@@ -1,10 +1,10 @@
 ;;; semanticdb.el --- Semantic tag database manager
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb.el,v 1.138 2009-09-23 01:26:41 zappo Exp $
+;; X-RCS: $Id: semanticdb.el,v 1.139 2010-01-05 02:34:05 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -535,10 +535,25 @@ Optional argument FORCE will force a refresh even if the file in question
 is not in a buffer.  Avoid using FORCE for most uses, as an old cache
 may be sufficient for the general case.  Forced updates can be slow.
 This will call `semantic-fetch-tags' if that file is in memory."
-  (when (or (semanticdb-in-buffer-p obj) force)
+  (cond
+   ;;
+   ;; Already in a buffer, just do it.
+   ((semanticdb-in-buffer-p obj)
+    (semanticdb-set-buffer obj)
+    (semantic-fetch-tags))
+   ;;
+   ;; Not in a buffer.  Forcing a load.  
+   (force
+    ;; Patch from Iain Nicol. -- 
+    ;; @TODO: I wonder if there is a way to recycle 
+    ;;        semanticdb-create-table-for-file-not-in-buffer
     (save-excursion
-      (semanticdb-set-buffer obj)
-      (semantic-fetch-tags))))
+      (let ((buff (semantic-find-file-noselect 
+		   (semanticdb-full-filename obj))))
+	(set-buffer buff)
+	(semantic-fetch-tags)
+	;; Kill off the buffer if it didn't exist when we were called.
+	(kill-buffer buff))))))
 
 (defmethod semanticdb-needs-refresh-p ((obj semanticdb-table))
   "Return non-nil of OBJ's tag list is out of date.
