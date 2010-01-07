@@ -5,7 +5,7 @@
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Version: 0.0.3
 ;; Keywords: project, make
-;; RCS: $Id: project-am.el,v 1.50 2009-12-22 01:39:00 zappo Exp $
+;; RCS: $Id: project-am.el,v 1.51 2010-01-07 02:17:02 zappo Exp $
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -32,7 +32,7 @@
 ;; fashion.
 ;;
 ;; project-am uses the structure defined in all good GNU projects with
-;; the Automake file as it's base template, and then maintains that
+;; the Automake file as its base template, and then maintains that
 ;; information during edits, automatically updating the automake file
 ;; where appropriate.
 
