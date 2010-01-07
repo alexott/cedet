@@ -1,10 +1,10 @@
 ;;; ede.el --- Emacs Development Environment gloss
 
-;;;  Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009  Eric M. Ludlam
+;;;  Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede.el,v 1.142 2009-12-27 03:36:00 zappo Exp $
+;; RCS: $Id: ede.el,v 1.143 2010-01-07 02:16:17 zappo Exp $
 (defconst ede-version "1.0pre7"
   "Current version of the Emacs EDE.")
 
@@ -1350,7 +1350,7 @@ Argument FNND is an argument."
   (error "New-target-custom not supported by %s" (object-name proj)))
 
 (defmethod project-delete-target ((ot ede-target))
-  "Delete the current target OT from it's parent project."
+  "Delete the current target OT from its parent project."
   (error "add-file not supported by %s" (object-name ot)))
 
 ;;;###autoload
@@ -1590,10 +1590,10 @@ Optional ROOTRETURN will return the root project for DIR."
      (t
       (setq toppath (ede-toplevel-project path))
       ;; We found the top-most directory.  Check to see if we already
-      ;; have an object defining it's project.
+      ;; have an object defining its project.
       (setq pfc (ede-directory-project-p toppath t))
 
-      ;; See if it's been loaded before
+      ;; See if its been loaded before
       (setq o (object-assoc (ede-dir-to-projectfile pfc toppath) 'file
 			    ede-projects))
       (if (not o)
@@ -1901,7 +1901,7 @@ Return the first non-nil value returned by PROC."
    (set-buffer buffer)
    (mapcar (lambda (v)
 	     (make-local-variable (car v))
-	     ;; set it's value here?
+	     ;; set its value here?
 	     (set (car v) (cdr v))
 	     )
 	   (oref project local-variables))))
