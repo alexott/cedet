@@ -1,10 +1,10 @@
 ;;; semanticdb-find.el --- Searching through semantic databases.
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb-find.el,v 1.84 2009-12-02 18:08:32 zappo Exp $
+;; X-RCS: $Id: semanticdb-find.el,v 1.85 2010-01-07 02:24:28 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -82,13 +82,13 @@
 ;;  The PATH argument is then the most interesting argument.  It can
 ;;  have these values:
 ;;
-;;    nil - Take the current buffer, and use it's include list
+;;    nil - Take the current buffer, and use its include list
 ;;    buffer - Use that buffer's include list.
 ;;    filename - Use that file's include list.  If the file is not
 ;;        in a buffer, see of there is a semanticdb table for it.  If
 ;;        not, read that file into a buffer.
 ;;    tag - Get that tag's buffer of file file.  See above.
-;;    table - Search that table, and it's include list.
+;;    table - Search that table, and its include list.
 ;;
 ;; Search Results:
 ;;
@@ -198,7 +198,7 @@ This class will cache data derived during various searches.")
   (when (oref idx type-cache)
     (semantic-reset (oref idx type-cache)))
   ;; Clear the scope.  Scope doesn't have the data it needs to track
-  ;; it's own reset.
+  ;; its own reset.
   (semantic-scope-reset-cache)
   )
 
@@ -256,13 +256,13 @@ This class will cache data derived during various searches.")
   "Translate PATH into a list of semantic tables.
 Path translation involves identifying the PATH input argument
 in one of the following ways:
-  nil - Take the current buffer, and use it's include list
+  nil - Take the current buffer, and use its include list
   buffer - Use that buffer's include list.
   filename - Use that file's include list.  If the file is not
       in a buffer, see of there is a semanticdb table for it.  If
       not, read that file into a buffer.
   tag - Get that tag's buffer of file file.  See above.
-  table - Search that table, and it's include list.
+  table - Search that table, and its include list.
   find result - Search the results of a previous find.
 
 In addition, once the base path is found, there is the possibility of
@@ -275,7 +275,7 @@ identified by translating PATH.  Such searches use brute force to
 scan every available table.
 
 The return value is a list of objects of type `semanticdb-table' or
-it's children.  In the case of passing in a find result, the result
+its children.  In the case of passing in a find result, the result
 is returned unchanged.
 
 This routine uses `semanticdb-find-table-for-include' to translate
