@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-ia.el,v 1.32 2009-09-11 23:36:20 zappo Exp $
+;; X-RCS: $Id: semantic-ia.el,v 1.33 2010-01-07 02:41:25 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -57,14 +57,6 @@
   :group 'semantic
   :type semantic-format-tag-custom-list)
 
-(defvar semantic-ia-cache nil
-  "Cache of the last completion request.
-Of the form ( POINT . COMPLETIONS ) where POINT is a location in the
-buffer where the completion was requested.  COMPLETONS is the list
-of semantic tag names that provide logical completions from that
-location.")
-(make-variable-buffer-local 'semantic-ia-cache)
-
 ;;; COMPLETION HELPER
 ;;
 ;; This overload function handles inserting a tag
@@ -86,21 +78,6 @@ location.")
 	   (insert "("))
 	  (t nil))))
 
-(defun semantic-ia-get-completions (context point)
-  "Fetch the completion of CONTEXT at POINT.
-Supports caching."
-  ;; Cache the current set of symbols so that we can get at
-  ;; them quickly the second time someone presses the
-  ;; complete button.
-  (let ((symbols
-	 (if (and semantic-ia-cache
-		  (= point (car semantic-ia-cache)))
-	     (cdr semantic-ia-cache)
-	   (semantic-analyze-possible-completions context))))
-    ;; Set the cache
-    (setq semantic-ia-cache (cons point symbols))
-    symbols))
-
 ;;;###autoload
 (defun semantic-ia-complete-symbol (point)
   "Complete the current symbol at POINT.
@@ -114,7 +91,7 @@ Completion options are calculated with `semantic-analyze-possible-completions'."
   ;;
   ;; The second step derives completions from that context.
   (let* ((a (semantic-analyze-current-context point))
-	 (syms (semantic-ia-get-completions a point))
+	 (syms (semantic-analyze-possible-completions a))
 	 (pre (car (reverse (oref a prefix))))
 	 )
     ;; If PRE was actually an already completed symbol, it doesn't
@@ -170,7 +147,7 @@ Completion options are calculated with `semantic-analyze-possible-completions'."
   (interactive "d")
   (require 'imenu)
   (let* ((a (semantic-analyze-current-context point))
-	 (syms (semantic-ia-get-completions a point))
+	 (syms (semantic-analyze-possible-completions a))
 	 )
     ;; Complete this symbol.
     (if (not syms)
@@ -212,7 +189,7 @@ Completion options are calculated with `semantic-analyze-possible-completions'."
   "Pop up a tooltip for completion at POINT."
   (interactive "d")
   (let* ((a (semantic-analyze-current-context point))
-	 (syms (semantic-ia-get-completions a point))
+	 (syms (semantic-analyze-possible-completions a))
          (x (mod (- (current-column) (window-hscroll))
                  (window-width)))
          (y (save-excursion
