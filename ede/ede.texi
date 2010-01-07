@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: ede.texi,v 1.24 2009-09-08 11:32:46 davenar Exp $
+@c $Id: ede.texi,v 1.25 2010-01-07 02:16:41 zappo Exp $
 @c
 @setfilename ede.info
 @settitle Emacs Development Environment
@@ -151,7 +151,7 @@ a file in the topmost directory first.  From this buffer, run
 project with the command @command{ede-new} you must choose the type of
 project you would like to create.  @xref{Project types}.
 
-Each type has it's own benefits or language specific enhancements.  You
+Each type has its own benefits or language specific enhancements.  You
 will be prompted for the type of project you would like to create.  The
 simplest and most language agnostic project type is @emph{Make}.  A
 derivation of this is the @samp{Automake} type.
@@ -241,7 +241,7 @@ the behavior with the variable @command{ede-auto-add-method}.
 @node Customize Features, EDE Project Features, Add/Remove files, Modifying your project
 @section Customize Features
 
-A project, and it's targets, are objects using the @samp{EIEIO} object
+A project, and its targets, are objects using the @samp{EIEIO} object
 system. @xref{(eieio)EIEIO}.  These objects have data fields containing
 important information related to your work.
 
@@ -673,7 +673,7 @@ extending classes, and writing methods.
 
 If you intend to extend @ede{}, it is most likely that a new target type is
 needed in one of the existing project types.  The rest of this chapter
-will discuss extending the @code{ede-project} class, and it's targets.
+will discuss extending the @code{ede-project} class, and its targets.
 See @file{project-am.el} for basic details on adding targets to it.
 
 For the @code{ede-project} type, the core target class is called
