@@ -355,7 +355,7 @@ refers to that parent by name, then the @code{:parent} attribute should be used.
 Return the parent of the function that @var{tag} describes.
 That is the value of the `:parent' attribute.
 A function has a parent if it is a method of a class, and if the
-function does not appear in body of it's parent class.
+function does not appear in body of its parent class.
 @obsolete{semantic-token-function-parent,semantic-tag-function-parent}
 @end defun
 
