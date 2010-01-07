@@ -1,10 +1,10 @@
 ;;; ede-proj.el --- EDE Generic Project file driver
 
-;;;  Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2007, 2008, 2009  Eric M. Ludlam
+;;;  Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2007, 2008, 2009, 2010  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj.el,v 1.65 2009-12-27 03:35:40 zappo Exp $
+;; RCS: $Id: ede-proj.el,v 1.66 2010-01-07 02:14:25 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -395,11 +395,11 @@ Argument TARGET is the project we are completing customization on."
 	     :source nil)))
 
 (defmethod project-delete-target ((this ede-proj-target))
-  "Delete the current target THIS from it's parent project."
+  "Delete the current target THIS from its parent project."
   (let ((p (ede-current-project))
 	(ts (oref this source)))
     ;; Loop across all sources.  If it exists in a buffer,
-    ;; clear it's object.
+    ;; clear its object.
     (while ts
       (let* ((default-directory (oref this path))
 	     (b (get-file-buffer (car ts))))
@@ -411,7 +411,7 @@ Argument TARGET is the project we are completing customization on."
 		    (setq ede-object nil)
 		    (ede-apply-object-keymap))))))
       (setq ts (cdr ts)))
-    ;; Remove THIS from it's parent.
+    ;; Remove THIS from its parent.
     ;; The two vectors should be pointer equivalent.
     (oset p targets (delq this (oref p targets)))
     (ede-proj-save (ede-current-project))))
