@@ -2,10 +2,10 @@
 ;;               or maybe Eric's Implementation of Emacs Intrepreted Objects
 
 ;;;
-;; Copyright (C) 95,96,98,99,2000,01,02,03,04,05,06,07,08,09 Eric M. Ludlam
+;; Copyright (C) 1995,1996,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio.el,v 1.192 2009-11-19 00:17:46 zappo Exp $
+;; RCS: $Id: eieio.el,v 1.193 2010-01-07 02:22:21 zappo Exp $
 ;; Keywords: OO, lisp
 
 (defvar eieio-version "1.2"
@@ -72,7 +72,7 @@ introduced."
 			  (if beta (format "beta%s" beta) ""))))
 
 (eval-and-compile
-;; About the above.  EIEIO must process it's own code when it compiles
+;; About the above.  EIEIO must process its own code when it compiles
 ;; itself, thus, by eval-and-compiling outselves, we solve the problem.
 
 ;; Compatibility
@@ -201,7 +201,7 @@ Stored outright without modifications or stripping.")
 ;;
 (defmacro class-v (class)
   "Internal: Return the class vector from the CLASS symbol."
-  ;; No check: If eieio gets this far, it's probably been checked already.
+  ;; No check: If eieio gets this far, it has probably been checked already.
   `(get ,class 'eieio-class-definition))
 
 (defmacro class-p (class)
@@ -429,7 +429,7 @@ It creates an autoload function for CNAME's constructor."
 	))))
 
 (defsubst eieio-class-un-autoload (cname)
-  "If class CNAME is in an autoload state, load it's file."
+  "If class CNAME is in an autoload state, load its file."
   (when (eq (car-safe (symbol-function cname)) 'autoload)
     (load-library (car (cdr (symbol-function cname))))))
 
@@ -457,7 +457,7 @@ OPTIONS-AND-DOC as the toplevel documentation for this class."
     (aset newc 0 'defclass)
     (aset newc class-symbol cname)
 
-    ;; If this class already existed, and we are updating it's structure,
+    ;; If this class already existed, and we are updating its structure,
     ;; make sure we keep the old child list.  This can cause bugs, but
     ;; if no new slots are created, it also saves time, and prevents
     ;; method table breakage, particularly when the users is only
@@ -830,7 +830,7 @@ If A already exists in NEWC, then do nothing.  If it doesn't exist,
 then also add in D (defualt), DOC, TYPE, CUST, LABEL, CUSTG, PRINT, PROT, and INIT arg.
 Argument ALLOC specifies if the slot is allocated per instance, or per class.
 If optional DEFAULTOVERRIDE is non-nil, then if A exists in NEWC,
-we must override it's value for a default.
+we must override its value for a default.
 Optional argument SKIPNIL indicates if type checking should be skipped
 if default value is nil."
   ;; Make sure we duplicate those items that are sequences.
@@ -1146,7 +1146,7 @@ a string."
 (defmacro defgeneric (method args &optional doc-string)
   "Create a generic function METHOD.  ARGS is ignored.
 DOC-STRING is the base documentation for this class.  A generic
-function has no body, as it's purpose is to decide which method body
+function has no body, as its purpose is to decide which method body
 is appropriate to use.  Use `defmethod' to create methods, and it
 calls defgeneric for you.  With this implementation the arguments are
 currently ignored.  You can use `defgeneric' to apply specialized
@@ -1441,7 +1441,7 @@ created by the :initarg tag."
 	    (aref (aref (class-v class) class-class-allocation-values) c)
 	  ;; The slot-missing method is a cool way of allowing an object author
 	  ;; to intercept missing slot definitions.  Since it is also the LAST
-	  ;; thing called in this fn, it's return value would be retrieved.
+	  ;; thing called in this fn, its return value would be retrieved.
 	  (slot-missing obj slot 'oref)
 	  ;;(signal 'invalid-slot-name (list (object-name obj) slot))
 	  )
@@ -1461,7 +1461,7 @@ tag in the `defclass' call."
 
 (defun eieio-oref-default (obj slot)
   "Does the work for the macro `oref-default' with similar parameters.
-Fills in OBJ's SLOT with it's default value."
+Fills in OBJ's SLOT with its default value."
   (if (not (or (eieio-object-p obj) (class-p obj))) (signal 'wrong-type-argument (list 'eieio-object-p obj)))
   (if (not (symbolp slot)) (signal 'wrong-type-argument (list 'symbolp slot)))
   (let* ((cl (if (eieio-object-p obj) (aref obj object-class) obj))
@@ -1913,7 +1913,7 @@ This should only be called from a generic function."
     ;; Is the class passed in autoloaded?
     ;; Since class names are also constructors, they can be autoloaded
     ;; via the autoload command.  Check for this, and load them in.
-    ;; It's ok if it doesn't turn out to be a class.  Probably want that
+    ;; It is ok if it doesn't turn out to be a class.  Probably want that
     ;; function loaded anyway.
     (if (and (symbolp firstarg)
 	     (fboundp firstarg)
@@ -2274,7 +2274,7 @@ function performs no type checking!"
 	 (cont t))
     ;; This converts ES from a single symbol to a list of parent classes.
     (setq es (eieiomt-next es))
-    ;; Loop over ES, then it's children individually.
+    ;; Loop over ES, then its children individually.
     ;; We can have multiple hits only at one level of the parent tree.
     (while (and es cont)
       (setq ov (intern-soft (symbol-name (car es)) eieiomt-optimizing-obarray))
@@ -2310,17 +2310,17 @@ memoized for future faster use."
 	     ;;    This can be slow since it only occurs once
 	     (progn
 	       (setq cs (intern (symbol-name class) emto))
-	       ;; 2.1) Cache it's nearest neighbor with a quick optimize
+	       ;; 2.1) Cache its nearest neighbor with a quick optimize
 	       ;;      which should only occur once for this call ever
 	       (let ((eieiomt-optimizing-obarray emto))
 		 (eieiomt-sym-optimize cs))))
-	 ;; 3) If it's bound return this one.
+	 ;; 3) If it is bound return this one.
 	 (if (fboundp  cs)
 	     (cons cs (aref (class-v class) class-symbol))
-	   ;; 4) If it's not bound then this variable knows something
+	   ;; 4) If it is not bound then this variable knows something
 	   (if (symbol-value cs)
 	       (progn
-		 ;; 4.1) This symbol holds the next class in it's value
+		 ;; 4.1) This symbol holds the next class in its value
 		 (setq class (symbol-value cs)
 		       cs (intern-soft (symbol-name class) emto))
 		 ;; 4.2) The optimizer should always have chosen a
@@ -2553,7 +2553,7 @@ value becomes the return value of the original method call."
 OBJECT is othe object being called on `call-next-method'.
 ARGS are the  arguments it is called by.
 This method signals `no-next-method' by default.  Override this
-method to not throw an error, and it's return value becomes the
+method to not throw an error, and its return value becomes the
 return value of `call-next-method'."
   (signal 'no-next-method (list (object-name object) args))
 )
@@ -2775,7 +2775,7 @@ Optional argument NOESCAPE is passed to `prin1-to-string' when appropriate."
   "Examine `lisp-imenu-generic-expression' and modify it to find `defmethod'."
   (let ((exp lisp-imenu-generic-expression))
     (while exp
-      ;; it's of the form '( ( title expr indx ) ... )
+      ;; it is of the form '( ( title expr indx ) ... )
       (let* ((subcar (cdr (car exp)))
 	     (substr (car subcar)))
 	(if (and (not (string-match "|method\\\\" substr))
