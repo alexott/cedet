@@ -1,8 +1,8 @@
 ;;; semantic-tag.el --- tag creation and access
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
-;; X-CVS: $Id: semantic-tag.el,v 1.72 2009-09-15 00:19:16 zappo Exp $
+;; X-CVS: $Id: semantic-tag.el,v 1.73 2010-01-07 02:23:40 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -874,7 +874,7 @@ That is the value of the `:throws' attribute."
   "Return the parent of the function that TAG describes.
 That is the value of the `:parent' attribute.
 A function has a parent if it is a method of a class, and if the
-function does not appear in body of it's parent class."
+function does not appear in body of its parent class."
   (semantic-tag-named-parent tag))
 
 (defsubst semantic-tag-function-destructor-p (tag)
