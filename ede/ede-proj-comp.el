@@ -1,10 +1,10 @@
 ;;; ede-proj-comp.el --- EDE Generic Project compiler/rule driver
 
-;;;  Copyright (C) 1999, 2000, 2001, 2004, 2005, 2007, 2009  Eric M. Ludlam
+;;;  Copyright (C) 1999, 2000, 2001, 2004, 2005, 2007, 2009, 2010  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-comp.el,v 1.12 2009-10-01 02:24:06 zappo Exp $
+;; RCS: $Id: ede-proj-comp.el,v 1.13 2010-01-07 02:13:56 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -82,7 +82,7 @@ For example, yacc/lex files need additional chain rules, or inferences.")
 	    :documentation
 	    "The commands used to execute this compiler.
 The object which uses this compiler will place these commands after
-it's rule definition.")
+its rule definition.")
    (autoconf :initarg :autoconf
 	     :initform nil
 	     :type list
