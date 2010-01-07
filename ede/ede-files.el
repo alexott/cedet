@@ -1,9 +1,9 @@
 ;;; ede-files.el --- Associate projects with files and directories.
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-files.el,v 1.18 2009-10-15 17:37:48 zappo Exp $
+;; X-RCS: $Id: ede-files.el,v 1.19 2010-01-07 02:13:33 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -54,13 +54,13 @@ the current EDE project."
 ;;; Placeholders for ROOT directory scanning on base objects
 ;;
 (defmethod ede-project-root ((this ede-project-placeholder))
-  "If a project knows it's root, return it here.
+  "If a project knows its root, return it here.
 Allows for one-project-object-for-a-tree type systems."
   (oref this rootproject))
 
 (defmethod ede-project-root-directory ((this ede-project-placeholder)
 				       &optional file)
-  "If a project knows it's root, return it here.
+  "If a project knows its root, return it here.
 Allows for one-project-object-for-a-tree type systems.
 Optional FILE is the file to test.  It is ignored in preference
 of the anchor file for the project."
@@ -68,13 +68,13 @@ of the anchor file for the project."
 
 
 (defmethod ede-project-root ((this ede-project-autoload))
-  "If a project knows it's root, return it here.
+  "If a project knows its root, return it here.
 Allows for one-project-object-for-a-tree type systems."
   nil)
 
 (defmethod ede-project-root-directory ((this ede-project-autoload)
 				       &optional file)
-  "If a project knows it's root, return it here.
+  "If a project knows its root, return it here.
 Allows for one-project-object-for-a-tree type systems.
 Optional FILE is the file to test.  If there is no FILE, use
 the current buffer."
@@ -172,7 +172,7 @@ If DIR is the root project, then it is the same."
     ;; Save.
     (when rootreturn (set rootreturn proj))
     ;; Find subprojects.
-    (when (and proj (or ede--disable-inode 
+    (when (and proj (or ede--disable-inode
 			(not (equal inode (ede--project-inode proj)))))
       (setq ans (ede-find-subproject-for-directory proj ft)))
     ans))
@@ -321,7 +321,7 @@ nil is returned if the current directory is not a part ofa project."
 	  ;; If PROJ didn't know, or there is no PROJ, then
 
 	  ;; Loop up to the topmost project, and then load that single
-	  ;; project, and it's sub projects.  When we are done, identify the
+	  ;; project, and its sub projects.  When we are done, identify the
 	  ;; sub-project object belonging to file.
 	  (while (and (not ans) newpath proj)
 	    (setq toppath newpath
