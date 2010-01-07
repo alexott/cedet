@@ -1,9 +1,9 @@
 ;;; semantic-c.el --- Semantic details for C
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-c.el,v 1.132 2009-11-27 17:02:06 zappo Exp $
+;; X-RCS: $Id: semantic-c.el,v 1.133 2010-01-07 02:25:16 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -153,7 +153,7 @@ part of the preprocessor map.")
 Each entry is a cons cell like this:
   ( \"KEYWORD\" . \"REPLACEMENT\" )
 Where KEYWORD is the macro that gets replaced in the lexical phase,
-and REPLACEMENT is a string that is inserted in it's place.  Empty string
+and REPLACEMENT is a string that is inserted in its place.  Empty string
 implies that the lexical analyzer will discard KEYWORD when it is encountered.
 
 Alternately, it can be of the form:
