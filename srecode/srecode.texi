@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: srecode.texi,v 1.17 2009-09-19 01:35:18 zappo Exp $
+@c $Id: srecode.texi,v 1.18 2010-01-07 02:27:23 zappo Exp $
 @c
 @c %**start of header
 @setfilename srecode.info
@@ -201,7 +201,7 @@ templates is needed.  The template manager has a loader for finding
 template files, and determining which templates are relevant to the
 current buffer.  Template files are sorted by priority, with user
 templates being found first, and system level default templates last.
-Templates are also sorted by application.  Each application has it's
+Templates are also sorted by application.  Each application has its
 own templates, and are kept seperate from the generic templates.
 
 @section Dictionary
@@ -1239,7 +1239,7 @@ or structs.
 @node Language Arguments
 @subsection language Arguments
 
-Each language typically has it's own argument.  These arguments can be
+Each language typically has its own argument.  These arguments can be
 used to fill in language specific values that will be useful.
 
 @subsubsection Argument :srt
@@ -1488,7 +1488,7 @@ In order for the @srecode{} function
 similar to those mentioned above, except with @code{-tag} appended to
 the end.  This lets a template like @code{function} have user
 conveniences when referencing @code{function-tag}, while also
-allowing the tag inserter to do it's job with a simpler template.
+allowing the tag inserter to do its job with a simpler template.
 
 @section Context: Classdef
 
