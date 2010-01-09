@@ -4,7 +4,7 @@
 
 ;; Author: Marco (Bj) Bardelli <bardelli.marco@gmail.com>
 ;; Keywords: project, make, gnustep, gnustep-make
-;; RCS: $Id: ede-gnustep.el,v 1.10 2009-10-08 21:11:31 safanaj Exp $
+;; RCS: $Id: ede-gnustep.el,v 1.11 2010-01-09 23:05:05 safanaj Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -65,6 +65,9 @@
 ;; difference is in direction of generation
 ;;     scanner: parse *makefile* to write *project file*
 ;;     writer : parse *project file* to write *makefile*
+
+;; To show what's TODO
+;; M-x occur <RET> XXX\|todo\|TODO\|fix\|FIX <RET>
 
 
 (eval-and-compile 
@@ -136,8 +139,7 @@
 ;; Target
 ;(defclass ede-step-target (ede-proj-target) ;; may be don't need
 (defclass ede-step-target (ede-target)
-  ((makefile :initarg :makefile
-	     :initform "GNUmakefile"
+  ((makefile :initarg :makefile ;;:initform "GNUmakefile"
 	     :type string
 	     :custom string
 	     :label "Parent Makefile"
@@ -438,13 +440,19 @@ making a tar file.")
 	(setq prj-file "RootProjStep.ede")
       (setq prj-file "ProjStep.ede"))
     (and mf
-	 ;; To FIX
+	 ;; To FIX, maybe VCS_MODULE ???
 	 (setq pkgname
 	       (or
 		(with-temp-buffer
 		  (insert-file-contents mf)
 		  (goto-char (point-min))
-		  (car (makefile-macro-file-list "PACKAGE_NAME")))
+		  (car (makefile-macro-file-list "PACKAGE_NAME"))
+		  ;; (ede-gnustep-semantic-value-for-tag
+		  ;;  (car (semantic-find-tags-by-name
+		  ;; 	 "PACKAGE_NAME"
+		  ;; 	 (semantic-find-tags-by-class
+		  ;; 	  'variable (current-buffer)))))
+		  )
 		(file-name-nondirectory
 		 (directory-file-name dir))))
 	 (setq pkgversion
@@ -454,7 +462,17 @@ making a tar file.")
 		  (goto-char (point-min))
 		  (or
 		   (car (makefile-macro-file-list "PACKAGE_VERSION"))
+		   ;; (ede-gnustep-semantic-value-for-tag
+		   ;;  (car (semantic-find-tags-by-name
+		   ;; 	  "PACKAGE_VERSION"
+		   ;; 	  (semantic-find-tags-by-class
+		   ;; 	   'variable (current-buffer)))))
 		   (car (makefile-macro-file-list "VERSION"))))
+		   ;; (ede-gnustep-semantic-value-for-tag
+		   ;;  (car (semantic-find-tags-by-name
+		   ;; 	  "VERSION"
+		   ;; 	  (semantic-find-tags-by-class
+		   ;; 	   'variable (current-buffer)))))))
 		"1.0"))
 	 
 	 ;; use dirinode to check for existence
@@ -571,7 +589,7 @@ Argument TARGET is the project we are completing customization on."
 (defmethod ede-proj-makefile-create ((this ede-step-project) mfilename)
   "Create a GNUmakefile for all Makefile targets in THIS.
 MFILENAME is the makefile to generate."
-  (when (eq 'writer (oref this project-mode))
+  (when (eq 'writer (oref this :project-mode))
     (let ((mt nil) tmp
 	  (isdist (string= mfilename (ede-proj-dist-makefile this)))
 	  (depth 0)
@@ -780,6 +798,7 @@ MFILENAME is the makefile to generate."
 		  (buffer-file-name))))
     (setq ot (funcall (nth 1 (assoc type ede-step-target-alist)) name :name name
 		      :path (ede-convert-path this default-directory)
+		      :makefile "GNUmakefile"
 		      :source (if src
 				  (list (file-name-nondirectory src))
 				nil)))
@@ -928,16 +947,17 @@ Argument COMMAND is the command to use for compiling the target."
   (require 'ede-pmake "ede-pmake.el")
   (require 'ede-pconf "ede-pconf.el"))
 
-;; FIX XXX
 (defmethod ede-proj-dist-makefile ((this ede-step-project))
   "Return the name of the Makefile with the DIST target in it for THIS."
-  (or (ede-gnustep-get-valid-makefile (oref this directory))
+  (or (ede-gnustep-get-topmost-makefile (oref this directory))
       (concat (file-name-directory (oref this file)) "GNUmakefile")))
 
+;; This Func is implemented elsewhere, probably in ede.el
 ;; (defun ede-proj-regenerate ()
 ;;   "Regenerate Makefiles for and edeproject project."
 ;;   (interactive)
-;;   (ede-proj-setup-buildenvironment (ede-current-project) t))
+;;   (and (eq 'writer (oref (ede-current-project) :project-mode))
+;;        (ede-proj-setup-buildenvironment (ede-current-project) t)))
 
 (defmethod ede-proj-makefile-create-maybe ((this ede-step-project) mfilename)
   "Create a Makefile for all Makefile targets in THIS if needed.
@@ -969,22 +989,18 @@ Optional argument FORCE will force items to be regenerated."
 (defsubst ede-gnustep-semantic-tags-named ()
   (semantic--find-tags-by-function
    '(lambda (tag)(string-match "_NAME$" (car tag)))
-   (current-buffer)))
+   (semantic-find-tags-by-class 'variable (current-buffer))))
 
 (defsubst ede-gnustep-semantic-tags-subprojects ()
   (semantic--find-tags-by-function
    '(lambda (tag)(string-match "^SUBPROJECTS$" (car tag)))
-   (current-buffer)))
+   (semantic-find-tags-by-class 'variable (current-buffer))))
 
 (defsubst ede-gnustep-semantic-tags-included-files ()
-  (semantic--find-tags-by-function
-   '(lambda (tag)(eq 'include (cadr tag)))
-   (current-buffer)))
+  (semantic-find-tags-by-class 'include (current-buffer)))
 
 (defsubst ede-gnustep-semantic-tags-all-variables ()
-  (semantic--find-tags-by-function
-   '(lambda (tag)(eq 'variable (cadr tag)))
-   (current-buffer)))
+  (semantic-find-tags-by-class 'variable (current-buffer)))
 
 (defsubst ede-gnustep-semantic-value-for-tag (tag)
   (cadr (caddr tag)))
@@ -997,11 +1013,10 @@ Optional argument FORCE will force items to be regenerated."
       (setq tags (cdr tags)))
     found))
 
-
 ;; maybe require some makefile utils
 (defmethod project-rescan ((this ede-step-project))
   "Rescan the EDE proj project THIS."
-  (cond ((eq 'writer (oref this project-mode))
+  (cond ((eq 'writer (oref this :project-mode))
 	 (ede-with-projectfile this
 	   (goto-char (point-min))
 	   (let ((l (read (current-buffer)))
@@ -1038,7 +1053,7 @@ Optional argument FORCE will force items to be regenerated."
 	       (setq l (cdr (cdr l))))))) ;; field/value
 
 	;; Scanner-mode
-	((eq 'scanner (oref this project-mode))
+	((eq 'scanner (oref this :project-mode))
 	 (let ((mf (ede-gnustep-get-valid-makefile (oref this :directory)))
 	       (otargets (oref this targets))
 	       (osubproj (oref this subproj))
@@ -1046,10 +1061,10 @@ Optional argument FORCE will force items to be regenerated."
 	   (when mf
 ;	     (oset this :makefile (file-name-nondirectory mf))
 	     (with-temp-buffer
-	       (insert-file-contents 
-		(expand-file-name mf (oref this :directory)))
+	       (insert-file-contents mf)
 	       (goto-char (point-min))
-	       (let ((named (ede-gnustep-semantic-tags-named))
+	       (let (;; XXX : Why these don't work ???
+		     (named (ede-gnustep-semantic-tags-named))
 		     (subprojs (ede-gnustep-semantic-tags-subprojects))
 		     (included (ede-gnustep-semantic-tags-included-files))
 		     (allvariables (ede-gnustep-semantic-tags-all-variables))
@@ -1068,7 +1083,14 @@ Optional argument FORCE will force items to be regenerated."
 		    (let ((macro (nth 2 typecar))
 			  (class (nth 1 typecar))
 			  )
-		      (let ((tmp nil)(targets (makefile-macro-file-list macro)))
+		      (let ((tmp nil)(targets
+				      (makefile-macro-file-list macro)
+				      ;; (ede-gnustep-semantic-value-for-tag
+				      ;;  (car (semantic-find-tags-by-name
+				      ;; 	     macro
+				      ;; 	     (semantic-find-tags-by-class
+				      ;; 	      'variable (current-buffer)))))
+				      ))
 			(setq targets (remove-duplicates targets :test 'equal))
 			(while targets
 			  (setq tmp (object-assoc (car targets) 'name otargets))
@@ -1080,7 +1102,7 @@ Optional argument FORCE will force items to be regenerated."
 					(expand-file-name (car targets)(oref this :directory)))) mf)
 				  (when (and
 					 (file-directory-p spdir)
-					 (setq mf (ede-gnustep-get-valid-makefile spdir)))
+					 (ede-gnustep-get-valid-makefile spdir))
 				    ;; For each project id found, see if we need to recycle,
 				    ;; and if we do not, then make a new one.  Check the deep
 				    ;; rescan value for behavior patterns.
@@ -1101,18 +1123,25 @@ Optional argument FORCE will force items to be regenerated."
 					   (setq nsubproj (cons tmp nsubproj))))
 				    (when tmp
 				      ;; force to be a subproject and in scanner mode
-					;				    (oset tmp rootproj (or (oref this rootproj) this))
-				      (oset tmp project-mode 'scanner)
+				      ;;(oset tmp rootproj (or (oref this rootproj) this))
+				      (oset tmp :project-mode 'scanner)
 				      ;; rescan subproj after, in tail
 				      ;; (if ede-deep-rescan (project-rescan tmp))
 				      )))
 			      
 			      ;; I found a non-subproject target.
 			      (setq tmp (apply class (car targets) :name (car targets)
-					       :path (oref this :directory)
-					       :makefile (ede-gnustep-get-valid-makefile
-							  (oref this :directory))
+					       ;; XXX check for possible relative path
+					       ;; in names, like Library/SubLibTarget
+					       ;;:path ""
+					       ;; FIX: we need an absolute path
+					       ;; because ede-object-progect var don't work,
+					       ;; we can't use it in `project-rescan'(target)
+					       :path (file-name-directory mf)
+					       :makefile (file-name-nondirectory mf)
 					       nil))
+			      ;; force :makefile, i don't know why !!!
+			      (oset tmp :makefile (file-name-nondirectory mf))
 			      (setq ntargets (cons tmp ntargets))
 			      ))
 			  ;; If we have tmp, then rescan it only if deep mode.
@@ -1134,9 +1163,10 @@ Optional argument FORCE will force items to be regenerated."
   ;; use the root project to distinguish between scanner/writer mode.
   ;; FIX is better something like `ede-target-parent' ??? non force topmost.
   (let ((this-step-root-project
-	 (ede-current-project
-	  (file-name-directory
-	   (or (ede-gnustep-get-topmost-makefile (oref this :path)) "")))))
+  	 (ede-current-project
+  	  (file-name-directory
+  	   (or (ede-gnustep-get-topmost-makefile (oref this :path)) (oref this :makefile) "")))))
+    ;;(when (ede-step-project-child-p ede-object-project)
     (when (ede-step-project-child-p this-step-root-project)
       (cond ((eq 'writer (oref this-step-root-project :project-mode))
 	     (progn
@@ -1146,31 +1176,55 @@ Optional argument FORCE will force items to be regenerated."
 		       (val (car (cdr readstream))))
 		   (eieio-oset this tag val))
 		 (setq readstream (cdr (cdr readstream))))))
-
+	    ;;((eq 'scanner (oref ede-object-project :project-mode))
 	    ((eq 'scanner (oref this-step-root-project :project-mode))
-	     (let ((mf (ede-gnustep-get-valid-makefile (oref this :path)))
+	     ;;(let ((mf (ede-gnustep-get-valid-makefile (oref ede-object-project :directory)))
+	     (let ((mf ;;(ede-gnustep-get-valid-makefile (oref this-step-root-project :directory)))
+		    (oref this :makefile))
 		   (allsource nil))
 	       (with-temp-buffer
 		 (insert-file-contents mf)
 		 (goto-char (point-min))
 		 ;; FIX add all available _MACROS_FOR_TARGETS by gnustep-make, 
 		 ;; or find a way to do it.
-		 (let ((c-src (makefile-macro-file-list
-			       (concat (oref this :name) "_C_FILES")))
-		       (objc-src (makefile-macro-file-list
-				  (concat (oref this :name) "_OBJC_FILES")))
-		       (h-src (makefile-macro-file-list
-			       (concat (oref this :name) "_HEADER_FILES"))))
-
+		 (let ((c-src
+			(makefile-macro-file-list (concat (oref this :name) "_C_FILES"))
+			;; (ede-gnustep-semantic-value-for-tag ;;was makefile-macro-file-list
+			;;  (car (semantic-find-tags-by-name
+			;;        (concat (oref this :name) "_C_FILES")
+			;;        (semantic-find-tags-by-class
+			;; 	'variable (current-buffer)))))
+		      )
+		     (objc-src
+		      (makefile-macro-file-list (concat (oref this :name) "_OBJC_FILES"))
+		      ;; (ede-gnustep-semantic-value-for-tag ;;was makefile-macro-file-list
+		      ;;  (car (semantic-find-tags-by-name
+		      ;; 		      (concat (oref this :name) "_OBJC_FILES")
+		      ;; 		      (semantic-find-tags-by-class
+		      ;; 		       'variable (current-buffer)))))
+		      )
+		     (h-src
+		      (makefile-macro-file-list (concat (oref this :name) "_HEADER_FILES"))
+		      ;; (ede-gnustep-semantic-value-for-tag ;;was makefile-macro-file-list
+		      ;; 	     (car (semantic-find-tags-by-name
+		      ;; 		   (concat (oref this :name) "_HEADER_FILES")
+		      ;; 		   (semantic-find-tags-by-class
+		      ;; 		    'variable (current-buffer)))))
+		      )
+		     )
 		   (if c-src (setq allsource (append c-src allsource)))
 		   (if objc-src (setq allsource (append objc-src allsource)))
 		   (if h-src (setq allsource (append h-src allsource)))))
-	       (oset this :source allsource)))))))
+	       (oset this :source allsource)))))
+    ))
 
-;; XXX regexp to validate a makefile may be customizable list.
+;; XXX regexp to validate a makefile may be customizable list. &&'d, OR'd ???
+;; if we use a list of regexp, thier have to match "every or any" element ???
 (defun ede-gnustep-get-valid-makefile (dir)
+  "Return the absolute path of a valid GNUmakefile in DIR.
+Check match of a line for validity."
   (let ((rexp-ok "^include \\$(GNUSTEP_MAKEFILES)/common\\.make")
-	(mfs (directory-files dir t "\\(GNU\\)?[mM]akefile.*")) (found nil))
+	(mfs (directory-files dir t "^\\(GNU\\)?[mM]akefile.*")) (found nil))
     (while (and (not found) mfs)
       (if (string-match rexp-ok (string-file-contents (car mfs)))
 	  (setq found (car mfs)))
