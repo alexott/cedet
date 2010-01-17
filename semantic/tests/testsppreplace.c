@@ -149,5 +149,13 @@ int
 OBJ(test)     /* expands to ABtest */
   ;
 
+/* TEST: Macro Recursion limits in arguments to a macro. 
+ * This code is from ALSA (with names changed to moose), noticed by Yupeng. */
+#define mr_moose(n) list_entry(n, struct mr_moose, list)
+
+struct mr_moose_ops {
+  int (*mr_moose_disconnect)(struct mr_moose *dev);
+};
+
 
 /* END */
