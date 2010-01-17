@@ -99,5 +99,11 @@ int MACROA () {
 /* TEST: Fancy concat/recursive macros */
 int ABtest;
 
+/* TEST: Macro Recursion limits in arguments to a macro. 
+ * This code is from ALSA, noticed by Yupeng. */
+struct mr_moose_ops {
+  int (*mr_moose_disconnect)(struct mr_moose *dev);
+};
+
 
 /* End */
