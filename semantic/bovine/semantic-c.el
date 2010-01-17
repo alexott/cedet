@@ -3,7 +3,7 @@
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-c.el,v 1.133 2010-01-07 02:25:16 zappo Exp $
+;; X-RCS: $Id: semantic-c.el,v 1.134 2010-01-17 16:21:02 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -700,59 +700,61 @@ the regular parser."
 	 (symtext (semantic-lex-token-text lexicaltoken))
 	 (macros (get-text-property 0 'macros symtext))
 	 )
-    (save-excursion
-      (set-buffer buf)
-      (erase-buffer)
-      (when (not (eq major-mode mode))
-	(save-match-data
+    (if (> semantic-c-parse-token-hack-depth 5)
+	nil
+      (save-excursion
+	(set-buffer buf)
+	(erase-buffer)
+	(when (not (eq major-mode mode))
+	  (save-match-data
 
-	  ;; Protect against user hooks throwing errors.
-	  (condition-case nil
-	      (funcall mode)
-	    (error
-	     (if (y-or-n-p
-		  (format "There was an error initializing %s in buffer \"%s\". Debug your hooks? "
-			  mode (buffer-name)))
-		 (semantic-c-debug-mode-init mode)
-	       (message "Macro parsing state may be broken...")
-	       (sit-for 1))))
-	  ) ; save match data
+	    ;; Protect against user hooks throwing errors.
+	    (condition-case nil
+		(funcall mode)
+	      (error
+	       (if (y-or-n-p
+		    (format "There was an error initializing %s in buffer \"%s\". Debug your hooks? "
+			    mode (buffer-name)))
+		   (semantic-c-debug-mode-init mode)
+		 (message "Macro parsing state may be broken...")
+		 (sit-for 1))))
+	    )				; save match data
 	
-	;; Hack in mode-local
-	(activate-mode-local-bindings)
-	;; CHEATER!  The following 3 lines are from
-	;; `semantic-new-buffer-fcn', but we don't want to turn
-	;; on all the other annoying modes for this little task.
-	(setq semantic-new-buffer-fcn-was-run t)
-	(semantic-lex-init)
-	(semantic-clear-toplevel-cache)
-	(remove-hook 'semantic-lex-reset-hooks 'semantic-lex-spp-reset-hook
-		     t)
-	)
-      ;; Get the macro symbol table right.
-      (setq semantic-lex-spp-dynamic-macro-symbol-obarray spp-syms)
-      ;; (message "%S" macros)
-      (dolist (sym macros)
-	(semantic-lex-spp-symbol-set (car sym) (cdr sym)))
+	  ;; Hack in mode-local
+	  (activate-mode-local-bindings)
+	  ;; CHEATER!  The following 3 lines are from
+	  ;; `semantic-new-buffer-fcn', but we don't want to turn
+	  ;; on all the other annoying modes for this little task.
+	  (setq semantic-new-buffer-fcn-was-run t)
+	  (semantic-lex-init)
+	  (semantic-clear-toplevel-cache)
+	  (remove-hook 'semantic-lex-reset-hooks 'semantic-lex-spp-reset-hook
+		       t)
+	  )
+	;; Get the macro symbol table right.
+	(setq semantic-lex-spp-dynamic-macro-symbol-obarray spp-syms)
+	;; (message "%S" macros)
+	(dolist (sym macros)
+	  (semantic-lex-spp-symbol-set (car sym) (cdr sym)))
 
-      (insert symtext)
+	(insert symtext)
 
-      (setq stream
-	    (semantic-parse-region-default
-	     (point-min) (point-max) nonterminal depth returnonerror))
+	(setq stream
+	      (semantic-parse-region-default
+	       (point-min) (point-max) nonterminal depth returnonerror))
 
-      ;; Clean up macro symbols
-      (dolist (sym macros)
-	(semantic-lex-spp-symbol-remove (car sym)))
+	;; Clean up macro symbols
+	(dolist (sym macros)
+	  (semantic-lex-spp-symbol-remove (car sym)))
 
-      ;; Convert the text of the stream.
-      (dolist (tag stream)
-	;; Only do two levels here 'cause I'm lazy.
-	(semantic--tag-set-overlay tag (list start end))
-	(dolist (stag (semantic-tag-components-with-overlays tag))
-	  (semantic--tag-set-overlay stag (list start end))
-	  ))
-      )
+	;; Convert the text of the stream.
+	(dolist (tag stream)
+	  ;; Only do two levels here 'cause I'm lazy.
+	  (semantic--tag-set-overlay tag (list start end))
+	  (dolist (stag (semantic-tag-components-with-overlays tag))
+	    (semantic--tag-set-overlay stag (list start end))
+	    ))
+	))
     stream))
 
 (defvar semantic-c-debug-mode-init-last-mode nil
