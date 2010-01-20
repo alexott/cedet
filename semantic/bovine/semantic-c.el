@@ -3,7 +3,7 @@
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-c.el,v 1.134 2010-01-17 16:21:02 zappo Exp $
+;; X-RCS: $Id: semantic-c.el,v 1.135 2010-01-20 04:15:12 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -38,8 +38,10 @@
   (require 'semantic-imenu)
   (require 'semantic-tag-ls)
   (require 'senator)
-  (require 'cc-mode))
+  (require 'cc-mode)
+  )
 
+(require 'hideif)
 
 ;;; Compatibility
 ;;
@@ -292,6 +294,7 @@ Moves completely over balanced #if blocks."
        ((looking-at "^\\s-*#\\s-*if")
 	;; We found a nested if.  Skip it.
 	;; @TODO - can we use the new c-scan-conditionals
+	;; - available in Emacs/CVS as of AUG 2009
 	(c-forward-conditional 1))
        ((looking-at "^\\s-*#\\s-*elif")
 	;; We need to let the preprocessor analize this one.
@@ -311,56 +314,225 @@ Moves completely over balanced #if blocks."
 	;; We found an elif.  Stop here.
 	(setq done t))))))
 
+;;; HIDEIF USAGE:
+;; NOTE: All hideif using code was contributed by Brian Carlson as
+;;       copies from hideif plus modifications and additions.
+;;       Eric then converted things to use hideif functions directly,
+;;       deleting most of that code, and added the advice.
+
+;;; SPP SYM EVAL
+;;
+;; Convert SPP symbols into values usable by hideif.
+;;
+;; @TODO - can these conversion fcns be a part of semantic-lex-spp.el?
+;;       -- TRY semantic-lex-spp-one-token-to-txt
+(defun semantic-c-convert-spp-value-to-hideif-value (symbol macrovalue)
+  "Convert an spp macro SYMBOL MACROVALUE, to something that hideif can use.
+Take the first interesting thing and convert it."
+  ;; Just warn for complex macros.
+  (when (> (length macrovalue) 1)
+    (semantic-push-parser-warning
+     (format "Complex macro value (%s) may be improperly evaluated. "
+	     symbol) 0 0))
+
+  (let* ((lextoken (car macrovalue))
+	 (key (semantic-lex-token-class lextoken))
+	 (value (semantic-lex-token-text lextoken)))
+    (cond
+     ((eq key 'number) (string-to-number value))
+     ((eq key 'symbol) (semantic-c-evaluate-symbol-for-hideif value))
+     ((eq key 'string) value)
+     (t (semantic-push-parser-warning
+	 (format "Unknown macro value. Token class = %s value = %s. " key value)
+	 0 0)
+      nil)
+     )))
+
+(defun semantic-c-evaluate-symbol-for-hideif (spp-symbol)
+  "Lookup the symbol SPP-SYMBOL (a string) to something hideif can use.
+Pulls out the symbol list, and call `semantic-c-convert-spp-value-to-hideif-value'."
+  (interactive "sSymbol name: ")
+  (when (symbolp spp-symbol) (setq spp-symbol (symbol-name spp-symbol)))
+
+  (if (semantic-lex-spp-symbol-p spp-symbol )
+      ;; Convert the symbol into a stream of tokens from the macro which we
+      ;; can then interpret.
+      (let ((stream (semantic-lex-spp-symbol-stream spp-symbol)))
+	(cond
+	 ;; Empyt string means defined, so t.
+	 ((null stream) t)
+	 ;; A list means a parsed macro stream.
+	 ((listp stream)
+	  ;; Convert the macro to something we can return.
+	  (semantic-c-convert-spp-value-to-hideif-value spp-symbol stream))
+
+	 ;; Just return the stream.  A user might have just stuck some
+	 ;; value in it directly.
+	 (t stream)
+	 ))
+    ;; Else, store an error, return nil.
+    (progn
+      (semantic-push-parser-warning
+       (format "SPP Symbol %s not available" spp-symbol)
+       (point) (point))
+      nil)))
+
+;;; HIDEIF HACK support fcns
+;;
+;; These fcns can replace the impl of some hideif features.
+;;
+;; @TODO - Should hideif and semantic-c merge?
+;;       I picture a grammar just for CPP that expands into
+;;       a second token stream for the parser.
+(defun semantic-c-hideif-lookup (var)
+  "Replacement for `hif-lookup'.
+I think it just gets the value for some CPP variable VAR."
+  (let ((val (semantic-c-evaluate-symbol-for-hideif
+              (cond
+               ((stringp var)  var )
+               ((symbolp var) (symbol-name var))
+               (t "Unable to determine var")))))
+    (if val
+	val
+      ;; Real hideif will return the right undefined symbol.
+      nil)))
+
+(defun semantic-c-hideif-defined (var)
+  "Replacement for `hif-defined'.
+I think it just returns t/nil dependent on if VAR has been defined."
+  (let ((var-symbol-name
+          (cond
+           ((symbolp var) (symbol-name var))
+           ((stringp var) var)
+           (t "Not A Symbol"))))
+    (if (not (semantic-lex-spp-symbol-p var-symbol-name))
+        (progn
+          (semantic-push-parser-warning
+	   (format "Skip %s" (buffer-substring-no-properties
+			      (point-at-bol) (point-at-eol)))
+	   (point-at-bol) (point-at-eol))
+          nil)
+      t)))
+
+;;; HIDEIF ADVICE
+;;
+;; Advise hideif functions to use our lexical tables instead.
+(defvar semantic-c-takeover-hideif nil
+  "Non-nil when Semantic is taking over hideif features.")
+
+(defadvice hif-defined (around semantic-c activate)
+  "Is the variable defined?"
+  (if semantic-c-takeover-hideif
+      (setq ad-return-value
+	    (semantic-c-hideif-defined (ad-get-arg 0)))
+    ad-do-it))
+
+(defadvice hif-lookup (around semantic-c activate)
+  "Is the argument defined?  Return true or false."
+  (let ((ans nil))
+    (when semantic-c-takeover-hideif
+      (setq ans (semantic-c-hideif-lookup (ad-get-arg 0))))
+    (if (null ans)
+	ad-do-it
+      (setq ad-return-value ans))))
+
+;;; #if macros
+;;
+;; Support #if macros by evaluating the values via use of hideif
+;; logic.  See above for hacks to make this work.
 (define-lex-regex-analyzer semantic-lex-c-if
   "Code blocks wrapped up in #if, or #ifdef.
 Uses known macro tables in SPP to determine what block to skip."
-  "^\\s-*#\\s-*\\(if\\|ifndef\\|ifdef\\|elif\\)\\s-+\\(!?defined(\\|\\)\\s-*\\(\\(\\sw\\|\\s_\\)+\\)\\(\\s-*)\\)?\\s-*$"
+  "^\\s-*#\\s-*\\if.*$"
   (semantic-c-do-lex-if))
 
 (defun semantic-c-do-lex-if ()
-  "Handle lexical CPP if statements."
-  (let* ((sym (buffer-substring-no-properties
-	       (match-beginning 3) (match-end 3)))
-	 (defstr (buffer-substring-no-properties
-		  (match-beginning 2) (match-end 2)))
-	 (defined (string= defstr "defined("))
-	 (notdefined (string= defstr "!defined("))
-	 (ift (buffer-substring-no-properties
-	       (match-beginning 1) (match-end 1)))
-	 (ifdef (or (string= ift "ifdef")
-		    (and (string= ift "if") defined)
-		    (and (string= ift "elif") defined)
-		    ))
-	 (ifndef (or (string= ift "ifndef")
-		     (and (string= ift "if") notdefined)
-		     (and (string= ift "elif") notdefined)
-		     ))
-	 )
-    (if (or (and (or (string= ift "if") (string= ift "elif"))
-		 (string= sym "0"))
-	    (and ifdef (not (semantic-lex-spp-symbol-p sym)))
-	    (and ifndef (semantic-lex-spp-symbol-p sym)))
-	;; The if indecates to skip this preprocessor section
+  "Handle lexical CPP if statements.
+Enables a takeover of some hideif functions, then uses hideif to
+evaluate the #if expression and enables us to make decisions on which
+code to parse."
+  ;; Enable our advice, and use hideif to parse.
+  (let* ((semantic-c-takeover-hideif t)
+	 (parsedtokelist (hif-canonicalize)))
+
+    (let ((eval-form (eval parsedtokelist)))
+      (if (or (not eval-form)
+              (and (numberp eval-form)
+                   (equal eval-form 0)));; ifdefline resulted in false
+
+	;; The if indicates to skip this preprocessor section
 	(let ((pt nil))
-	  ;; (message "%s %s yes" ift sym)
+	  (semantic-push-parser-warning (format "Skip %s" (buffer-substring-no-properties (point-at-bol) (point-at-eol)))
+					(point-at-bol) (point-at-eol))
 	  (beginning-of-line)
 	  (setq pt (point))
-	  ;;(c-forward-conditional 1)
 	  ;; This skips only a section of a conditional.  Once that section
 	  ;; is opened, encountering any new #else or related conditional
 	  ;; should be skipped.
 	  (semantic-c-skip-conditional-section)
 	  (setq semantic-lex-end-point (point))
-	  (semantic-push-parser-warning (format "Skip #%s %s" ift sym)
-					pt (point))
-;;	  (semantic-lex-push-token
-;;	   (semantic-lex-token 'c-preprocessor-skip pt (point)))
+	  
+	  ;; @TODO -somewhere around here, we also need to skip
+	  ;; other sections of the conditional.
+
 	  nil)
       ;; Else, don't ignore it, but do handle the internals.
-      ;;(message "%s %s no" ift sym)
       (end-of-line)
       (setq semantic-lex-end-point (point))
-      nil)))
+      nil))))
+
+;; (define-lex-regex-analyzer semantic-lex-c-if
+;;   "Code blocks wrapped up in #if, or #ifdef.
+;; Uses known macro tables in SPP to determine what block to skip."
+;;   "^\\s-*#\\s-*\\(if\\|ifndef\\|ifdef\\|elif\\)\\s-+\\(!?defined(\\|\\)\\s-*\\(\\(\\sw\\|\\s_\\)+\\)\\(\\s-*)\\)?\\s-*$"
+;;   (semantic-c-do-lex-if))
+;; 
+;; (defun semantic-c-do-lex-if ()
+;;   "Handle lexical CPP if statements."
+;;   (let* ((sym (buffer-substring-no-properties
+;; 	       (match-beginning 3) (match-end 3)))
+;; 	 (defstr (buffer-substring-no-properties
+;; 		  (match-beginning 2) (match-end 2)))
+;; 	 (defined (string= defstr "defined("))
+;; 	 (notdefined (string= defstr "!defined("))
+;; 	 (ift (buffer-substring-no-properties
+;; 	       (match-beginning 1) (match-end 1)))
+;; 	 (ifdef (or (string= ift "ifdef")
+;; 		    (and (string= ift "if") defined)
+;; 		    (and (string= ift "elif") defined)
+;; 		    ))
+;; 	 (ifndef (or (string= ift "ifndef")
+;; 		     (and (string= ift "if") notdefined)
+;; 		     (and (string= ift "elif") notdefined)
+;; 		     ))
+;; 	 )
+;;     (if (or (and (or (string= ift "if") (string= ift "elif"))
+;; 		 (string= sym "0"))
+;; 	    (and ifdef (not (semantic-lex-spp-symbol-p sym)))
+;; 	    (and ifndef (semantic-lex-spp-symbol-p sym)))
+;; 	;; The if indecates to skip this preprocessor section
+;; 	(let ((pt nil))
+;; 	  ;; (message "%s %s yes" ift sym)
+;; 	  (beginning-of-line)
+;; 	  (setq pt (point))
+;; 	  ;;(c-forward-conditional 1)
+;; 	  ;; This skips only a section of a conditional.  Once that section
+;; 	  ;; is opened, encountering any new #else or related conditional
+;; 	  ;; should be skipped.
+;; 	  (semantic-c-skip-conditional-section)
+;; 	  (setq semantic-lex-end-point (point))
+;; 	  (semantic-push-parser-warning (format "Skip #%s %s" ift sym)
+;; 					pt (point))
+;; ;;	  (semantic-lex-push-token
+;; ;;	   (semantic-lex-token 'c-preprocessor-skip pt (point)))
+;; 	  nil)
+;;       ;; Else, don't ignore it, but do handle the internals.
+;;       ;;(message "%s %s no" ift sym)
+;;       (end-of-line)
+;;       (setq semantic-lex-end-point (point))
+;;       nil)))
+
+;;; END HIDEIF HACKS
 
 (define-lex-regex-analyzer semantic-lex-c-macro-else
   "Ignore an #else block.
