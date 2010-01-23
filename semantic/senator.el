@@ -1,12 +1,12 @@
 ;;; senator.el --- SEmantic NAvigaTOR
 
-;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 by David Ponce
+;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 by David Ponce
 
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 10 Nov 2000
 ;; Keywords: syntax
-;; X-RCS: $Id: senator.el,v 1.143 2009-09-23 01:10:49 zappo Exp $
+;; X-RCS: $Id: senator.el,v 1.144 2010-01-23 16:16:14 zappo Exp $
 
 ;; This file is not part of Emacs
 
@@ -1903,6 +1903,8 @@ This is a buffer local variable.")
     (define-key km "+"    'senator-unfold-tag)
     (define-key km "?"    'senator-pulse-tag)
     (define-key km "/"    'senator-adebug-tag)
+
+    (define-key km ","    'senator-force-refresh)
 
     km)
   "Default key bindings in senator minor mode.")
