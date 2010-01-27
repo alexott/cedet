@@ -1,10 +1,10 @@
 ;; semantic-idle.el --- Schedule parsing tasks in idle time
 
-;;; Copyright (C) 2003, 2004, 2005, 2006, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2003, 2004, 2005, 2006, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.59 2009-10-13 03:17:53 zappo Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.60 2010-01-27 01:37:09 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -338,6 +338,12 @@ Disable to prevent lots of excessive parsing in idle time."
   :group 'semantic
   :type 'boolean)
 
+(defcustom semantic-idle-work-update-headers-flag t
+  "*Non-nil means to parse through header files in idle time.
+Disable to prevent idle time parsing of many files.  If completion
+is called that work will be done then instead."
+  :group 'semantic
+  :type 'boolean)
 
 (defun semantic-idle-work-for-one-buffer (buffer)
   "Do long-processing work for for BUFFER.
@@ -350,6 +356,9 @@ Returns t of all processing succeeded."
 	  (semantic-safe "Idle Work Parse Error: %S"
 	    (semantic-idle-scheduler-refresh-tags)
 	    t)
+
+	  ;; Option to disable this work.
+	  semantic-idle-work-update-headers-flag
 
 	  ;; Force all our include files to get read in so we
 	  ;; are ready to provide good smart completion and idle
