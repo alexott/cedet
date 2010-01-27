@@ -3,7 +3,7 @@
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-load.el,v 1.68 2009-09-29 01:31:06 zappo Exp $
+;; X-RCS: $Id: semantic-load.el,v 1.69 2010-01-27 01:39:32 zappo Exp $
 
 ;; Semantic is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -156,12 +156,15 @@ This includes `semantic-load-enable-code-helpers'.
   "Enable all semantic features that provide coding assistance.
 This includes all features of `semantic-load-enable-gaudy-code-helpers' plus:
   `semantic-highlight-func-mode' - Highlight the current tag.
+  `semantic-idle-tag-highlight-mode' - Highlight the tag for symbol at pt.
   `semantic-decoration-on-*-members' - Two decoration modes that
                     color the background of private and protected methods.
   `which-func-mode' - Display the current function in the mode line."
   (interactive)
 
   (global-semantic-highlight-func-mode 1)
+
+  (semantic-idle-tag-highlight-mode 1)
 
   (semantic-load-enable-gaudy-code-helpers)
 
