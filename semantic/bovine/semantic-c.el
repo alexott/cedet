@@ -3,7 +3,7 @@
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-c.el,v 1.136 2010-01-23 02:20:26 zappo Exp $
+;; X-RCS: $Id: semantic-c.el,v 1.137 2010-01-29 03:10:21 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -1743,6 +1743,29 @@ DO NOT return the list of tags encompassing point."
     ;; Return the stuff
     tagreturn
     ))
+
+(define-mode-local-override semanticdb-expand-nested-tag c++-mode (tag)
+  "Expand TAG if it has a fully qualified name.
+For types with a :parent, create faux namespaces to put TAG into."
+  (let ((p (semantic-tag-get-attribute tag :parent)))
+    (if (and p (semantic-tag-of-class-p tag 'type))
+	;; Expand the tag
+	(let ((s (semantic-analyze-split-name p))
+	      (newtag (semantic-tag-copy tag nil t)))
+	  ;; Erase the qualified name.
+	  (semantic-tag-put-attribute newtag :parent nil)
+	  ;; Fixup the namespace name
+	  (setq s (if (stringp s) (list s) (nreverse s)))
+	  ;; Loop over all the parents, creating the nested
+	  ;; namespace.
+	  (dolist (namespace s)
+	    (setq newtag (semanticdb-typecache-faux-namespace
+			  namespace (list newtag)))
+	    )
+	  ;; Return the last created namespace.
+	  newtag)
+      ;; Else, return tag unmodified.
+      tag)))
 
 (define-mode-local-override semantic-get-local-variables c++-mode ()
   "Do what `semantic-get-local-variables' does, plus add `this' if needed."
