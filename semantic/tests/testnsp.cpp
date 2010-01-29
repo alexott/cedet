@@ -26,3 +26,34 @@ void myfcn_not_in_ns (void) {
   test.// -1-
     ; // #1# ( "fromchild" "fromroot" )
 }
+
+// Test a class declared in a class, where the contents
+// are in a qualified name.
+//
+// Thanks Michael Reiher for the concise example.
+
+class AAA
+{
+public:
+  AAA();
+
+  void aaa();
+
+private:
+    class Private;
+    Private * const d;
+};
+
+class AAA::Private
+{
+    Private() : bbb(0) {
+    }    
+    
+    BBB* bbb;
+};
+
+void AAA::aaa()
+{
+  d->// -2-
+    ; // #2# ( "bbb" )
+}
