@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semanticdb-typecache.el,v 1.40 2009-09-11 18:56:10 zappo Exp $
+;; X-RCS: $Id: semanticdb-typecache.el,v 1.41 2010-01-29 03:12:11 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -212,6 +212,14 @@ Adds a filename and copies the tags."
    (semanticdb-full-filename table)
    tags))
 
+(defun semanticdb-typecache-faux-namespace (name members)
+  "Create a new namespace tag with NAME and a set of MEMBERS.
+The new tag will be a faux tag, used as a placeholder in a typecache."
+  (let ((tag (semantic-tag-new-type name "namespace" members nil)))
+    ;; Make sure we mark this as a fake tag.
+    (semantic-tag-set-faux tag)
+    tag))
+
 ;;;###autoload
 (defun semanticdb-typecache-merge-streams (cache1 cache2)
   "Merge into CACHE1 and CACHE2 together.  The Caches will be merged in place."
@@ -251,23 +259,22 @@ Adds a filename and copies the tags."
 	    (setq ans (cons next ans))
 	  ;; ELSE - We have a NAME match.
 	  (setq type (semantic-tag-type next))
-	  (if (semantic-tag-of-type-p prev type) ; Are they the same datatype
+	  (if (or (semantic-tag-of-type-p prev type) ; Are they the same datatype
+		  (semantic-tag-faux-p prev)
+		  (semantic-tag-faux-p next) ; or either a faux tag?
+		  )
 	      ;; Same Class, we can do a merge.
 	      (cond
 	       ((and (semantic-tag-of-class-p next 'type)
 		     (string= type "namespace"))
 		;; Namespaces - merge the children together.
 		(setcar ans
-			(semantic-tag-new-type
+			(semanticdb-typecache-faux-namespace
 			 (semantic-tag-name prev) ; - they are the same
-			 "namespace"	; - we know this as fact
 			 (semanticdb-typecache-merge-streams
 			  (semanticdb-typecache-safe-tag-members prev)
 			  (semanticdb-typecache-safe-tag-members next))
-			 nil		; - no attributes
 			 ))
-		;; Make sure we mark this as a fake tag.
-		(semantic-tag-set-faux (car ans))
 		)
 	       ((semantic-tag-prototype-p next)
 		;; NEXT is a prototype... so keep previous.
@@ -294,6 +301,12 @@ Adds a filename and copies the tags."
 ;;; Refresh / Query API
 ;;
 ;; Queries that can be made for the typecache.
+(define-overloadable-function semanticdb-expand-nested-tag (tag)
+  "Expand TAG from fully qualified names.
+If TAG has fully qualified names, expand it to a series of nested
+namespaces instead."
+  tag)
+
 (defmethod semanticdb-typecache-file-tags ((table semanticdb-abstract-table))
   "No tags available from non-file based tables."
   nil)
@@ -308,10 +321,13 @@ all included files."
 
     ;; Make sure our file-tags list is up to date.
     (when (not (oref cache filestream))
-      (let ((tags  (semantic-find-tags-by-class 'type table)))
+      (let ((tags  (semantic-find-tags-by-class 'type table))
+	    (exptags nil))
 	(when tags
 	  (setq tags (semanticdb-typecache-safe-tag-list tags table))
-	  (oset cache filestream (semanticdb-typecache-merge-streams tags nil)))))
+	  (dolist (T tags)
+	    (push (semanticdb-expand-nested-tag T) exptags))
+	  (oset cache filestream (semanticdb-typecache-merge-streams exptags nil)))))
 
     ;; Return our cache.
     (oref cache filestream)
