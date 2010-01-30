@@ -1,11 +1,11 @@
 ;;; project-am.el --- A project management scheme based on automake files.
 
-;;;  Copyright (C) 1998, 1999, 2000, 2003, 2005, 2007, 2008, 2009  Eric M. Ludlam
+;;;  Copyright (C) 1998, 1999, 2000, 2003, 2005, 2007, 2008, 2009, 2010  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Version: 0.0.3
 ;; Keywords: project, make
-;; RCS: $Id: project-am.el,v 1.51 2010-01-07 02:17:02 zappo Exp $
+;; RCS: $Id: project-am.el,v 1.52 2010-01-30 12:19:40 zappo Exp $
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -509,14 +509,18 @@ Kill the makefile if it was not loaded before the load."
 	      (form def-body))))
 
 
-(defun project-am-load-makefile (path)
+(defun project-am-load-makefile (path &optional suggestedname)
   "Convert PATH into a project Makefile, and return its project object.
-It does not check for existing project objects.  Use `project-am-load'."
+It does not check for existing project objects.  Use `project-am-load'.
+Optional argument SUGGESTEDNAME will be the project name.
+This is used when subprojects are made in named subdirectories."
   (project-am-with-makefile-current path
     (if (and ede-object (project-am-makefile-p ede-object))
 	ede-object
       (let* ((pi (project-am-package-info path))
-	     (pn (or (nth 0 pi) (project-am-last-dir fn)))
+	     (sfn (when suggestedname
+		    (project-am-last-dir suggestedname)))
+	     (pn (or sfn (nth 0 pi) (project-am-last-dir fn)))
 	     (ver (or (nth 1 pi) "0.0"))
 	     (bug (nth 2 pi))
 	     (cof (nth 3 pi))
@@ -595,7 +599,24 @@ DIR is the directory to apply to new targets."
        project-am-type-alist)
       ntargets))
 
-(defmethod project-rescan ((this project-am-makefile))
+(defun project-am-expand-subdirlist (place subdirs)
+  "Store in PLACE the SUBDIRS expanded from variables.
+Strip out duplicates, and recurse on variables."
+  (mapc (lambda (sp)
+	  (let ((var (makefile-extract-varname-from-text sp)))
+	    (if var
+		;; If it is a variable, expand that variable, and keep going.
+		(project-am-expand-subdirlist
+		 place (makefile-macro-file-list var))
+	      ;; Else, add SP in if it isn't a dup.
+	      (if (member sp (symbol-value place))
+		  nil ; don't do it twice.
+		(set place (cons sp (symbol-value place))) ;; add
+		))))
+	subdirs)
+  )
+
+(defmethod project-rescan ((this project-am-makefile) &optional suggestedname)
   "Rescan the makefile for all targets and sub targets."
   (project-am-with-makefile-current (file-name-directory (oref this file))
     ;;(message "Scanning %s..." (oref this file))
@@ -605,10 +626,11 @@ DIR is the directory to apply to new targets."
 	   (bug (nth 2 pi))
 	   (cof (nth 3 pi))
 	   (osubproj (oref this subproj))
-	   (csubproj (or
-		      ;; If DIST_SUBDIRS doesn't exist, then go for the
-		      ;; static list of SUBDIRS.  The DIST version should
-		      ;; contain SUBDIRS plus extra stuff.
+	   ;; 1/30/10 - We need to append these two lists together,
+	   ;; then strip out duplicates.  Expanding this list (via 
+	   ;; references to other variables should also strip out
+	   ;; dups
+	   (csubproj (append
 		      (makefile-macro-file-list "DIST_SUBDIRS")
 		      (makefile-macro-file-list "SUBDIRS")))
 	   (csubprojexpanded nil)
@@ -620,25 +642,19 @@ DIR is the directory to apply to new targets."
 	   (ntargets (project-am-scan-for-targets this dir))
 	   )
 
-      (and pn (string= (directory-file-name
-			(oref this directory))
-		       (directory-file-name
-			(project-am-find-topmost-level
-			 (oref this directory))))
-	   (oset this name pn)
-	   (and pv (oset this version pv))
-	   (and bug (oset this mailinglist bug))
-	   (oset this configureoutputfiles cof))
+      (if suggestedname
+	  (oset this name (project-am-last-dir suggestedname))
+	;; Else, setup toplevel project info.
+	(and pn (string= (directory-file-name
+			  (oref this directory))
+			 (directory-file-name
+			  (project-am-find-topmost-level
+			   (oref this directory))))
+	     (oset this name pn)
+	     (and pv (oset this version pv))
+	     (and bug (oset this mailinglist bug))
+	     (oset this configureoutputfiles cof)))
 
-;      ;; LISP is different.  Here there is only one kind of lisp (that I know of
-;      ;; anyway) so it doesn't get mapped when it is found.
-;      (if (makefile-move-to-macro "lisp_LISP")
-; 	  (let ((tmp (project-am-lisp "lisp"
-; 				      :name "lisp"
-; 				      :path dir)))
-; 	    (project-rescan tmp)
-; 	    (setq ntargets (cons tmp ntargets))))
-;
       ;; Now that we have this new list, chuck the old targets
       ;; and replace it with the new list of targets I just created.
       (oset this targets (nreverse ntargets))
@@ -647,17 +663,8 @@ DIR is the directory to apply to new targets."
 
       ;; FIGURE THIS OUT
 
-      (mapc (lambda (sp)
- 	      (let ((var (makefile-extract-varname-from-text sp))
- 		    )
- 		(if (not var)
- 		    (setq csubprojexpanded (cons sp csubprojexpanded))
- 		  ;; If it is a variable, expand that variable, and keep going.
- 		  (let ((varexp (makefile-macro-file-list var)))
- 		    (dolist (V varexp)
- 		      (setq csubprojexpanded (cons V csubprojexpanded)))))
- 		))
- 	    csubproj)
+      (project-am-expand-subdirlist 'csubprojexpanded csubproj)
+
 
       ;; Ok, now lets look at all our sub-projects.
       (mapc (lambda (sp)
@@ -680,11 +687,11 @@ DIR is the directory to apply to new targets."
  		      (setq tmp
  			    (condition-case nil
  				;; In case of problem, ignore it.
- 				(project-am-load-makefile subdir)
+ 				(project-am-load-makefile subdir subdir)
  			      (error nil)))
  		    ;; If we have tmp, then rescan it only if deep mode.
  		    (if ede-deep-rescan
- 			(project-rescan tmp)))
+ 			(project-rescan tmp subdir)))
  		  ;; Tac tmp onto our list of things to keep, but only
  		  ;; if tmp was found.
  		  (when tmp
