@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-fields.el,v 1.10 2009-04-02 01:50:20 zappo Exp $
+;; X-RCS: $Id: srecode-fields.el,v 1.11 2010-02-03 23:39:25 scymtym Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -61,7 +61,7 @@
 	(defalias 'srecode-overlay-start  'extent-start-position)
 	(defalias 'srecode-overlay-end    'extent-end-position)
 	(defalias 'srecode-overlays-at
-	  (lambda (pos) 
+	  (lambda (pos)
 	    (condition-case nil
 		(extent-list nil pos pos)
 	      (error nil))
@@ -83,6 +83,10 @@
   "While inserting a set of fields, collect in this variable.
 Once an insertion set is done, these fields will be activated.")
 
+
+;;; Customization
+;;
+
 (defface srecode-field-face
   '((((class color) (background dark))
      (:underline "green"))
@@ -90,6 +94,11 @@ Once an insertion set is done, these fields will be activated.")
      (:underline "green4")))
   "*Face used to specify editable fields from a template."
   :group 'semantic-faces)
+
+(defcustom srecode-fields-exit-confirmation t
+  "Ask for confirmation before leaving field editing mode."
+  :group 'srecode
+  :type  'boolean)
 
 ;;; BASECLASS
 ;;
@@ -152,7 +161,7 @@ Has virtual :start and :end initializers.")
     (srecode-overlay-delete ola)
 
     (srecode-overlay-put ol 'srecode olaid)
-    
+
     (oset olaid overlay ol)
 
     ))
@@ -277,7 +286,7 @@ If SET-TO is a string, then replace the text of OLAID wit SET-TO."
 	(remove-hook 'post-command-hook 'srecode-field-post-command t)
       (if (srecode-point-in-region-p ar)
 	  nil ;; Keep going
-	;; We moved out of the temlate.  Cancel the edits.
+	;; We moved out of the template.  Cancel the edits.
 	(srecode-delete ar)))
     ))
 
@@ -285,7 +294,7 @@ If SET-TO is a string, then replace the text of OLAID wit SET-TO."
 ;;
 ;;;###autoload
 (defclass srecode-field (srecode-overlaid)
-  ((tail :documentation 
+  ((tail :documentation
 	 "Overlay used on character just after this field.
 Used to provide useful keybindings there.")
    (name :initarg :name
@@ -470,7 +479,8 @@ PRE-LEN is used in the after mode for the length of the changed text."
 (defun srecode-field-exit-ask ()
   "Ask if the user wants to exit field-editing mini-mode."
   (interactive)
-  (when (y-or-n-p "Exit field-editing mode? ")
+  (when (or (not srecode-fields-exit-confirmation)
+	    (y-or-n-p "Exit field-editing mode? "))
     (srecode-delete (srecode-active-template-region))))
 
 ;;; TESTS
@@ -504,7 +514,7 @@ It is filled with some text."
     ;; Test basic field generation.
     (let ((srecode-field-archive nil)
 	  (f nil))
-      
+
       (end-of-line)
       (forward-word -1)
 
@@ -556,7 +566,7 @@ It is filled with some text."
 
 	     (srecode-field "Test4" :name "TEST-4" :start 35 :end 35))
 	    ))
-		     
+
       (when (not (= (length srecode-field-archive) 4))
 	(error "Region Test: Found %d fields.  Expected 4"
 	       (length srecode-field-archive)))
@@ -640,7 +650,7 @@ It is filled with some text."
 	   (reg (srecode-template-inserted-region "REG" :start 4 :end 40))
 	   )
       (srecode-overlaid-activate reg)
-      
+
       (when (not (string= (srecode-overlaid-text f1)
 			  (srecode-overlaid-text f2)))
 	(error "Linkage Test: Init strings are not ="))
