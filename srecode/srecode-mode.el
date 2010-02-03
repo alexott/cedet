@@ -223,7 +223,7 @@ MENU-DEF is the menu to bind this into."
 	(setq ltab (oref (car subtab) templates))
 	(while ltab
 	  (setq temp (car ltab))
-	
+
 	  ;; Do something with this template.
 
 	  (let* ((ctxt (oref temp context))
@@ -276,7 +276,7 @@ MENU-DEF is the menu to bind this into."
   ;; Doing this SEGVs Emacs on windows.
   ;;(srecode-load-tables-for-mode major-mode)
   (let ((allgeneratorapps nil))
-    
+
     (dolist (gen srecode-minor-mode-generators)
       (setq allgeneratorapps
 	    (cons (vector (cdr gen) (car gen))
@@ -297,6 +297,7 @@ MENU-DEF is the menu to bind this into."
 This command will insert whichever srecode template has a binding
 to the current key."
   (interactive)
+  (srecode-load-tables-for-mode major-mode)
   (let* ((k last-command-char)
 	 (ctxt (srecode-calculate-context))
 	 ;; Find the template with the binding K
