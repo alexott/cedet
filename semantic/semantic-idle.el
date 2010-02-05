@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.60 2010-01-27 01:37:09 zappo Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.61 2010-02-05 02:58:04 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -332,13 +332,13 @@ call additional functions registered with the timer calls."
 ;;
 ;; Unlike the shorter timer, the WORK timer will kick of tasks that
 ;; may take a long time to complete.
-(defcustom semantic-idle-work-parse-neighboring-files-flag t
+(defcustom semantic-idle-work-parse-neighboring-files-flag nil
   "*Non-nil means to parse files in the same dir as the current buffer.
 Disable to prevent lots of excessive parsing in idle time."
   :group 'semantic
   :type 'boolean)
 
-(defcustom semantic-idle-work-update-headers-flag t
+(defcustom semantic-idle-work-update-headers-flag nil
   "*Non-nil means to parse through header files in idle time.
 Disable to prevent idle time parsing of many files.  If completion
 is called that work will be done then instead."
