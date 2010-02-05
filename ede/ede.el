@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede.el,v 1.143 2010-01-07 02:16:17 zappo Exp $
+;; RCS: $Id: ede.el,v 1.144 2010-02-05 03:42:14 zappo Exp $
 (defconst ede-version "1.0pre7"
   "Current version of the Emacs EDE.")
 
@@ -559,20 +559,20 @@ Argument LIST-O-O is the list of objects to choose from."
 (if ede-minor-keymap
     (progn
       (easy-menu-define
-       ede-minor-menu ede-minor-keymap "Project Minor Mode Menu"
-       '("Project"
-	 ( "Build" :filter ede-build-forms-menu )
-	 ( "Project Options" :filter ede-project-forms-menu )
-	 ( "Target Options" :filter ede-target-forms-menu )
-	 [ "Create Project" ede-new (not ede-object) ]
-	 [ "Load a project" ede t ]
-;;	 [ "Select Active Target" 'undefined nil ]
-;;	 [ "Remove Project" 'undefined nil ]
-	 "---"
-	 [ "Find File in Project..." ede-find-file t ]
-	 ( "Customize" :filter ede-customize-forms-menu )
-	 [ "View Project Tree" ede-speedbar t ]
-	 ))
+	ede-minor-menu ede-minor-keymap "Project Minor Mode Menu"
+	'("Project"
+	  ( "Build" :filter ede-build-forms-menu )
+	  ( "Project Options" :filter ede-project-forms-menu )
+	  ( "Target Options" :filter ede-target-forms-menu )
+	  [ "Create Project" ede-new (not ede-object) ]
+	  [ "Load a project" ede t ]
+	  ;;	 [ "Select Active Target" 'undefined nil ]
+	  ;;	 [ "Remove Project" 'undefined nil ]
+	  "---"
+	  [ "Find File in Project..." ede-find-file t ]
+	  ( "Customize" :filter ede-customize-forms-menu )
+	  [ "View Project Tree" ede-speedbar t ]
+	  ))
       ))
 
 ;; Allow re-insertion of a new keymap
@@ -655,7 +655,7 @@ Argument MENU-DEF is the menu definition to use."
 	   (when (listp obj)
 	     ;; This is bad, but I'm not sure what else to do.
 	     (oref (car obj) menu)))))))))
-       
+
 (defun ede-project-forms-menu (menu-def)
   "Create a target MENU-DEF based on the object belonging to this buffer."
   (easy-menu-filter-return
@@ -1205,7 +1205,7 @@ Optional argument GROUP is the slot group to display."
     (widget-insert "   ")
     (widget-create 'push-button
                    :notify (lambda (&rest ignore)
-                               (kill-buffer))
+			     (kill-buffer))
                    " Cancel ")
     (widget-insert "\n\n")
     (setq ede-project-sort-targets-order nil)
@@ -1311,7 +1311,7 @@ Return the new object created in its place."
 ;;  methods based on those below.
 
 (defmethod project-interactive-select-target ((this ede-project-placeholder) prompt)
-  ; checkdoc-params: (prompt)
+					; checkdoc-params: (prompt)
   "Make sure placeholder THIS is replaced with the real thing, and pass through."
   (project-interactive-select-target (ede-project-force-load this) prompt))
 
@@ -1322,7 +1322,7 @@ Argument PROMPT is the prompt to use when querying the user for a target."
     (cdr (assoc (completing-read prompt ob nil t) ob))))
 
 (defmethod project-add-file ((this ede-project-placeholder) file)
-  ; checkdoc-params: (file)
+					; checkdoc-params: (file)
   "Make sure placeholder THIS is replaced with the real thing, and pass through."
   (project-add-file (ede-project-force-load this) file))
 
@@ -1581,7 +1581,7 @@ Optional ROOTRETURN will return the root project for DIR."
 	(if p (ede-load-project-file p)
 	  nil)
 	;; recomment as we go
-	;nil
+	;;nil
 	))
      ;; Do nothing if we are buiding an EDE project already
      (ede-constructing
@@ -1687,10 +1687,19 @@ This function clears cached values and recalculates."
     (if (not buffer) (setq buffer (current-buffer)))
     (set-buffer buffer)
     (setq ede-object nil)
-    (let ((po (ede-current-project)))
-      (if po (setq ede-object (ede-find-target po buffer))))
-    (if (= (length ede-object) 1)
-	(setq ede-object (car ede-object)))
+    (let* ((po (ede-current-project))
+	   (top (ede-toplevel po)))
+      (if po (setq ede-object (ede-find-target po buffer)))
+      ;; If we get nothing, go with the backup plan of slowly
+      ;; looping upward
+      (while (and (not ede-object) (not (eq po top)))
+	(setq po (ede-parent-project po))
+	(if po (setq ede-object (ede-find-target po buffer))))
+      ;; Filter down to 1 project if there are dups.
+      (if (= (length ede-object) 1)
+	  (setq ede-object (car ede-object)))
+      )
+    ;; Return our findings.
     ede-object))
 
 (defmethod ede-target-in-project-p ((proj ede-project) target)
