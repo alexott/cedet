@@ -5,7 +5,7 @@
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Version: 0.0.3
 ;; Keywords: project, make
-;; RCS: $Id: project-am.el,v 1.52 2010-01-30 12:19:40 zappo Exp $
+;; RCS: $Id: project-am.el,v 1.53 2010-02-05 03:37:31 zappo Exp $
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -538,21 +538,6 @@ This is used when subprojects are made in named subdirectories."
 	ampf))))
 
 ;;; Methods:
-(defmethod ede-find-target ((amf project-am-makefile) buffer)
-  "Fetch the target belonging to BUFFER."
-  (or (call-next-method)
-      (let ((targ (oref amf targets))
-	    (sobj (oref amf subproj))
-	    (obj nil))
-	(while (and targ (not obj))
-	  (if (ede-buffer-mine (car targ) buffer)
-	      (setq obj (car targ)))
-	  (setq targ (cdr targ)))
-	(while (and sobj (not obj))
-	  (setq obj (project-am-buffer-object (car sobj) buffer)
-		sobj (cdr sobj)))
-	obj)))
-
 (defmethod project-targets-for-file ((proj project-am-makefile))
   "Return a list of targets the project PROJ."
   (oref proj targets))
@@ -819,22 +804,24 @@ nil means that this buffer belongs to no-one."
 
 (defmethod ede-buffer-mine ((this project-am-objectcode) buffer)
   "Return t if object THIS lays claim to the file in BUFFER."
-  (member (file-name-nondirectory (buffer-file-name buffer))
+  (member (file-relative-name (buffer-file-name buffer) (oref this :path))
 	  (oref this :source)))
 
 (defmethod ede-buffer-mine ((this project-am-texinfo) buffer)
   "Return t if object THIS lays claim to the file in BUFFER."
-  (let ((bfn (buffer-file-name buffer)))
-    (or (string= (oref this :name)  (file-name-nondirectory bfn))
-	(member (file-name-nondirectory bfn) (oref this :include)))))
+  (let ((bfn (file-relative-name (buffer-file-name buffer)
+				 (oref this :path))))
+    (or (string= (oref this :name)  bfn)
+	(member bfn (oref this :include)))))
 
 (defmethod ede-buffer-mine ((this project-am-man) buffer)
   "Return t if object THIS lays claim to the file in BUFFER."
-  (string= (oref this :name) (buffer-file-name buffer)))
+  (string= (oref this :name)
+	   (file-relative-name (buffer-file-name buffer) (oref this :path))))
 
 (defmethod ede-buffer-mine ((this project-am-lisp) buffer)
   "Return t if object THIS lays claim to the file in BUFFER."
-  (member (file-name-nondirectory (buffer-file-name buffer))
+  (member (file-relative-name (buffer-file-name buffer) (oref this :path))
 	  (oref this :source)))
 
 (defmethod project-am-subtree ((ampf project-am-makefile) subdir)
