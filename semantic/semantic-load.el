@@ -3,7 +3,7 @@
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-load.el,v 1.70 2010-01-30 03:40:57 zappo Exp $
+;; X-RCS: $Id: semantic-load.el,v 1.71 2010-02-05 02:57:28 zappo Exp $
 
 ;; Semantic is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -102,10 +102,17 @@ This includes `semantic-load-enable-minimum-features' plus:
   `senator-minor-mode' - Semantic Navigator, and global menu for all
                          features Semantic.
   `semantic-mru-bookmark-mode' - Provides a `switch-to-buffer' like
-                       keybinding for tag names."
+                       keybinding for tag names.
+
+This also sets `semantic-idle-work-update-headers-flag' to t to
+pre-build your database of header files in idle time for features
+such as idle summary mode."
   (interactive)
 
   (semantic-load-enable-minimum-features)
+
+  ;; This enables parsing of header files.
+  (setq semantic-idle-work-update-headers-flag t)
 
   (when (and (eq window-system 'x)
 	     (locate-library "imenu"))
@@ -133,8 +140,13 @@ This includes `semantic-load-enable-code-helpers'.
   `semantic-decoration-mode' - Decorate tags based on various attributes.
   `semantic-decoration-on-includes' - Decoration style for include files.
   `semantic-idle-completions-mode' - Provide smart symbol completion
-                                 automatically at idle time."
+                                 automatically at idle time.
+
+This also sets `semantic-idle-work-parse-neighboring-files-flag' to t
+to pre-build your databases in idle time."
   (interactive)
+
+  (semantic-load-enable-code-helpers)
 
   (global-semantic-decoration-mode 1)
   (require 'semantic-decorate-include)
@@ -143,10 +155,12 @@ This includes `semantic-load-enable-code-helpers'.
     (global-semantic-stickyfunc-mode 1))
 
   (condition-case nil
-      (global-semantic-idle-completions-mode 1)
+      (progn
+	(global-semantic-idle-completions-mode 1)
+	;; Enable preparsing many neighboring files.
+	(setq semantic-idle-work-parse-neighboring-files-flag t)
+	)
     (error nil))
-
-  (semantic-load-enable-code-helpers)
   )
 
 (semantic-alias-obsolete 'semantic-load-enable-guady-code-helpers
@@ -162,11 +176,11 @@ This includes all features of `semantic-load-enable-gaudy-code-helpers' plus:
   `which-func-mode' - Display the current function in the mode line."
   (interactive)
 
+  (semantic-load-enable-gaudy-code-helpers)
+
   (global-semantic-highlight-func-mode 1)
 
   (global-semantic-idle-tag-highlight-mode 1)
-
-  (semantic-load-enable-gaudy-code-helpers)
 
   (semantic-toggle-decoration-style "semantic-decoration-on-private-members" t)
   (semantic-toggle-decoration-style "semantic-decoration-on-protected-members" t)
