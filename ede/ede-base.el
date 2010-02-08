@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-base.el,v 1.1 2010-02-08 21:57:57 zappo Exp $
+;; X-RCS: $Id: ede-base.el,v 1.2 2010-02-08 23:46:03 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -27,6 +27,9 @@
 ;; Contains all the base structures needed by EDE.
 
 ;;; Code:
+(require 'eieio)
+(eval-when-compile
+  (require 'data-debug))
 
 ;;; TARGET
 ;;
