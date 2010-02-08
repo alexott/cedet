@@ -1,10 +1,10 @@
 ;; ede-pmake.el --- EDE Generic Project Makefile code generator.
 
-;;;  Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009  Eric M. Ludlam
+;;;  Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-pmake.el,v 1.64 2009-12-26 22:41:09 zappo Exp $
+;; RCS: $Id: ede-pmake.el,v 1.65 2010-02-08 17:58:19 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -382,7 +382,7 @@ NOTE: Not yet in use!  This is part of an SRecode conversion of
       (setq tmp (ede-parent-project tmp)
 	    top (concat "../" top)))
     ;; If this is the top, then use CURDIR.
-    (if (string= top "")
+    (if (and (not (oref this metasubproject)) (string= top ""))
 	(insert "\ntop=\"$(CURDIR)\"/")
       (insert "\ntop=" top)))
   (insert "\nede_FILES=" (file-name-nondirectory (oref this file)) " "
