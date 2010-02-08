@@ -1,8 +1,8 @@
 ;;; semantic-edit.el --- Edit Management for Semantic
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
-;; X-CVS: $Id: semantic-edit.el,v 1.41 2009-09-29 01:29:15 zappo Exp $
+;; X-CVS: $Id: semantic-edit.el,v 1.42 2010-02-08 23:49:23 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -504,7 +504,7 @@ the semantic cache to see what needs to be changed."
     changed-tags))
 
 (defmacro semantic-edits-assert-valid-region ()
-  "Asert that parse-start and parse-end are sorted correctly."
+  "Assert that parse-start and parse-end are sorted correctly."
 ;;;  (if (> parse-start parse-end)
 ;;;      (error "Bug is %s !> %d!  Buff min/max = [ %d %d ]"
 ;;;	     parse-start parse-end
