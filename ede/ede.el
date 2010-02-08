@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede.el,v 1.145 2010-02-08 22:10:46 zappo Exp $
+;; RCS: $Id: ede.el,v 1.146 2010-02-08 23:18:25 zappo Exp $
 (defconst ede-version "1.0pre7"
   "Current version of the Emacs EDE.")
 
@@ -386,8 +386,7 @@ mode.  nil means to toggle the mode."
       (setq ede-minor-mode
 	    (not (or (and (null arg) ede-minor-mode)
 		     (<= (prefix-numeric-value arg) 0))))
-      (if (and ede-minor-mode (not ede-constructing)
-	       (ede-directory-project-p default-directory t))
+      (if (and ede-minor-mode (not ede-constructing))
 	  (ede-initialize-state-current-buffer)
 	;; If we fail to have a project here, turn it back off.
 	(if (not (interactive-p))
@@ -399,20 +398,23 @@ Sets buffer local variables for EDE."
   (let* ((ROOT nil)
 	 (proj (ede-directory-get-open-project default-directory
 					       'ROOT)))
-    (when (not proj)
-      ;; @todo - this could be wasteful.
-      (setq proj (ede-load-project-file default-directory 'ROOT)))
+    (when (or proj ROOT
+	      (ede-directory-project-p default-directory t))
 
-    (setq ede-object (ede-buffer-object (current-buffer)
-					'ede-object-project))
+      (when (not proj)
+	;; @todo - this could be wasteful.
+	(setq proj (ede-load-project-file default-directory 'ROOT)))
 
-    (setq ede-object-root-project
-	  (or ROOT (ede-project-root ede-object-project)))
+      (setq ede-object (ede-buffer-object (current-buffer)
+					  'ede-object-project))
 
-    (if (and (not ede-object) ede-object-project)
-	(ede-auto-add-to-target))
+      (setq ede-object-root-project
+	    (or ROOT (ede-project-root ede-object-project)))
 
-    (ede-apply-target-options)))
+      (if (and (not ede-object) ede-object-project)
+	  (ede-auto-add-to-target))
+
+      (ede-apply-target-options))))
 
 (defun ede-reset-all-buffers (onoff)
   "Reset all the buffers due to change in EDE.
