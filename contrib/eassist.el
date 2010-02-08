@@ -21,7 +21,7 @@
 ;; MA 02111-1307 USA
 
 ;; Version: 0.9
-;; CEDET CVS Version: $Id: eassist.el,v 1.6 2010-01-30 15:31:50 zappo Exp $
+;; CEDET CVS Version: $Id: eassist.el,v 1.7 2010-02-08 23:29:59 zappo Exp $
 
 ;; Compatibility: Emacs 22 or 23, CEDET 1.0pre4
 
@@ -144,9 +144,11 @@ for example *.hpp <--> *.cpp."
           (or
            (loop for b in (mapcar (lambda (i) (concat base-name i)) count-ext)
 		 when (bufferp (get-buffer b)) return
-		 (if (get-buffer-window b)
-		     (switch-to-buffer-other-window b)
-		   (switch-to-buffer b)))
+ 		 (if (get-buffer-window b)
+ 		     (switch-to-buffer-other-window b)
+ 		   (if (get-buffer-window b t)
+ 		       (switch-to-buffer-other-frame b)
+ 		     (switch-to-buffer b))))
            (loop for c in (mapcar (lambda (count-ext) (concat base-path count-ext)) count-ext)
                  when (file-exists-p c) return (find-file c)))
         (message "There is no corresponding pair (header or body) file.")))
