@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj.el,v 1.66 2010-01-07 02:14:25 zappo Exp $
+;; RCS: $Id: ede-proj.el,v 1.67 2010-02-08 22:00:45 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -665,17 +665,8 @@ Optional argument FORCE will force items to be regenerated."
   (let ((root (or (ede-project-root this) this))
 	)
     (setq ede-projects (delq root ede-projects))
-    (ede-proj-load (ede-project-root-directory root))
+    (ede-load-project-file (ede-project-root-directory root))
     ))
-
-(defmethod project-rescan ((this ede-proj-target) readstream)
-  "Rescan target THIS from the read list READSTREAM."
-  (setq readstream (cdr (cdr readstream))) ;; constructor/name
-  (while readstream
-    (let ((tag (car readstream))
-	  (val (car (cdr readstream))))
-      (eieio-oset this tag val))
-    (setq readstream (cdr (cdr readstream)))))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("Project\\.ede$" . emacs-lisp-mode))
