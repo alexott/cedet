@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-auto.el,v 1.1 2010-02-08 21:57:17 zappo Exp $
+;; X-RCS: $Id: ede-auto.el,v 1.2 2010-02-08 22:27:39 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -77,7 +77,7 @@ type is required and the load function used.")
 			 :class-sym 'ede-proj-project)
    (ede-project-autoload "automake"
 			 :name "automake" :file 'project-am
-			 :proj-file 'project-am-projectfile-for-dir
+			 :proj-file "Makefile.am"
 			 :load-type 'project-am-load
 			 :class-sym 'project-am-makefile
 			 :new-p nil)
