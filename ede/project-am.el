@@ -5,7 +5,7 @@
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Version: 0.0.3
 ;; Keywords: project, make
-;; RCS: $Id: project-am.el,v 1.53 2010-02-05 03:37:31 zappo Exp $
+;; RCS: $Id: project-am.el,v 1.54 2010-02-08 23:48:48 zappo Exp $
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -49,6 +49,7 @@
 
 (require 'ede-make)
 (require 'makefile-edit)
+(require 'autoconf-edit)
 
 (eval-when-compile (require 'ede-speedbar "ede-speedbar.el"))
 (eval-when-compile (require 'compile)
@@ -429,45 +430,17 @@ Argument COMMAND is the command to use for compiling the target."
 
 ;;; Project loading and saving
 ;;
-(defun project-am-load (project &optional rootproj)
-  "Read an automakefile PROJECT into our data structure.
-Make sure that the tree down to our makefile is complete so that there
-is cohesion in the project.  Return the project file (or sub-project).
+(defun project-am-load (directory &optional rootproj)
+  "Read an automakefile DIRECTORY into our data structure.
 If a given set of projects has already been loaded, then do nothing
 but return the project for the directory given.
 Optional ROOTPROJ is the root EDE project."
-  ;; @TODO - rationalize this to the newer EDE way of doing things.
-  (setq project (expand-file-name project))
-  (let* ((ede-constructing t)
-	 (fn (project-am-find-topmost-level (file-name-as-directory project)))
-	 (amo nil)
-	 (trimmed (if (string-match (regexp-quote fn)
-				    project)
-		      (replace-match "" t t project)
-		    ""))
-	 (subdir nil))
-    (setq amo (object-assoc (expand-file-name "Makefile.am" fn)
-			    'file ede-projects))
-    (if amo
-	(error "Synchronous error in ede/project-am objects")
-      (let ((project-am-constructing t))
-	(setq amo (project-am-load-makefile fn))))
-    (if (not amo)
-	nil
-      ;; Now scan down from amo, and find the current directory
-      ;; from the PROJECT file.
-      (while (< 0 (length trimmed))
-	(if (string-match "\\([a-zA-Z0-9.-]+\\)/" trimmed)
-	    (setq subdir (match-string 0 trimmed)
-		  trimmed (replace-match "" t t trimmed))
-	  (error "Error scanning down path for project"))
-	(setq amo (project-am-subtree
-		   amo
-		   (expand-file-name "Makefile.am"
-				     (expand-file-name subdir fn)))
-	      fn (expand-file-name subdir fn)))
-      amo)
-    ))
+  (let* ((ede-constructiong t)
+	 (amo (object-assoc (expand-file-name "Makefile.am" directory)
+			    'file ede-projects)))
+    (when (not amo)
+      (setq amo (project-am-load-makefile directory)))
+    amo))
 
 (defun project-am-find-topmost-level (dir)
   "Find the topmost automakefile starting with DIR."
