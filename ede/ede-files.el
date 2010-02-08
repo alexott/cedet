@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-files.el,v 1.19 2010-01-07 02:13:33 zappo Exp $
+;; X-RCS: $Id: ede-files.el,v 1.20 2010-02-08 21:59:41 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -66,28 +66,6 @@ Optional FILE is the file to test.  It is ignored in preference
 of the anchor file for the project."
   (file-name-directory (expand-file-name (oref this file))))
 
-
-(defmethod ede-project-root ((this ede-project-autoload))
-  "If a project knows its root, return it here.
-Allows for one-project-object-for-a-tree type systems."
-  nil)
-
-(defmethod ede-project-root-directory ((this ede-project-autoload)
-				       &optional file)
-  "If a project knows its root, return it here.
-Allows for one-project-object-for-a-tree type systems.
-Optional FILE is the file to test.  If there is no FILE, use
-the current buffer."
-  (when (not file)
-    (setq file default-directory))
-  (when (slot-boundp this :proj-root)
-    (let ((rootfcn (oref this proj-root)))
-      (when rootfcn
-	(condition-case nil
-	    (funcall rootfcn file)
-	  (error 
-	   (funcall rootfcn)))
-	))))
 
 (defmethod ede--project-inode ((proj ede-project-placeholder))
   "Get the inode of the directory project PROJ is in."
@@ -369,11 +347,13 @@ Argument THIS is the project to convert PATH to."
 	    (substring fptf (match-end 0))
 	  (error "Cannot convert relativize path %s" fp))))))
 
-(defmethod ede-convert-path ((this ede-target) path)
+(defmethod ede-convert-path ((this ede-target) path &optional project)
   "Convert path in a standard way for a given project.
 Default to making it project relative.
-Argument THIS is the project to convert PATH to."
-  (let ((proj (ede-target-parent this)))
+Argument THIS is the project to convert PATH to.
+Optional PROJECT is the project that THIS belongs to.  Associating
+a target to a project is expensive, so using this can speed things up."
+  (let ((proj (or project (ede-target-parent this))))
     (if proj
 	(let ((p (ede-convert-path proj path))
 	      (lp (or (oref this path) "")))
