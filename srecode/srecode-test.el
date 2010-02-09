@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-test.el,v 1.11 2010-02-09 18:45:12 zappo Exp $
+;; X-RCS: $Id: srecode-test.el,v 1.12 2010-02-09 21:33:33 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -202,13 +202,13 @@ Assumes that the current buffer is the testing buffer."
    (srecode-utest-output
     "wrapinclude-around" :name "wrapinclude-around"
     :output ";; An includable  we could use.
-;; Intermediate Comments
+;; [VAR]Intermediate Comments
 ;; Text after a point inserter."
     )
    (srecode-utest-output
     "wrapinclude-around1" :name "wrapinclude-around"
     :output ";; An includable PENGUIN we could use.
-;; Intermediate Comments
+;; [VAR]Intermediate Comments
 ;; Text after a point inserter."
     :dict-entries '("COMMENT" "PENGUIN")
     )
