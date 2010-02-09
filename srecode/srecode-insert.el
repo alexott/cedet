@@ -1,9 +1,9 @@
 ;;; srecode-insert --- Insert srecode templates to an output stream.
 
-;;; Copyright (C) 2005, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: srecode-insert.el,v 1.31 2009-04-04 03:09:20 zappo Exp $
+;; X-RCS: $Id: srecode-insert.el,v 1.32 2010-02-09 18:43:43 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -87,7 +87,6 @@ DICT-ENTRIES are additional dictionary values to add."
 				    (car dict-entries)
 				    (car (cdr dict-entries)))
       (setq dict-entries (cdr (cdr dict-entries))))
-    ;;(srecode-resolve-arguments temp newdict)
     (srecode-insert-fcn temp newdict)
     ;; Don't put code here.  We need to return the end-mark
     ;; for this insertion step.
@@ -102,6 +101,10 @@ has set everything up already."
   ;; Perform the insertion.
   (let ((standard-output (or stream (current-buffer)))
 	(end-mark nil))
+    ;; Merge any template entries into the input dictionary.
+    (when (slot-boundp template 'dictionary)
+      (srecode-dictionary-merge dictionary (oref template dictionary)))
+
     (unless skipresolver
       ;; Make sure the semantic tags are up to date.
       (semantic-fetch-tags)
@@ -240,9 +243,6 @@ ST can be a class, or an object."
 
 (defmethod srecode-insert-method ((st srecode-template) dictionary)
   "Insert the srecoder template ST."
-  ;; Merge any template entries into the input dictionary.
-  (when (slot-boundp st 'dictionary)
-    (srecode-dictionary-merge dictionary (oref st dictionary)))
   ;; Do an insertion.
   (unwind-protect
       (let ((c (oref st code)))
@@ -753,9 +753,15 @@ Loops over the embedded CODE which was saved here during compilation.
 The template to insert is stored in SLOT."
   (let ((dicts (srecode-dictionary-lookup-name 
 		dictionary (oref sti :object-name))))
+    (when (not (listp dicts))
+      (error "Cannot insert section %S from non-section variable."
+	     (oref sti :object-name)))
     ;; If there is no section dictionary, then don't output anything
     ;; from this section.
     (while dicts
+      (when (not (srecode-dictionary-p (car dicts)))
+	(error "Cannot insert section %S from non-section variable."
+	       (oref sti :object-name)))
       (srecode-insert-subtemplate sti (car dicts) slot)
       (setq dicts (cdr dicts)))))
 
