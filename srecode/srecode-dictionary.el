@@ -1,9 +1,9 @@
 ;;; srecode-dictionary.el --- Dictionary code for the semantic recoder.
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-dictionary.el,v 1.11 2009-08-29 01:28:22 zappo Exp $
+;; X-RCS: $Id: srecode-dictionary.el,v 1.12 2010-02-09 21:21:11 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -320,7 +320,11 @@ inserted dictionaries."
 
 (defmethod srecode-dictionary-lookup-name ((dict srecode-dictionary)
 					   name)
-  "Return information about the current DICT's value for NAME."
+  "Return information about the current DICT's value for NAME.
+DICT is a dictionary, and NAME is a string that is the name of
+a symbol in the dictionary.
+This function derives values for some special NAMEs, such as `FIRST'
+and 'LAST'."
   (if (not (slot-boundp dict 'namehash))
       nil
     ;; Get the value of this name from the dictionary
@@ -420,10 +424,22 @@ inserted with a new editable field.")
 	   (start (point))
 	   (name (oref sti :object-name)))
 
-      (if (or (not dv) (string= dv ""))
-	  (insert name)
-	(insert dv))
+      (cond
+       ;; No default value.
+       ((not dv) (insert name))
+       ;; A compound value as the default?  Recurse.
+       ((srecode-dictionary-compound-value-child-p dv)
+	(srecode-compound-toString dv function dictionary))
+       ;; A string that is empty?  Use the name.
+       ((and (stringp dv) (string= dv ""))
+	(insert name))
+       ;; Insert strings
+       ((stringp dv) (insert dv))
+       ;; Some other issue
+       (t 
+	(error "Unknown default value for value %S" name)))
 
+      ;; Create a field from the inserter.
       (srecode-field name :name name
 		     :start start
 		     :end (point)
