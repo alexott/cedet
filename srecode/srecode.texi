@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: srecode.texi,v 1.18 2010-01-07 02:27:23 zappo Exp $
+@c $Id: srecode.texi,v 1.19 2010-02-09 15:59:03 zappo Exp $
 @c
 @c %**start of header
 @setfilename srecode.info
@@ -21,7 +21,7 @@ END-INFO-DIR-ENTRY
 @sp 10
 @center @titlefont{srecode}
 @vskip 0pt plus 1 fill
-Copyright @copyright{} 2007, 2008, 2009 Eric M. Ludlam
+Copyright @copyright{} 2007, 2008, 2009, 2010 Eric M. Ludlam
 @end titlepage
 
 @macro semantic{}
@@ -832,6 +832,7 @@ the @ref{Template Argument Dictionary Entries} section.
 * Compound Dictionary Values::	Complex dictionary values
 * Argument Resolution::	        Automatic template argument resolution
 * Creating new Arguments::      Create new arguments for use in templates
+* Querying a Dictionary::       Querying a dictionary for values.
 * Template Argument Dictionary Entries:: Catalog of arguments
 @end menu
 
@@ -933,7 +934,7 @@ of the compound value.  The @var{function} could be a fraction
 of some function symbol with a logical prefix excluded.
 @end defun
 
-This method is for dumping out tables during debugging.
+The next method is for dumping out tables during debugging.
 
 @defun srecode-dump cp &optional indent
 @anchor{srecode-dump}
@@ -1005,6 +1006,27 @@ new argument @code{:user} that can be used in a template.
 Your argument handler must take one argument @var{dict}, which is the
 dictionary to fill in.  Inside your function, you can do whatever you
 want, but adding dictionary values is the right thing.
+
+@node Querying a Dictionary
+@section Querying a Dictionary
+
+When creating a new argument, it may be useful to ask the dicitonary
+what entries are already set there, and conditionally create new
+entries based on those.
+
+In this way, a template author can get additional logical through more
+advanced arguments.
+
+@defun srecode-dictionary-lookup-name dict name
+@anchor{srecode-dictionary-lookup-name}
+Return information about the current @var{DICT}'s value for @var{NAME}.
+@var{DICT} is a dictionary, and @var{NAME} is a string that is the name of
+a symbol in the dictionary.
+This function derives values for some special NAMEs, such as @var{FIRST}
+and '@var{LAST}'.
+@end defun
+
+
 
 @node Template Argument Dictionary Entries
 @section Template Argument Dictionary Entries
