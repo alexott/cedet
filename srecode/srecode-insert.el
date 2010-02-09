@@ -3,7 +3,7 @@
 ;;; Copyright (C) 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: srecode-insert.el,v 1.32 2010-02-09 18:43:43 zappo Exp $
+;; X-RCS: $Id: srecode-insert.el,v 1.33 2010-02-09 21:32:27 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -243,6 +243,12 @@ ST can be a class, or an object."
 
 (defmethod srecode-insert-method ((st srecode-template) dictionary)
   "Insert the srecoder template ST."
+  ;; Merge any template entries into the input dictionary.
+  ;; This may happen twice since some templates arguments need
+  ;; these dictionary values earlier, but these values always
+  ;; need merging for template inserting in other templates.
+  (when (slot-boundp st 'dictionary)
+    (srecode-dictionary-merge dictionary (oref st dictionary)))
   ;; Do an insertion.
   (unwind-protect
       (let ((c (oref st code)))
