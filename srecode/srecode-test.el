@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-test.el,v 1.10 2010-02-09 15:59:37 zappo Exp $
+;; X-RCS: $Id: srecode-test.el,v 1.11 2010-02-09 18:45:12 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -89,7 +89,6 @@ Assumes that the current buffer is the testing buffer."
 	     (oref o name) major-mode))
 
     ;; RESOLVE AND INSERT
-    (srecode-resolve-arguments temp dict)
     (let ((entries (oref o dict-entries)))
       (while entries
 	(srecode-dictionary-set-value dict
@@ -127,8 +126,16 @@ Assumes that the current buffer is the testing buffer."
       ;; No value, make stuff up
       (setq nval1 "NO VALUE"))
 
-    (srecode-dictionary-set-value dict "UTESTARGXFORM" nval1)
-    ))
+    (srecode-dictionary-set-value dict "UTESTARGXFORM" nval1))
+
+  (let ((dicts (srecode-dictionary-lookup-name dict "UTLOOP")))
+    (dolist (D dicts)
+      ;; For each dictionary, lookup NAME, and transform into
+      ;; something in DICT instead.
+      (let ((sval (srecode-dictionary-lookup-name D "NAME")))
+	(srecode-dictionary-set-value dict (concat "FOO_" sval) sval)
+	)))
+  )
 
 ;;; TEST POINTS
 ;;
@@ -238,6 +245,9 @@ INSIDE SECTION: ARG HANDLER ONE")
     "custom-arg-w-arg upcase" :name "custom-arg-w-arg"
     :dict-entries '( "UTWA" "uppercaseme" )
     :output "Value of xformed UTWA: UPPERCASEME")
+   (srecode-utest-output
+    "custom-arg-w-subdict" :name "custom-arg-w-subdict"
+    :output "All items here: item1 item2 item3")
    )
   "Test point entries for the template output tests.")
 
