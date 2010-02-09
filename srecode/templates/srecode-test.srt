@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-test.srt,v 1.4 2010-02-09 15:56:38 zappo Exp $
+;; X-RCS: $Id: srecode-test.srt,v 1.5 2010-02-09 18:44:25 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -149,6 +149,17 @@ INSIDE SECTION: $#A$$UTESTVAR1$$/A$
 template custom-arg-w-arg :utestwitharg
 ----
 Value of xformed UTWA: $UTESTARGXFORM$
+----
+
+template custom-arg-w-subdict :utestwitharg
+sectiondictionary "UTLOOP"
+set NAME "item1"
+sectiondictionary "UTLOOP"
+set NAME "item2"
+sectiondictionary "UTLOOP"
+set NAME "item3"
+----
+All items here: $FOO_item1$ $FOO_item2$ $FOO_item3$
 ----
 
 ;; end
