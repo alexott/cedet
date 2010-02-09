@@ -1,9 +1,9 @@
 ;;; srecode-test.el --- SRecode Core Template tests.
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-test.el,v 1.9 2009-08-29 01:31:18 zappo Exp $
+;; X-RCS: $Id: srecode-test.el,v 1.10 2010-02-09 15:59:37 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -117,6 +117,19 @@ Assumes that the current buffer is the testing buffer."
   (srecode-dictionary-set-value dict "UTESTVAR2" "ARG HANDLER TWO")
   )
 
+(defun srecode-semantic-handle-:utestwitharg (dict)
+  "Add macros into the dictionary DICT based on other vars in DICT."
+  (let ((val1 (srecode-dictionary-lookup-name dict "UTWA"))
+	(nval1 nil))
+    ;; If there is a value, mutate it
+    (if (and val1 (stringp val1))
+	(setq nval1 (upcase val1))
+      ;; No value, make stuff up
+      (setq nval1 "NO VALUE"))
+
+    (srecode-dictionary-set-value dict "UTESTARGXFORM" nval1)
+    ))
+
 ;;; TEST POINTS
 ;;
 (defvar srecode-utest-output-entries
@@ -218,6 +231,13 @@ LAST                 |                 LAST")
     "custom-arg-handler" :name "custom-arg-handler"
     :output "OUTSIDE SECTION: ARG HANDLER ONE
 INSIDE SECTION: ARG HANDLER ONE")
+   (srecode-utest-output
+    "custom-arg-w-arg none" :name "custom-arg-w-arg"
+    :output "Value of xformed UTWA: NO VALUE")
+   (srecode-utest-output
+    "custom-arg-w-arg upcase" :name "custom-arg-w-arg"
+    :dict-entries '( "UTWA" "uppercaseme" )
+    :output "Value of xformed UTWA: UPPERCASEME")
    )
   "Test point entries for the template output tests.")
 
