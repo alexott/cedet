@@ -3,7 +3,7 @@
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-c.el,v 1.137 2010-01-29 03:10:21 zappo Exp $
+;; X-RCS: $Id: semantic-c.el,v 1.138 2010-02-13 20:25:00 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -341,7 +341,12 @@ Take the first interesting thing and convert it."
     (cond
      ((eq key 'number) (string-to-number value))
      ((eq key 'symbol) (semantic-c-evaluate-symbol-for-hideif value))
-     ((eq key 'string) value)
+     ((eq key 'string)
+      (if (string-match "^[0-9]+L?$" value)
+	  ;; If it matches a number expression, then
+	  ;; convert to a number.
+	  (string-to-number value)
+	value))
      (t (semantic-push-parser-warning
 	 (format "Unknown macro value. Token class = %s value = %s. " key value)
 	 0 0)
@@ -366,6 +371,14 @@ Pulls out the symbol list, and call `semantic-c-convert-spp-value-to-hideif-valu
 	  ;; Convert the macro to something we can return.
 	  (semantic-c-convert-spp-value-to-hideif-value spp-symbol stream))
 
+	 ;; Strings might need to be turned into numbers
+	 ((stringp stream)
+	  (if (string-match "^[0-9]+L?$" stream)
+	      ;; If it matches a number expression, then convert to a
+	      ;; number.
+	      (string-to-number stream)
+	    stream))
+
 	 ;; Just return the stream.  A user might have just stuck some
 	 ;; value in it directly.
 	 (t stream)
@@ -389,7 +402,7 @@ Pulls out the symbol list, and call `semantic-c-convert-spp-value-to-hideif-valu
 I think it just gets the value for some CPP variable VAR."
   (let ((val (semantic-c-evaluate-symbol-for-hideif
               (cond
-               ((stringp var)  var )
+               ((stringp var) var)
                ((symbolp var) (symbol-name var))
                (t "Unable to determine var")))))
     (if val
