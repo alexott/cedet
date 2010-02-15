@@ -285,12 +285,15 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
     ;; Calculate priority
     ;; 
     (if (not priority)
-	(let ((d (file-name-directory (buffer-file-name)))
-	      (sd (file-name-directory (locate-library "srecode")))
-	      (defaultdelta (if (eq mode 'default) 20 0)))
-	  (if (string= d sd)
-	      (setq priority (+ 80 defaultdelta))
-	    (setq priority (+ 30 defaultdelta)))
+	(let ((d (expand-file-name (file-name-directory (buffer-file-name))))
+	      (sd (expand-file-name (file-name-directory (locate-library "srecode"))))
+	      (defaultdelta (if (eq mode 'default) 0 20)))
+	  ;; @TODO :   WHEN INTEGRATING INTO EMACS
+	  ;;   The location of Emacs default templates needs to be specified
+	  ;;   here to also have a lower priority.
+	  (if (string-match (concat "^" sd) d)
+	      (setq priority (+ 30 defaultdelta))
+	    (setq priority (+ 80 defaultdelta)))
 	  (message "Templates %s has estimated priority of %d"
 		   (file-name-nondirectory (buffer-file-name))
 		   priority))
