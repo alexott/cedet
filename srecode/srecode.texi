@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: srecode.texi,v 1.19 2010-02-09 15:59:03 zappo Exp $
+@c $Id: srecode.texi,v 1.20 2010-02-15 14:21:31 zappo Exp $
 @c
 @c %**start of header
 @setfilename srecode.info
@@ -426,14 +426,14 @@ for this major mode.
 Multiple template files can use the same mode, and all those templates
 will be mixed together.
 @item priority
-The priority of a file indicates where it lies in the template search
-order.  System templates default to large priority numbers.  User
-templates default to small priority numbers.  You can specify the
-priority of your template to insert it anywhere in the template search
-list.
+The priority of a file is a number in a satring constant that
+indicates where it lies in the template search order.  System
+templates default to low priority numbers.  User templates default to
+high priority numbers.  You can specify the priority of your template
+to insert it anywhere in the template search list.
 
 If there are multiple templates with the same context and name, the
-template with the lowest priority number will be used.
+template with the highest priority number will be used.
 
 If multiple files have the same priority, then then sort order is
 unpredictable.  If no template names match, then it doesn't matter.
