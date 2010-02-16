@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: srecode.texi,v 1.20 2010-02-15 14:21:31 zappo Exp $
+@c $Id: srecode.texi,v 1.21 2010-02-16 02:05:40 zappo Exp $
 @c
 @c %**start of header
 @setfilename srecode.info
@@ -446,6 +446,23 @@ the generic template insertion case.
 
 The application with a particular name will access these templates
 from Lisp code.
+
+@item project
+If a template file contains templates, or template overrides specific
+to a set of files under a particular directory, then that template
+file can specify a ``project'' that it belongs to.
+
+Set the ``project'' special variable to a directory name.  Only files
+under that directory will be able to access the templates in that
+file.
+
+Any template file that has a project specified will get have a
+priority that is set between SRecode base templates, and user defined
+templates.
+
+Templates can be compiled via a project system, such as EDE.  EDE
+loaded templates will get a @var{project} set automatically.
+
 @end table
 
 If you want to insert the characters that belong to the variables
