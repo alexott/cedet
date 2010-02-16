@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-dictionary.el,v 1.12 2010-02-09 21:21:11 zappo Exp $
+;; X-RCS: $Id: srecode-dictionary.el,v 1.13 2010-02-16 02:05:06 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -203,11 +203,12 @@ TPL is an object representing a compiled template file."
   (when tpl
     (let ((tabs (oref tpl :tables)))
       (while tabs
-	(let ((vars (oref (car tabs) variables)))
-	  (while vars
-	    (srecode-dictionary-set-value
-	     dict (car (car vars)) (cdr (car vars)))
-	    (setq vars (cdr vars))))
+	(when (srecode-template-table-in-project-p (car tabs))
+	  (let ((vars (oref (car tabs) variables)))
+	    (while vars
+	      (srecode-dictionary-set-value
+	       dict (car (car vars)) (cdr (car vars)))
+	      (setq vars (cdr vars)))))
 	(setq tabs (cdr tabs))))))
 
 
