@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-test.el,v 1.12 2010-02-09 21:33:33 zappo Exp $
+;; X-RCS: $Id: srecode-test.el,v 1.13 2010-02-16 02:06:47 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -289,6 +289,52 @@ INSIDE SECTION: ARG HANDLER ONE")
        )
       )))
 
+;;; Project test
+;;
+;; Test that "project" specification works ok.
+
+(defun srecode-utest-project ()
+  "Test that project filtering works ok."
+  (interactive)
+  
+  (save-excursion
+    (let ((testbuff (find-file-noselect srecode-utest-testfile))
+	  (temp nil))
+
+      (set-buffer testbuff)
+
+      (srecode-load-tables-for-mode major-mode)
+      (srecode-load-tables-for-mode major-mode 'tests)
+
+      (if (not (srecode-table major-mode))
+	  (error "No template table found for mode %s" major-mode))
+  
+      (erase-buffer)
+
+
+      (setq temp (srecode-template-get-table (srecode-table)
+					     "test-project"
+					     "test"
+					     'tests
+					     ))
+
+      (when (not temp)
+	(error "Project template not found when in project"))
+
+      ;; Temporarily change the home of this file.
+      (let ((default-directory (expand-file-name "~/")))
+
+	(setq temp (srecode-template-get-table (srecode-table)
+					       "test-project"
+					       "test"
+					       'tests
+					       ))
+
+	(when temp
+	  (error "Project template found when not in project")))
+
+      ;;
+      )))
 
 
 (provide 'srecode-test)
