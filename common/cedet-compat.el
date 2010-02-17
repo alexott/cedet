@@ -1,12 +1,12 @@
 ;;; cedet-compat.el --- Compatibility across (X)Emacs versions
 
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;; Copyright (C) 2004, 2008, 2010 David Ponce
 
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Keywords: compatibility
-;; X-RCS: $Id: cedet-compat.el,v 1.6 2009-09-29 02:02:28 zappo Exp $
+;; X-RCS: $Id: cedet-compat.el,v 1.7 2010-02-17 01:56:41 zappo Exp $
 
 ;; This file is not part of Emacs
 
@@ -139,6 +139,22 @@ Copied verbatim from Emacs 23 CVS version subr.el."
 	      (cons (substring string start)
 		    list)))
     (nreverse list)))
+
+(when (not (fboundp 'find-coding-systems-region))
+;; XEmacs does not currently have `find-coding-systems-region'. Here
+;; is a cheap emulation, which seems sufficient for CEDET's purposes.
+;; This implementation will always return a list containing a single
+;; element.
+;;;###autoload
+(defun find-coding-systems-region (start end)
+  "Return a list of possible coding systems in the region between
+START and END.
+
+In this implementation, the returned list will always consist of one
+element only!"
+  (list (coding-system-name (detect-coding-region start end))))
+)
+
 
 ;;;###autoload
 (if (or (featurep 'xemacs) (inversion-test 'emacs "22.0"))
