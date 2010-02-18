@@ -3,7 +3,7 @@
 ;;; Copyright (C) 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: srecode-insert.el,v 1.33 2010-02-09 21:32:27 zappo Exp $
+;; X-RCS: $Id: srecode-insert.el,v 1.34 2010-02-18 22:45:09 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -867,39 +867,44 @@ this template instance."
     ;; If there was no template name, throw an error
     (if (not templatenamepart)
 	(error "Include macro %s needs a template name." (oref sti :object-name)))
-    ;; Find the template by name, and save it.
-    (if (or (not (slot-boundp sti 'includedtemplate))
-	    (not (oref sti includedtemplate)))
-	(let ((tmpl (srecode-template-get-table (srecode-table)
-						templatenamepart))
-	      (active (oref srecode-template active))
-	      ctxt)
+
+    ;; NOTE: We used to cache the template and not look it up a second time,
+    ;; but changes in the template tables can change which template is
+    ;; eventually discovered, so now we always lookup that template.
+
+    ;; Calculate and store the discovered template
+    (let ((tmpl (srecode-template-get-table (srecode-table)
+					    templatenamepart))
+	  (active (oref srecode-template active))
+	  ctxt)
+      (when (not tmpl)
+	;; If it isn't just available, scan back through
+	;; the active template stack, searching for a matching
+	;; context.
+	(while (and (not tmpl) active)
+	  (setq ctxt (oref (car active) context))
+	  (setq tmpl (srecode-template-get-table (srecode-table)
+						 templatenamepart
+						 ctxt))
 	  (when (not tmpl)
-	    ;; If it isn't just available, scan back through
-	    ;; the active template stack, searching for a matching
-	    ;; context.
-	    (while (and (not tmpl) active)
-	      (setq ctxt (oref (car active) context))
-	      (setq tmpl (srecode-template-get-table (srecode-table)
-						     templatenamepart
-						     ctxt))
-	      (when (not tmpl)
-		(when (slot-boundp (car active) 'table)
-		  (let ((app (oref (oref (car active) table) application)))
-		    (when app
-		      (setq tmpl (srecode-template-get-table 
-				  (srecode-table)
-				  templatenamepart
-				  ctxt app)))
-		    )))
-	      (setq active (cdr active)))
-	    (when (not tmpl)
-	      ;; If it wasn't in this context, look to see if it
-	      ;; defines it's own context
-	      (setq tmpl (srecode-template-get-table (srecode-table)
-						     templatenamepart)))
-	    )
-	  (oset sti :includedtemplate tmpl)))
+	    (when (slot-boundp (car active) 'table)
+	      (let ((app (oref (oref (car active) table) application)))
+		(when app
+		  (setq tmpl (srecode-template-get-table 
+			      (srecode-table)
+			      templatenamepart
+			      ctxt app)))
+		)))
+	  (setq active (cdr active)))
+	(when (not tmpl)
+	  ;; If it wasn't in this context, look to see if it
+	  ;; defines it's own context
+	  (setq tmpl (srecode-template-get-table (srecode-table)
+						 templatenamepart)))
+	)
+
+      ;; Store the found template into this object for later use.
+      (oset sti :includedtemplate tmpl))
 
     (if (not (oref sti includedtemplate))
 	;; @todo - Call into a debugger to help find the template in question.
