@@ -5,7 +5,7 @@
 
 ;; Created By: Paul Kinnucan
 ;; Maintainer: Eric Ludlam
-;; X-RCS: $Id: semantic-imenu.el,v 1.59 2009-09-29 01:30:44 zappo Exp $
+;; X-RCS: $Id: semantic-imenu.el,v 1.60 2010-02-18 02:26:25 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -534,7 +534,8 @@ in which case it concatenates them together."
 	((memq (semantic-tag-class (car taglist))
                semantic-imenu-expandable-tag-classes)
 	 (concat (semantic-format-tag-name
-                  (car taglist) semantic-which-function-use-color) "."
+                  (car taglist) nil semantic-which-function-use-color)
+		 (car semantic-type-relation-separator-character)
 		 ;; recurse until we no longer have a type
 		 ;; or any tags left.
 		 (semantic-default-which-function (cdr taglist))))
