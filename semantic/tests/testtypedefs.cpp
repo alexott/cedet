@@ -72,3 +72,23 @@ int main()
 
   return 0;
 }
+
+// ------------------
+// Example from Yupeng.
+
+typedef struct epd_info {
+     int a;
+} epd_info_t;
+
+static int epd_probe(struct platform_device *pdev)
+{
+     struct epd_info *db;
+     epd_info_t db1;
+
+     db.// -5-
+       ; // #5# ("a")
+     db1.// -6-
+       ;// #6# ("a")
+
+     return 1;
+}
