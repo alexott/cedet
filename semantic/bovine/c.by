@@ -7,7 +7,7 @@
 ;;         David Ponce <david@dponce.com>
 ;;         Klaus Berndl <klaus.berndl@sdm.de>
 ;;
-;; X-RCS: $Id: c.by,v 1.61 2010-02-19 02:33:53 zappo Exp $
+;; X-RCS: $Id: c.by,v 1.62 2010-02-19 02:57:10 zappo Exp $
 ;;
 ;; c.by is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -883,8 +883,8 @@ opt-restrict
 ;; then also some invalid C++-syntax is parsed but this is better than
 ;; not parsing valid syntax.
 varname
-  : opt-stars opt-restrict namespace-symbol opt-bits opt-array opt-assign
-    ( ,$3 ,$1 ,$4 ,$5 ,$6 )
+  : opt-stars opt-restrict namespace-symbol opt-bits opt-array 
+    ( ,$3 ,$1 ,$4 ,$5 )
   ;
 
 ;; I should store more in this def, but leave it simple for now.
@@ -907,10 +907,16 @@ variablearg-opt-name
     ( "" ,$1 nil nil nil )
   ;
 
+varname-opt-initializer
+  : semantic-list
+  | opt-assign
+  | ;; EMPTY
+  ;
+
 varnamelist
-  : opt-ref varname COMA varnamelist
-    ( ,(cons $2 $4) )
-  | opt-ref varname
+  : opt-ref varname varname-opt-initializer COMA varnamelist
+    ( ,(cons $2 $5) )
+  | opt-ref varname varname-opt-initializer
     ( $2 )
   ;
 
