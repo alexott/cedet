@@ -1,13 +1,13 @@
 ;;; c.by -- LL grammar for C/C++ language specification
 ;;
-;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 ;; Copyright (C) 2002, 2003 David Ponce
 ;;
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;;         David Ponce <david@dponce.com>
 ;;         Klaus Berndl <klaus.berndl@sdm.de>
 ;;
-;; X-RCS: $Id: c.by,v 1.60 2009-09-01 22:24:24 zappo Exp $
+;; X-RCS: $Id: c.by,v 1.61 2010-02-19 02:33:53 zappo Exp $
 ;;
 ;; c.by is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -1159,33 +1159,42 @@ expr-start
   | AMPERSAND
   ;
 
+expr-binop
+  : MINUS
+  | PLUS
+  | STAR
+  | DIVIDE
+  | AMPERSAND AMPERSAND
+  | AMPERSAND
+  | OR OR
+  | OR
+ ;; There are more.
+  ;
+
 ;; Use expression for parsing only.  Don't actually return anything
 ;; for now.  Hopefully we can fix this later.
 expression
+  : unaryexpression expr-binop unaryexpression
+    ( (identity start) (identity end) )
+  | unaryexpression
+    ( (identity start) (identity end) )
+  ;
+
+unaryexpression
   : number
-    ( (identity start) (identity end) )
   | multi-stage-dereference
-    ( (identity start) (identity end) )
   | NEW multi-stage-dereference
-    ( (identity start) (identity end) )
   | NEW builtintype-types semantic-list
-    ( (identity start) (identity end) )
  ;; Klaus Berndl: symbol -> namespace-symbol!
   | namespace-symbol
-    ( (identity start) (identity end) )
  ;; Klaus Berndl: C/C++ allows sequences of strings which are
  ;; concatenated by the precompiler to one string
   | string-seq
-    ( (identity start) (identity end) )
   | type-cast expression  ;; A cast to some other type
-    ( (identity start) (identity end) )
  ;; Casting the results of one expression to something else.
   | semantic-list expression
-    ( (identity start) (identity end) )
   | semantic-list
-    ( (identity start) (identity end) )
   | expr-start expression
-    ( (identity start) (identity end) )
   ;
 
 ;;; c.by ends here
