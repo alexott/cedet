@@ -1,9 +1,9 @@
 ;;; semantic-scope.el --- Analyzer Scope Calculations
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-scope.el,v 1.35 2009-12-28 14:19:28 zappo Exp $
+;; X-RCS: $Id: semantic-scope.el,v 1.36 2010-02-19 02:23:59 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -233,8 +233,11 @@ are from nesting data types."
 	   )
       ;; In case of arg lists or some-such, throw out non-types.
       (while (and stack (not (semantic-tag-of-class-p pparent 'type)))
-	(setq stack (cdr stack)
-	            pparent (car (cdr stack))))
+	(setq stack (cdr stack) pparent (car (cdr stack))))
+
+      ;; Remove duplicates
+      (while (member pparent scopetypes)
+	(setq stack (cdr stack) pparent (car (cdr stack))))
 
       ;; Step 1:
       ;;    Analyze the stack of tags we are nested in as parents.
@@ -606,7 +609,7 @@ whose tags can be searched when needed, OR it may be a scope object."
 	  ;; to do any of the stuff related to variables and what-not.
 	  (setq tmpscope (semantic-scope-cache "mini"))
 	  (let* ( ;; Step 1:
-		 (scopetypes (semantic-analyze-scoped-types (point)))
+		 (scopetypes (cons type (semantic-analyze-scoped-types (point))))
 		 (parents (semantic-analyze-scope-nested-tags (point) scopetypes))
 		 ;;(parentinherited (semantic-analyze-scope-lineage-tags parents scopetypes))
 		 (lscope nil)
