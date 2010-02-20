@@ -1,9 +1,9 @@
 ;;; semantic-texi.el --- Semantic details for Texinfo files
 
-;;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-texi.el,v 1.44 2009-09-11 19:04:29 zappo Exp $
+;; X-RCS: $Id: semantic-texi.el,v 1.45 2010-02-20 20:52:31 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -463,6 +463,7 @@ that start with that symbol."
 	semantic-imenu-bucketize-file nil
 	semantic-imenu-bucketize-type-members nil
 	senator-step-at-start-end-tag-classes '(section)
+	senator-step-at-tag-classes '(section)
 	semantic-stickyfunc-sticky-classes '(section)
 	)
   (local-set-key [(f9)] 'semantic-texi-update-doc-from-texi)
