@@ -1,9 +1,9 @@
 ;;; semantic-html.el --- Semantic details for html files
 
-;;; Copyright (C) 2004, 2005, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-html.el,v 1.13 2009-09-11 23:36:52 zappo Exp $
+;; X-RCS: $Id: semantic-html.el,v 1.14 2010-02-20 20:52:11 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -242,6 +242,7 @@ tag with greater section value than LEVEL is found."
 	semantic-imenu-bucketize-file nil
 	semantic-imenu-bucketize-type-members nil
 	senator-step-at-start-end-tag-classes '(section)
+	senator-step-at-tag-classes '(section)
 	semantic-stickyfunc-sticky-classes '(section)
 	)
   (semantic-install-function-overrides
