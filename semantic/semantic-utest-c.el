@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-utest-c.el,v 1.6 2010-01-23 02:37:41 zappo Exp $
+;; X-RCS: $Id: semantic-utest-c.el,v 1.7 2010-02-20 22:21:26 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -82,29 +82,32 @@ expand to."
   "Run parsing test for C which is full of conditional statements.
 Functions parsed with FAIL in the name will fail the tests, while
 those with PASS in the name will pass."
-  (dolist (fp semantic-utest-c-conditionals)
-    (let* ((sem (locate-library "semantic"))
-	   (sdir (file-name-directory sem))
-	   (semantic-lex-c-nested-namespace-ignore-second nil)
-	   (tags-actual
-	    (save-excursion
-	      (set-buffer (find-file-noselect (expand-file-name (concat "tests/" fp) sdir)))
-	      (semantic-clear-toplevel-cache)
-	      (semantic-fetch-tags)))
-	   )
-      (dolist (tag tags-actual)
-	(let ((name (semantic-tag-name tag)))
-	  (cond ((string-match "fail" name)
-		 (error "Found: >> %s << which should not have been found"
-			name))
-		((string-match "pass" name)
-		 nil) ;; that's ok
-		((and (semantic-tag-of-class-p tag 'variable)
-		      (semantic-tag-variable-constant-p tag))
-		 nil) ;; Our macro definitions
-		(t
-		 (error "Found: >> %s << which is not expected" name)))
-	  ))))
+  (if (featurep 'xemacs)
+      (message "\nNOTICE: XEmacs 21 doesn't support a recent enough version of hideif to run C contional tests.\n")
+
+    (dolist (fp semantic-utest-c-conditionals)
+      (let* ((sem (locate-library "semantic"))
+	     (sdir (file-name-directory sem))
+	     (semantic-lex-c-nested-namespace-ignore-second nil)
+	     (tags-actual
+	      (save-excursion
+		(set-buffer (find-file-noselect (expand-file-name (concat "tests/" fp) sdir)))
+		(semantic-clear-toplevel-cache)
+		(semantic-fetch-tags)))
+	     )
+	(dolist (tag tags-actual)
+	  (let ((name (semantic-tag-name tag)))
+	    (cond ((string-match "fail" name)
+		   (error "Found: >> %s << which should not have been found"
+			  name))
+		  ((string-match "pass" name)
+		   nil) ;; that's ok
+		  ((and (semantic-tag-of-class-p tag 'variable)
+			(semantic-tag-variable-constant-p tag))
+		   nil) ;; Our macro definitions
+		  (t
+		   (error "Found: >> %s << which is not expected" name)))
+	    )))))
   )
 
 (provide 'semantic-utest-c)
