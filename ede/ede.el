@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede.el,v 1.146 2010-02-08 23:18:25 zappo Exp $
+;; RCS: $Id: ede.el,v 1.147 2010-02-20 21:42:43 zappo Exp $
 (defconst ede-version "1.0pre7"
   "Current version of the Emacs EDE.")
 
@@ -993,7 +993,8 @@ that contains the target that becomes buffer's object."
     (if (not buffer) (setq buffer (current-buffer)))
     (set-buffer buffer)
     (setq ede-object nil)
-    (let* ((po (ede-current-project))
+    (let* ((localpo (ede-current-project))
+	   (po localpo)
 	   (top (ede-toplevel po)))
       (if po (setq ede-object (ede-find-target po buffer)))
       ;; If we get nothing, go with the backup plan of slowly
@@ -1005,8 +1006,15 @@ that contains the target that becomes buffer's object."
       (if (= (length ede-object) 1)
 	  (setq ede-object (car ede-object)))
       ;; Track the project, if needed.
-      (when (and projsym (symbolp projsym)) (set projsym po))
-      )
+      (when (and projsym (symbolp projsym))
+	(if ede-object
+	    ;; If we found a target, then PO is the
+	    ;; project to use.
+	    (set projsym po)
+	  ;; If there is no ede-object, then the projsym
+	  ;; is whichever part of the project is most local.
+	  (set projsym localpo))
+	))
     ;; Return our findings.
     ede-object))
 
