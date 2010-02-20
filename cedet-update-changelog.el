@@ -1,9 +1,9 @@
 ;;; cedet-update-changelog --- Utility for updating changelogs in CEDET.
 
-;;; Copyright (C) 2005, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2005, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: cedet-update-changelog.el,v 1.11 2009-08-30 16:35:42 zappo Exp $
+;; X-RCS: $Id: cedet-update-changelog.el,v 1.12 2010-02-20 22:22:48 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -67,6 +67,7 @@
   "Update the changelog in DIR."
   (interactive "DDir: ")
   (find-file (concat dir "ChangeLog"))
+  (erase-buffer)
   (goto-char (point-min))
   (sit-for 0)
   (message "Calling rcs2log on %s..."
