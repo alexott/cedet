@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project
-;; RCS: $Id: autoconf-edit.el,v 1.12 2009-09-14 02:33:08 zappo Exp $
+;; RCS: $Id: autoconf-edit.el,v 1.13 2010-02-21 01:42:12 safanaj Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -162,33 +162,35 @@ From the autoconf manual:
     (beginning-of-line)
     (looking-at (concat "\\(A[CM]_" macro "\\|" macro "\\)"))))
 
-(defun autoconf-find-last-macro (macro)
+(defun autoconf-find-last-macro (macro &optional ignore-bol)
   "Move to the last occurance of MACRO in FILE, and return that point.
 The last macro is usually the one in which we would like to insert more
 items such as CHECK_HEADERS."
-  (let ((op (point)))
+  (let ((op (point)) (atbol (if ignore-bol "" "^")))
     (goto-char (point-max))
-    (if (re-search-backward (concat "^" (regexp-quote macro) "\\s-*\\((\\|$\\)") nil t)
+    (if (re-search-backward (concat atbol (regexp-quote macro) "\\s-*\\((\\|$\\)") nil t)
 	(progn
-	  (beginning-of-line)
+	  (unless ignore-bol (beginning-of-line))
 	  (point))
       (goto-char op)
       nil)))
 
 (defun autoconf-parameter-strip (param)
   "Strip the parameter PARAM  of whitespace and misc characters."
-  (when (string-match "^\\s-*\\[?\\s-*" param)
+  ;; force greedy match for \n.
+  (when (string-match "\\`\n*\\s-*\\[?\\s-*" param)
     (setq param (substring param (match-end 0))))
-  (when (string-match "\\s-*\\]?\\s-*$" param)
+  (when (string-match "\\s-*\\]?\\s-*\\'" param)
     (setq param (substring param 0  (match-beginning 0))))
   param)
 
 ;;;###autoload
-(defun autoconf-parameters-for-macro (macro)
+(defun autoconf-parameters-for-macro (macro &optional ignore-bol ignore-case)
   "Retrieve the parameters to MACRO.
 Returns a list of the arguments passed into MACRO as strings."
+  (let ((case-fold-search ignore-case))
   (save-excursion
-    (when (autoconf-find-last-macro macro)
+    (when (autoconf-find-last-macro macro ignore-bol)
       (forward-sexp 1)
       (mapcar
        #'autoconf-parameter-strip
@@ -198,7 +200,7 @@ Returns a list of the arguments passed into MACRO as strings."
 		       (forward-sexp 1)
 		       (- (point) 1)))
 		(ans (buffer-substring-no-properties start end)))
-	   (split-string ans "," t)))))))
+	   (split-string ans "," t))))))))
 
 (defun autoconf-position-for-macro (macro)
   "Position the cursor where a new MACRO could be inserted.
