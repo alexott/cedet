@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-dictionary.el,v 1.13 2010-02-16 02:05:06 zappo Exp $
+;; X-RCS: $Id: srecode-dictionary.el,v 1.14 2010-02-22 02:41:07 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -228,9 +228,9 @@ TPL is an object representing a compiled template file."
   "In dictionary DICT, add a section dictionary for section macro NAME.
 Return the new dictionary.
 
-You can add several dictionaries to the same section macro.
-For each dictionary added to a macro, the block of codes in the
-template will be repeated.
+You can add several dictionaries to the same section entry.
+For each dictionary added to a variable, the block of codes in
+the template will be repeated.
 
 If optional argument SHOW-ONLY is non-nil, then don't add a new dictionarly
 if there is already one in place.  Also, don't add FIRST/LAST entries.
