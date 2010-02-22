@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: srecode.texi,v 1.21 2010-02-16 02:05:40 zappo Exp $
+@c $Id: srecode.texi,v 1.22 2010-02-22 02:55:24 zappo Exp $
 @c
 @c %**start of header
 @setfilename srecode.info
@@ -205,21 +205,25 @@ Templates are also sorted by application.  Each application has its
 own templates, and are kept seperate from the generic templates.
 
 @section Dictionary
-Dictionaries contain values associated with macro names.  A value can
-be one of three things; a string, a list of more dictionaries, or a
-special @code{srecode-dictionary-compound-value} object subclass.
+Dictionaries contain values associated with variable.  Variables are
+used in macros in a template.  Variables are what allows a generic
+template such as a function to be made specific, such as a function
+named foo.  The value of a variable can be one of three things; a
+string, a list of more dictionaries, or a special
+@code{srecode-dictionary-compound-value} object subclass.  See
+@ref{Variables} for more.
 
 @section Template Insertion
 The template insertion layer involves extensions to the basic template
-layer.  A wide range of custom macros are available for mixing derived
+layer.  A wide range of custom variables are available for mixing derived
 data as macros into the plain text of a template.
 
 In addition, templates can be declared with arguments.  These
 arguments represent predetermined sets of dictionary values, such as
 features of the current file name, user name, time, etc.
 
-Some arguments are major-mode specific, such as the @code{:el} or @code{:cpp}
-arguments.
+Some arguments are major-mode specific, such as the @code{:el} or
+@code{:cpp} arguments.
 @refill
 
 @section Template Insertion Context
@@ -236,13 +240,18 @@ state from @i{Semantic}.  @inforef{Top, Semantic Manual, semantic}.
 Commands that do a particular user task which involves also writing
 Emacs Lisp code.  Applications are at the top layer.  These
 applications have their own template files and logic needed to fill in
-dictionaries or position a cursor.
+dictionaries or position a cursor.  SRecode comes with an example
+@code{srecode-document} application for creating comments for Semantic
+tags.  The CEDET application @i{EDE} has a project type that is an
+@srecode{} application.
 
 @section Field Editing
 If the variable @code{srecode-insert-ask-variable-method} is set to
 'field, then variables that would normally ask a question, will
 instead create ``fields'' in the buffer.  A field-editing layer
-provides simple interaction through the fields.
+provides simple interaction through the fields.  Typing in a field
+will cause all variable locations that are the same to edit at the
+same time.  Pressing TAB on a field will move you to the next field.
 
 @node SRecode Minor Mode
 @chapter SRecode Minor Mode
@@ -261,6 +270,8 @@ The most important key is bound to @code{srecode-insert} which is
 Major keybindings are:
 
 @table @key
+@item C-c / /
+Insert a template whose name is typed into the minibuffer.
 @item C-c / <lower case letter>
 Reserved for direct binding of simple templates to keys using a
 keybinding command in the template file.
@@ -294,7 +305,7 @@ Use the dictionary macro name as the inserted value,
 and place a field there.  Matched fields change together.
 @end table
 
-@var{NOTE}: The field feature does not yet work with XEmacs.
+@b{NOTE}: The field feature does not yet work with XEmacs.
 @end defun
 
 Field editing mode is supported in newer versions of Emacs.  You
@@ -308,16 +319,39 @@ between editable fields in the template.
 Once the cursor moves out of the are inserted by the template, all the
 fields are cancelled.
 
-Of note: Some conveniences in templates, such as completion, or
+@b{NOTE}: Some conveniences in templates, such as completion, or
 character restrictins are lost when using field editing mode.
 
 @node Template Writing
 @chapter Template Writing
 @anchor{@code{SRecode-template-mode}}
 
-@code{SRecode-template-mode} is the major mode used for designing new
+@code{srecode-template-mode} is the major mode used for designing new
 templates.  @srecode{} files (Extension @file{.srt}) are made up of
 variable settings and template declarations.
+
+Here is an overview of the terminology you will need for the next few
+sections:
+
+@table @asis
+@item template file
+A file with a @file{.srt} extension which contains settings,
+variables, and templates.
+@item template
+One named entity which represents a block of text that will be
+inserted.  The text is compiled into a sequence of insertable
+entities.  The entities are string constants, and macros.
+@item macro
+A macro is a text sequence within template text that is replaced with
+some other value.
+@item dictionary
+A table of variable names and values.
+@item subdictionary
+A dictionary that is subordinate under another dictionary as a value
+to some variable.
+@item variable
+A variable is an entry in a dictionary which has a value.
+@end table
 
 @menu
 * Variables:: Creating special and regular variables.
@@ -341,6 +375,9 @@ A variable can be set like this:
 @example
 set VARNAME "some value"
 @end example
+
+Note that a VARIABLE is a name in a dictionary that can be used in a
+MACRO in a template.  The macro referernces some variable by name.
 
 @menu
 * String Values::       Basic Variable values
@@ -377,22 +414,23 @@ set NAME "this" "-mode"
 
 These two strings will be concatenated together.
 
-A more useful thing is to include dictionary macros and concatenate
-those into the string.  For example:
+A more useful thing is to include dictionary variables and concatenate
+those into the string.  Use the ``macro'' keyword to include the name
+of a variable.  This is like macros in a template.  For example:
 
 @example
 set NAME macro "MODE" "-mode"
 @end example
 
-will extract the value of the dictionary macro MODE and append
+will extract the value of the dictionary variable MODE and append
 ``-mode'' to the end.
 
 @node Section Show
 @subsection Section Show
 
 To set a variable to show a template section, use the @code{show}
-command.  Sections are blocks of a template wrapped in section
-macros.  If there is a section macro @var{NAME} it will be shown for each
+command.  Sections are blocks of a template wrapped in section macros.
+If there is a section macro using @var{NAME} it will be shown for each
 dictionary associated with the @var{NAME} macro.
 
 @example
@@ -414,19 +452,32 @@ templates are compiled, including:
 @table @code
 @item escape-start
 This is the character sequence that escapes from raw text to template
-macro names.
+macro names.  The ability to change the escape characters are key for
+enabling @srecode{} templates to work across many kinds of languages.
 @item escape-end
 This is the character sequence that escapes the end of a template
 macro name.
+
+Example:
+@example
+set escape_start "$"
+set escape_end "$"
+@end example
 @item mode
-This is the major mode, as a string with the Emacs Lisp symbol in it.
-All templates in this file will be installed into the template table
-for this major mode.
+This is the major mode, as a string with the full Emacs Lisp symbol in
+it.  All templates in this file will be installed into the template
+table for this major mode.
 
 Multiple template files can use the same mode, and all those templates
-will be mixed together.
+will be available in buffers of that mode.
+
+Example:
+@example
+set mode "emacs-lisp-mode"
+@end example
+
 @item priority
-The priority of a file is a number in a satring constant that
+The priority of a file is a number in a string constant that
 indicates where it lies in the template search order.  System
 templates default to low priority numbers.  User templates default to
 high priority numbers.  You can specify the priority of your template
@@ -438,6 +489,11 @@ template with the highest priority number will be used.
 If multiple files have the same priority, then then sort order is
 unpredictable.  If no template names match, then it doesn't matter.
 
+Example:
+@example
+set priority "35"
+@end example
+
 @item application
 If a template file contains templates only needed for a particular
 application, then specify an application.  Template files for an
@@ -446,6 +502,11 @@ the generic template insertion case.
 
 The application with a particular name will access these templates
 from Lisp code.
+
+Example:
+@example
+set application "document"
+@end example
 
 @item project
 If a template file contains templates, or template overrides specific
@@ -463,9 +524,14 @@ templates.
 Templates can be compiled via a project system, such as EDE.  EDE
 loaded templates will get a @var{project} set automatically.
 
+Example:
+@example
+set project "/tmp/testproject"
+@end example
+
 @end table
 
-If you want to insert the characters that belong to the variables
+If you need to insert the characters that belong to the variables
 @code{escape_start} or @code{escape_end}, then place those into
 a variable.  For example
 
@@ -499,7 +565,7 @@ A variable can also have a compound value.  This means the value of
 the variable is an @EIEIO{} object, which is a subclass of
 @code{srecode-dictionary-compound-value}.
 
-Compound variables can only be setup from Lisp code.  See
+New compound variables can only be setup from Lisp code.  See
 @ref{Compound Dictionary Values} for details on setting up compound
 variables from Lisp.
 
@@ -521,7 +587,7 @@ binding "a"
 @end example
 
 Templates are stored in a template table by name, and are inserted by
-the TEMPLATENAME provided.
+the @var{templatename} provided.
 
 The documentation string is optional.  This documentation string will
 be used to aid users in selecting which template they want to use.
@@ -553,8 +619,9 @@ An end line
 ----
 @end example
 
-In this example, the @var{NAME} macro gets the value ``foo'', but only
-while it is inside section A.  The outer scoped NAME will be empty.
+In this example, the @var{NAME} variable gets the value ``foo'', but
+only while it is inside section macro A.  The outer scoped NAME will
+be empty.
 
 This is particularly useful while using an include macro to pull in a
 second template.  In this way, you can pass values known from one
@@ -600,16 +667,16 @@ $/A$
 
 In this way, @var{NAME} can be set as a user posed question for
 @var{MODESYM} with ``-mode-syntax-table'' appended.  A simplified doc
-string can also be posed.
+string will also be inserted.
 
-Lastly, the A section contains more macro text which is inserted at
-the @code{^} point marker.
+Lastly, the @var{A} section contains more macro text which is inserted
+at the @code{^} point marker.
 
-By creating useful base macros for things like function or variable
-declarations, and recycling them in higher-order macros, an end user
-can override the basic declarator, and the higher order macros will
-then obey the new format, or perhaps even work in more than one major
-mode.
+By creating useful base templates for things like function or variable
+declarations, and recycling them in higher-order templates, an end
+user can override the basic declarator, and the higher order templates
+will then obey the new format, or perhaps even work in more than one
+major mode.
 
 @node Template Macros
 @subsection Template Macros
@@ -624,8 +691,8 @@ Thus, if you have the template code that looks like this:
 ;; Author: @{@{AUTHOR@}@}
 @end example
 
-Then the text between @{@{ and @}@} are substituted by the value of the
-macro AUTHOR.
+Then the text between @{@{ and @}@} are a macro, and substituted by
+the value of the variable @var{AUTHOR}.
 
 Macros can be specialized to be more than just a text string.  For
 example, the macro above could be augmented with an Emacs Lisp
@@ -635,8 +702,8 @@ function.
 ;; Author: @{@{AUTHOR:upcase@}@}
 @end example
 
-In this case, the Emacs Lisp function ``upcase'' will be called on the
-text value of the AUTHOR macro.
+In this case, the Emacs Lisp function @code{upcase} will be called on
+the text value of the @var{AUTHOR} variable.
 
 Macros can also be specialized to have different behaviors by using a
 prefix, non-alpha character or symbol.  For example:
@@ -655,10 +722,10 @@ Alternately, a macro could query the user during insertion:
    ) ;; End of @{@{NAME@}@}
 @end example
 
-the ``?'' symbol indicates that if the symbol NAME isn't in the macro
-dictionary, then the user should be queried for the NAME variable.
-If NAME appears again in the macro, the original value specified by
-the user will be inserted again.
+the ``?'' symbol indicates that if the symbol @var{NAME} isn't in the
+dictionary, then the user should be queried for the @var{NAME}
+variable.  If @var{NAME} appears again in the template, the original
+value specified by the user will be inserted again.
 
 If the text from a dictionary value is to be placed in column format,
 you can use the ``|'' symbol to indicate you want column control.  For
@@ -669,9 +736,9 @@ example:
    | @{@{|THIS:4@}@} | @{@{|THAT:4@}@} |@{@{/A@}@}
 @end example
 
-For each repeated section ``#A'' the dictionary values for THIS and
-THAT will be inserted and either trimmed to, or expanded to 4
-characters in width.
+For each repeated section ``#A'' the dictionary values for @var{THIS}
+and @var{THAT} will be inserted and either trimmed to, or expanded to
+4 characters in width.
 
 Macros that are prefixed with the ``#'' symbol denote a section.  A
 macro of the same name with a ``\\'' prefix denotes the end of that
@@ -705,8 +772,9 @@ expanding the template @code{defun}.  The @code{defun} template will
 be looked up in the template repository for the current mode, or in
 any inherited modes.
 
-Another way to include another template is with the includewrap
-insertion method, such as:
+Another way to include another template is with an include macro that
+will also wrap section text.  The includewrap insertion method looks
+like this:
 
 @example
 @{@{<FOO:defun@}@}Handy Text goes here@{@{/FOO@}@}
@@ -718,6 +786,14 @@ section text ``Handy Text goes here'' will be inserted at that point,
 and that location will not be saved as the cursor location.
 
 If there is no @{@{^@}@}, then the text will not be inserted.
+
+For both kinds of include macros, you may need to include a template
+from a different context.  You can use @code{:} separate the context
+from the name, like this:
+
+@example
+@{@{>FOO:declaration:function@}@}
+@end example
 
 @node Contexts
 @section Context
@@ -835,9 +911,9 @@ Look for these when creating your prompts.
 @node Dictionaries
 @chapter Dictionaries
 
-Dictionaries contain sets of macros.  The values associated with the
-macro names could be anything, but how it is handled is dependent on
-the type of macro being inserted.
+Dictionaries are a set of variables.  The values associated with the
+variable names could be anything, but how it is handled is dependent
+on the type of macro being inserted.
 
 Most of this chapter is for writing Lisp programs that use @srecode{}.
 If you only want to write template files, then you only need to read
@@ -872,7 +948,7 @@ When building an @srecode{} based application, you will need to setup
 your dictionary values yourself.  There are several utility functions
 for this.
 
-In the simplest form, you can assocate a string with a macro.
+In the simplest form, you can assocate a string with a variable.
 
 @defun srecode-dictionary-set-value dict name value
 @anchor{srecode-dictionary-set-value}
@@ -887,23 +963,22 @@ either be toggled as visible, or it can act as a loop.
 In dictionary @var{dict}, indicate that the section @var{name} should be exposed.
 @end defun
 
-@defun srecode-dictionary-add-section-dictionary dict name &optional show-only
+
+@defun srecode-dictionary-add-section-dictionary dict name show-only
 @anchor{srecode-dictionary-add-section-dictionary}
-In dictionary @var{dict}, add a section dictionary for section macro @var{name}.
+In dictionary @var{DICT}, add a section dictionary for section macro @var{NAME}.
 Return the new dictionary.
 
-You can add several dictionaries to the same section macro.
-For each dictionary added to a macro, the block of codes in the
-template will be repeated.
+You can add several dictionaries to the same section entry.
+For each dictionary added to a variable, the block of codes in
+the template will be repeated.
 
-If optional argument @var{show-only} is non-@code{nil}, then don't add
-a new dictionarly if there is already one in place.  Also, don't add
-@var{first}/@var{last} entries.  These entries are not needed when we
-are just showing a section.
-@refill
+If optional argument @var{SHOW-ONLY} is non-@code{nil}, then don't add a new dictionarly
+if there is already one in place.  Also, don't add @var{FIRST}/@var{LAST} entries.
+These entries are not needed when we are just showing a section.
 
 Each dictionary added will automatically get values for positional macros
-which will enable @var{sections} to be shown.
+which will enable @var{SECTIONS} to be enabled.
 
 @table @var
 @item first
@@ -923,10 +998,10 @@ inserted dictionaries.
 @node Compound Dictionary Values
 @section Compound Dictionary Values
 
-If you want to associate a non-string value with a dictionary macro,
-then you will need to use a compound value.  Compound dictionary
-values are derived using EIEIO from a base class for handling
-arbitrary data in a macro.
+If you want to associate a non-string value with a dictionary
+variable, then you will need to use a compound value.  Compound
+dictionary values are derived using @EIEIO{} from a base class for
+handling arbitrary data in a macro.
 
 @deffn Type srecode-dictionary-compound-value
 @anchor{srecode-dictionary-compound-value}
@@ -1031,7 +1106,7 @@ When creating a new argument, it may be useful to ask the dicitonary
 what entries are already set there, and conditionally create new
 entries based on those.
 
-In this way, a template author can get additional logical through more
+In this way, a template author can get additional logic through more
 advanced arguments.
 
 @defun srecode-dictionary-lookup-name dict name
@@ -1550,9 +1625,9 @@ Inside a body of code, such as a function or method body.
 
  - no conventions yet.
 
-@section Standard Macro Values
+@section Standard Dictionary Values
 
-For these macros to be useful, standard macro names should be used.
+For these variables to be useful, standard names should be used.
 These values could be provided directly from a Semantic tag, or by an
 application.
 
@@ -1568,13 +1643,13 @@ A datatype name for a variable, or the return value of a function.
 If there is some documentation associated with the item, then DOC
 should contain the value.  (Optional)
 @item ARGS
-The ARGS macro defines a section for 0 or more arguments to a function
+The ARGS variable defines a section for 0 or more arguments to a function
 or method.  Each entry in ARGS will follow the rest of these naming
 conventions, such as for NAME and TYPE.
 @end table
 
 For templates used by @code{srecode-semantic-insert-tag}, there is
-also the following useful macro values.
+also the following useful dictionary values.
 
 @table @var
 @item TAG
