@@ -1,9 +1,9 @@
 ;;; srecode-fields.el --- Handling type-in fields in a buffer.
 ;;
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-fields.el,v 1.11 2010-02-03 23:39:25 scymtym Exp $
+;; X-RCS: $Id: srecode-fields.el,v 1.12 2010-02-22 00:48:23 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -35,6 +35,8 @@
 ;;
 ;; Each field has 2 overlays.  The second overlay allows control in
 ;; the character just after the field, but does not highlight it.
+
+;; @TODO - Cancel an old field array if a new one is about to be created!
 
 ;; Keep this library independent of SRecode proper.
 (require 'eieio)
@@ -95,7 +97,7 @@ Once an insertion set is done, these fields will be activated.")
   "*Face used to specify editable fields from a template."
   :group 'semantic-faces)
 
-(defcustom srecode-fields-exit-confirmation t
+(defcustom srecode-fields-exit-confirmation nil
   "Ask for confirmation before leaving field editing mode."
   :group 'srecode
   :type  'boolean)
