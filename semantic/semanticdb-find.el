@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb-find.el,v 1.85 2010-01-07 02:24:28 zappo Exp $
+;; X-RCS: $Id: semanticdb-find.el,v 1.86 2010-02-22 00:55:54 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -754,6 +754,19 @@ for details on how this list is derived."
     (message "Search of tags took %.2f seconds."
 	     (semantic-elapsed-time start end))
 
+    (data-debug-insert-stuff-list p "*")))
+
+;;;###autoload
+(defun semanticdb-test-current-database-list ()
+  "Call and output results of `semanticdb-current-database-list'.
+Uses the `default-directory' to derive results."
+  (interactive)
+  (require 'data-debug)
+  (let ((start (current-time))
+	(p (semanticdb-current-database-list))
+	)
+    (data-debug-new-buffer "*SEMANTICDB Current Database List*")
+    
     (data-debug-insert-stuff-list p "*")))
 
 (defun semanticdb-find-adebug-lost-includes ()
