@@ -3,7 +3,7 @@
 ;;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-texi.el,v 1.45 2010-02-20 20:52:31 zappo Exp $
+;; X-RCS: $Id: semantic-texi.el,v 1.46 2010-02-22 02:39:40 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -583,12 +583,16 @@ If TAG is nil, determine a tag based on the current position."
     ;; Test for doc string
     (unless docstring
       (error "Could not find documentation for %s" (semantic-tag-name tag)))
+
+    (require 'srecode)
+    (require 'srecode-texi)
+
     ;; If we have a string, do the replacement.
     (delete-region (semantic-tag-start tag)
 		   (semantic-tag-end tag))
     ;; Use useful functions from the docaument library.
-    (require 'document)
-    (document-insert-texinfo doctag (semantic-tag-buffer doctag))
+    (srecode-texi-insert-tag-as-doc doctag)
+    ;(semantic-insert-foreign-tag doctag)
     ))
 
 (defun semantic-texi-update-doc-from-source (&optional tag)
@@ -623,11 +627,15 @@ The current buffer must include TAG."
 	(set-buffer docbuff)
       (switch-to-buffer docbuff))
     (goto-char (semantic-tag-start doctag))
+
+    (require 'srecode)
+    (require 'srecode-texi)
+
     (delete-region (semantic-tag-start doctag)
 		   (semantic-tag-end doctag))
     ;; Use useful functions from the document library.
-    (require 'document)
-    (document-insert-texinfo tag (semantic-tag-buffer tag))
+    (srecode-texi-insert-tag-as-doc doctag)
+    ;(semantic-insert-foreign-tag doctag)
     ))
 
 (defun semantic-texi-update-doc (&optional tag)
