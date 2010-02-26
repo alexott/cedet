@@ -1,10 +1,10 @@
 ;;; semantic-ia.el --- Interactive Analysis functions
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-ia.el,v 1.33 2010-01-07 02:41:25 zappo Exp $
+;; X-RCS: $Id: semantic-ia.el,v 1.34 2010-02-26 01:58:36 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -77,6 +77,17 @@
     (cond ((eq tt 'function)
 	   (insert "("))
 	  (t nil))))
+
+(defalias 'semantic-ia-get-completions 'semantic-ia-get-completions-deprecated
+  "`Semantic-ia-get-completions' is obsolete.
+Use `semantic-analyze-possible-completions' instead.")
+
+(defun semantic-ia-get-completions-deprecated (context point)
+  "A function to help transition away from `semantic-ia-get-completions'.
+Return completions based on CONTEXT at POINT.
+You should not use this, nor the aliased version.
+Use `semantic-analyze-possible-completions' instead."
+    (semantic-analyze-possible-completions context))
 
 ;;;###autoload
 (defun semantic-ia-complete-symbol (point)
