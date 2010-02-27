@@ -33,10 +33,21 @@ namespace moose {
     /**
      * @}
      */
+
   private:
     int fVal;
   };
 
+}
+
+namespace togglemoose {
+
+  class MyOtherClass {
+  public:
+    int testToggle1();
+    int testToggle2();
+    int testToggle3();
+  };
 }
 
 namespace deer {
