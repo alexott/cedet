@@ -6,7 +6,7 @@
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Author: David Ponce <david@dponce.com>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-util-modes.el,v 1.74 2010-02-27 03:58:32 zappo Exp $
+;; X-RCS: $Id: semantic-util-modes.el,v 1.75 2010-02-27 13:13:38 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -958,6 +958,13 @@ minor mode is enabled."
   "List of tag classes which sticky func will display in the header line.")
 (make-variable-buffer-local 'semantic-stickyfunc-sticky-classes)
 
+(defcustom semantic-stickyfunc-show-only-functions-p nil
+  "Non-nil means don't show lines that aren't part of a tag.
+If this is nil, then comments or other text between tags that is
+1 line above the top of the current window will be shown."
+  :group 'semantic
+  :type 'boolean)
+
 (defun semantic-stickyfunc-tag-to-stick ()
   "Return the tag to stick at the current point."
   (let ((tags (nreverse (semantic-find-tag-by-overlay (point)))))
@@ -986,11 +993,11 @@ If there is no function, disable the header line."
 		;; TAG is nil if there was nothing of the apropriate type there.
 		(if (not tag)
 		    ;; Set it to be the text under the header line
-		    (if noshow
-			""
-		      (buffer-substring (point-at-bol) (point-at-eol))
-		      )
-		  ;; Get it
+		    (if noshow ""
+		      (if semantic-stickyfunc-show-only-functions-p ""
+			(buffer-substring (point-at-bol) (point-at-eol))
+			))
+		  ;; Go get the first line of this tag.
 		  (goto-char (semantic-tag-start tag))
 		  ;; Klaus Berndl <klaus.berndl@sdm.de>:
 		  ;; goto the tag name; this is especially needed for languages
