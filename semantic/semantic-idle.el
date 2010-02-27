@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.61 2010-02-05 02:58:04 zappo Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.62 2010-02-27 03:58:03 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -718,6 +718,11 @@ minor mode is enabled.")
 ;;; SUMMARY MODE
 ;;
 ;; A mode similar to eldoc using semantic
+(defcustom semantic-idle-truncate-long-summaries t
+  "Truncate summaries that are too long to fit in the minibuffer.
+This can prevent minibuffer resizing in idle time."
+  :group 'semantic
+  :type 'boolean)
 
 (defcustom semantic-idle-summary-function
   'semantic-format-tag-summarize-with-file
@@ -838,6 +843,14 @@ current tag to display information."
           (let ((w (1- (window-width (minibuffer-window)))))
             (if (> (length str) w)
                 (setq str (substring str 0 w)))))
+	;; I borrowed some bits from eldoc to shorten the
+	;; message.
+	(when semantic-idle-truncate-long-summaries
+	  (let ((ea-width (1- (window-width (minibuffer-window))))
+		(strlen (length str)))
+	    (when (> strlen ea-width)
+	      (setq str (substring str 0 ea-width)))))
+	;; Display it
         (eldoc-message str))))
 
 (semantic-alias-obsolete 'semantic-summary-mode
@@ -943,10 +956,16 @@ Call `semantic-symref-hits-in-region' to identify local references."
 ;; This mode uses tooltips to display a (hopefully) short list of possible
 ;; completions available for the text under point.  It provides
 ;; NO provision for actually filling in the values from those completions.
+(defun semantic-idle-completions-end-of-symbol-p ()
+  "Return non-nil if the cursor is at the END of a symbol.
+If the cursor is in the middle of a symbol, then we shouldn't be
+doing fancy completions."
+  (not (looking-at "\\w\\|\\s_")))
 
 (defun semantic-idle-completion-list-default ()
   "Calculate and display a list of completions."
-  (when (semantic-idle-summary-useful-context-p)
+  (when (and (semantic-idle-summary-useful-context-p)
+	     (semantic-idle-completions-end-of-symbol-p))
     ;; This mode can be fragile.  Ignore problems.
     ;; If something doesn't do what you expect, run
     ;; the below command by hand instead.
