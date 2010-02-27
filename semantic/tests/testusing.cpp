@@ -51,6 +51,23 @@ namespace panda {
   }
 }
 
+namespace togglemoose {
+  
+  MyOtherClass::testToggle1() { //^1^
+    // Impl for testToggle1
+  }
+}
+
+togglemoose::MyOtherClass::testToggle2() { //^3^
+  // Impl for testToggle2
+}
+
+using togglemoose;
+
+MyOtherClass::testToggle3() { //^3^
+  // Impl for testToggle3
+}
+
 // Local using statements and aliased types
 // Code from David Engster
 
