@@ -5,7 +5,7 @@
 ;; Copyright (C) 1995,1996,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio.el,v 1.193 2010-01-07 02:22:21 zappo Exp $
+;; RCS: $Id: eieio.el,v 1.194 2010-03-03 01:34:03 scymtym Exp $
 ;; Keywords: OO, lisp
 
 (defvar eieio-version "1.2"
@@ -37,6 +37,11 @@
 ;; Emacs running environment.
 ;;
 ;; See eieio.texi for complete documentation on using this package.
+;;
+;; Note: the implementation of the c3 algorithm is based on:
+;;   Kim Barrett et al.: A Monotonic Superclass Linearization for Dylan
+;;   Retrieved from:
+;;   http://192.220.96.201/dylan/linearization-oopsla96.html
 
 ;; There is funny stuff going on with typep and deftype.  This
 ;; is the only way I seem to be able to make this stuff load properly.
@@ -391,7 +396,7 @@ It creates an autoload function for CNAME's constructor."
 
 	  ;; Does our parent exist?
 	  (if (not (class-p SC))
-	    
+
 	      ;; Create a symbol for this parent, and then store this
 	      ;; parent on that symbol.
 	      (let ((sym (intern (symbol-name SC) eieio-defclass-autoload-map)))
@@ -521,7 +526,7 @@ OPTIONS-AND-DOC as the toplevel documentation for this class."
 		  (cons cname (aref (class-v 'eieio-default-superclass) class-children))))
 	;; save parent in child
 	(aset newc class-parent (list eieio-default-superclass))))
-    
+
     ;; turn this into a useable self-pointing symbol
     (set cname cname)
 
@@ -539,7 +544,7 @@ OPTIONS-AND-DOC as the toplevel documentation for this class."
 
     ;; Make sure the method invocation order  is a valid value.
     (let ((io (class-option-assoc options :method-invocation-order)))
-      (when (and io (not (member io '(:depth-first :breadth-first))))
+      (when (and io (not (member io '(:depth-first :breadth-first :c3))))
 	(error "Method invocation order %s is not allowed" io)
 	))
 
@@ -552,7 +557,7 @@ OPTIONS-AND-DOC as the toplevel documentation for this class."
 		  cname)
 	       (and (eieio-object-p obj)
 		    (object-of-class-p obj ,cname))))
-    
+
       ;; When using typep, (typep OBJ 'myclass) returns t for objects which
       ;; are subclasses of myclass.  For our predicates, however, it is
       ;; important for EIEIO to be backwards compatible, where
@@ -639,7 +644,7 @@ OPTIONS-AND-DOC as the toplevel documentation for this class."
 	;; Label is nil, or a string
 	(if (not (or (null label) (stringp label)))
 	    (signal 'invalid-slot-type (list ':label label)))
-	
+
 	;; Is there an initarg, but allocation of class?
 	(if (and initarg (eq alloc :class))
 	    (message "Class allocated slots do not need :initarg"))
@@ -927,7 +932,7 @@ if default value is nil."
 			    (union (car where-groups)
 				   (if (listp custg) custg (list custg))))))
 		;;  End PLN
-		  
+
 		;;  PLN Mon Jun 25 22:44:34 2007 : If a new cust is
 		;;  set, simply replaces the old one.
 		(when cust
@@ -1206,14 +1211,14 @@ IMPL is the symbol holding the method implementation."
 	(if (not (eieio-object-p (car local-args)))
 	    ;; Not an object.  Just signal.
 	    (signal 'no-method-definition (list ,(list 'quote method) local-args))
-	
+
 	  ;; We do have an object.  Make sure it is the right type.
 	  (if ,(if (eq class eieio-default-superclass)
 		   nil ; default superclass means just an obj.  Already asked.
 		 `(not (child-of-class-p (aref (car local-args) object-class)
 					 ,(list 'quote class)))
 		 )
-	      
+
 	      ;; If not the right kind of object, call no applicable
 	      (apply 'no-applicable-method (car local-args)
 		     ,(list 'quote method) local-args)
@@ -1592,7 +1597,7 @@ variable name of the same name as the slot."
 ;;
 (defmacro object-class-fast (obj) "Return the class struct defining OBJ with no check."
   `(aref ,obj object-class))
-  
+
 (defun class-name (class) "Return a Lisp like symbol name for CLASS."
   (if (not (class-p class)) (signal 'wrong-type-argument (list 'class-p class)))
   ;; I think this is supposed to return a symbol, but to me CLASS is a symbol,
@@ -1644,6 +1649,99 @@ The CLOS function `class-direct-superclasses' is aliased to this function."
 The CLOS function `class-direct-subclasses' is aliased to this function."
   (if (not (class-p class)) (signal 'wrong-type-argument (list 'class-p class)))
   (class-children-fast class))
+
+(defun eieio-c3-candidate (class remaining-inputs)
+  "Returns CLASS if it can go in the result now, otherwise nil"
+  ;; Ensure CLASS is not in any position but the first in any of the
+  ;; element lists of REMAINING-INPUTS.
+  (and (not (some (lambda (l) (member class (rest l)))
+		  remaining-inputs))
+       class))
+
+(defun eieio-c3-merge-lists (reversed-partial-result remaining-inputs)
+  "Merge REVERSED-PARTIAL-RESULT REMAINING-INPUTS in a consistent order, if possible.
+If a consistent order does not exist, signal an error."
+  (if (every #'null remaining-inputs)
+      ;; If all remaining inputs are empty lists, we are done.
+      (nreverse reversed-partial-result)
+    ;; Otherwise, we try to find the next element of the result. This
+    ;; is achieved by considering the first element of each
+    ;; (non-empty) input list and accepting a candidate if it is
+    ;; consistent with the rests of the input lists.
+    (let ((next (some (lambda (c) (eieio-c3-candidate c remaining-inputs))
+		      (mapcar #'first
+			      (remove-if #'null remaining-inputs)))))
+      (if next
+	  ;; The graph is consistent so far, add NEXT to result and
+	  ;; merge input lists, dropping NEXT from their heads where
+	  ;; applicable.
+	  (eieio-c3-merge-lists
+	   (cons next reversed-partial-result)
+	   (mapcar (lambda (l) (if (eq (first l) next) (rest l) l))
+		   remaining-inputs))
+	;; The graph is inconsistent, give up
+	(signal 'inconsistent-class-hierarchy (list remaining-inputs)))))
+  )
+
+(defun eieio-class-precedence-dfs (class)
+  "Return all parents of CLASS in depth-first order."
+  (let ((parents (class-parents-fast class)))
+    (or (remove-duplicates
+	 (apply #'append
+		(list class)
+		(or
+		 (mapcar
+		  (lambda (parent)
+		    (cons parent (eieio-class-precedence-dfs parent)))
+		  parents)
+		 '((eieio-default-superclass))))
+	 :from-end t)))
+  )
+
+(defun eieio-class-precedence-bfs (class)
+  "Return all parents of CLASS in breadth-first order."
+  (let ((result)
+	(queue (or (class-parents-fast class)
+		   '(eieio-default-superclass))))
+    (while queue
+      (let ((head (pop queue)))
+	(unless (member head result)
+	  (push head result)
+	  (unless (eq head 'eieio-default-superclass)
+	    (setq queue (append queue (or (class-parents-fast head)
+					  '(eieio-default-superclass))))))))
+    (cons class (nreverse result)))
+  )
+
+(defun eieio-class-precedence-c3 (class)
+  "Return all parents of CLASS in c3 order."
+  (let ((parents (class-parents-fast class)))
+    (eieio-c3-merge-lists
+     (list class)
+     (append
+      (or
+       (mapcar
+	(lambda (x)
+	  (eieio-class-precedence-c3 x))
+	parents)
+       '((eieio-default-superclass)))
+      (list parents))))
+  )
+
+(defun class-precedence-list (class)
+  "Return (transitively closed) list of parents of CLASS.
+The order, in which the parents are returned depends on the
+method invocation orders of the involved classes."
+  (if (eq class 'eieio-default-superclass)
+      nil
+    (case (class-method-invocation-order class)
+      (:depth-first
+       (eieio-class-precedence-dfs class))
+      (:breadth-first
+       (eieio-class-precedence-bfs class))
+      (:c3
+       (eieio-class-precedence-c3 class))))
+  )
 
 ;; Official CLOS functions.
 (defalias 'class-direct-superclasses 'class-parents)
@@ -1953,7 +2051,7 @@ This should only be called from a generic function."
 	    )
       (setq lambdas (append tlambdas lambdas)
 	    keys (append (make-list (length tlambdas) method-after) keys))
-      
+
       ;; :primary methods
       (setq tlambdas
 	    (or (and mclass (eieio-generic-form method method-primary mclass))
@@ -2092,7 +2190,7 @@ for this common case to improve performance."
 
 	(run-hook-with-args 'eieio-pre-method-execution-hooks
 			    lambdas)
-	
+
 	(setq lastval (apply (car lambdas) newargs))
 	(setq rval lastval
 	      rvalever t)
@@ -2110,40 +2208,27 @@ CLASS is the starting class to search from in the method tree.
 If CLASS is nil, then an empty list of methods should be returned."
   ;; Note: eieiomt - the MT means MethodTree.  See more comments below
   ;; for the rest of the eieiomt methods.
-  (let ((lambdas nil)
-	(mclass (list class)))
-    (while mclass
-      ;; Note: a nil can show up in the class list once we start
-      ;;       searching through the method tree.
-      (when (car mclass)
-	;; lookup the form to use for the PRIMARY object for the next level
-	(let ((tmpl (eieio-generic-form method key (car mclass))))
-	  (when (or (not lambdas)
-		    ;; This prevents duplicates coming out of the
-		    ;; class method optimizer.  Perhaps we should
-		    ;; just not optimize before/afters?
-		    (not (member tmpl lambdas)))
-	    (setq lambdas (cons tmpl lambdas))
-	    (if (null (car lambdas))
-		(setq lambdas (cdr lambdas))))))
-      ;; Add new classes to mclass.  Since our input might not be a class
-      ;; protect against that.
-      (if (car mclass)
-	  ;; If there is a class, append any methods it may provide
-	  ;; to the remainder of the class list.
-	  (let ((io (class-method-invocation-order (car mclass))))
-	    (if (eq io :depth-first)
-		;; Depth first.
-		(setq mclass (append (eieiomt-next (car mclass)) (cdr mclass)))
-	      ;; Breadth first.
-	      (setq mclass (append (cdr mclass) (eieiomt-next (car mclass)))))
-	    )
-	;; Advance to next entry in mclass if it is nil.
-	(setq mclass (cdr mclass)))
-      )
+
+  ;; Collect lambda expressions stored for the class and its parent
+  ;; classes.
+  (let (lambdas)
+    (dolist (ancestor (class-precedence-list class))
+      ;; Lookup the form to use for the PRIMARY object for the next level
+      (let ((tmpl (eieio-generic-form method key ancestor)))
+	(when (and tmpl
+		   (or (not lambdas)
+		       ;; This prevents duplicates coming out of the
+		       ;; class method optimizer.  Perhaps we should
+		       ;; just not optimize before/afters?
+		       (not (member tmpl lambdas))))
+	  (push tmpl lambdas))))
+
+    ;; Return collected lambda. For :after methods, return in current
+    ;; order (most general class last); Otherwise, reverse order.
     (if (eq key method-after)
 	lambdas
-      (nreverse lambdas))))
+      (nreverse lambdas)))
+  )
 
 (defun next-method-p ()
   "Non-nil if there is a next method.
@@ -2267,32 +2352,19 @@ function performs no type checking!"
 
 (defun eieiomt-sym-optimize (s)
   "Find the next class above S which has a function body for the optimizer."
-  ;; (message "Optimizing %S" s)
-  (let* ((es (intern-soft (symbol-name s))) ;external symbol of class
-	 (io (class-method-invocation-order es))
-	 (ov nil)
-	 (cont t))
-    ;; This converts ES from a single symbol to a list of parent classes.
-    (setq es (eieiomt-next es))
-    ;; Loop over ES, then its children individually.
-    ;; We can have multiple hits only at one level of the parent tree.
-    (while (and es cont)
-      (setq ov (intern-soft (symbol-name (car es)) eieiomt-optimizing-obarray))
-      (if (fboundp ov)
-	  (progn
-	    (set s ov)			;store ov as our next symbol
-	    (setq cont nil))
-	(if (eq io :depth-first)
-	    ;; Pre-pend the subclasses of (car es) so we get
-	    ;; DEPTH FIRST optimization.
-	    (setq es (append (eieiomt-next (car es)) (cdr es)))
-	  ;; Else, we are breadth first.
-	  ;; (message "Class %s is breadth first" es)
-	  (setq es (append (cdr es) (eieiomt-next (car es))))
-	  )))
-    ;; If there is no nearest call, then set our value to nil
-    (if (not es) (set s nil))
-    ))
+  ;; Set the value to nil in case there is no nearest cell.
+  (set s nil)
+  ;; Find the nearest cell that has a function body. If we find one,
+  ;; we replace the nil from above.
+  (let ((external-symbol (intern-soft (symbol-name s))))
+    (catch 'done
+      (dolist (ancestor (rest (class-precedence-list external-symbol)))
+	(let ((ov (intern-soft (symbol-name ancestor)
+			       eieiomt-optimizing-obarray)))
+	  (when (fboundp ov)
+	    (set s ov) ;; store ov as our next symbol
+	    (throw 'done ancestor))))))
+  )
 
 (defun eieio-generic-form (method key class)
  "Return the lambda form belonging to METHOD using KEY based upon CLASS.
@@ -2398,6 +2470,11 @@ This is usually a symbol that starts with `:'."
 (intern "unbound-slot")
 (put 'unbound-slot 'error-conditions '(unbound-slot error nil))
 (put 'unbound-slot 'error-message "Unbound slot")
+
+(intern "inconsistent-class-hierarchy")
+(put 'inconsistent-class-hierarchy 'error-conditions
+     '(inconsistent-class-hierarchy error nil))
+(put 'inconsistent-class-hierarchy 'error-message "Inconsistent class hierarchy")
 
 ;;; Here are some CLOS items that need the CL package
 ;;
