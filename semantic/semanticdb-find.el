@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb-find.el,v 1.86 2010-02-22 00:55:54 zappo Exp $
+;; X-RCS: $Id: semanticdb-find.el,v 1.87 2010-03-06 04:10:49 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -1029,9 +1029,14 @@ is still made current."
 	  (when norm
 	    ;; The normalized tags can now be found based on that
 	    ;; tags table.
-	    (semanticdb-set-buffer (car norm))
-	    ;; Now reset ans
-	    (setq ans (cdr norm))
+	    (condition-case foo
+		(progn
+		  (semanticdb-set-buffer (car norm))
+		  ;; Now reset ans
+		  (setq ans (cdr norm)))
+	      ;; Don't error for this case, but don't store
+	      ;; the thing either.
+	      (no-method-definition nil))
 	    ))
       )
     ;; Return the tag.
