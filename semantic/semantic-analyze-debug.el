@@ -1,9 +1,9 @@
 ;;; semantic-analyze-debug.el --- Debug the analyzer
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-analyze-debug.el,v 1.10 2009-09-11 23:42:52 zappo Exp $
+;; X-RCS: $Id: semantic-analyze-debug.el,v 1.11 2010-03-08 01:15:21 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -549,24 +549,25 @@ PARENT is a possible parent (by nesting) tag."
   (let ((str (semantic-format-tag-prototype tag parent)))
     (if (and (semantic-tag-with-position-p tag)
 	     (semantic-tag-file-name tag))
-	(insert-button str
-		       'mouse-face 'custom-button-pressed-face
-		       'tag tag
-		       'action
-		       `(lambda (button)
-			  (let ((buff nil)
-				(pnt nil))
-			    (save-excursion
-			      (semantic-go-to-tag
-			       (button-get button 'tag))
-			      (setq buff (current-buffer))
-			      (setq pnt (point)))
-			    (if (get-buffer-window buff)
-				(select-window (get-buffer-window buff))
-			      (pop-to-buffer buff t))
-			    (goto-char pnt)
-			    (pulse-line-hook-function)))
-		       )
+	(with-current-buffer standard-output
+	  (insert-button str
+			 'mouse-face 'custom-button-pressed-face
+			 'tag tag
+			 'action
+			 `(lambda (button)
+			    (let ((buff nil)
+				  (pnt nil))
+			      (save-excursion
+				(semantic-go-to-tag
+				 (button-get button 'tag))
+				(setq buff (current-buffer))
+				(setq pnt (point)))
+			      (if (get-buffer-window buff)
+				  (select-window (get-buffer-window buff))
+				(pop-to-buffer buff t))
+			      (goto-char pnt)
+			      (pulse-line-hook-function)))
+			 ))
       (princ "\"")
       (princ str)
       (princ "\""))
