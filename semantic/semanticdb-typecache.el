@@ -1,9 +1,9 @@
 ;;; semanticdb-typecache.el --- Manage Datatypes
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semanticdb-typecache.el,v 1.41 2010-01-29 03:12:11 zappo Exp $
+;; X-RCS: $Id: semanticdb-typecache.el,v 1.42 2010-03-08 02:26:07 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -406,8 +406,9 @@ found tag to be loaded."
 If more than one tag has NAME in TABLE, we will prefer the tag that
 is of class 'type."
   (let* ((names (semantic-find-tags-by-name name table))
-	 (types (semantic-find-tags-by-class 'type names)))
-    (or (car-safe types) (car-safe names))))
+	 (nmerge (semanticdb-typecache-merge-streams names nil))
+	 (types (semantic-find-tags-by-class 'type nmerge)))
+    (or (car-safe types) (car-safe nmerge))))
 
 (defmethod semanticdb-typecache-find-method ((table semanticdb-abstract-table)
 					     type find-file-match)
