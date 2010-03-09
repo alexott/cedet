@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede.el,v 1.147 2010-02-20 21:42:43 zappo Exp $
+;; RCS: $Id: ede.el,v 1.148 2010-03-09 02:51:59 zappo Exp $
 (defconst ede-version "1.0pre7"
   "Current version of the Emacs EDE.")
 
@@ -297,7 +297,7 @@ Argument MENU-DEF is the definition of the current menu."
    (easy-menu-create-menu
     "Customize Project"
     (let* ((obj (ede-current-project))
-	   (targ (when (slot-boundp obj 'targets)
+	   (targ (when (and obj (slot-boundp obj 'targets))
 		   (oref obj targets))))
       (when obj
 	;; Make custom menus for everything here.
