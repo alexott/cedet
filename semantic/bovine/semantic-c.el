@@ -3,7 +3,7 @@
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-c.el,v 1.140 2010-02-27 03:16:44 zappo Exp $
+;; X-RCS: $Id: semantic-c.el,v 1.141 2010-03-14 13:23:11 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -1109,13 +1109,19 @@ now.
 	     ;; the super class, and stick it into the tags list.
 	     (setq addlast super)
 
-	     ;; Clone super and remove the members.
+	     ;; Clone super and remove the members IFF super has a name.
+	     ;; Note: anonymous struct/enums that are typedef'd shouldn't
+	     ;; exist in the top level type list, so they will appear only
+	     ;; in the :typedef slot of the typedef.
 	     (setq super (semantic-tag-clone super))
-	     (semantic-tag-put-attribute super :members nil)
+	     (if (not (string= (semantic-tag-name super) ""))
+		 (semantic-tag-put-attribute super :members nil)
+	       (setq addlast nil))
 
 	     ;; Add in props to the full superclass.
-	     (semantic--tag-copy-properties tag addlast)
-	     (semantic--tag-set-overlay addlast (semantic-tag-overlay tag))
+	     (when addlast
+	       (semantic--tag-copy-properties tag addlast)
+	       (semantic--tag-set-overlay addlast (semantic-tag-overlay tag)))
 	     )
 
 	   
