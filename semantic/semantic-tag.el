@@ -2,7 +2,7 @@
 
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
-;; X-CVS: $Id: semantic-tag.el,v 1.73 2010-01-07 02:23:40 zappo Exp $
+;; X-CVS: $Id: semantic-tag.el,v 1.74 2010-03-14 13:21:51 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -685,18 +685,24 @@ This function is for internal use only."
 ;;
 (defun semantic-tag-deep-copy-one-tag (tag &optional filter)
   "Make a deep copy of TAG, applying FILTER to each child-tag.
-Properties and overlay info are not copied.
-FILTER takes TAG as an argument, and should returns a semantic-tag.
+No properties are copied except for :filename.
+Overlay will be a vector.
+FILTER takes TAG as an argument, and should returns a `semantic-tag'.
 It is safe for FILTER to modify the input tag and return it."
   (when (not filter) (setq filter 'identity))
   (when (not (semantic-tag-p tag))
     (signal 'wrong-type-argument (list tag 'semantic-tag-p)))
-  (funcall filter (list (semantic-tag-name tag)
-                        (semantic-tag-class tag)
-                        (semantic--tag-deep-copy-attributes
-			 (semantic-tag-attributes tag) filter)
-                        nil
-                        nil)))
+  (let ((ol (semantic-tag-overlay tag))
+	(fn (semantic-tag-file-name tag)))
+    (funcall filter (list (semantic-tag-name tag)
+			  (semantic-tag-class tag)
+			  (semantic--tag-deep-copy-attributes
+			   (semantic-tag-attributes tag) filter)
+			  ;; Only copy the filename property
+			  (when fn (list :filename fn))
+			  ;; Only setup a vector if we had an overlay.
+			  (when ol (vector (semantic-tag-start tag) (semantic-tag-end tag)))
+			  ))))
 
 (defun semantic--tag-deep-copy-attributes (attrs &optional filter)
   "Make a deep copy of ATTRS, applying FILTER to each child-tag.
