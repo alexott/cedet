@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-files.el,v 1.20 2010-02-08 21:59:41 zappo Exp $
+;; X-RCS: $Id: ede-files.el,v 1.21 2010-03-15 13:40:54 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -265,7 +265,7 @@ This depends on an up to date `ede-project-class-files' variable."
 ;;
 (defun ede-toplevel-project-or-nil (dir)
   "Starting with DIR, find the toplevel project directory, or return nil.
-nil is returned if the current directory is not a part ofa project."
+nil is returned if the current directory is not a part of a project."
   (let* ((ans (ede-directory-get-toplevel-open-project dir)))
     (if ans
 	(oref ans :directory)

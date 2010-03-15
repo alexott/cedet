@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb-el.el,v 1.35 2009-09-11 18:59:19 zappo Exp $
+;; X-RCS: $Id: semanticdb-el.el,v 1.36 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -107,8 +107,7 @@ For Emacs Lisp, creates a specialized table."
   "Return non-nil if TABLE's mode is equivalent to BUFFER.
 Equivalent modes are specified by by `semantic-equivalent-major-modes'
 local variable."
-  (save-excursion
-    (set-buffer buffer)
+  (with-current-buffer buffer
     (eq (or mode-local-active-mode major-mode) 'emacs-lisp-mode)))
 
 (defmethod semanticdb-full-filename ((obj semanticdb-table-emacs-lisp))

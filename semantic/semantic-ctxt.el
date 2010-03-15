@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-ctxt.el,v 1.57 2010-02-27 03:15:53 zappo Exp $
+;; X-RCS: $Id: semantic-ctxt.el,v 1.58 2010-03-15 13:40:54 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -88,7 +88,7 @@ Return non-nil if there is no upper context.
 The default behavior uses `semantic-up-context'.")
 
 (defun semantic-beginning-of-context-default (&optional point)
-  "Move POINT to the beginning of the current context via parenthisis.
+  "Move POINT to the beginning of the current context via parenthesis.
 Return non-nil if there is no upper context."
   (if point (goto-char point))
   (if (semantic-up-context)
@@ -103,13 +103,13 @@ Be default, this uses `semantic-up-context', and assumes parenthetical
 block delimiters.")
 
 (defun semantic-end-of-context-default (&optional point)
-  "Move POINT to the end of the current context via parenthisis.
+  "Move POINT to the end of the current context via parenthesis.
 Return non-nil if there is no upper context."
   (if point (goto-char point))
   (let ((start (point)))
     (if (semantic-up-context)
 	t
-      ;; Go over the list, and back over the end parenthisis.
+      ;; Go over the list, and back over the end parenthesis.
       (condition-case nil
 	  (progn
 	    (forward-sexp 1)
@@ -513,7 +513,7 @@ cursor is on the text representing that function.")
 
 (defun semantic-ctxt-current-function-default (&optional point)
   "Return the current function call the cursor is in at POINT.
-The call will be identifed for C like langauges with the form
+The call will be identified for C like languages with the form
  NAME ( args ... )"
   (if point (goto-char point))
   (let ((case-fold-search semantic-case-fold))
@@ -604,7 +604,7 @@ that may or may not have a name.)")
 (defun semantic-ctxt-scoped-types-default (&optional point)
   "Return a list of scoped types by name for the current context at POINT.
 This is very different for various languages, and does nothing unless
-overriden."
+overridden."
   nil)
 
 (define-overloadable-function semantic-ctxt-imported-packages (&optional point)

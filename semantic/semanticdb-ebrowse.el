@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>, Joakim Verona
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb-ebrowse.el,v 1.23 2009-09-11 19:00:04 zappo Exp $
+;; X-RCS: $Id: semanticdb-ebrowse.el,v 1.24 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -120,8 +120,7 @@ EBROWSE is a C/C++ parser for use with `ebrowse' Emacs program.")
       (and (string-match "/\\w+$" file)
 	   (not (file-directory-p file))
 	   (let ((tmp (get-buffer-create "*semanticdb-ebrowse-tmp*")))
-	     (save-excursion
-	       (set-buffer tmp)
+	     (with-current-buffer tmp
 	       (condition-case nil
 		   (insert-file-contents file nil 0 100 t)
 		 (error (insert-file-contents file nil nil nil t)))
@@ -144,8 +143,7 @@ is specified by `semanticdb-default-save-directory'."
 	 (regexp nil)
 	 )
     ;; Create the input to the ebrowse command
-    (save-excursion
-      (set-buffer filebuff)
+    (with-current-buffer filebuff
       (buffer-disable-undo filebuff)
       (setq default-directory (expand-file-name dir))
 
@@ -159,8 +157,7 @@ is specified by `semanticdb-default-save-directory'."
 		(insert "\n")))
 	    files)
       ;; Cleanup the ebrowse output buffer.
-      (save-excursion
-	(set-buffer (get-buffer-create "*EBROWSE OUTPUT*"))
+      (with-current-buffer (get-buffer-create "*EBROWSE OUTPUT*")
 	(erase-buffer))
       ;; Call the EBROWSE command.
       (message "Creating ebrowse file: %s ..." savein)
@@ -172,8 +169,7 @@ is specified by `semanticdb-default-save-directory'."
     ;; Create a short LOADER program for loading in this database.
     (let* ((lfn (concat savein "-load.el"))
 	   (lf (find-file-noselect lfn)))
-      (save-excursion
-	(set-buffer lf)
+      (with-current-buffer lf
 	(erase-buffer)
 	(insert "(semanticdb-ebrowse-load-helper \""
 		(expand-file-name dir)
@@ -408,7 +404,7 @@ If there is no database for DIRECTORY available, then
 
 (defun semanticdb-ebrowse-add-tree-to-table (dbe tree &optional fname baseclasses)
   "For database DBE, add the ebrowse TREE into the table for FNAME.
-Optional argument BASECLASSES specifyies a baseclass to the tree being provided."
+Optional argument BASECLASSES specifies a baseclass to the tree being provided."
   (if (not (ebrowse-ts-p tree))
       (signal 'wrong-type-argument (list 'ebrowse-ts-p tree)))
 

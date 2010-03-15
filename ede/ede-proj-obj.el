@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-obj.el,v 1.17 2009-10-14 02:18:42 zappo Exp $
+;; RCS: $Id: ede-proj-obj.el,v 1.18 2010-03-15 13:40:54 xscript Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -26,6 +26,7 @@
 ;; Handles a superclass of target types which create object code in
 ;; and EDE Project file.
 
+(eval-when-compile (require 'cl))
 (require 'ede-proj)
 ;; (require 'ede-pmake)
 ;; The above require is needed for ede-pmake-varname, but introduces

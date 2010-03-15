@@ -3,7 +3,7 @@
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-el.el,v 1.53 2009-09-11 18:54:32 zappo Exp $
+;; X-RCS: $Id: semantic-el.el,v 1.54 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -142,7 +142,7 @@ syntax as specified by the syntax table."
 
 (defun semantic-elisp-form-to-doc-string (form)
   "After reading a form FORM, covert it to a doc string.
-For Emacs Lisp, sometimes that string is non-existant.
+For Emacs Lisp, sometimes that string is non-existent.
 Sometimes it is a form which is evaluated at compile time, permitting
 compound strings."
   (cond ((stringp form) form)
@@ -824,7 +824,7 @@ In emacs lisp this is easilly defined by parenthisis bounding."
   (&optional point)
   "Return a list of tag classes allowed at POINT.
 Emacs Lisp knows much more about the class of the tag needed to perform
-completion than some langauges.  We distincly know if we are to be
+completion than some languages.  We distincly know if we are to be
 a function name, variable name, or any type of symbol.  We could identify
 fields and such to, but that is for some other day."
   (save-excursion

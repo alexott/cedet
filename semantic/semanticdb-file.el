@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb-file.el,v 1.47 2009-09-23 01:33:02 zappo Exp $
+;; X-RCS: $Id: semanticdb-file.el,v 1.48 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -281,8 +281,7 @@ Restore the overlays after writting.
 Argument OBJ is the object to write."
   (when (semanticdb-live-p obj)
     (when (semanticdb-in-buffer-p obj)
-      (save-excursion
-	(set-buffer (semanticdb-in-buffer-p obj))
+      (with-current-buffer (semanticdb-in-buffer-p obj)
 
 	;; Make sure all our tag lists are up to date.
 	(semantic-fetch-tags)

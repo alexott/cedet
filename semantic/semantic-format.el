@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-format.el,v 1.36 2009-09-15 00:18:35 zappo Exp $
+;; X-RCS: $Id: semantic-format.el,v 1.37 2010-03-15 13:40:54 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -75,7 +75,7 @@ COLOR indicates that the generated text should be colored using
 	  (mapcar (lambda (f) (list 'const f))
 		  semantic-format-tag-functions)
 	  '(function))
-  "A List used by customizeable variables to choose a tag to text function.
+  "A List used by customizable variables to choose a tag to text function.
 Use this variable in the :type field of a customizable variable.")
 
 (semantic-varalias-obsolete 'semantic-token->text-custom-list
@@ -311,14 +311,14 @@ local definitions."
 
 (define-overloadable-function semantic-format-tag-canonical-name (tag &optional parent color)
   "Return a canonical name for TAG.
-A canonical name includes the names of any parents or namespaces preceeding
+A canonical name includes the names of any parents or namespaces preceding
 the tag.
 Optional argument PARENT is the parent type if TAG is a detail.
 Optional argument COLOR means highlight the prototype with font-lock colors.")
 
 (defun semantic-format-tag-canonical-name-default (tag &optional parent color)
   "Return a canonical name for TAG.
-A canonical name includes the names of any parents or namespaces preceeding
+A canonical name includes the names of any parents or namespaces preceding
 the tag with colons separating them.
 Optional argument PARENT is the parent type if TAG is a detail.
 Optional argument COLOR means highlight the prototype with font-lock colors."

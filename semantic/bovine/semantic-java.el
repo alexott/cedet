@@ -5,7 +5,7 @@
 ;;;   David Ponce
 
 ;; Author: David Ponce <david@dponce.com>
-;; X-RCS: $Id: semantic-java.el,v 1.19 2009-09-11 18:54:15 zappo Exp $
+;; X-RCS: $Id: semantic-java.el,v 1.20 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -147,7 +147,7 @@ corresponding compound declaration."
   java-mode semantic-java-dependency-system-include-path
   ;; @todo - Use JDEE to get at the include path, or something else?
   nil
-  "The system include path used by Java langauge.")
+  "The system include path used by Java language.")
 
 ;; Local context
 ;;
@@ -255,7 +255,7 @@ Optional argument COLOR indicates that color should be mixed in."
 (define-mode-local-override semantic-documentation-for-tag
   java-mode (&optional tag nosnarf)
   "Find documentation from TAG and return it as a clean string.
-Java have documentation set in a comment preceeding TAG's definition.
+Java have documentation set in a comment preceding TAG's definition.
 Attempt to strip out comment syntactic sugar, unless optional argument
 NOSNARF is non-nil.
 If NOSNARF is 'lex, then return the semantic lex token."

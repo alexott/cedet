@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-util.el,v 1.142 2009-09-29 01:31:49 zappo Exp $
+;; X-RCS: $Id: semantic-util.el,v 1.143 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -68,8 +68,7 @@ If FILE is not loaded, and semanticdb is not available, find the file
    and parse it."
   (save-match-data
     (if (find-buffer-visiting file)
-	(save-excursion
-	  (set-buffer (find-buffer-visiting file))
+	(with-current-buffer (find-buffer-visiting file)
 	  (semantic-fetch-tags))
       ;; File not loaded
       (if (and (fboundp 'semanticdb-minor-mode-p)
@@ -77,8 +76,7 @@ If FILE is not loaded, and semanticdb is not available, find the file
 	  ;; semanticdb is around, use it.
 	  (semanticdb-file-stream file)
 	;; Get the stream ourselves.
-	(save-excursion
-	  (set-buffer (find-file-noselect file))
+	(with-current-buffer (find-file-noselect file)
 	  (semantic-fetch-tags))))))
 
 (semantic-alias-obsolete 'semantic-file-token-stream
@@ -95,14 +93,12 @@ buffer, or a filename.  If SOMETHING is nil return nil."
     something)
    ;; A buffer
    ((bufferp something)
-    (save-excursion
-      (set-buffer something)
+    (with-current-buffer something
       (semantic-fetch-tags)))
    ;; A Tag: Get that tag's buffer
    ((and (semantic-tag-with-position-p something)
 	 (semantic-tag-in-buffer-p something))
-    (save-excursion
-      (set-buffer (semantic-tag-buffer something))
+    (with-current-buffer (semantic-tag-buffer something)
       (semantic-fetch-tags)))
    ;; Tag with a file name in it
    ((and (semantic-tag-p something)
@@ -148,8 +144,7 @@ The return item is of the form (BUFFER TOKEN) where BUFFER is the buffer
 in which TOKEN (the token found to match NAME) was found.
 
 THIS ISN'T USED IN SEMANTIC.  DELETE ME SOON."
-  (save-excursion
-    (set-buffer buffer)
+  (with-current-buffer buffer
     (let* ((stream (semantic-fetch-tags))
 	   (includelist (or (semantic-find-tags-by-class 'include stream)
 			    "empty.silly.thing"))
@@ -158,9 +153,8 @@ THIS ISN'T USED IN SEMANTIC.  DELETE ME SOON."
       (while (and (not found) includelist)
 	(let ((fn (semantic-dependency-tag-file (car includelist))))
 	  (if (and fn (not (member fn unfound)))
-	      (save-excursion
-		(save-match-data
-		  (set-buffer (find-file-noselect fn)))
+          (with-current-buffer (save-match-data
+                                 (find-file-noselect fn))
 		(message "Scanning %s" (buffer-file-name))
 		(setq stream (semantic-fetch-tags))
 		(setq found (semantic-find-first-tag-by-name name stream))
@@ -286,8 +280,7 @@ If TAG is not specified, use the tag at point."
 ;; Some hacks to help me test these functions
 (defun semantic-describe-buffer-var-helper (varsym buffer)
   "Display to standard out the value of VARSYM in BUFFER."
-  (let ((value (save-excursion
-		 (set-buffer buffer)
+  (let ((value (with-current-buffer buffer
 		 (symbol-value varsym))))
     (cond
      ((and (consp value)

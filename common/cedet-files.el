@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-files.el,v 1.5 2009-09-12 00:01:50 zappo Exp $
+;; X-RCS: $Id: cedet-files.el,v 1.6 2010-03-15 13:40:54 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -35,7 +35,7 @@ Obsoleted in some versions of Emacs.  Needed in others.")
 
 (defun cedet-directory-name-to-file-name (referencedir &optional testmode)
   "Convert the REFERENCEDIR (a full path name) into a filename.
-Converts directory seperation characters into ! characters.
+Converts directory separation characters into ! characters.
 Optional argument TESTMODE is used by tests to avoid conversion
 to the file's truename, and dodging platform tricks."
   (let ((file referencedir)

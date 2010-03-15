@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-analyze-debug.el,v 1.11 2010-03-08 01:15:21 zappo Exp $
+;; X-RCS: $Id: semantic-analyze-debug.el,v 1.12 2010-03-15 13:40:54 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -99,8 +99,7 @@ Argument COMP are possible completions here."
 	;; NOTE: This line is copied from semantic-analyze-current-context.
 	;;       You will need to update both places.
 	(condition-case err
-	    (save-excursion
-	      (set-buffer origbuf)
+	    (with-current-buffer origbuf
 	      (let* ((position (or (cdr-safe (oref ctxt bounds)) (point)))
 		     (prefixtypes nil) ; Used as type return
 		     (scope (semantic-calculate-scope position))
@@ -241,13 +240,11 @@ with the command:
 	  (princ "\nSemantic has found the datatype ")
 	  (semantic-analyzer-debug-insert-tag dt)
 	  (if (or (not (semantic-equivalent-tag-p ots dt))
-		  (not (save-excursion
-			 (set-buffer orig-buffer)
+		  (not (with-current-buffer orig-buffer
 			 (car (semantic-analyze-dereference-metatype
 			  ots (oref ctxt scope))))))
 	      (let ((lasttype ots)
-		    (nexttype (save-excursion
-				(set-buffer orig-buffer)
+		    (nexttype (with-current-buffer orig-buffer
 				(car (semantic-analyze-dereference-metatype
 				 ots (oref ctxt scope))))))
 		(if (eq nexttype lasttype)
@@ -269,8 +266,7 @@ with the command:
 		  (princ "\n")
 		  (setq lasttype nexttype
 			nexttype
-			(save-excursion
-			  (set-buffer orig-buffer)
+			(with-current-buffer orig-buffer
 			  (car (semantic-analyze-dereference-metatype
 			   nexttype (oref ctxt scope)))))
 		  )
@@ -383,20 +379,16 @@ or implementing a version specific to ")
   (let ((inc (semantic-find-tags-by-class 'include table))
 	;;(path (semanticdb-find-test-translate-path-no-loading))
 	(unk
-	 (save-excursion
-	   (set-buffer (semanticdb-get-buffer table))
+	 (with-current-buffer (semanticdb-get-buffer table)
 	   semanticdb-find-lost-includes))
 	(ip
-	 (save-excursion
-	   (set-buffer (semanticdb-get-buffer table))
+	 (with-current-buffer (semanticdb-get-buffer table)
 	   semantic-dependency-system-include-path))
 	(edeobj
-	 (save-excursion
-	   (set-buffer (semanticdb-get-buffer table))
+	 (with-current-buffer (semanticdb-get-buffer table)
 	   ede-object))
 	(edeproj
-	 (save-excursion
-	   (set-buffer (semanticdb-get-buffer table))
+	 (with-current-buffer (semanticdb-get-buffer table)
 	   ede-object-project))
 	)
 
@@ -581,9 +573,8 @@ PARENT is a possible parent (by nesting) tag."
 Look for key expressions, and add push-buttons near them."
   (let ((orig-buffer (make-marker)))
     (set-marker orig-buffer (point) (current-buffer))
-    (save-excursion
-      ;; Get a buffer ready.
-      (set-buffer "*Help*")
+    ;; Get a buffer ready.
+    (with-current-buffer "*Help*"
       (toggle-read-only -1)
       (goto-char (point-min))
       (set (make-local-variable 'semantic-analyzer-debug-orig) orig-buffer)

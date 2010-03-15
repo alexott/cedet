@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb.el,v 1.139 2010-01-05 02:34:05 zappo Exp $
+;; X-RCS: $Id: semanticdb.el,v 1.140 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -57,7 +57,7 @@ mechanism.")
 
 (defvar semanticdb-default-find-index-class 'semanticdb-find-search-index
   "The default type of search index to use for a `semanticdb-table's.
-This can be changed to try out new types of search indicies.")
+This can be changed to try out new types of search indices.")
 (make-variable-buffer-local 'semanticdb-default-find=index-class)
 
 
@@ -562,8 +562,7 @@ The file associated with OBJ does not need to be in a buffer."
 	 (buff (semanticdb-in-buffer-p obj))
 	 )
     (if buff
-	(save-excursion
-	  (set-buffer buff)
+	(with-current-buffer buff
 	  ;; Use semantic's magic tracker to determine of the buffer is up
 	  ;; to date or not.
 	  (not (semantic-parse-tree-up-to-date-p))
@@ -720,14 +719,14 @@ Uses `semanticdb-persistent-path' to determine the return value."
       nil))
 
 (defvar semanticdb-match-any-mode nil
-  "Non-nil to temporarilly search any major mode for a tag.
+  "Non-nil to temporarily search any major mode for a tag.
 If a particular major mode wants to search any mode, put the
 `semantic-match-any-mode' symbol onto the symbol of that major mode.
 Do not set the value of this variable permanently.")
 
 (defmacro semanticdb-with-match-any-mode (&rest body)
-  "A Semanticdb search occuring withing BODY will search tags in all modes.
-This temporarilly sets `semanticdb-match-any-mode' while executing BODY."
+  "A Semanticdb search occurring withing BODY will search tags in all modes.
+This temporarily sets `semanticdb-match-any-mode' while executing BODY."
   `(let ((semanticdb-match-any-mode t))
      ,@body))
 (put 'semanticdb-with-match-any-mode 'lisp-indent-function 0)
@@ -775,7 +774,7 @@ local variable."
 (defcustom semanticdb-project-roots nil
   "*List of directories, where each directory is the root of some project.
 All subdirectories of a root project are considered a part of one project.
-Values in this string can be overriden by project management programs
+Values in this string can be overridden by project management programs
 via the `semanticdb-project-root-functions' variable."
   :group 'semanticdb
   :type '(repeat string))

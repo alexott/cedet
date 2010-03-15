@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-idutils.el,v 1.2 2009-05-30 13:33:45 zappo Exp $
+;; X-RCS: $Id: cedet-idutils.el,v 1.3 2010-03-15 13:40:54 xscript Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -44,7 +44,7 @@
 
 ;;; Code:
 (defun cedet-idutils-search (searchtext texttype type scope)
-  "Perform a search with IDUtils, return the created buffer.
+  "Perform a search with ID Utils, return the created buffer.
 SEARCHTEXT is text to find.
 TEXTTYPE is the type of text, such as 'regexp, 'string, 'tagname,
 'tagregexp, or 'tagcompletions.
@@ -82,8 +82,7 @@ Return the created buffer with with program output."
   (let ((b (get-buffer-create "*CEDET fnid*"))
 	(cd default-directory)
 	)
-    (save-excursion
-      (set-buffer b)
+    (with-current-buffer b
       (setq default-directory cd)
       (erase-buffer))
     (apply 'call-process cedet-idutils-file-command
@@ -97,8 +96,7 @@ Return the created buffer with with program output."
   (let ((b (get-buffer-create "*CEDET lid*"))
 	(cd default-directory)
 	)
-    (save-excursion
-      (set-buffer b)
+    (with-current-buffer b
       (setq default-directory cd)
       (erase-buffer))
     (apply 'call-process cedet-idutils-token-command
@@ -110,11 +108,10 @@ Return the created buffer with with program output."
 ;;
 ;;;###autoload
 (defun cedet-idutils-expand-filename (filename)
-  "Expand the FILENAME with IDUtils.
+  "Expand the FILENAME with ID Utils.
 Return a filename relative to the default directory."
   (interactive "sFile: ")
-  (let ((ans (save-excursion
-	       (set-buffer (cedet-idutils-fnid-call (list filename)))
+  (let ((ans (with-current-buffer (cedet-idutils-fnid-call (list filename))
 	       (goto-char (point-min))
 	       (if (looking-at "[^ \n]*fnid: ")
 		   (error "ID Utils not available")
@@ -130,7 +127,7 @@ Return a filename relative to the default directory."
     ans))
 
 (defun cedet-idutils-support-for-directory (&optional dir)
-  "Return non-nil if IDUtils has a support file for DIR.
+  "Return non-nil if ID Utils has a support file for DIR.
 If DIR is not supplied, use the current default directory.
 This works by running lid on a bogus symbol, and looking for
 the error code."
@@ -161,15 +158,14 @@ return nil."
 	  (when (interactive-p)
 	    (message "ID Utils not found."))
 	  nil)
-      (save-excursion
-	(set-buffer b)
+      (with-current-buffer b
 	(goto-char (point-min))
 	(re-search-forward "fnid - \\([0-9.]+\\)" nil t)
 	(setq rev (match-string 1))
 	(if (inversion-check-version rev nil cedet-idutils-min-version)
 	    (if noerror
 		nil
-	      (error "Version of ID Utis is %s.  Need at least %s"
+	      (error "Version of ID Utils is %s.  Need at least %s"
 		     rev cedet-idutils-min-version))
 	  ;; Else, return TRUE, as in good enough.
 	  (when (interactive-p)

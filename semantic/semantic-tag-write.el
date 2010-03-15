@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-tag-write.el,v 1.5 2009-09-11 23:34:08 zappo Exp $
+;; X-RCS: $Id: semantic-tag-write.el,v 1.6 2010-03-15 13:40:55 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -29,7 +29,7 @@
 ;; to share tags between processes as well.
 ;;
 ;; As a bonus, these routines will also validate the tag structure, and make sure
-;; that they conform to good semantic tag hygene.
+;; that they conform to good semantic tag hygiene.
 ;;
 
 (require 'semantic-tag)

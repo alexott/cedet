@@ -7,7 +7,7 @@
 ;; Maintainer: CEDET developers <http://sf.net/projects/cedet>
 ;; Created: 09 Dec 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: cedet.el,v 1.36 2009-09-12 12:04:55 zappo Exp $
+;; X-RCS: $Id: cedet.el,v 1.37 2010-03-15 13:40:54 xscript Exp $
 
 ;; This file is not part of Emacs
 
@@ -176,7 +176,7 @@ REQUESTED VERSION is the version requested by the CEDET load script.
 See `cedet-packages' for details.
 
 FILE VERSION is the version number found in the source file
-for the specificed PACKAGE.
+for the specified PACKAGE.
 
 LOADED VERSION is the version of PACKAGE current loaded in Emacs
 memory and (presumably) running in this Emacs instance.  Value is X

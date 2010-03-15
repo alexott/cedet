@@ -7,7 +7,7 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 30 January 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: wisent.el,v 1.40 2009-09-11 18:51:36 zappo Exp $
+;; X-RCS: $Id: wisent.el,v 1.41 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -274,9 +274,9 @@ Return nil.
 Must be used in error recovery semantic actions.
 Optional argument BOUNDS is a pair (START . END) which indicates where
 the parenthesized block starts.  Typically the value of a `$regionN'
-variable, where `N' is the the Nth element of the current rule
-components that match the block beginning.  It defaults to the value
-of the `$region' variable."
+variable, where `N' is the Nth element of the current rule components
+that match the block beginning.  It defaults to the value of the
+`$region' variable."
   (let ((start (car (or bounds $region)))
         end input)
     (if (not (number-or-marker-p start))

@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-shell.el,v 1.5 2010-02-23 00:43:44 zappo Exp $
+;; X-RCS: $Id: ede-shell.el,v 1.6 2010-03-15 13:40:54 xscript Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -29,6 +29,9 @@
 ;; Each thing that EDE wants to use will create a shell to interact with it.
 
 ;;; Code:
+
+(require 'ede)
+
 ;;;###autoload
 (defmethod ede-shell-run-something ((target ede-target) command)
   "Create a shell to run stuff for TARGET.

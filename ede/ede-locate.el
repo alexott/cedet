@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-locate.el,v 1.9 2009-09-11 23:44:12 zappo Exp $
+;; X-RCS: $Id: ede-locate.el,v 1.10 2010-03-15 13:40:54 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -35,7 +35,7 @@
 ;; projects are completely controlled by EDE, such sh the Project.ede
 ;; based projects.
 ;;
-;; For other projects, haveing a "quick hack" to support these location
+;; For other projects, having a "quick hack" to support these location
 ;; routines is handy.
 ;;
 ;; The baseclass `ede-locate-base' provides the abstract interface to
@@ -194,16 +194,14 @@ that crated this ede locat object."
 	 (b (get-buffer-create "*LOCATE*"))
 	 (cd default-directory)
 	 )
-    (save-excursion
-      (set-buffer b)
+    (with-current-buffer b
       (setq default-directory cd)
       (erase-buffer))
     (require 'locate)
     (apply 'call-process locate-command
 	   nil b nil
 	   searchstr nil)
-    (save-excursion
-      (set-buffer b)
+    (with-current-buffer b
       (split-string (buffer-string) "\n" t))
     )
   )

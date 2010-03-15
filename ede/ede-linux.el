@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-linux.el,v 1.5 2009-10-16 03:50:47 zappo Exp $
+;; X-RCS: $Id: ede-linux.el,v 1.6 2010-03-15 13:40:54 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -70,8 +70,7 @@ DIR is the directory to search from."
 (defun ede-linux-version (dir)
   "Find the Linux version for the Linux src in DIR."
   (let ((buff (get-buffer-create " *linux-query*")))
-    (save-excursion
-      (set-buffer buff)
+    (with-current-buffer buff
       (erase-buffer)
       (setq default-directory (file-name-as-directory dir))
       (insert-file-contents "Makefile" nil 0 512)

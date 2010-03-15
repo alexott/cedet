@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-custom.el,v 1.1 2010-02-08 21:58:27 zappo Exp $
+;; X-RCS: $Id: ede-custom.el,v 1.2 2010-03-15 13:40:54 xscript Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -66,7 +66,7 @@ Optional argument GROUP is the slot group to display."
   (interactive "P")
   (require 'eieio-custom)
   (if (not (obj-of-class-p ede-object ede-target))
-      (error "Current file is not part of a target."))
+      (error "Current file is not part of a target"))
   (let ((group (if group (eieio-read-customization-group ede-object))))
     (ede-customize-target ede-object group)))
 ;;;###autoload

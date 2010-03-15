@@ -2,7 +2,7 @@
 
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
 
-;; X-CVS: $Id: semantic-fw.el,v 1.82 2009-10-01 01:56:54 zappo Exp $
+;; X-CVS: $Id: semantic-fw.el,v 1.83 2010-03-15 13:40:54 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -271,12 +271,12 @@ Remove self from `post-command-hook' if it is empty."
 	(intern (substring sym-name (match-end 0)))
       name)))
 
-(defun semantic-alias-obsolete (oldfnalias newfn)
+(defun semantic-alias-obsolete (oldfnalias newfn &optional when)
   "Make OLDFNALIAS an alias for NEWFN.
 Mark OLDFNALIAS as obsolete, such that the byte compiler
 will throw a warning when it encounters this symbol."
   (defalias oldfnalias newfn)
-  (make-obsolete oldfnalias newfn)
+  (make-obsolete oldfnalias newfn when)
   (when (and (function-overload-p newfn)
              (not (overload-obsoleted-by newfn))
              ;; Only throw this warning when byte compiling things.
@@ -284,7 +284,7 @@ will throw a warning when it encounters this symbol."
              byte-compile-current-file
 	     (not (string-match "cedet" byte-compile-current-file))
 	     )
-    (make-obsolete-overload oldfnalias newfn)
+    (make-obsolete-overload oldfnalias newfn when)
     (semantic-compile-warn
      "%s: `%s' obsoletes overload `%s'"
      byte-compile-current-file
@@ -292,11 +292,11 @@ will throw a warning when it encounters this symbol."
      (semantic-overload-symbol-from-function oldfnalias))
     ))
 
-(defun semantic-varalias-obsolete (oldvaralias newvar)
+(defun semantic-varalias-obsolete (oldvaralias newvar &optional when)
   "Make OLDVARALIAS an alias for variable NEWVAR.
 Mark OLDVARALIAS as obsolete, such that the byte compiler
 will throw a warning when it encounters this symbol."
-  (make-obsolete-variable oldvaralias newvar)
+  (make-obsolete-variable oldvaralias newvar when)
   (condition-case nil
       (defvaralias oldvaralias newvar)
     (error

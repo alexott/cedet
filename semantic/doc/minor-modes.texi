@@ -19,7 +19,7 @@ Scheduler}, and @ref{semanticdb}
 @section Code Helpers
 
 Code Helpers are minor modes that augment basic Emacs behavior in ways
-that can assist in programming Semantic supported langauges.
+that can assist in programming Semantic supported languages.
 
 @menu
 * Sticky Function Mode::

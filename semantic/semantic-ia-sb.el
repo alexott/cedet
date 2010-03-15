@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-ia-sb.el,v 1.25 2009-09-11 23:36:33 zappo Exp $
+;; X-RCS: $Id: semantic-ia-sb.el,v 1.26 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -106,8 +106,7 @@ DIRECTORY is the current directory, which is ignored, and ZERO is 0."
 	    ))
       (error nil))
     (select-frame cf)
-    (save-excursion
-      (set-buffer speedbar-buffer)
+    (with-current-buffer speedbar-buffer
       ;; If we have something, do something spiff with it.
       (erase-buffer)
       (speedbar-insert-separator "Buffer/Function")
@@ -290,16 +289,14 @@ TEXT, TAG, and INDENT are speedbar function arguments."
 	  (setq ob (current-buffer))
 	  (with-output-to-temp-buffer "*Tag Information*"
 	    ;; Output something about this tag:
-	    (save-excursion
-	      (set-buffer "*Tag Information*")
+	    (with-current-buffer "*Tag Information*"
 	      (goto-char (point-max))
 	      (insert
 	       (semantic-format-tag-prototype tag nil t)
 	       "\n")
 	      (let ((typetok
 		     (condition-case nil
-			 (save-excursion
-			   (set-buffer ob)
+			 (with-current-buffer ob
 			   ;; @todo - We need a context to derive a scope from.
 			   (semantic-analyze-tag-type tag nil))
 		       (error nil))))

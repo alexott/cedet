@@ -1,6 +1,6 @@
 @c -*-texinfo-*-
 @c
-@c $Id: ede-projects.texi,v 1.6 2010-01-07 02:14:54 zappo Exp $
+@c $Id: ede-projects.texi,v 1.7 2010-03-15 13:40:54 xscript Exp $
 @c
 
 @c The next line is for the back-search to see what node this one
@@ -1460,7 +1460,7 @@ The variable GNUSTEP_INSTALLATION_DOMAIN is set at this value.
 Type: @code{(or null list)} @*
 Default Value: @code{(quote ("GNUmakefile.preamble"))}
 
-The auxilliary makefile for additional variables.
+The auxiliary makefile for additional variables.
 Included just before the specific target files.
 @refill
 
@@ -1468,7 +1468,7 @@ Included just before the specific target files.
 Type: @code{(or null list)} @*
 Default Value: @code{(quote ("GNUmakefile.postamble"))}
 
-The auxilliary makefile for additional rules.
+The auxiliary makefile for additional rules.
 Included just after the specific target files.
 @refill
 

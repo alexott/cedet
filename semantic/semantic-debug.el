@@ -3,7 +3,7 @@
 ;;; Copyright (C) 2003, 2004, 2005, 2008 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-debug.el,v 1.18 2009-09-11 23:40:04 zappo Exp $
+;; X-RCS: $Id: semantic-debug.el,v 1.19 2010-03-15 13:40:54 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -29,7 +29,7 @@
 ;; controlling and stepping through the parsing work must be implemented
 ;; by the parser.
 ;;
-;; Fortunatly, the nature of language support files means that the parser
+;; Fortunately, the nature of language support files means that the parser
 ;; may not need to be instrumented first.
 ;;
 ;; The debugger uses EIEIO objects.  One object controls the user
@@ -39,6 +39,7 @@
 ;; Each parser must implement the interface and override any methods as needed.
 ;;
 
+(eval-when-compile (require 'cl))
 (require 'semantic)
 (require 'inversion)
 (inversion-require 'eieio "0.18beta1")
@@ -121,8 +122,7 @@ These buffers are brought into view when layout occurs.")
 
 (defmethod semantic-debug-set-parser-location ((iface semantic-debug-interface) point)
   "Set the parser location in IFACE to POINT."
-  (save-excursion
-    (set-buffer (oref iface parser-buffer))
+  (with-current-buffer (oref iface parser-buffer)
     (if (not (slot-boundp iface 'parser-location))
 	(oset iface parser-location (make-marker)))
     (move-marker (oref iface parser-location) point))
@@ -130,8 +130,7 @@ These buffers are brought into view when layout occurs.")
 
 (defmethod semantic-debug-set-source-location ((iface semantic-debug-interface) point)
   "Set the source location in IFACE to POINT."
-  (save-excursion
-    (set-buffer (oref iface source-buffer))
+  (with-current-buffer (oref iface source-buffer)
     (if (not (slot-boundp iface 'source-location))
 	(oset iface source-location (make-marker)))
     (move-marker (oref iface source-location) point))
@@ -143,8 +142,7 @@ These buffers are brought into view when layout occurs.")
   ;; Deal with the data buffer
   (when (slot-boundp iface 'data-buffer)
     (let ((lines (/ (frame-height (selected-frame)) 3))
-	  (cnt (save-excursion
-		 (set-buffer (oref iface data-buffer))
+	  (cnt (with-current-buffer (oref iface data-buffer)
 		 (count-lines (point-min) (point-max))))
 	  )
       ;; Set the number of lines to 1/3, or the size of the data buffer.
@@ -311,8 +309,7 @@ Argument ONOFF is non-nil when we are entering debug mode.
   (let ((iface semantic-debug-current-interface))
     (if onoff
 	;; Turn it on
-	(save-excursion
-	  (set-buffer (oref iface parser-buffer))
+	(with-current-buffer (oref iface parser-buffer)
 	  ;; Install our map onto this buffer
 	  (use-local-map semantic-debug-mode-map)
 	  ;; Make the buffer read only
@@ -327,18 +324,16 @@ Argument ONOFF is non-nil when we are entering debug mode.
 	  (run-hooks 'semantic-debug-mode-hooks)
 	  )
       ;; Restore old mode information
-      (save-excursion
-	(set-buffer
-	 (oref semantic-debug-current-interface parser-buffer))
-	(use-local-map
-	 (oref semantic-debug-current-interface parser-local-map))
-	)
-      (save-excursion
-	(set-buffer
-	 (oref semantic-debug-current-interface source-buffer))
-	(use-local-map
-	 (oref semantic-debug-current-interface source-local-map))
-	)
+      (with-current-buffer
+          (oref semantic-debug-current-interface parser-buffer)
+        (use-local-map
+         (oref semantic-debug-current-interface parser-local-map))
+        )
+      (with-current-buffer
+          (oref semantic-debug-current-interface source-buffer)
+        (use-local-map
+         (oref semantic-debug-current-interface source-local-map))
+        )
       (run-hooks 'semantic-debug-exit-hooks)
       )))
 
@@ -360,9 +355,8 @@ Argument ONOFF is non-nil when we are entering debug mode.
 	   (semantic-debug-interface
 	    "Debug Interface"
 	    :parser-buffer parserb
-	    :parser-local-map (save-excursion
-				(set-buffer parserb)
-				(current-local-map))
+        :parser-local-map (with-current-buffer parserb
+                            (current-local-map))
 	    :source-buffer (current-buffer)
 	    :source-local-map (current-local-map)
 	    )))

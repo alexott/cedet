@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-comp.el,v 1.13 2010-01-07 02:13:56 zappo Exp $
+;; RCS: $Id: ede-proj-comp.el,v 1.14 2010-03-15 13:40:54 xscript Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 ;; source code.  Users can also define new compiler types whenever they
 ;; some customized behavior.
 ;;
-;; The `ede-makefile-rule' class lets users add customized rules into thier
+;; The `ede-makefile-rule' class lets users add customized rules into their
 ;; objects, and also lets different compilers add chaining rules to their
 ;; behaviors.
 ;;
@@ -44,8 +44,10 @@
 ;; To write a method that inserts a variable or rule for a compiler
 ;; based object, wrap the body of your call in `ede-compiler-only-once'
 
+(eval-when-compile (require 'cl))
 (require 'ede)				;source object
 (require 'autoconf-edit)
+(declare-function ede-pmake-insert-variable-once "ede-pmake")
 
 ;;; Types:
 (defclass ede-compilation-program (eieio-instance-inheritor)
@@ -169,7 +171,7 @@ Adds this rule to a .PHONY list."))
 
 (defvar ede-current-build-list nil
   "List of EDE compilers that have already inserted parts of themselves.
-This is used when creating a Makefile to prevend duplicate variables and
+This is used when creating a Makefile to prevent duplicate variables and
 rules from being created.")
 
 (defmethod initialize-instance :AFTER ((this ede-compiler) &rest fields)
@@ -252,6 +254,7 @@ This will prevent rules from creating duplicate variables or rules."
 
 (defmethod ede-proj-makefile-insert-variables ((this ede-compilation-program))
   "Insert variables needed by the compiler THIS."
+  (require 'ede-pmake)
   (if (eieio-instance-inheritor-slot-boundp this 'variables)
       (with-slots (variables) this
 	(mapcar

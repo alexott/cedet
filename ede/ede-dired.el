@@ -5,7 +5,7 @@
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Version: 0.4
 ;; Keywords: project, make
-;; RCS: $Id: ede-dired.el,v 1.11 2010-01-07 02:12:49 zappo Exp $
+;; RCS: $Id: ede-dired.el,v 1.12 2010-03-15 13:40:54 xscript Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -90,8 +90,7 @@ negative, force off."
       (project-add-file target (car files))
       ;; Find the buffer for this files, and set its ede-object
       (if (get-file-buffer (car files))
-	  (save-excursion
-	    (set-buffer (get-file-buffer (car files)))
+	  (with-current-buffer (get-file-buffer (car files))
 	    (setq ede-object nil)
 	    (setq ede-object (ede-buffer-object (current-buffer)))))
       ;; Increment.

@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-auto.el,v 1.2 2010-02-08 22:27:39 zappo Exp $
+;; X-RCS: $Id: ede-auto.el,v 1.3 2010-03-15 13:40:54 xscript Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -82,7 +82,7 @@ type is required and the load function used.")
 			 :class-sym 'project-am-makefile
 			 :new-p nil)
    )
-  "List of vectos defining how to determine what type of projects exist.")
+  "List of vectors defining how to determine what type of projects exist.")
 
 ;;; EDE project-autoload methods
 ;;

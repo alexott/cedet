@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-decorate-mode.el,v 1.28 2009-09-29 01:28:29 zappo Exp $
+;; X-RCS: $Id: semantic-decorate-mode.el,v 1.29 2010-03-15 13:40:54 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -38,6 +38,7 @@
 ;;
 
 ;;; Code:
+(eval-when-compile (require 'cl))
 (require 'semantic)
 (require 'semantic-decorate)
 (require 'semantic-util-modes)

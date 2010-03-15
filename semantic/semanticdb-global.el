@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb-global.el,v 1.10 2009-09-29 01:32:34 zappo Exp $
+;; X-RCS: $Id: semanticdb-global.el,v 1.11 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -45,7 +45,7 @@ This will add an instance of a GNU Global database to each buffer
 in a GNU Global supported hierarchy."
   (interactive
    (list (completing-read
-          "Emable in Mode: " obarray
+          "Enable in Mode: " obarray
           #'(lambda (s) (get s 'mode-local-symbol-table))
           t (symbol-name major-mode))))
 

@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-sb.el,v 1.61 2009-09-11 23:34:40 zappo Exp $
+;; X-RCS: $Id: semantic-sb.el,v 1.62 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -41,7 +41,7 @@
 
 (defcustom semantic-sb-autoexpand-length 1
   "*Length of a semantic bucket to autoexpand in place.
-This will replace the named bucket that would have usually occured here."
+This will replace the named bucket that would have usually occurred here."
   :group 'speedbar
   :type 'integer)
 
@@ -391,8 +391,7 @@ Returns the tag list, or t for an error."
 	;; Successful DB query.
 	nil
       ;; No database, do it the old way.
-      (save-excursion
-	(set-buffer (find-file-noselect file))
+      (with-current-buffer (find-file-noselect file)
 	(if (or (not (featurep 'semantic))
 		(not semantic--parse-table))
 	    (setq out t)

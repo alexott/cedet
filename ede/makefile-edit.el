@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: makefile-edit.el,v 1.2 2009-07-22 11:30:37 zappo Exp $
+;; X-RCS: $Id: makefile-edit.el,v 1.3 2010-03-15 13:40:54 xscript Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -43,7 +43,7 @@
 ;;; Code:
 
 (defun makefile-beginning-of-command ()
-  "Move the the beginning of the current command."
+  "Move to the beginning of the current command."
   (interactive)
   (if (save-excursion
 	(forward-line -1)
@@ -58,7 +58,7 @@
     (forward-line 1)))
 
 (defun makefile-end-of-command ()
-  "Move the the beginning of the current command."
+  "Move to the end of the current command."
   (interactive)
   (end-of-line)
   (while (and (makefile-line-continued-p)
@@ -76,7 +76,7 @@
 ;;
 (defun makefile-move-to-macro (macro &optional next)
   "Move to the definition of MACRO.  Return t if found.
-If NEXT is non-nil, move to the next occurance of MACRO."
+If NEXT is non-nil, move to the next occurrence of MACRO."
   (let ((oldpt (point)))
     (when (not next) (goto-char (point-min)))
     (if (re-search-forward (concat "^\\s-*" macro "\\s-*[+:?]?=") nil t)

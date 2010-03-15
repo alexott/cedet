@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-extract.el,v 1.3 2009-01-09 22:56:32 zappo Exp $
+;; X-RCS: $Id: srecode-extract.el,v 1.4 2010-03-15 13:40:55 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -222,7 +222,7 @@ Return nil if nothing was extracted."
       ;; With a name, do the insertion.
       (let ((subdict (srecode-dictionary-add-section-dictionary
 		      dict (oref ins :object-name))))
-	(error "Need to implement include w/ name extractor.")
+	(error "Need to implement include w/ name extractor")
 	;; Recurse into the new template while no errors.
 	(while (condition-case nil
 		   (progn

@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj.el,v 1.68 2010-02-27 03:56:57 zappo Exp $
+;; RCS: $Id: ede-proj.el,v 1.69 2010-03-15 13:40:54 xscript Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -148,7 +148,7 @@ It is safe to leave this blank.")
 (autoload 'ede-proj-target-scheme "ede-proj-scheme"
   "Target class for a group of lisp files." nil nil)
 (autoload 'ede-proj-target-makefile-miscelaneous "ede-proj-misc"
-  "Target class for a group of miscelaneous w/ a special makefile." nil nil)
+  "Target class for a group of miscellaneous w/ a special makefile." nil nil)
 (autoload 'ede-proj-target-makefile-program "ede-proj-prog"
   "Target class for building a program." nil nil)
 (autoload 'ede-proj-target-makefile-archive "ede-proj-archive"
@@ -406,8 +406,7 @@ Argument TARGET is the project we are completing customization on."
       (let* ((default-directory (oref this path))
 	     (b (get-file-buffer (car ts))))
 	(if b
-	    (save-excursion
-	      (set-buffer b)
+	    (with-current-buffer b
 	      (if (eq ede-object this)
 		  (progn
 		    (setq ede-object nil)

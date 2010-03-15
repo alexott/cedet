@@ -7,7 +7,7 @@
 ;; Maintainer: Richard Kim <ryk@dspwiz.com>
 ;; Created: June 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: wisent-python.el,v 1.54 2009-01-28 16:07:22 zappo Exp $
+;; X-RCS: $Id: wisent-python.el,v 1.55 2010-03-15 13:40:55 xscript Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -287,7 +287,7 @@ To be implemented for python!  For now just return nil."
 (defcustom-mode-local-semantic-dependency-system-include-path
   python-mode semantic-python-dependency-system-include-path
   nil
-  "The system include path used by Python langauge.")
+  "The system include path used by Python language.")
 
 ;;; Enable Semantic in `python-mode'.
 ;;

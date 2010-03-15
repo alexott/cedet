@@ -2,7 +2,7 @@
 
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
-;; X-CVS: $Id: semantic-edit.el,v 1.42 2010-02-08 23:49:23 zappo Exp $
+;; X-CVS: $Id: semantic-edit.el,v 1.43 2010-03-15 13:40:54 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -55,7 +55,7 @@
 ;;    syntax instead.
 ;;
 ;; 2. Incremental parsing while a new function is being typed in
-;;    somtimes gets a chance only when lists are incomplete,
+;;    sometimes gets a chance only when lists are incomplete,
 ;;    preventing correct context identification.
 
 ;;
@@ -115,14 +115,14 @@ incremental reparse.")
 
 (defvar semantic-edits-incremental-reparse-failed-hook nil
   "Hook run after the incremental parser fails.
-When this happens, the buffer is marked as needing a full reprase.")
+When this happens, the buffer is marked as needing a full reparse.")
 
 (semantic-varalias-obsolete 'semantic-edits-incremental-reparse-failed-hooks
                           'semantic-edits-incremental-reparse-failed-hook)
 
 ;;;###autoload
 (defcustom semantic-edits-verbose-flag nil
-  "Non-nil means the incremental perser is verbose.
+  "Non-nil means the incremental parser is verbose.
 If nil, errors are still displayed, but informative messages are not."
   :group 'semantic
   :type 'boolean)
@@ -433,7 +433,7 @@ See `semantic-edits-change-leaf-tag' for details on parents."
 	    ;; confirmed as the lineage of `overlapped-tags'
 	    ;; which must have a value by now.
 
-	    ;; Loop over the search list to find the preceeding CDR.
+	    ;; Loop over the search list to find the preceding CDR.
 	    ;; Fortunatly, (car overlapped-tags) happens to be
 	    ;; the first tag positionally.
 	    (let ((tokstart (semantic-tag-start (car overlapped-tags))))
@@ -843,7 +843,7 @@ This function is for internal use by `semantic-edits-incremental-parser'."
 ;; list can be fiddled.
 (defun semantic-edits-splice-remove (oldtags parent cachelist)
   "Remove OLDTAGS from PARENT's CACHELIST.
-OLDTAGS are tags in the currenet buffer, preferably linked
+OLDTAGS are tags in the current buffer, preferably linked
 together also in CACHELIST.
 PARENT is the parent tag containing OLDTAGS.
 CACHELIST should be the children from PARENT, but may be
@@ -882,7 +882,7 @@ pre-positioned to a convenient location."
 	    ))
       (working-temp-message "To Remove Middle Tag: (%s)"
 			    (semantic-format-tag-name first)))
-    ;; Find in the cache the preceeding tag
+    ;; Find in the cache the preceding tag
     (while (and cachestart (not (eq first (car (cdr cachestart)))))
       (setq cachestart (cdr cachestart)))
     ;; Find the last tag
@@ -936,7 +936,7 @@ convenient location, so use that."
 
 (defun semantic-edits-splice-replace (oldtag newtag)
   "Replace OLDTAG with NEWTAG in the current cache.
-Do this by recycling OLDTAG's first CONS cell.  This effectivly
+Do this by recycling OLDTAG's first CONS cell.  This effectively
 causes the new tag to completely replace the old one.
 Make sure that all information in the overlay is transferred.
 It is presumed that OLDTAG and NEWTAG are both cooked.

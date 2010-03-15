@@ -174,7 +174,7 @@ we can tell font lock about them.")
 
 ;;;###autoload
 (defun srecode-template-mode ()
-  "Major-mode for writing srecode macros."
+  "Major-mode for writing SRecode macros."
   (interactive)
   (kill-all-local-variables)
   (setq major-mode 'srecode-template-mode
@@ -223,7 +223,7 @@ we can tell font lock about them.")
   
 
 (defun srecode-macro-help ()
-  "Provide help for working with macros in a tempalte."
+  "Provide help for working with macros in a template."
   (interactive)
   (let* ((root 'srecode-template-inserter)
 	 (chl (aref (class-v root) class-children))
@@ -301,7 +301,7 @@ we can tell font lock about them.")
   "Non-nil if POINT is inside a macro bounds.
 If the ESCAPE_START and END are different sequences,
 a simple search is used.  If ESCAPE_START and END are the same
-characteres, start at the beginning of the line, and find out
+characters, start at the beginning of the line, and find out
 how many occur."
   (let ((tag (semantic-current-tag))
 	(es (regexp-quote (srecode-template-get-escape-start)))
@@ -314,7 +314,7 @@ how many occur."
 	    (beginning-of-line)
 	    (while (re-search-forward es start t 2))
 	    (if (re-search-forward es start t)
-		;; If there is a single, the the answer is yes.
+		;; If there is a single, the answer is yes.
 		t
 	      ;; If there wasn't another, then the answer is no.
 	      nil)
@@ -369,7 +369,7 @@ Moves out one named section."
 (define-mode-local-override semantic-beginning-of-context
   srecode-template-mode (&optional point)
   "Move to the beginning of the current context.
-Moves the the beginning of one named section."
+Moves to the beginning of one named section."
   (if (semantic-up-context point)
       t
     (let ((es (regexp-quote (srecode-template-get-escape-start)))
@@ -380,8 +380,8 @@ Moves the the beginning of one named section."
 
 (define-mode-local-override semantic-end-of-context
   srecode-template-mode (&optional point)
-  "Move to the beginning of the current context.
-Moves the the beginning of one named section."
+  "Move to the end of the current context.
+Moves to the end of one named section."
   (let ((name (srecode-up-context-get-name point))
 	(tag (semantic-current-tag))
 	(es  (regexp-quote (srecode-template-get-escape-start))))
@@ -622,8 +622,7 @@ section or ? for an ask variable."
 (define-mode-local-override semantic-analyze-possible-completions
   srecode-template-mode (context)
   "Return a list of possible completions based on NONTEXT."
-  (save-excursion
-    (set-buffer (oref context buffer))
+  (with-current-buffer (oref context buffer)
     (let* ((prefix (car (last (oref context :prefix))))
 	   (prefixstr (cond ((stringp prefix)
 			     prefix)

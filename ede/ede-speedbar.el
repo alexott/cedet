@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make, tags
-;; RCS: $Id: ede-speedbar.el,v 1.35 2010-01-07 02:15:15 zappo Exp $
+;; RCS: $Id: ede-speedbar.el,v 1.36 2010-03-15 13:40:54 xscript Exp $
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -29,6 +29,8 @@
 ;;
 
 ;;; Code:
+
+(eval-when-compile (require 'cl))
 (require 'speedbar)
 (require 'eieio-speedbar)
 

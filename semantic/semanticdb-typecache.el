@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semanticdb-typecache.el,v 1.42 2010-03-08 02:26:07 zappo Exp $
+;; X-RCS: $Id: semanticdb-typecache.el,v 1.43 2010-03-15 13:40:55 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -552,8 +552,7 @@ If there isn't one, create it.
 ;;;###autoload
 (defun semanticdb-typecache-refresh-for-buffer (buffer)
   "Refresh the typecache for BUFFER."
-  (save-excursion
-    (set-buffer buffer)
+  (with-current-buffer buffer
     (let* ((tab semanticdb-current-table)
 	   ;(idx (semanticdb-get-table-index tab))
 	   (tc (semanticdb-get-typecache tab)))

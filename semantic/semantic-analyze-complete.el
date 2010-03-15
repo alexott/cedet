@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-analyze-complete.el,v 1.15 2009-09-11 23:43:07 zappo Exp $
+;; X-RCS: $Id: semantic-analyze-complete.el,v 1.16 2010-03-15 13:40:54 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -22,7 +22,7 @@
 
 ;;; Commentary:
 ;;
-;; Caclulate smart completions.
+;; Calculate smart completions.
 ;;
 ;; Uses the analyzer context routine to determine the best possible
 ;; list of completions.
@@ -106,7 +106,7 @@ in a buffer."
                         context
                       (semantic-analyze-current-context context)))
 	   (ans (if (not context)
-		    (error "Nothing to Complete.")
+		    (error "Nothing to complete")
 		  (:override))))
       ;; If interactive, display them.
       (when (interactive-p)

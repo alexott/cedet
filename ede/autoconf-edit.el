@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project
-;; RCS: $Id: autoconf-edit.el,v 1.13 2010-02-21 01:42:12 safanaj Exp $
+;; RCS: $Id: autoconf-edit.el,v 1.14 2010-03-15 13:40:54 xscript Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -163,7 +163,7 @@ From the autoconf manual:
     (looking-at (concat "\\(A[CM]_" macro "\\|" macro "\\)"))))
 
 (defun autoconf-find-last-macro (macro &optional ignore-bol)
-  "Move to the last occurance of MACRO in FILE, and return that point.
+  "Move to the last occurrence of MACRO in FILE, and return that point.
 The last macro is usually the one in which we would like to insert more
 items such as CHECK_HEADERS."
   (let ((op (point)) (atbol (if ignore-bol "" "^")))
@@ -176,7 +176,7 @@ items such as CHECK_HEADERS."
       nil)))
 
 (defun autoconf-parameter-strip (param)
-  "Strip the parameter PARAM  of whitespace and misc characters."
+  "Strip the parameter PARAM  of whitespace and miscellaneous characters."
   ;; force greedy match for \n.
   (when (string-match "\\`\n*\\s-*\\[?\\s-*" param)
     (setq param (substring param (match-end 0))))
@@ -241,7 +241,7 @@ Optional argument PARAM is the parameter to pass to the macro as one string."
 	 (autoconf-insert-macro-at-point macro param))
 	((member macro autoconf-multiple-multiple-macros)
 	 (if (not param)
-	     (error "You must have a paramter for %s" macro))
+	     (error "You must have a parameter for %s" macro))
 	 (if (not (autoconf-find-last-macro macro))
 	     (progn
 	       ;; Doesn't exist yet....

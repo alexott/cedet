@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-pmake.el,v 1.65 2010-02-08 17:58:19 zappo Exp $
+;; RCS: $Id: ede-pmake.el,v 1.66 2010-03-15 13:40:54 xscript Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -44,6 +44,7 @@
 ;;       1) Insert distribution source variables for targets
 ;;       2) Insert user requested rules
 
+(eval-when-compile (require 'cl))
 (require 'ede-proj)
 (require 'ede-proj-obj)
 (require 'ede-proj-comp)

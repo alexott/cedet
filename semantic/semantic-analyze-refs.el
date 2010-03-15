@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-analyze-refs.el,v 1.8 2010-02-27 03:20:06 zappo Exp $
+;; X-RCS: $Id: semantic-analyze-refs.el,v 1.9 2010-03-15 13:40:54 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -133,7 +133,7 @@ Optional argument IN-BUFFER indicates that the returned tag should be in an acti
 ;;; LOOKUP
 ;;
 (defun semantic--analyze-refs-full-lookup (tag scope)
-  "Perform a full lookup for all occurances of TAG in the current project.
+  "Perform a full lookup for all occurrences of TAG in the current project.
 TAG should be the tag currently under point.
 SCOPE is the scope the cursor is in.  From this a list of parents is
 derived.  If SCOPE does not have parents, then only a simple lookup is done."
@@ -204,7 +204,7 @@ PARENTS is a list of names."
     ans))
 
 (defun semantic--analyze-refs-full-lookup-with-parents (tag scope)
-  "Perform a lookup for all occurances of TAG based on TAG's SCOPE.
+  "Perform a lookup for all occurrences of TAG based on TAG's SCOPE.
 TAG should be the tag currently under point."
   (let* ((classmatch (semantic-tag-class tag))
 	 (plist (mapcar (lambda (T) (semantic-tag-name T)) (oref scope parents)))
@@ -252,7 +252,7 @@ TAG should be the tag currently under point."
     answer))
 
 (defun semantic--analyze-refs-full-lookup-simple (tag &optional noerror)
-  "Perform a simple  lookup for occurances of TAG in the current project.
+  "Perform a simple  lookup for occurrences of TAG in the current project.
 TAG should be the tag currently under point.
 Optional NOERROR means don't throw errors on failure to find something.
 This only compares the tag name, and does not infer any matches in namespaces,

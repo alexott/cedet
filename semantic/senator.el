@@ -6,7 +6,7 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 10 Nov 2000
 ;; Keywords: syntax
-;; X-RCS: $Id: senator.el,v 1.144 2010-01-23 16:16:14 zappo Exp $
+;; X-RCS: $Id: senator.el,v 1.145 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of Emacs
 
@@ -526,7 +526,7 @@ Ignore tags of classes in `senator-search-ignore-tag-classes'"
 (defvar senator-search-tag-filter-functions
   '(senator-search-default-tag-filter)
   "List of functions to be called to filter searched tags.
-Each function is passed a tag. If one of them returns nil, the tag is
+Each function is passed a tag.  If one of them returns nil, the tag is
 excluded from the search.")
 
 (defun senator-search (searcher text &optional bound noerror count)
@@ -1138,7 +1138,7 @@ REGEXP says which ring to use."
     (error "No previous search"))))
 
 (defun senator-nonincremental-search-forward (string)
-  "Search for STRING  nonincrementally."
+  "Search for STRING nonincrementally."
   (interactive "sSemantic search for string: ")
   (setq senator-last-search-type 'string)
   (if (equal string "")
@@ -1367,7 +1367,7 @@ is found, we can jump to it.
 Some tags such as includes have other reference features.")
 
 (defun semantic-up-reference-default (tag)
-  "Return a tag that is referredto by TAG.
+  "Return a tag that is referred to by TAG.
 Makes C/C++ language like assumptions."
   (cond ((semantic-tag-faux-p tag)
          ;; Faux tags should have a real tag in some other location.
@@ -2658,7 +2658,7 @@ the kill ring.  Retrieve that text with \\[yank]."
 
 (defun senator-yank-tag ()
   "Yank a tag from the tag ring.
-The form the tag takes is differnet depending on where it is being
+The form the tag takes is different depending on where it is being
 yanked to."
   (interactive)
   (or (ring-empty-p senator-tag-ring)
@@ -2707,7 +2707,7 @@ If senator is not active, use the original mechanism."
       ad-do-it)))
 
 (defun senator-transpose-tags-up ()
-  "Transpose the current tag, and the preceeding tag."
+  "Transpose the current tag, and the preceding tag."
   (interactive)
   (senator-parse)
   (let* ((current-tag (semantic-current-tag))

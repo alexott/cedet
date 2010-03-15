@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-base.el,v 1.2 2010-02-08 23:46:03 zappo Exp $
+;; X-RCS: $Id: ede-base.el,v 1.3 2010-03-15 13:40:54 xscript Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -467,8 +467,7 @@ Not all buffers need headers, so return nil if no applicable."
 (defmethod ede-buffer-header-file ((this ede-target) buffer)
   "There are no default header files in EDE.
 Do a quick check to see if there is a Header tag in this buffer."
-  (save-excursion
-    (set-buffer buffer)
+  (with-current-buffer buffer
     (if (re-search-forward "::Header:: \\([a-zA-Z0-9.]+\\)" nil t)
 	(buffer-substring-no-properties (match-beginning 1)
 					(match-end 1))
@@ -496,8 +495,7 @@ Some projects may have multiple documentation files, so return a list."
 (defmethod ede-buffer-documentation-files ((this ede-target) buffer)
   "Check for some documentation files for THIS.
 Also do a quick check to see if there is a Documentation tag in this BUFFER."
-  (save-excursion
-    (set-buffer buffer)
+  (with-current-buffer buffer
     (if (re-search-forward "::Documentation:: \\([a-zA-Z0-9.]+\\)" nil t)
 	(buffer-substring-no-properties (match-beginning 1)
 					(match-end 1))

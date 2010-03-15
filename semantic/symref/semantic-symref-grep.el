@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-symref-grep.el,v 1.8 2010-02-27 03:32:13 zappo Exp $
+;; X-RCS: $Id: semantic-symref-grep.el,v 1.9 2010-03-15 13:40:55 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -105,9 +105,9 @@ Optional argument MODE specifies the `major-mode' to test."
 (defun semantic-symref-grep-use-template (rootdir filepattern grepflags greppattern)
   "Use the grep template expand feature to create a grep command.
 ROOTDIR is the root location to run the `find' from.
-FILEPATTERN is a string represeting find flags for searching file patterns.
+FILEPATTERN is a string representing find flags for searching file patterns.
 GREPFLAGS are flags passed to grep, such as -n or -l.
-GREPPATTERN is the pattren used by grep."
+GREPPATTERN is the pattern used by grep."
   ;; We have grep-compute-defaults.  Lets use it.
   (grep-compute-defaults)
   (let* ((grep-expand-keywords semantic-symref-grep-expand-keywords)
@@ -164,8 +164,7 @@ This shell should support pipe redirect syntax."
 	 (ans nil)
 	 )
     
-    (save-excursion
-      (set-buffer b)
+    (with-current-buffer b
       (erase-buffer)
       (setq default-directory rootdir)
 

@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semanticdb-debug.el,v 1.8 2009-09-11 19:00:35 zappo Exp $
+;; X-RCS: $Id: semanticdb-debug.el,v 1.9 2010-03-15 13:40:55 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -94,8 +94,7 @@
   (let* ((full-filename (semanticdb-full-filename table))
 	 (buff (find-buffer-visiting full-filename)))
     (if buff
-	(save-excursion
-	  (set-buffer buff)
+	(with-current-buffer buff
 	  (semantic-sanity-check))
       ;; We can't use the usual semantic validity check, so hack our own.
       (semanticdb-table-oob-sanity-check (semanticdb-get-tags table)))))

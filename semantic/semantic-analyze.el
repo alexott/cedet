@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-analyze.el,v 1.87 2009-09-12 02:32:43 zappo Exp $
+;; X-RCS: $Id: semantic-analyze.el,v 1.88 2010-03-15 13:40:54 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -44,7 +44,7 @@
 ;; tag - A single entity
 ;; prefix - The beginning of a symbol, usually used to look up something
 ;;       incomplete.
-;; type - The name of a datatype in the langauge.
+;; type - The name of a datatype in the language.
 ;; metatype - If a type is named in a declaration like:
 ;;       struct moose somevariable;
 ;;       that name "moose" can be turned into a concrete type.
@@ -67,9 +67,12 @@
 ;;       constant.  These need to be returned as there would be no
 ;;       other possible completions.
 ;;
+
+
 (require 'inversion)
 (eval-and-compile
   (inversion-require 'eieio "1.0"))
+(eval-when-compile (require 'cl))
 (require 'semantic)
 (require 'semantic-format)
 (require 'semantic-ctxt)
@@ -419,7 +422,7 @@ to calculate the context information.  The purpose for this function is
 to provide a large number of non-cached analysis for filtering symbols."
   ;; Only do this in a Semantic enabled buffer.
   (when (not (semantic-active-p))
-    (error "Cannot analyze buffers not supported by Semantic."))
+    (error "Cannot analyze buffers not supported by Semantic"))
   ;; Always refresh out tags in a safe way before doing the
   ;; context.
   (semantic-refresh-tags-safe)
@@ -487,7 +490,7 @@ if a cached copy of the return object is found."
   (interactive "d")
   ;; Only do this in a Semantic enabled buffer.
   (when (not (semantic-active-p))
-    (error "Cannot analyze buffers not supported by Semantic."))
+    (error "Cannot analyze buffers not supported by Semantic"))
   ;; Always refresh out tags in a safe way before doing the
   ;; context.
   (semantic-refresh-tags-safe)
@@ -712,8 +715,7 @@ Optional argument CTXT is the context to show."
 ;;
 (defmethod semantic-analyze-pulse ((context semantic-analyze-context))
   "Pulse the region that CONTEXT affects."
-  (save-excursion
-    (set-buffer (oref context :buffer))
+  (with-current-buffer (oref context :buffer)
     (let ((bounds (oref context :bounds)))
       (when bounds
 	(pulse-momentary-highlight-region (car bounds) (cdr bounds))))))

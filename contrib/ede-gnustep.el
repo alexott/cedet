@@ -4,7 +4,7 @@
 
 ;; Author: Marco (Bj) Bardelli <bardelli.marco@gmail.com>
 ;; Keywords: project, make, gnustep, gnustep-make
-;; RCS: $Id: ede-gnustep.el,v 1.11 2010-01-09 23:05:05 safanaj Exp $
+;; RCS: $Id: ede-gnustep.el,v 1.12 2010-03-15 13:40:54 xscript Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -172,7 +172,7 @@ Include some dir via the -I preprocessor flag, for this target.")
 	      :custom (repeat (string :tag "File"))
 	      :label "Auxiliary Source Files"
 	      :group (default source)
-	      :documentation "Auxilliary source files included in this target.
+	      :documentation "Auxiliary source files included in this target.
 Each of these is considered equivalent to a source file, but it is not
 distributed, and each should have a corresponding rule to build it.")
    (dirty :initform nil
@@ -393,20 +393,20 @@ The variable GNUSTEP_INSTALLATION_DOMAIN is set at this value.")
 	     :type (or null list)
 	     :custom (repeat (string :tag "Makefile"))
 	     :group make
-	     :documentation "The auxilliary makefile for additional variables.
+	     :documentation "The auxiliary makefile for additional variables.
 Included just before the specific target files.")
    (included-makefiles :initarg :included-makefiles
 		       :type (or null list)
 		       :custom (repeat (string :tag "Makefile"))
 		       :group make
-		       :documentation "The auxilliary makefile for targets rules.
+		       :documentation "The auxiliary makefile for targets rules.
 Included common and specific target files.")
    (postamble :initarg :postamble
 	     :initform '("GNUmakefile.postamble")
 	     :type (or null list)
 	     :custom (repeat (string :tag "Makefile"))
 	     :group make
-	     :documentation "The auxilliary makefile for additional rules.
+	     :documentation "The auxiliary makefile for additional rules.
 Included just after the specific target files.")
 
    (metasubproject

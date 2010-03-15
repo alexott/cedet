@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-ectag-lang.el,v 1.10 2009-07-27 01:37:17 zappo Exp $
+;; X-RCS: $Id: semantic-ectag-lang.el,v 1.11 2010-03-15 13:40:55 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -78,7 +78,7 @@ KINDS are the kinds of tags to generate from exuberent ctags."
 ;;;###autoload
 (defun semantic-load-enable-primary-exuberent-ctags-support ()
   "Enable all ectag supported parsers for new languages.
-This is support for any langauge that does not have a regular
+This is support for any language that does not have a regular
 semantic parser."
   (interactive)
 

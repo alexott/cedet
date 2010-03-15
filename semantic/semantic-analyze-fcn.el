@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-analyze-fcn.el,v 1.29 2009-09-11 23:42:33 zappo Exp $
+;; X-RCS: $Id: semantic-analyze-fcn.el,v 1.30 2010-03-15 13:40:54 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -278,7 +278,7 @@ SCOPE is the scope object with additional items in which to search for names."
 
 (defun semantic-analyze-dereference-metatype-1 (ans scope)
   "Do extra work after dereferencing a metatype.
-ANS is the answer from the the language specific query.
+ANS is the answer from the language specific query.
 SCOPE is the current scope."
   ;; If ANS is a string, or if ANS is a short tag, we
   ;; need to do some more work to look it up.

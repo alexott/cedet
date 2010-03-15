@@ -3,7 +3,7 @@
 ;;; Copyright (C) 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-html.el,v 1.14 2010-02-20 20:52:11 zappo Exp $
+;; X-RCS: $Id: semantic-html.el,v 1.15 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -226,6 +226,11 @@ tag with greater section value than LEVEL is found."
   html-mode (tag)
   "The children TAG expands to."
   (semantic-html-components tag))
+
+;; In semantic-imenu.el, not part of Emacs.
+(defvar semantic-imenu-expandable-tag-classes)
+(defvar semantic-imenu-bucketize-file)
+(defvar semantic-imenu-bucketize-type-members)
 
 ;;;###autoload
 (defun semantic-default-html-setup ()

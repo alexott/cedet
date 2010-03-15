@@ -3,7 +3,7 @@
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-c.el,v 1.141 2010-03-14 13:23:11 zappo Exp $
+;; X-RCS: $Id: semantic-c.el,v 1.142 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -73,7 +73,7 @@ This function does not do any hidden buffer changes."
 (defcustom-mode-local-semantic-dependency-system-include-path
   c-mode semantic-c-dependency-system-include-path
   '("/usr/include")
-  "The system include path used by the C langauge.")
+  "The system include path used by the C language.")
 
 (defcustom semantic-default-c-path nil
   "Default set of include paths for C code.
@@ -165,7 +165,7 @@ lexical analyzer, such as `symbol' or `string'.  The string in the
 second position is the text that makes up the replacement.  This is
 the way to have multiple lexical symbols in a replacement.  Using the
 first way to specify text like \"foo::bar\" would not work, because :
-is a sepearate lexical symbol.
+is a separate lexical symbol.
 
 A quick way to see what you would need to insert is to place a
 definition such as:
@@ -227,7 +227,7 @@ if `semantic-c-member-of-autocast' is nil :
 (define-lex-spp-macro-declaration-analyzer semantic-lex-cpp-define
   "A #define of a symbol with some value.
 Record the symbol in the semantic preprocessor.
-Return the the defined symbol as a special spp lex token."
+Return the defined symbol as a special spp lex token."
   "^\\s-*#\\s-*define\\s-+\\(\\(\\sw\\|\\s_\\)+\\)" 1
   (goto-char (match-end 0))
   (skip-chars-forward " \t")
@@ -263,7 +263,7 @@ Return the the defined symbol as a special spp lex token."
 (define-lex-spp-macro-undeclaration-analyzer semantic-lex-cpp-undef
   "A #undef of a symbol.
 Remove the symbol from the semantic preprocessor.
-Return the the defined symbol as a special spp lex token."
+Return the defined symbol as a special spp lex token."
   "^\\s-*#\\s-*undef\\s-+\\(\\(\\sw\\|\\s_\\)+\\)" 1)
 
 
@@ -857,7 +857,7 @@ as for the parent."
     ))
 
 (defvar semantic-c-parse-token-hack-depth 0
-  "Current depth of recursive calls to `semantic-c-parse-lexical-token'")
+  "Current depth of recursive calls to `semantic-c-parse-lexical-token'.")
 
 (defun semantic-c-parse-lexical-token (lexicaltoken nonterminal depth
 						    returnonerror)
@@ -880,8 +880,7 @@ the regular parser."
 	 )
     (if (> semantic-c-parse-token-hack-depth 5)
 	nil
-      (save-excursion
-	(set-buffer buf)
+      (with-current-buffer buf
 	(erase-buffer)
 	(when (not (eq major-mode mode))
 	  (save-match-data
@@ -1531,8 +1530,8 @@ SPEC-LIST is the template specifier of the datatype instantiated."
     (semantic-c--instantiate-template tag (cdr def-list) (cdr spec-list))))
 
 (defun semantic-c--template-name-1 (spec-list)
-  "return a string used to compute template class name based on SPEC-LIST
-for ref<Foo,Bar> it will return 'Foo,Bar'."
+  "Return a string used to compute template class name.
+Based on SPEC-LIST, for ref<Foo,Bar> it will return 'Foo,Bar'."
   (when (car spec-list)
     (let* ((endpart (semantic-c--template-name-1 (cdr spec-list)))
 	   (separator (and endpart ",")))
@@ -1546,7 +1545,7 @@ return 'ref<Foo,Bar>'."
 	  "<" (semantic-c--template-name-1 (cdr spec-list)) ">"))
 
 (defun semantic-c-dereference-template (type scope &optional type-declaration)
-  "Dereference any template specifieres in TYPE within SCOPE.
+  "Dereference any template specifiers in TYPE within SCOPE.
 If TYPE is a template, return a TYPE copy with the templates types
 instantiated as specified in TYPE-DECLARATION."
   (when (semantic-tag-p type-declaration)

@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede.el,v 1.148 2010-03-09 02:51:59 zappo Exp $
+;; RCS: $Id: ede.el,v 1.149 2010-03-15 13:40:54 xscript Exp $
 (defconst ede-version "1.0pre7"
   "Current version of the Emacs EDE.")
 
@@ -57,7 +57,7 @@
   )
 
 (defcustom ede-auto-add-method 'ask
-  "*Determins if a new source file shoud be automatically added to a target.
+  "*Determines if a new source file should be automatically added to a target.
 Whenever a new file is encountered in a directory controlled by a
 project file, all targets are queried to see if it should be added.
 If the value is 'always, then the new file is added to the first
@@ -560,7 +560,7 @@ Optional argument NAME is the name to give this project."
 			  nil t)))
   ;; Make sure we have a valid directory
   (when (not (file-exists-p default-directory))
-    (error "Cannot create project in non-existant directory %s" default-directory))
+    (error "Cannot create project in non-existent directory %s" default-directory))
   (when (not (file-writable-p default-directory))
     (error "No write permissions for %s" default-directory))
   ;; Create the project
@@ -1045,8 +1045,7 @@ could become slow in time."
 
 (defmethod ede-find-target ((proj ede-project) buffer)
   "Fetch the target in PROJ belonging to BUFFER or nil."
-  (save-excursion
-    (set-buffer buffer)
+  (with-current-buffer buffer
     (or ede-object
 	(if (ede-buffer-mine proj buffer)
 	    proj
@@ -1083,8 +1082,7 @@ This includes buffers controlled by a specific target of PROJECT."
   (let ((bl (buffer-list))
 	(pl nil))
     (while bl
-      (save-excursion
-	(set-buffer (car bl))
+      (with-current-buffer (car bl)
 	(if (and ede-object (eq (ede-current-project) project))
 	    (setq pl (cons (car bl) pl))))
       (setq bl (cdr bl)))
@@ -1095,8 +1093,7 @@ This includes buffers controlled by a specific target of PROJECT."
   (let ((bl (buffer-list))
 	(pl nil))
     (while bl
-      (save-excursion
-	(set-buffer (car bl))
+      (with-current-buffer (car bl)
 	(if (if (listp ede-object)
 		(memq target ede-object)
 	      (eq ede-object target))
@@ -1105,19 +1102,18 @@ This includes buffers controlled by a specific target of PROJECT."
     pl))
 
 (defun ede-buffers ()
-  "Return a list of all buffers controled by an EDE object."
+  "Return a list of all buffers controlled by an EDE object."
   (let ((bl (buffer-list))
 	(pl nil))
     (while bl
-      (save-excursion
-	(set-buffer (car bl))
+      (with-current-buffer (car bl)
 	(if ede-object
 	    (setq pl (cons (car bl) pl))))
       (setq bl (cdr bl)))
     pl))
 
 (defun ede-map-buffers (proc)
-  "Execute PROC on all buffers controled by EDE."
+  "Execute PROC on all buffers controlled by EDE."
   (mapcar proc (ede-buffers)))
 
 (defmethod ede-map-project-buffers ((this ede-project) proc)
@@ -1216,35 +1212,31 @@ Return the first non-nil value returned by PROC."
       nil
     (oset project local-variables (cons (list variable)
 					(oref project local-variables)))
-    (mapcar (lambda (b) (save-excursion
-			  (set-buffer  b)
-			  (make-local-variable variable)))
-	    (ede-project-buffers project))))
+    (dolist (b (ede-project-buffers project))
+      (with-current-buffer b
+        (make-local-variable variable)))))
 
 (defmethod ede-set-project-variables ((project ede-project) &optional buffer)
   "Set variables local to PROJECT in BUFFER."
   (if (not buffer) (setq buffer (current-buffer)))
-  (save-excursion
-   (set-buffer buffer)
-   (mapcar (lambda (v)
-	     (make-local-variable (car v))
-	     ;; set its value here?
-	     (set (car v) (cdr v))
-	     )
-	   (oref project local-variables))))
+  (with-current-buffer buffer
+    (dolist (v (oref project local-variables))
+      (make-local-variable (car v))
+      ;; set its value here?
+      (set (car v) (cdr v)))))
 
 (defun ede-set (variable value &optional proj)
   "Set the project local VARIABLE to VALUE.
-If VARIABLE is not project local, just use set."
+If VARIABLE is not project local, just use set.  Optional argument PROJ
+is the project to use, instead of `ede-current-project'."
   (let ((p (or proj (ede-current-project)))
 	a)
     (if (and p (setq a (assoc variable (oref p local-variables))))
 	(progn
 	  (setcdr a value)
-	  (mapc (lambda (b) (save-excursion
-			      (set-buffer b)
-			      (set variable value)))
-		(ede-project-buffers p)))
+      (dolist (b (ede-project-buffers p))
+        (with-current-buffer b
+          (set variable value))))
       (set variable value))
     (ede-commit-local-variables p))
   value)

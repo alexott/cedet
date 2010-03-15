@@ -5,7 +5,7 @@
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Version: 0.0.3
 ;; Keywords: project, make
-;; RCS: $Id: project-am.el,v 1.55 2010-03-13 00:04:10 safanaj Exp $
+;; RCS: $Id: project-am.el,v 1.56 2010-03-15 13:40:54 xscript Exp $
 
 ;; This file is NOT part of GNU Emacs.
 
@@ -394,6 +394,7 @@ Argument COMMAND is the command to use for compiling the target."
 	(cmd nil))
     (unwind-protect
 	(progn
+      (require 'ede-shell)
 	  (set-buffer tb)
 	  (setq default-directory dd)
 	  (setq cmd (read-from-minibuffer

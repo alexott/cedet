@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-decorate-include.el,v 1.27 2010-01-27 01:38:54 zappo Exp $
+;; X-RCS: $Id: semantic-decorate-include.el,v 1.28 2010-03-15 13:40:54 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -25,7 +25,7 @@
 ;; Highlight any include that is in a state the user may care about.
 ;; The basic idea is to have the state be highly visible so users will
 ;; as 'what is this?" and get the info they need to fix problems that
-;; are otherwises transparent when trying to get smart completion
+;; are otherwise transparent when trying to get smart completion
 ;; working.
 
 (require 'semantic-decorate-mode)

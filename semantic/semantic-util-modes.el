@@ -6,7 +6,7 @@
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Author: David Ponce <david@dponce.com>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-util-modes.el,v 1.75 2010-02-27 13:13:38 zappo Exp $
+;; X-RCS: $Id: semantic-util-modes.el,v 1.76 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -541,7 +541,7 @@ minor mode is enabled.
 (defcustom global-semantic-show-parser-state-mode nil
   "*If non-nil enable global use of `semantic-show-parser-state-mode'.
 When enabled, the current parse state of the current buffer is displayed
-in the mode line. See `semantic-show-parser-state-marker' for details
+in the mode line.  See `semantic-show-parser-state-marker' for details
 on what is displayed."
   :group 'semantic
   :type 'boolean
@@ -653,7 +653,7 @@ minor mode is enabled."
 (defun semantic-show-parser-state-mode (&optional arg)
   "Minor mode for displaying parser cache state in the modeline.
 The cache can be in one of three states.  They are
-Up to date, Partial reprase needed, and Full reparse needed.
+Up to date, Partial reparse needed, and Full reparse needed.
 The state is indicated in the modeline with the following characters:
  `-'  ->  The cache is up to date.
  `!'  ->  The cache requires a full update.
@@ -893,7 +893,7 @@ when it lands in the sticky line."
   "Setup option `semantic-stickyfunc-mode'.
 For semantic enabled buffers, make the function declaration for the top most
 function \"sticky\".  This is accomplished by putting the first line of
-text for that function in Emacs 21's header line."
+text for that function in the header line."
   (if semantic-stickyfunc-mode
       (progn
 	(unless (and (featurep 'semantic) (semantic-active-p))
@@ -930,7 +930,7 @@ Enables/disables making the header line of functions sticky.
 A function (or other tag class specified by
 `semantic-stickyfunc-sticky-classes') has a header line, meaning the
 first line which describes the rest of the construct.  This first
-line is what is displayed in the Emacs 21 header line.
+line is what is displayed in the header line.
 
 With prefix argument ARG, turn on if positive, otherwise off.  The
 minor mode can be turned on only if semantic feature is available and
@@ -1053,7 +1053,7 @@ Argument EVENT describes the event that caused this function to be called."
 ;;;;
 
 ;; Highlight the first like of the function we are in if it is different
-;; from the the tag going off the top of the screen.
+;; from the tag going off the top of the screen.
 
 ;;;###autoload
 (defun global-semantic-highlight-func-mode (&optional arg)
@@ -1180,7 +1180,7 @@ current tag declaration."
 ;;;###autoload
 (defun semantic-highlight-func-mode (&optional arg)
   "Minor mode to highlight the first line of the current tag.
-Enables/disables making current function firstline light up.
+Enables/disables making current function first line light up.
 A function (or other tag class specified by
 `semantic-stickyfunc-sticky-classes') is highlighted, meaning the
 first line which describes the rest of the construct.

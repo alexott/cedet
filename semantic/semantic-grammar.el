@@ -6,7 +6,7 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 15 Aug 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-grammar.el,v 1.78 2009-08-29 20:10:05 zappo Exp $
+;; X-RCS: $Id: semantic-grammar.el,v 1.79 2010-03-15 13:40:54 xscript Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -668,7 +668,7 @@ The symbols in the list are local variables in
                  (car delim-spec) (symbolp (car delim-spec))
                  (cadr delim-spec) (symbolp (cadr delim-spec)))
             delim-spec
-          (error)))
+          (error "Invalid delimiter")))
     (error
      (error "Invalid delimiters specification %s in block token %s"
             (cdr block-spec) (car block-spec)))))
@@ -927,7 +927,7 @@ Lisp code."
     output))
 
 (defun semantic-grammar-recreate-package ()
-  "Unconditionnaly create Lisp code from grammar in current buffer.
+  "Unconditionally create Lisp code from grammar in current buffer.
 Like \\[universal-argument] \\[semantic-grammar-create-package]."
   (interactive)
   (semantic-grammar-create-package t))
@@ -1516,7 +1516,7 @@ library found in DEF."
           (list mac lib))))
 
 (defun semantic--grammar-macro-compl-dict ()
-  "Return a completion dictionnary of macro definitions."
+  "Return a completion dictionary of macro definitions."
   (let ((defs (semantic-grammar-macros))
         def dups dict)
     (while defs
@@ -1879,8 +1879,7 @@ Optional argument COLOR determines if color is added to the text."
   (if (semantic-grammar-in-lisp-p)
       (with-mode-local emacs-lisp-mode
 	(semantic-analyze-possible-completions context))
-    (save-excursion
-      (set-buffer (oref context buffer))
+    (with-current-buffer (oref context buffer)
       (let* ((prefix (car (oref context :prefix)))
 	     (completetext (cond ((semantic-tag-p prefix)
 				  (semantic-tag-name prefix))

@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-cscope.el,v 1.2 2009-05-30 13:38:28 zappo Exp $
+;; X-RCS: $Id: cedet-cscope.el,v 1.3 2010-03-15 13:40:54 xscript Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -79,8 +79,7 @@ SCOPE is the scope of the search, such as 'project or 'subdirs."
   (let ((b (get-buffer-create "*CEDET CScope*"))
 	(cd default-directory)
 	)
-    (save-excursion
-      (set-buffer b)
+    (with-current-buffer b
       (setq default-directory cd)
       (erase-buffer))
     (apply 'call-process cedet-cscope-command
@@ -94,8 +93,8 @@ SCOPE is the scope of the search, such as 'project or 'subdirs."
   "Expand the FILENAME with CScope.
 Return a fully qualified filename."
   (interactive "sFile: ")
-  (let* ((ans1 (save-excursion
-		 (set-buffer (cedet-cscope-call (list "-d" "-L" "-7" filename)))
+  (let* ((ans1 (with-current-buffer
+                   (cedet-cscope-call (list "-d" "-L" "-7" filename))
 		 (goto-char (point-min))
 		 (if (looking-at "[^ \n]*cscope: ")
 		     (error "CScope not available")
@@ -141,8 +140,7 @@ return nil."
 	  (when (interactive-p)
 	    (message "CScope not found."))
 	  nil)
-      (save-excursion
-	(set-buffer b)
+      (with-current-buffer b
 	(goto-char (point-min))
 	(re-search-forward "cscope: version \\([0-9.]+\\)" nil t)
 	(setq rev (match-string 1))

@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-emacs.el,v 1.10 2009-11-22 13:31:40 zappo Exp $
+;; X-RCS: $Id: ede-emacs.el,v 1.11 2010-03-15 13:40:54 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -74,8 +74,7 @@ Return a tuple of ( EMACSNAME . VERSION )."
   (let ((buff (get-buffer-create " *emacs-query*"))
 	(emacs "Emacs")
 	(ver ""))
-    (save-excursion
-      (set-buffer buff)
+    (with-current-buffer buff
       (erase-buffer)
       (setq default-directory (file-name-as-directory dir))
       ;(call-process "egrep" nil buff nil "-n" "-e" "^version=" "Makefile")

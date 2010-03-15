@@ -3,7 +3,7 @@
 ;;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-texi.el,v 1.46 2010-02-22 02:39:40 zappo Exp $
+;; X-RCS: $Id: semantic-texi.el,v 1.47 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -248,7 +248,7 @@ The cursor should be on the @ sign."
 	      "menu\\|"
 	       (substring texinfo-environment-regexp
 			 (match-beginning 0)))))
-  "Regular expression for matching texinfo enviroments.
+  "Regular expression for matching texinfo environments.
 uses `texinfo-environment-regexp', but makes sure that it
 can handle the @menu environment.")
 
@@ -443,6 +443,11 @@ that start with that symbol."
 
 ;;; Parser Setup
 ;;
+;; In semantic-imenu.el, not part of Emacs.
+(defvar semantic-imenu-expandable-tag-classes)
+(defvar semantic-imenu-bucketize-file)
+(defvar semantic-imenu-bucketize-type-members)
+
 ;;;###autoload
 (defun semantic-default-texi-setup ()
   "Set up a buffer for parsing of Texinfo files."

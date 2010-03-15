@@ -25,7 +25,7 @@
 ;;
 ;; Semantic's native parsing tools do not handle symbol references.
 ;; Tracking such information is a task that requires a huge amount of
-;; space and processing not apropriate for an Emacs Lisp program.
+;; space and processing not appropriate for an Emacs Lisp program.
 ;;
 ;; Many desired tools used in refactoring, however, need to have
 ;; such references available to them.  This API aims to provide a
@@ -58,7 +58,7 @@
 ;;
 ;; ADD A NEW EXTERNAL TOOL
 ;;
-;; To support a new external tool, sublcass `semantic-symref-tool-baseclass'
+;; To support a new external tool, subclass `semantic-symref-tool-baseclass'
 ;; and implement the methods.  The baseclass provides support for
 ;; managing external processes that produce parsable output.
 ;;
@@ -249,7 +249,7 @@ Returns an object of class `semantic-symref-result'."
 
 ;;;###autoload
 (defun semantic-symref-find-text (text &optional scope)
-  "Find a list of occurances of TEXT in the current project.
+  "Find a list of occurrences of TEXT in the current project.
 TEXT is a regexp formatted for use with egrep.
 Optional SCOPE specifies which file set to search.  Defaults to 'project.
 Refers to `semantic-symref-tool', to determine the reference tool to use
@@ -472,8 +472,7 @@ The symref TOOL should already contain the search criteria."
   "Parse the entire OUTPUTBUFFER of a symref tool.
 Calls the method `semantic-symref-parse-tool-output-one-line' over and
 over until it returns nil."
-  (save-excursion
-    (set-buffer outputbuffer)
+  (with-current-buffer outputbuffer
     (goto-char (point-min))
     (let ((result nil)
 	  (hit nil))

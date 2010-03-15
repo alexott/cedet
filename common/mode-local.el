@@ -7,7 +7,7 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 27 Apr 2004
 ;; Keywords: syntax
-;; X-RCS: $Id: mode-local.el,v 1.24 2009-09-11 23:44:53 zappo Exp $
+;; X-RCS: $Id: mode-local.el,v 1.25 2010-03-15 13:40:54 xscript Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -112,6 +112,9 @@ Return nil if MODE has no parent."
   (or (get mode 'mode-local-parent)
       (get mode 'derived-mode-parent)))
 
+;; FIXME doc (and function name) seems wrong.
+;; Return a list of MODE and all its parent modes, if any.
+;; Lists parent modes first.
 (defun mode-local-equivalent-mode-p (mode)
   "Is the major-mode in the current buffer equivalent to a mode in MODES."
   (let ((modes nil))
@@ -421,8 +424,8 @@ To use the symbol MODE (quoted), use `with-mode-local'."
 The current mode bindings are saved, BODY is evaluated, and the saved
 bindings are restored, even in case of an abnormal exit.
 Value is what BODY returns.
-This lis like `with-mode-local-symbol', except that MODE is quoted
-and is note evaluated."
+This is like `with-mode-local-symbol', except that MODE is quoted
+and is not evaluated."
    `(with-mode-local-symbol ',mode ,@body))
 (put 'with-mode-local 'lisp-indent-function 1)
 
@@ -486,9 +489,11 @@ DOCSTRING is optional."
 
 ;;; Function overloading
 ;;
-(defun make-obsolete-overload (old new)
-  "Mark OLD overload as obsoleted by NEW overload."
+(defun make-obsolete-overload (old new when)
+  "Mark OLD overload as obsoleted by NEW overload.
+WHEN is a string describing the first release where it was made obsolete."
   (put old 'overload-obsoleted-by new)
+  (put old 'overload-obsoleted-since when)
   (put old 'mode-local-overload t)
   (put new 'overload-obsolete old))
 
@@ -638,12 +643,12 @@ PROMPT, INITIAL, HIST, and DEFAULT are the same as for `completing-read'."
  (see `define-mode-local-override' for details).")
         (sym (overload-obsoleted-by overload)))
     (when sym
-      (setq doc (format "%s\nIt makes the overload `%s' obsolete."
-                        doc sym)))
+      (setq doc (format "%s\nIt has made the overload `%s' obsolete since %s."
+                        doc sym (get sym 'overload-obsoleted-since))))
     (setq sym (overload-that-obsolete overload))
     (when sym
-      (setq doc (format "%s\nThis overload is obsoletes;\nUse `%s' instead."
-                        doc sym)))
+      (setq doc (format "%s\nThis overload is obsolete since %s;\nUse `%s' instead."
+                        doc (get overload 'overload-obsoleted-since) sym)))
     doc))
 
 (defun mode-local-augment-function-help (symbol)

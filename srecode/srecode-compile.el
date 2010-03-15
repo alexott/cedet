@@ -22,12 +22,13 @@
 ;; Compile a Semantic Recoder template file.
 ;;
 ;; Template files are parsed using a Semantic/Wisent parser into
-;; a tag table.  The code therin is then further parsed down using
+;; a tag table.  The code therein is then further parsed down using
 ;; a regular expression parser.
 ;;
 ;; The output are a series of EIEIO objects which represent the
 ;; templates in a way that could be inserted later.
 
+(eval-when-compile (require 'cl))
 (require 'semantic-fw)
 (require 'eieio)
 (require 'eieio-base)
@@ -76,7 +77,7 @@ for push, pop, and peek for the active template.")
 
 (defun srecode-flush-active-templates ()
   "Flush the active template storage.
-Useful if something goes wrong in SRecode, and the active tempalte
+Useful if something goes wrong in SRecode, and the active template
 stack is broken."
   (interactive)
   (if (oref srecode-template active)
@@ -180,6 +181,8 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
 	  (set-buffer (semantic-find-file-noselect fname))
 	(set-buffer peb))
       ;; Do the compile.
+      (unless (semantic-active-p)
+        (semantic-new-buffer-fcn))
       (srecode-compile-templates)
       ;; Trash the buffer if we had to read it in.
       (if (not peb)

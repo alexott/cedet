@@ -2,7 +2,7 @@
 
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2006, 2007 Eric M. Ludlam
 
-;; X-CVS: $Id: semantic-bovine.el,v 1.15 2009-09-11 18:55:33 zappo Exp $
+;; X-CVS: $Id: semantic-bovine.el,v 1.16 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -23,13 +23,13 @@
 
 ;;; Commentary:
 ;;
-;; Semantix 1.x uses an LL parser named the "bovinator".  This parser
+;; Semantic 1.x uses an LL parser named the "bovinator".  This parser
 ;; had several conveniences in it which made for parsing tags out of
 ;; languages with list characters easy.  This parser lives on as one
 ;; of many available parsers for semantic the tool.
 ;;
 ;; This parser should be used when the language is simple, such as
-;; makefiles or other data-declaritive langauges.
+;; makefiles or other data-declarative languages.
 
 ;;; Code:
 (require 'semantic)

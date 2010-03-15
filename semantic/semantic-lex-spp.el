@@ -2,7 +2,7 @@
 
 ;;; Copyright (C) 2006, 2007, 2008, 2009 Eric M. Ludlam
 
-;; X-CVS: $Id: semantic-lex-spp.el,v 1.51 2010-01-17 16:21:56 zappo Exp $
+;; X-CVS: $Id: semantic-lex-spp.el,v 1.52 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -92,7 +92,7 @@ added and removed from this symbol table.")
 (make-variable-buffer-local 'semantic-lex-spp-dynamic-macro-symbol-obarray)
 
 (defvar semantic-lex-spp-dynamic-macro-symbol-obarray-stack nil
-  "A stack of obarrays for temporarilly scoped macro values.")
+  "A stack of obarrays for temporarily scoped macro values.")
 (make-variable-buffer-local 'semantic-lex-spp-dynamic-macro-symbol-obarray-stack)
 
 (defvar semantic-lex-spp-expanded-macro-stack nil
@@ -134,7 +134,7 @@ currently being expanded."
 ;;
 (defsubst semantic-lex-spp-symbol (name)
   "Return spp symbol with NAME or nil if not found.
-The searcy priority is:
+The search priority is:
   1. DYNAMIC symbols
   2. PROJECT specified symbols.
   3. SYSTEM specified symbols."
@@ -384,7 +384,7 @@ ARGVALUES are values for any arg list, or nil."
 If TOK is made of multiple tokens, convert those to text.  This
 conversion is needed if a macro has a merge symbol in it that
 combines the text of two previously distinct symbols.  For
-exampe, in c:
+example, in c:
 
 #define (a,b) a ## b;
 
@@ -867,8 +867,7 @@ and variable state from the current buffer."
 	 )
     (if (> semantic-lex-spp-hack-depth 5)
 	nil
-      (save-excursion
-	(set-buffer buf)
+      (with-current-buffer buf
 	(erase-buffer)
 	;; Below is a painful hack to make sure everything is setup correctly.
 	(when (not (eq major-mode mode))

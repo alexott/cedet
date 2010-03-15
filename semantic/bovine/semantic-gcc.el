@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-gcc.el,v 1.18 2009-08-28 12:29:00 davenar Exp $
+;; X-RCS: $Id: semantic-gcc.el,v 1.19 2010-03-15 13:40:55 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -36,8 +36,7 @@ to give to the program."
   ;;
   (let ((buff (get-buffer-create " *gcc-query*"))
         (old-lc-messages (getenv "LC_ALL")))
-    (save-excursion
-      (set-buffer buff)
+    (with-current-buffer buff
       (erase-buffer)
       (setenv "LC_ALL" "C")
       (condition-case nil
@@ -58,7 +57,7 @@ to give to the program."
 ;;(semantic-gcc-get-include-paths "c")
 ;;(semantic-gcc-get-include-paths "c++")
 (defun semantic-gcc-get-include-paths (lang)
-  "Return include paths as gcc use them for language LANG."
+  "Return include paths as gcc uses them for language LANG."
   (let* ((gcc-cmd (cond
                    ((string= lang "c") "gcc")
                    ((string= lang "c++") "c++")
@@ -134,9 +133,9 @@ to give to the program."
   "The GCC setup data.
 This is setup by `semantic-gcc-setup'.
 This is an alist, and should include keys of:
-  'version - The version of gcc
-  '--host  - The host symbol.  (Used in include directories)
-  '--prefix - Where GCC was installed.
+  'version - the version of gcc
+  '--host  - the host symbol (used in include directories)
+  '--prefix - where GCC was installed.
 It should also include other symbols GCC was compiled with.")
 
 ;;;###autoload
@@ -166,15 +165,18 @@ It should also include other symbols GCC was compiled with.")
              (gcc-include-c++-ver (expand-file-name ver gcc-include-c++))
              (gcc-include-c++-ver-host (expand-file-name host gcc-include-c++-ver)))
         (setq c-include-path
-              (remove-if-not 'file-accessible-directory-p
-                             (list "/usr/include" gcc-include)))
+              ;; Replace cl-function remove-if-not.
+              (delq nil (mapcar (lambda (d)
+                                  (if (file-accessible-directory-p d) d))
+                                (list "/usr/include" gcc-include))))
         (setq c++-include-path
-              (remove-if-not 'file-accessible-directory-p
-                             (list "/usr/include"
-                                   gcc-include
-                                   gcc-include-c++
-                                   gcc-include-c++-ver
-                                   gcc-include-c++-ver-host)))))
+              (delq nil (mapcar (lambda (d)
+                                  (if (file-accessible-directory-p d) d))
+                                (list "/usr/include"
+                                      gcc-include
+                                      gcc-include-c++
+                                      gcc-include-c++-ver
+                                      gcc-include-c++-ver-host))))))
 
     ;;; Fix-me: I think this part might have been a misunderstanding, but I am not sure.
     ;; If this option is specified, try it both with and without prefix, and with and without host

@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-map.el,v 1.16 2009-08-29 01:29:28 zappo Exp $
+;; X-RCS: $Id: srecode-map.el,v 1.17 2010-03-15 13:40:55 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -41,7 +41,7 @@
 ;;
 
 (defvar srecode-current-map nil
-  "The current map for global SRecode templtes.")
+  "The current map for global SRecode templates.")
 
 (defcustom srecode-map-save-file (expand-file-name "~/.srecode/srecode-map")
   "The save location for SRecode's map file.
@@ -396,7 +396,7 @@ Return non-nil if the map changed."
   (list (srecode-map-base-template-dir)
 	(expand-file-name "~/.srecode/")
 	)
-  "*Global load path for SRecode template files."
+  "Global load path for SRecode template files."
   :group 'srecode
   :type '(repeat file)
   :set 'srecode-map-load-path-set)

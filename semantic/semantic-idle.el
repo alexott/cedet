@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.62 2010-02-27 03:58:03 zappo Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.63 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -136,7 +136,7 @@ If ARG is nil, then toggle."
          'semantic-idle-scheduler-mode arg)))
 
 (defcustom semantic-idle-scheduler-mode-hook nil
-  "*Hook run at the end of function `semantic-idle-scheduler-mode'."
+  "Hook run at the end of function `semantic-idle-scheduler-mode'."
   :group 'semantic
   :type 'hook)
 
@@ -349,8 +349,7 @@ is called that work will be done then instead."
   "Do long-processing work for for BUFFER.
 Uses `semantic-safe' and returns the output.
 Returns t of all processing succeeded."
-  (save-excursion
-    (set-buffer buffer)
+  (with-current-buffer buffer
     (not (and
 	  ;; Just in case
 	  (semantic-safe "Idle Work Parse Error: %S"
@@ -726,7 +725,9 @@ This can prevent minibuffer resizing in idle time."
 
 (defcustom semantic-idle-summary-function
   'semantic-format-tag-summarize-with-file
-  "*Function to use when displaying tag information during idle time.
+  "Function to call when displaying tag information during idle time.
+This function should take a single argument, a Semantic tag, and
+return a string to display.
 Some useful functions are found in `semantic-format-tag-functions'."
   :group 'semantic
   :type semantic-format-tag-custom-list)
@@ -742,7 +743,7 @@ If semanticdb is not in use, use the current buffer only."
 (defun semantic-idle-summary-current-symbol-info-brutish ()
   "Return a string message describing the current context.
 Gets a symbol with `semantic-ctxt-current-thing' and then
-trys to find it with a deep targetted search."
+tries to find it with a deep targeted search."
   ;; Try the current "thing".
   (let ((sym (car (semantic-ctxt-current-thing))))
     (when sym
@@ -767,7 +768,7 @@ Use the semantic analyzer to find the symbol information."
 
 (defun semantic-idle-summary-current-symbol-info-default ()
   "Return a string message describing the current context.
-This functin will disable loading of previously unloaded files
+This function will disable loading of previously unloaded files
 by semanticdb as a time-saving measure."
   (let (
 	(semanticdb-find-default-throttle
@@ -834,10 +835,8 @@ current tag to display information."
              (str (cond ((stringp found) found)
                         ((semantic-tag-p found)
                          (funcall semantic-idle-summary-function
-                                  found nil t))))
-	     )
+                                  found nil t)))))
 	;; Show the message with eldoc functions
-        (require 'eldoc)
         (unless (and str (boundp 'eldoc-echo-area-use-multiline-p)
                      eldoc-echo-area-use-multiline-p)
           (let ((w (1- (window-width (minibuffer-window)))))
@@ -883,8 +882,7 @@ visible, then highlight it."
 	 (pulse-flag nil)
 	 )
     (cond ((semantic-overlay-p region)
-	   (save-excursion
-	     (set-buffer (semantic-overlay-buffer region))
+	   (with-current-buffer (semantic-overlay-buffer region)
 	     (goto-char (semantic-overlay-start region))
 	     (when (pos-visible-in-window-p
 		    (point) (get-buffer-window (current-buffer) 'visible))

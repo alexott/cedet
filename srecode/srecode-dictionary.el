@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-dictionary.el,v 1.14 2010-02-22 02:41:07 zappo Exp $
+;; X-RCS: $Id: srecode-dictionary.el,v 1.15 2010-03-15 13:40:55 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -22,7 +22,7 @@
 
 ;;; Commentary:
 ;;
-;; Dictionaries contain lists of names and their assocaited values.
+;; Dictionaries contain lists of names and their associated values.
 ;; These dictionaries are used to fill in macros from recoder templates.
 
 ;;; Code:
@@ -146,7 +146,7 @@ is the same as belongs to the parent dictionary.
 The dictionary is initialized with variables setup for that
 buffer's table.
 If BUFFER-OR-PARENT is t, then this dictionary should not be
-assocated with a buffer or parent."
+associated with a buffer or parent."
   (save-excursion
     (let ((parent nil)
 	  (buffer nil)
@@ -413,10 +413,10 @@ inserted with a new editable field.")
   "Convert this field into an insertable string."
   ;; If we are not in a buffer, then this is not supported.
   (when (not (bufferp standard-output))
-    (error "FIELDS invoked while inserting template to non-buffer."))
+    (error "FIELDS invoked while inserting template to non-buffer"))
 
   (if function
-      (error "@todo: Cannot mix field insertion with functions.")
+      (error "@todo: Cannot mix field insertion with functions")
 
     ;; No function.  Perform a plain field insertion.
     ;; We know we are in a buffer, so we can perform the insertion.

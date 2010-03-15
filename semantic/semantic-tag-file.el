@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-tag-file.el,v 1.34 2009-09-17 22:53:36 zappo Exp $
+;; X-RCS: $Id: semantic-tag-file.el,v 1.35 2010-03-15 13:40:55 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -187,12 +187,10 @@ file prototypes belong in."
   (:override
    ;; Perform some default behaviors
    (if (and (fboundp 'ede-header-file) ede-minor-mode)
-       (save-excursion
-         (set-buffer buffer)
+       (with-current-buffer buffer
          (ede-header-file))
      ;; No EDE options for a quick answer.  Search.
-     (save-excursion
-       (set-buffer buffer)
+     (with-current-buffer buffer
        (if (re-search-forward "::Header:: \\([a-zA-Z0-9.]+\\)" nil t)
            (match-string 1))))))
 

@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-symref-list.el,v 1.8 2009-09-11 18:53:27 zappo Exp $
+;; X-RCS: $Id: semantic-symref-list.el,v 1.9 2010-03-15 13:40:55 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -24,8 +24,8 @@
 ;;
 ;; Provide a simple user facing API to finding symbol references.
 ;;
-;; This UI will is the base of some refactoring tools.  For any
-;; refactor, the user will execture `semantic-symref' in a tag.  Once
+;; This UI is the base of some refactoring tools.  For any
+;; refactor, the user will execute `semantic-symref' in a tag.  Once
 ;; that data is collected, the output will be listed in a buffer.  In
 ;; the output buffer, the user can then initiate different refactoring
 ;; operations.
@@ -41,10 +41,10 @@
 (defun semantic-symref ()
   "Find references to the current tag.
 This command uses the currently configured references tool within the
-current project to find references to the current tag. The
+current project to find references to the current tag.  The
 references are the organized by file and the name of the function
 they are used in.
-Display the references in`semantic-symref-results-mode'"
+Display the references in`semantic-symref-results-mode'."
   (interactive)
   (semantic-fetch-tags)
   (let ((ct (semantic-current-tag))
@@ -67,7 +67,7 @@ This command uses the currently configured references tool within the
 current project to find references to the input SYM.  The
 references are the organized by file and the name of the function
 they are used in.
-Display the references in`semantic-symref-results-mode'"
+Display the references in`semantic-symref-results-mode'."
   (interactive (list (car (senator-jump-interactive "Symrefs for: " nil nil t)))
 	       )
   (semantic-fetch-tags)
@@ -142,7 +142,7 @@ RESULTS is an object of class `semantic-symref-results'."
   )
 
 (defun semantic-symref-hide-buffer ()
-  "Hide buffer with sematinc-symref results"
+  "Hide buffer with sematinc-symref results."
   (interactive)
   (bury-buffer))
 
@@ -218,8 +218,7 @@ BUTTON is the button that was clicked."
     (cond
      ((eq state 'closed)
       (toggle-read-only -1)
-      (save-excursion
-	(set-buffer buff)
+      (with-current-buffer buff
 	(dolist (H hits)
 	  (goto-char (point-min))
 	  (forward-line (1- H))

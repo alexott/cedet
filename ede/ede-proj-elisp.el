@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-elisp.el,v 1.40 2009-10-01 02:24:22 zappo Exp $
+;; RCS: $Id: ede-proj-elisp.el,v 1.41 2010-03-15 13:40:54 xscript Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -177,9 +177,8 @@ is found, such as a `-version' variable, or the standard header."
       (let ((vs (oref this versionsource))
 	    (match nil))
 	(while vs
-	  (save-excursion
-	    (set-buffer (find-file-noselect
-			 (ede-expand-filename this (car vs))))
+	  (with-current-buffer (find-file-noselect
+                            (ede-expand-filename this (car vs)))
 	    (goto-char (point-min))
 	    (let ((case-fold-search t))
 	      (if (re-search-forward "-version\\s-+\"\\([^\"]+\\)\"" nil t)
@@ -287,8 +286,7 @@ is found, such as a `-version' variable, or the standard header."
   (let ((ec (ede-expand-filename this "elisp-comp" 'newfile))
 	)
     (if (and ec (file-exists-p ec))
-	(save-excursion
-	  (set-buffer (find-file-noselect ec t))
+	(with-current-buffer (find-file-noselect ec t)
 	  (goto-char (point-min))
 	  (while (re-search-forward "(cons \\([^ ]+\\) load-path)"
 				    nil t)
@@ -427,7 +425,7 @@ Argument THIS is the target which needs to insert an info file."
 
 (defmethod ede-proj-tweak-autoconf ((this ede-proj-target-elisp-autoloads))
   "Tweak the configure file (current buffer) to accomodate THIS."
-  (error "Autoloads not supported in autoconf yet."))
+  (error "Autoloads not supported in autoconf yet"))
 
 (defmethod ede-proj-flush-autoconf ((this ede-proj-target-elisp-autoloads))
   "Flush the configure file (current buffer) to accomodate THIS."
