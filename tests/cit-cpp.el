@@ -1,9 +1,9 @@
 ;;; cit-cpp.el --- C++ specific things for our integ test.
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cit-cpp.el,v 1.8 2009-10-18 16:16:30 zappo Exp $
+;; X-RCS: $Id: cit-cpp.el,v 1.9 2010-03-16 03:05:27 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -163,10 +163,9 @@ MAKE-TYPE is the type of make process to use."
   ;; 1 g) build the sources.
   ;; Direct compile to test that make fails properly.
   (compile ede-make-command)
-  ;; @todo - verify make error status
-  (while compilation-in-progress
-    (accept-process-output)
-    (sit-for 1))
+
+  (cit-wait-for-compilation)
+  (cit-check-compilation-for-error t) ;; That should have errored.
 
   (cit-compile-and-wait)
   )
@@ -191,10 +190,9 @@ Argument MAKE-TYPE is the type of make project to create."
   ;; 1 g) build the sources.
   ;; Direct compile to test that make fails properly.
   (compile ede-make-command)
-  ;; @todo - verify make error status
-  (while compilation-in-progress
-    (accept-process-output)
-    (sit-for 1))
+
+  (cit-wait-for-compilation)
+  (cit-check-compilation-for-error t) ;; that should have errored.
 
   (let ((p (ede-current-project)))
     (if (string= make-type "Automake")
