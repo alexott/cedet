@@ -1,6 +1,6 @@
 ;;; cit-gnustep.el --- Test EDE GNUstep Project
 
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;; Copyright (C) 2008 "Marco (Bj) Bardelli"
 
 ;; Author: Marco (Bj) Bardelli <bardelli.marco@gmail.com>
@@ -97,22 +97,15 @@
       (message "I'll compile this simple example via gcc ... but, use gnustep ... is better ;)")
       (compile "sh -c \"gcc -o Prog main.c\"")
 
-      (while compilation-in-progress
-	(accept-process-output)
-	(sit-for 1))
-
-      (when (re-search-backward " Error " nil t)
-	(error "Compilation failed!"))
-      ;; (unless compilation-in-progress
-      ;; 	(kill-buffer "*compilation*"))
+      (cit-wait-for-compilation)
+      (cit-check-compilation-for-error)
       ))
 
   ;; Let Compilation finish
   (and compilation-in-progress
        (switch-to-buffer-other-window "*compilation*"))
-  (while compilation-in-progress
-    (accept-process-output)
-    (sit-for 1)))
+  (cit-wait-for-compilation)
+  )
 
 (defun cit-step-file (filename)
   "Return a testing filename.
