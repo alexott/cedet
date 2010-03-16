@@ -1,10 +1,10 @@
 ;;; ede-pconf.el --- configure.ac maintenance for EDE
 
-;;  Copyright (C) 1998, 1999, 2000, 2005, 2008, 2009  Eric M. Ludlam
+;;  Copyright (C) 1998, 1999, 2000, 2005, 2008, 2009, 2010  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project
-;; RCS: $Id: ede-pconf.el,v 1.19 2010-03-15 13:40:54 xscript Exp $
+;; RCS: $Id: ede-pconf.el,v 1.20 2010-03-16 02:54:40 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -125,7 +125,11 @@ don't do it.  A value of nil means to just do it.")
 
 	  (while compilation-in-progress
 	    (accept-process-output)
-	    (sit-for 1))
+	    ;; If sit for indicates that input is waiting, then
+	    ;; read and discard whatever it is that is going on.
+	    (when (not (sit-for 1))
+	      (read-event nil nil .1)
+	      ))
 
 	  (with-current-buffer "*compilation*"
 	    (goto-char (point-max))
