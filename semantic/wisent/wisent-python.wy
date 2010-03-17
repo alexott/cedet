@@ -6,7 +6,7 @@
 ;; Maintainer: Richard Kim <ryk@dspwiz.com>
 ;; Created: June 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: wisent-python.wy,v 1.35 2007-03-08 02:12:07 zappo Exp $
+;; X-RCS: $Id: wisent-python.wy,v 1.36 2010-03-17 00:00:53 scymtym Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -62,7 +62,7 @@
 %token <charquote>   BACKSLASH 	  "\\"
 %token <newline>     NEWLINE      "\n"
 %token <indentation> INDENT       "^\\s-+"
-%token <indentation> DEDENT       "[^:INDENT:]" 
+%token <indentation> DEDENT       "[^:INDENT:]"
 %token <indentation> INDENT_BLOCK "(INDENT DEDENT)"
 
 ;; -----------------------------
@@ -160,7 +160,7 @@
 
 %keyword CONTINUE	     "continue"
 %put     CONTINUE summary
-"Skip to the next interation of enclosing for or whilte loop"
+"Skip to the next interation of enclosing for or while loop"
 
 %keyword DEF	     "def"
 %put     DEF summary
@@ -219,7 +219,7 @@
 "Binary operator that tests for object equality"
 
 %keyword LAMBDA	     "lambda"
-%put     LAMDA summary
+%put     LAMBDA summary
 "Create anonymous function"
 
 %keyword NOT	     "not"
