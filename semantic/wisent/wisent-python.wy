@@ -6,7 +6,7 @@
 ;; Maintainer: Richard Kim <ryk@dspwiz.com>
 ;; Created: June 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: wisent-python.wy,v 1.37 2010-03-17 00:06:28 scymtym Exp $
+;; X-RCS: $Id: wisent-python.wy,v 1.38 2010-03-17 00:49:32 scymtym Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -145,6 +145,10 @@
 %keyword AND	     "and"
 %put     AND summary
 "Logical AND binary operator ... "
+
+%keyword AS          "as"
+%put     AS summary
+"EXPR as NAME makes value of EXPR available as variable NAME"
 
 %keyword ASSERT	     "assert"
 %put     ASSERT summary
@@ -514,20 +518,20 @@ import_as_name_list
 
 ;; import_as_name: NAME [NAME NAME]
 import_as_name
-  : NAME name_name_opt
+  : NAME as_name_opt
     ()
   ;
 
-;; dotted_as_name: dotted_name [NAME NAME]
+;; dotted_as_name: dotted_name [AS NAME]
 dotted_as_name
-  : dotted_name name_name_opt
+  : dotted_name as_name_opt
   ;
 
-;; [NAME NAME]
-name_name_opt
+;; [AS NAME]
+as_name_opt
   : ;;EMPTY
-  | NAME NAME
-    ()
+  | AS NAME
+    (identity $2)
   ;
 
 ;; dotted_name: NAME ('.' NAME)*
