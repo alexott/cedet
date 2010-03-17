@@ -6,7 +6,7 @@
 ;; Maintainer: Richard Kim <ryk@dspwiz.com>
 ;; Created: June 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: wisent-python.wy,v 1.36 2010-03-17 00:00:53 scymtym Exp $
+;; X-RCS: $Id: wisent-python.wy,v 1.37 2010-03-17 00:06:28 scymtym Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -443,7 +443,9 @@ testlist_opt
 
 ;; yield_stmt: 'yield' testlist
 yield_stmt
-  : YIELD testlist
+  : YIELD
+    (CODE-TAG $1 nil)
+  | YIELD testlist
     (CODE-TAG $1 nil)
   ;
 
