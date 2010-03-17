@@ -3,7 +3,7 @@
 ;;; Copyright (C) 2003, 2004, 2007, 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-utest.el,v 1.15 2010-02-09 00:21:12 scymtym Exp $
+;; X-RCS: $Id: semantic-utest.el,v 1.16 2010-03-17 00:11:06 scymtym Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -233,6 +233,11 @@ def fun1(a,b,c):
 def fun2(a,b,c): #1
   return b
 
+def fun_yield():
+  yield
+  yield 1
+  yield 1, 2
+
 # Statements
 for x in y:
     print x
@@ -387,6 +392,8 @@ r, s, t = 1, 2, '3'
         (reparse-symbol function_parameters)
         (overlay 45 46 "tst.py"))))
      nil (overlay 32 65 "tst.py"))
+    ("fun_yield" function
+     nil nil nil)
 
     ;; Statements
     ("for"     code     nil nil nil)
