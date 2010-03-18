@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cogre-semantic.el,v 1.9 2009-04-23 03:28:09 zappo Exp $
+;; X-RCS: $Id: cogre-semantic.el,v 1.10 2010-03-18 01:03:51 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -141,6 +141,23 @@ Goes to the original location of TAG, and tries to re-find that tag."
       (oset node methods (nreverse method))
       ;; Tada!
       )))
+
+(defmethod cogre-peer-jump-to-source ((peer cogre-peer-semantic-class) node)
+  "Jump to the source stored in the tag in PEER.
+NODE is not used."
+  (let ((tag (oref peer tag))
+	(buff nil)
+	)
+    (when (not tag) (error "No tag found on current COGRE node"))
+    (save-excursion
+      (semantic-go-to-tag tag)
+      (setq buff (current-buffer))
+      )
+    (switch-to-buffer-other-window buff)
+    (semantic-go-to-tag tag)
+    (pulse-momentary-highlight-one-line (point))
+    ))
+
 
 (defmethod cogre-peer-update-from-element ((peer cogre-peer-semantic-class) element)
   "Update the PEER object, from the ELEMENT data, changing the environment."
