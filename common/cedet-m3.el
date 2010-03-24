@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-m3.el,v 1.3 2010-03-24 16:18:54 zappo Exp $
+;; X-RCS: $Id: cedet-m3.el,v 1.4 2010-03-24 16:29:37 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -256,7 +256,10 @@ ATTRIBUTES are easymenu compatible attributes."
 					    (cdr (oref ctxt :bounds))))
 
 	;; If there are completions, then add some in.
-	(when (and completions (> (length completions) 1))
+	;; Don't use completions if there is only one, and SYM
+	;; is a tag.
+	(when (and completions (or (> (length completions) 1)
+				   (stringp sym)))
 	  (dolist (T (reverse completions))
 	    (push (cedet-m3-menu-item
 		   (concat "==> " (semantic-format-tag-name T))
