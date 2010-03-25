@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-prog.el,v 1.12 2010-03-15 13:40:54 xscript Exp $
+;; RCS: $Id: ede-proj-prog.el,v 1.13 2010-03-25 15:07:50 xscript Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -28,8 +28,6 @@
 (eval-when-compile (require 'cl))
 (require 'ede-pmake)
 (require 'ede-proj-obj)
-
-(declare-function ede-shell-run-something "ede-shell")
 
 ;;; Code:
 (defclass ede-proj-target-makefile-program
