@@ -1,9 +1,9 @@
 ;;; cogre-semantic.el --- Convert Semantic TAGS to COGRE nodes.
 ;;
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cogre-semantic.el,v 1.10 2010-03-18 01:03:51 zappo Exp $
+;; X-RCS: $Id: cogre-semantic.el,v 1.11 2010-03-26 00:57:15 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -339,17 +339,37 @@ The parent to CLASS, CLASS, and all of CLASSes children will be shown."
 	 (stripped (when byclass (semanticdb-strip-find-results byclass t)))
 	 (classes (when stripped (semantic-find-tags-by-type "class" stripped)))
 	 (class-tok (car classes))
-	 (parent (semantic-tag-type-superclasses class-tok))
-	 (ptags nil)
-
-	 (children
-	  (semanticdb-strip-find-results
-	   (semanticdb-find-tags-subclasses-of-type
-	    (semantic-tag-name class-tok) (current-buffer))))
 	 )
 
     (unless class-tok
       (error "Could not find class %S" class))
+
+    ;; Create a graph.
+    (cogre (semantic-tag-name class-tok))
+
+    ;; Create this class
+    (let ((CT (cogre-semantic-tag-to-node class-tok)))
+      ;; Create the parents
+      (cogre-uml-parent-classes class-tok CT)
+      ;; Create the children nodes
+      (cogre-uml-children-classes class-tok CT)
+      )
+      
+    ;; Run the layout engine.
+    (condition-case nil
+	(cogre-layout)
+      (error
+       (message "Layout engine failed. You need to install Graphviz.")
+       ))
+    ))
+
+
+(defun cogre-uml-parent-classes (class-tok tag-node)
+  "Create nodes for the parents of the tag CLASS-TOK.
+Argument TAG-NODE is the cogre node that belongs to CLASS-TOK
+that these parents will be linked to."
+  (let* ((parent (semantic-tag-type-superclasses class-tok))
+	 (ptags nil))
 
     (save-excursion
       ;; Go to our token, and then look up the parents.
@@ -360,30 +380,43 @@ The parent to CLASS, CLASS, and all of CLASSes children will be shown."
 		ptags))
 	))
 
-    ;; Create a graph.
-    (cogre (semantic-tag-name class-tok))
+    ;; Create all the parent nodes in the graph, then connect
+    ;; them to C.
+    (dolist (P ptags)
+      (when P
+	(let ((pn (cogre-semantic-tag-to-node P)))
+	  ;; Create the link
+	  (make-instance 'cogre-inherit :start tag-node :end pn)
+	  ;; Recurse
+	  (cogre-uml-parent-classes P pn)
+	  )))
 
-    ;; Create this class
-    (let ((CT (cogre-semantic-tag-to-node class-tok)))
+    ))
 
-      ;; Create all the parent nodes in the graph, then connect
-      ;; them to C.
-      (dolist (P ptags)
-	(when P
-	  (let ((pn (cogre-semantic-tag-to-node P)))
-	    (make-instance 'cogre-inherit :start CT :end pn))))
-      
-      ;; Create all the children nodes, and align them.
-      (dolist (C children)
-	(let ((cn (cogre-semantic-tag-to-node C)))
-	(make-instance 'cogre-inherit :start cn :end CT))))
-      
-    ;; Run the layout engine.
-    (condition-case nil
-	(cogre-layout)
-      (error
-       (message "Layout engine failed. You need to install Graphviz.")
-       ))
+(defun cogre-uml-children-classes (class-tok tag-node)
+  "Create nodes for the children of CLASS-TOK.
+Argument TAG-NODE is the cogre node that belongs CLASS-TOK
+that the children of TAG-NODE will be linked to."
+  (let* ((children nil))
+
+    ;; Find all the children.
+    (save-excursion
+      (semantic-go-to-tag class-tok)
+      (setq children
+	    (semanticdb-strip-find-results
+	     (semanticdb-find-tags-subclasses-of-type
+	      (semantic-tag-name class-tok) (current-buffer))))
+      )
+
+    ;; Create all the children nodes, and align them.
+    (dolist (C children)
+      (let ((cn (cogre-semantic-tag-to-node C)))
+	;; Create the link
+	(make-instance 'cogre-inherit :start cn :end tag-node)
+	;; Recurse
+	(cogre-uml-children-classes C cn)
+	))
+    
     ))
 
 (provide 'cogre-semantic)
