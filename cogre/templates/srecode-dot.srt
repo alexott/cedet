@@ -1,6 +1,6 @@
 ;; srecode-dot.srt --- 
 ;;
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;;
@@ -50,7 +50,7 @@ template digraph-tag :blank
 "Insert a digraph structure."
 ----
 digraph structs {
-	node [shape=record];
+	node [shape=record fontsize=12];
 	{{^}}
 }
 ----
