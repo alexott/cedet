@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cogre-semantic.el,v 1.11 2010-03-26 00:57:15 zappo Exp $
+;; X-RCS: $Id: cogre-semantic.el,v 1.12 2010-03-26 22:54:56 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -334,12 +334,15 @@ The parent to CLASS, CLASS, and all of CLASSes children will be shown."
   
   (message "Building UML diagram for %S" class)
 
-  (let* ((brute (semanticdb-brute-deep-find-tags-by-name class (current-buffer)))
-	 (byclass (when brute (semanticdb-find-tags-by-class 'type brute)))
-	 (stripped (when byclass (semanticdb-strip-find-results byclass t)))
-	 (classes (when stripped (semantic-find-tags-by-type "class" stripped)))
-	 (class-tok (car classes))
-	 )
+  (let*
+      ((classes
+	(when (not (semantic-tag-p class))
+	  (let* ((brute (semanticdb-brute-deep-find-tags-by-name class (current-buffer)))
+		 (byclass (when brute (semanticdb-find-tags-by-class 'type brute)))
+		 (stripped (when byclass (semanticdb-strip-find-results byclass t))))
+	    (when stripped (semantic-find-tags-by-type "class" stripped)))))
+       (class-tok (if (semantic-tag-p class) class (car classes)))
+       )
 
     (unless class-tok
       (error "Could not find class %S" class))
@@ -405,7 +408,8 @@ that the children of TAG-NODE will be linked to."
       (setq children
 	    (semanticdb-strip-find-results
 	     (semanticdb-find-tags-subclasses-of-type
-	      (semantic-tag-name class-tok) (current-buffer))))
+	      (semantic-tag-name class-tok) (current-buffer))
+	     t))
       )
 
     ;; Create all the children nodes, and align them.
