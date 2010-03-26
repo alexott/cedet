@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-mru-bookmark.el,v 1.19 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semantic-mru-bookmark.el,v 1.20 2010-03-26 22:18:03 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -253,9 +253,9 @@ If ARG is nil, then toggle."
 
 ;;;###autoload
 (defcustom global-semantic-mru-bookmark-mode nil
-  "*If non-nil enable global use of variable `semantic-mru-bookmark-mode'.
-When this mode is enabled, changes made to a buffer are highlighted
-until the buffer is reparsed."
+  "If non-nil, enable `semantic-mru-bookmark-mode' globally.
+When this mode is enabled, Emacs keeps track of which tags have
+been edited, and you can re-visit them with \\[semantic-mrub-switch-tags]."
   :group 'semantic
   :group 'semantic-modes
   :type 'boolean
@@ -310,8 +310,8 @@ minor mode is enabled."
 ;;;###autoload
 (defun semantic-mru-bookmark-mode (&optional arg)
   "Minor mode for tracking tag-based bookmarks automatically.
-Tag based bookmarks a tracked based on editing and viewing habits
-and can then be navigated via the MRU bookmark keymap.
+When this mode is enabled, Emacs keeps track of which tags have
+been edited, and you can re-visit them with \\[semantic-mrub-switch-tags].
 
 \\{semantic-mru-bookmark-mode-map}
 
@@ -330,7 +330,7 @@ minor mode is enabled."
           (not semantic-mru-bookmark-mode)))
   (semantic-mru-bookmark-mode-setup)
   (run-hooks 'semantic-mru-bookmark-mode-hook)
-  (if (interactive-p)
+  (if (called-interactively-p 'interactive)
       (message "mru-bookmark minor mode %sabled"
                (if semantic-mru-bookmark-mode "en" "dis")))
   (semantic-mode-line-update)
@@ -432,7 +432,7 @@ the mru bookmark stack."
 ;  "Set this buffer's mark to POS.
 ;If `semantic-mru-bookmark-mode' is active, also push a tag onto
 ;the mru bookmark stack."
-;  (when (and semantic-mru-bookmark-mode (interactive-p))
+;  (when (and semantic-mru-bookmark-mode (called-interactively-p 'interactive))
 ;    (semantic-mrub-push semantic-mru-bookmark-ring
 ;			(point)
 ;			'mark))

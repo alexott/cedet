@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-files.el,v 1.21 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: ede-files.el,v 1.22 2010-03-26 22:18:01 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -418,7 +418,7 @@ If FORCE equals 'newfile, then the cache is ignored."
 	      (setq ans calc))
 	  ;; If we failed to calculate something, we
 	  ;; should add it to the hash, but ONLY if we are not
-	  ;; going to FORCE the file into existance.
+	  ;; going to FORCE the file into existence.
 	  (when (not force)
 	    (ede-locate-add-file-to-hash loc filename 'nomatch))))
       ))
@@ -462,7 +462,7 @@ doesn't exist."
 
 (defmethod ede-expand-filename ((this ede-target) filename &optional force)
   "Return a fully qualified file name based on target THIS.
-FILENAME should a a filename which occurs in a directory in which THIS works.
+FILENAME should be a filename which occurs in a directory in which THIS works.
 Optional argument FORCE forces the default filename to be provided even if it
 doesn't exist."
   (ede-expand-filename (ede-target-parent this) filename force))

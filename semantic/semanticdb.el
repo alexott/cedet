@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb.el,v 1.140 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semanticdb.el,v 1.141 2010-03-26 22:18:05 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -445,7 +445,8 @@ See the file semantic-scope.el for an example."
   "Get a cache object on TABLE of class DESIRED-CLASS.
 This method will create one if none exists with no init arguments
 other than :table."
-  (assert (child-of-class-p desired-class 'semanticdb-abstract-cache))
+  (assert (child-of-class-p desired-class 'semanticdb-abstract-cache)
+          (error "Invalid SemanticDB cache"))
   (let ((cache (oref table cache))
 	(obj nil))
     (while (and (not obj) cache)
@@ -495,7 +496,8 @@ See the file semantic-scope.el for an example."
   "Get a cache object on DB of class DESIRED-CLASS.
 This method will create one if none exists with no init arguments
 other than :table."
-  (assert (child-of-class-p desired-class 'semanticdb-abstract-db-cache))
+  (assert (child-of-class-p desired-class 'semanticdb-abstract-db-cache)
+          (error "Invalid SemanticDB cache"))
   (let ((cache (oref db cache))
 	(obj nil))
     (while (and (not obj) cache)
@@ -744,13 +746,13 @@ all files of any type."
 
 (defmethod semanticdb-equivalent-mode ((table semanticdb-abstract-table) &optional buffer)
   "Return non-nil if TABLE's mode is equivalent to BUFFER.
-Equivalent modes are specified by by `semantic-equivalent-major-modes'
+Equivalent modes are specified by the `semantic-equivalent-major-modes'
 local variable."
   nil)
 
 (defmethod semanticdb-equivalent-mode ((table semanticdb-table) &optional buffer)
   "Return non-nil if TABLE's mode is equivalent to BUFFER.
-Equivalent modes are specified by by `semantic-equivalent-major-modes'
+Equivalent modes are specified by the `semantic-equivalent-major-modes'
 local variable."
   (save-excursion
     (if buffer (set-buffer buffer))

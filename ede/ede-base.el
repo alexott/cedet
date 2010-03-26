@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-base.el,v 1.3 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: ede-base.el,v 1.4 2010-03-26 22:18:01 xscript Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -422,7 +422,7 @@ Specifying PARENT is useful for sub-sub projects relative to the root project."
 
 ;;;###autoload
 (defmethod ede-name ((this ede-target))
-  "Return the name of THIS targt."
+  "Return the name of THIS target."
   (oref this name))
 
 (defmethod ede-target-name ((this ede-target))
@@ -504,7 +504,7 @@ Also do a quick check to see if there is a Documentation tag in this BUFFER."
 	(ede-buffer-documentation-files cp (current-buffer))))))
 
 (defmethod ede-documentation ((this ede-project))
-  "Return a list of files that provides documentation.
+  "Return a list of files that provide documentation.
 Documentation is not for object THIS, but is provided by THIS for other
 files in the project."
   (let ((targ (oref this targets))
@@ -519,7 +519,7 @@ files in the project."
     found))
 
 (defmethod ede-documentation ((this ede-target))
-  "Return a list of files that provides documentation.
+  "Return a list of files that provide documentation.
 Documentation is not for object THIS, but is provided by THIS for other
 files in the project."
   nil)
@@ -569,7 +569,7 @@ files in the project."
 ;;
 ;;;###autoload
 (defun ede-adebug-project ()
-  "Run adebug against the current ede project.
+  "Run adebug against the current EDE project.
 Display the results as a debug list."
   (interactive)
   (require 'data-debug)
@@ -580,7 +580,7 @@ Display the results as a debug list."
 
 ;;;###autoload
 (defun ede-adebug-project-parent ()
-  "Run adebug against the current ede parent project.
+  "Run adebug against the current EDE parent project.
 Display the results as a debug list."
   (interactive)
   (require 'data-debug)
@@ -591,7 +591,7 @@ Display the results as a debug list."
 
 ;;;###autoload
 (defun ede-adebug-project-root ()
-  "Run adebug against the current ede parent project.
+  "Run adebug against the current EDE parent project.
 Display the results as a debug list."
   (interactive)
   (require 'data-debug)
@@ -603,7 +603,7 @@ Display the results as a debug list."
 
 ;;; Hooks & Autoloads
 ;;
-;;  These let us watch various activities, and respond apropriatly.
+;;  These let us watch various activities, and respond appropriately.
 
 (add-hook 'edebug-setup-hook
 	  (lambda ()

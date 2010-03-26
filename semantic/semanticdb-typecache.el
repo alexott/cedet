@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semanticdb-typecache.el,v 1.43 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semanticdb-typecache.el,v 1.44 2010-03-26 22:18:05 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -104,7 +104,7 @@ Said object must support `semantic-reset' methods.")
 	 )
     (object-add-to-list cache 'dependants dep)))
 
-(defun semanticdb-typecache-length(thing)
+(defun semanticdb-typecache-length (thing)
   "How long is THING?
 Debugging function."
   (cond ((semanticdb-typecache-child-p thing)
@@ -395,7 +395,7 @@ FIND-FILE-MATCH is non-nil to force all found tags to be loaded into a buffer.")
 (defun semanticdb-typecache-find-default (type &optional path find-file-match)
   "Default implementation of `semanticdb-typecache-find'.
 TYPE is the datatype to find.
-PATH is the search path.. which should be one table object.
+PATH is the search path, which should be one table object.
 If FIND-FILE-MATCH is non-nil, then force the file belonging to the
 found tag to be loaded."
   (semanticdb-typecache-find-method (or path semanticdb-current-table)

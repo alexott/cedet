@@ -6,7 +6,7 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 10 Nov 2000
 ;; Keywords: syntax
-;; X-RCS: $Id: senator.el,v 1.145 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: senator.el,v 1.146 2010-03-26 22:18:05 xscript Exp $
 
 ;; This file is not part of Emacs
 
@@ -2637,8 +2637,9 @@ used by add log.")
     (when ft
       (ring-insert senator-tag-ring ft)
       (kill-ring-save (semantic-tag-start ft) (semantic-tag-end ft))
-      (when (interactive-p)
-        (message "Use C-y to yank text.  Use `senator-yank-tag' for prototype insert."))
+      (when (called-interactively-p 'interactive)
+        (message "Use C-y to yank text.  \
+Use `senator-yank-tag' for prototype insert."))
       )
     ft))
 (semantic-alias-obsolete 'senator-copy-token 'senator-copy-tag)
@@ -2651,8 +2652,9 @@ the kill ring.  Retrieve that text with \\[yank]."
   (let ((ct (senator-copy-tag))) ;; this handles the reparse for us.
     (kill-region (semantic-tag-start ct)
                  (semantic-tag-end ct))
-    (when (interactive-p)
-      (message "Use C-y to yank text.  Use `senator-yank-tag' for prototype insert."))
+    (when (called-interactively-p 'interactive)
+      (message "Use C-y to yank text.  \
+Use `senator-yank-tag' for prototype insert."))
     ))
 (semantic-alias-obsolete 'senator-kill-token 'senator-kill-tag)
 
@@ -2665,10 +2667,9 @@ yanked to."
       (let ((ft (ring-ref senator-tag-ring 0)))
           (semantic-foreign-tag-check ft)
           (semantic-insert-foreign-tag ft)
-          (when (interactive-p)
+          (when (called-interactively-p 'interactive)
             (message "Use C-y to recover the yank the text of %s."
-                     (semantic-tag-name ft)))
-          )))
+                     (semantic-tag-name ft))))))
 (semantic-alias-obsolete 'senator-yank-token 'senator-yank-tag)
 
 (defun senator-copy-tag-to-register (register &optional kill-flag)

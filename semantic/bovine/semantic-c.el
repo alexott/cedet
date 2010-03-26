@@ -3,7 +3,7 @@
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-c.el,v 1.142 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semantic-c.el,v 1.143 2010-03-26 22:18:06 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -206,7 +206,7 @@ to store your global macros in a more natural way."
 
 ;;;###autoload
 (defcustom semantic-c-member-of-autocast 't
-  "Non-nil means classes with a '->' operator will cast to it's return type.
+  "Non-nil means classes with a '->' operator will cast to its return type.
 
 For Examples:
 
@@ -618,7 +618,7 @@ It is really there, but if a majority of uses is to squeeze out
 the second namespace in use, then it should not be included.
 
 If you are having problems with smart completion and STL templates,
-it may that this is set incorrectly.  After changing the value
+it may be that this is set incorrectly.  After changing the value
 of this flag, you will need to delete any semanticdb cache files
 that may have been incorrectly parsed."
   :group 'semantic
@@ -795,7 +795,7 @@ Use semantic-cpp-lexer for parsing text inside a CPP macro."
 
 (define-mode-local-override semantic-parse-region c-mode
   (start end &optional nonterminal depth returnonerror)
-  "Calls 'semantic-parse-region-default', except in a macro expansion.
+  "Calls `semantic-parse-region-default', except in a macro expansion.
 MACRO expansion mode is handled through the nature of Emacs's non-lexical
 binding of variables.
 START, END, NONTERMINAL, DEPTH, and RETURNONERRORS are the same
@@ -890,7 +890,7 @@ the regular parser."
 		(funcall mode)
 	      (error
 	       (if (y-or-n-p
-		    (format "There was an error initializing %s in buffer \"%s\". Debug your hooks? "
+		    (format "There was an error initializing %s in buffer \"%s\".  Debug your hooks? "
 			    mode (buffer-name)))
 		   (semantic-c-debug-mode-init mode)
 		 (message "Macro parsing state may be broken...")
@@ -940,7 +940,7 @@ the regular parser."
 (defun semantic-c-debug-mode-init (mm)
   "Debug mode init for major mode MM after we're done parsing now."
   (interactive (list semantic-c-debug-mode-init-last-mode))
-  (if (interactive-p)
+  (if (called-interactively-p 'interactive)
       ;; Do the debug.
       (progn
 	(switch-to-buffer (get-buffer-create "*MODE HACK TEST*"))
@@ -958,9 +958,9 @@ the regular parser."
     (switch-to-buffer-other-window
      (get-buffer-create "*MODE HACK TEST*"))
     (erase-buffer)
-    (insert "A failure occured while parsing your buffers.
+    (insert "A failure occurred while parsing your buffers.
 
-The failure occured while attempting to initialize " (symbol-name mm) " in a
+The failure occurred while attempting to initialize " (symbol-name mm) " in a
 buffer not associated with a file.  To debug this problem, type
 
 M-x semantic-c-debug-mode-init
@@ -1173,7 +1173,7 @@ now.
   "At parse time, assign a class or struct name text here.
 It is picked up by `semantic-c-reconstitute-token' to determine
 if something is a constructor.  Value should be:
-  ( TYPENAME .  TYPEOFTYPE)
+  (TYPENAME .  TYPEOFTYPE)
 where typename is the name of the type, and typeoftype is \"class\"
 or \"struct\".")
 
@@ -1464,7 +1464,7 @@ Optional PARENT and COLOR as specified with
 
 (define-mode-local-override semantic-format-tag-uml-prototype
   c-mode (token &optional parent color)
-  "Return an uml string describing TOKEN for C and C++.
+  "Return an UML string describing TOKEN for C and C++.
 Optional PARENT and COLOR as specified with
 `semantic-abbreviate-tag-default'."
   ;; If we have special template things, append.
@@ -1586,7 +1586,7 @@ TYPE-DECLARATION is passed through."
 (defun semantic-c-dereference-namespace (type scope &optional type-declaration)
   "Dereference namespace which might hold an 'alias' for TYPE.
 Such an alias can be created through 'using' statements in a
-namespace declaration. This function checks the namespaces in
+namespace declaration.  This function checks the namespaces in
 SCOPE for such statements."
   (let ((scopetypes (oref scope scopetypes))
 	typename currentns tmp usingname result namespaces)
@@ -1723,7 +1723,7 @@ Handle typedef, template instantiation, and '->' operator."
     (list type type-declaration))
 
 (define-mode-local-override semantic-analyze-type-constants c-mode (type)
-  "When TYPE is a tag for an enum, return it's parts.
+  "When TYPE is a tag for an enum, return its parts.
 These are constants which are of type TYPE."
   (if (and (eq (semantic-tag-class type) 'type)
 	   (string= (semantic-tag-type type) "enum"))
@@ -1864,7 +1864,7 @@ For types with a :parent, create faux namespaces to put TAG into."
       (semantic-idle-summary-current-symbol-info-default))))
 
 (defvar-mode-local c-mode semantic-orphaned-member-metaparent-type "struct"
-  "When lost memberes are found in the class hierarchy generator, use a struct.")
+  "When lost members are found in the class hierarchy generator, use a struct.")
 
 (defvar-mode-local c-mode semantic-symbol->name-assoc-list
   '((type     . "Types")
@@ -1890,7 +1890,7 @@ For types with a :parent, create faux namespaces to put TAG into."
   "Separator characters between something of a given type, and a field.")
 
 (defvar-mode-local c-mode semantic-command-separation-character ";"
-  "Commen separation character for C")
+  "Command separation character for C")
 
 (defvar-mode-local c-mode senator-step-at-tag-classes '(function variable)
   "Tag classes where senator will stop at the end.")

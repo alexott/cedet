@@ -2,7 +2,7 @@
 
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
 
-;; X-CVS: $Id: semantic-lex.el,v 1.56 2010-03-15 13:40:55 xscript Exp $
+;; X-CVS: $Id: semantic-lex.el,v 1.57 2010-03-26 22:18:03 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -951,7 +951,7 @@ START and END define the bounds of the token in the current buffer.
 Optional STR is the string for the token only if the bounds in
 the buffer do not cover the string they represent.  (As from
 macro expansion.)"
-  ;; This if statement checks the existance of a STR argument at
+  ;; This if statement checks the existence of a STR argument at
   ;; compile time, where STR is some symbol or constant.  If the
   ;; variable STr (runtime) is nil, this will make an incorrect decision.
   ;;

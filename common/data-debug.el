@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: data-debug.el,v 1.26 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: data-debug.el,v 1.27 2010-03-26 22:17:57 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -847,7 +847,7 @@ If PARENT is non-nil, it is somehow related as a parent to thing."
 ;;
 (defgroup data-debug nil
   "data-debug group."
-  :group 'languages)
+  :group 'extensions)
 
 (defvar data-debug-mode-syntax-table
   (let ((table (make-syntax-table (standard-syntax-table))))

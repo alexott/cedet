@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-ia.el,v 1.34 2010-02-26 01:58:36 zappo Exp $
+;; X-RCS: $Id: semantic-ia.el,v 1.35 2010-03-26 22:18:02 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -52,8 +52,8 @@
 ;; functions.
 
 (defcustom semantic-ia-completion-format-tag-function
-  'semantic-prototype-nonterminal
-  "*Function used to convert a tag to a string during completion."
+  'semantic-format-tag-prototype
+  "Function used to convert a tag to a string during completion."
   :group 'semantic
   :type semantic-format-tag-custom-list)
 
@@ -90,18 +90,20 @@ Use `semantic-analyze-possible-completions' instead."
     (semantic-analyze-possible-completions context))
 
 ;;;###autoload
-(defun semantic-ia-complete-symbol (point)
-  "Complete the current symbol at POINT.
+(defun semantic-ia-complete-symbol (&optional pos)
+  "Complete the current symbol at POS.
+If POS is nil, default to point.
 Completion options are calculated with `semantic-analyze-possible-completions'."
   (interactive "d")
+  (or pos (setq pos (point)))
   ;; Calculating completions is a two step process.
   ;;
   ;; The first analyzer the current context, which finds tags
   ;; for all the stuff that may be references by the code around
-  ;; POINT.
+  ;; POS.
   ;;
   ;; The second step derives completions from that context.
-  (let* ((a (semantic-analyze-current-context point))
+  (let* ((a (semantic-analyze-current-context pos))
 	 (syms (semantic-analyze-possible-completions a))
 	 (pre (car (reverse (oref a prefix))))
 	 )

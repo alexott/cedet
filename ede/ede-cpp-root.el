@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-cpp-root.el,v 1.22 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: ede-cpp-root.el,v 1.23 2010-03-26 22:18:01 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -334,7 +334,7 @@ exist, it should return nil."
 	       )
    )
   "EDE cpp-root project class.
-Each directory needs a a project file to control it.")
+Each directory needs a project file to control it.")
 
 ;;; INIT
 ;;

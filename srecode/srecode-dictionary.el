@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-dictionary.el,v 1.15 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: srecode-dictionary.el,v 1.16 2010-03-26 22:18:07 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -232,7 +232,7 @@ You can add several dictionaries to the same section entry.
 For each dictionary added to a variable, the block of codes in
 the template will be repeated.
 
-If optional argument SHOW-ONLY is non-nil, then don't add a new dictionarly
+If optional argument SHOW-ONLY is non-nil, then don't add a new dictionary
 if there is already one in place.  Also, don't add FIRST/LAST entries.
 These entries are not needed when we are just showing a section.
 
@@ -397,7 +397,7 @@ FUNCTION and DICTIONARY are as for the baseclass."
 (defclass srecode-field-value (srecode-dictionary-compound-value)
   ((firstinserter :initarg :firstinserter
 		  :documentation
-		  "The inserter object for the first occurance of this field.")
+		  "The inserter object for the first occurrence of this field.")
    (defaultvalue :initarg :defaultvalue
      :documentation
      "The default value for this inserter.")

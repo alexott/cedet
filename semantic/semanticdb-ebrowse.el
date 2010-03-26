@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>, Joakim Verona
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb-ebrowse.el,v 1.24 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semanticdb-ebrowse.el,v 1.25 2010-03-26 22:18:05 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -93,7 +93,7 @@ be searched."
 		   :initarg :global-extract
 		   :documentation
 		   "Table of ebrowse tags specific to this file.
-This table is compisited from the ebrowse *Globals* section.")
+This table is composited from the ebrowse *Globals* section.")
    )
   "A table for returning search results from ebrowse.")
 
@@ -131,7 +131,7 @@ EBROWSE is a C/C++ parser for use with `ebrowse' Emacs program.")
 
 ;;;###autoload
 (defun semanticdb-create-ebrowse-database (dir)
-  "Create an EBROSE database for directory DIR.
+  "Create an EBROWSE database for directory DIR.
 The database file is stored in ~/.semanticdb, or whichever directory
 is specified by `semanticdb-default-save-directory'."
   (interactive "DDirectory: ")
@@ -601,7 +601,7 @@ Return a list of tags."
 
 (defmethod semanticdb-find-tags-for-completion-method
   ((table semanticdb-table-ebrowse) prefix &optional tags)
-  "In TABLE, find all occurances of tags matching PREFIX.
+  "In TABLE, find all occurrences of tags matching PREFIX.
 Optional argument TAGS is a list of tags to search.
 Returns a table of all matching tags."
   (if tags (call-next-method)
@@ -611,7 +611,7 @@ Returns a table of all matching tags."
 
 (defmethod semanticdb-find-tags-by-class-method
   ((table semanticdb-table-ebrowse) class &optional tags)
-  "In TABLE, find all occurances of tags of CLASS.
+  "In TABLE, find all occurrences of tags of CLASS.
 Optional argument TAGS is a list of tags to search.
 Returns a table of all matching tags."
   (if tags (call-next-method)
@@ -629,7 +629,7 @@ Returns a table of all matching tags."
 (defmethod semanticdb-deep-find-tags-by-name-method
   ((table semanticdb-table-ebrowse) name &optional tags)
   "Find all tags name NAME in TABLE.
-Optional argument TAGS is a list of tags t
+Optional argument TAGS is a list of tags to search.
 Like `semanticdb-find-tags-by-name-method' for ebrowse."
   ;;(semanticdb-find-tags-by-name-method table name tags)
   (call-next-method))
@@ -644,7 +644,7 @@ Like `semanticdb-find-tags-by-name-method' for ebrowse."
 
 (defmethod semanticdb-deep-find-tags-for-completion-method
   ((table semanticdb-table-ebrowse) prefix &optional tags)
-  "In TABLE, find all occurances of tags matching PREFIX.
+  "In TABLE, find all occurrences of tags matching PREFIX.
 Optional argument TAGS is a list of tags to search.
 Like `semanticdb-find-tags-for-completion-method' for ebrowse."
   ;;(semanticdb-find-tags-for-completion-method table prefix tags)

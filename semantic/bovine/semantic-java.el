@@ -5,7 +5,7 @@
 ;;;   David Ponce
 
 ;; Author: David Ponce <david@dponce.com>
-;; X-RCS: $Id: semantic-java.el,v 1.20 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semantic-java.el,v 1.21 2010-03-26 22:18:06 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -237,7 +237,7 @@ Optional argument COLOR indicates that color should be mixed in."
 
 ;; Thanks Bruce Stephens
 (define-mode-local-override semantic-tag-include-filename java-mode (tag)
-  "Return a suitable path for (some) Java imports"
+  "Return a suitable path for (some) Java imports."
   (let ((name (semantic-tag-name tag)))
     (concat (mapconcat 'identity (split-string name "\\.") "/") ".java")))
 
@@ -369,9 +369,9 @@ That is TAG `symbol-name' without the leading '@'."
 (defun semantic-java-doc-keywords-map (fun &optional property)
   "Run function FUN for each javadoc keyword.
 Return the list of FUN results.  If optional PROPERTY is non nil only
-call FUN for javadoc keyword which have a value for PROPERTY.  FUN
+call FUN for javadoc keywords which have a value for PROPERTY.  FUN
 receives two arguments: the javadoc keyword and its associated
-'javadoc property list.  It can return any value.  Nil values are
+'javadoc property list.  It can return any value.  All nil values are
 removed from the result list."
   (delq nil
         (mapcar

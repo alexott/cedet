@@ -8,7 +8,7 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 30 January 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: wisent-comp.el,v 1.28 2009-09-11 18:52:52 zappo Exp $
+;; X-RCS: $Id: wisent-comp.el,v 1.29 2010-03-26 22:18:06 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -198,7 +198,7 @@ If optional LEFT is non-nil insert spaces on left."
   "Toggle whether to report verbose information on generated parser."
   (interactive)
   (setq wisent-verbose-flag (not wisent-verbose-flag))
-  (when (interactive-p)
+  (when (called-interactively-p 'interactive)
     (message "Verbose report %sabled"
              (if wisent-verbose-flag "en" "dis"))))
 

@@ -4,7 +4,7 @@
 
 ;; Author: Eric Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: wisent-javascript.el,v 1.2 2009-09-11 18:51:55 zappo Exp $
+;; X-RCS: $Id: wisent-javascript.el,v 1.3 2010-03-26 22:18:06 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -51,8 +51,8 @@ to this variable NAME."
               elts  (cdr elts)
               clone (semantic-tag-clone tag (car elt))
 	      value (car (cdr elt))
-              start (if elts  (caddr elt) (semantic-tag-start tag))
-              end   (if xpand (cdddr elt) (semantic-tag-end   tag))
+              start (if elts  (car (cddr elt)) (semantic-tag-start tag))
+              end   (if xpand (cdr (cddr elt)) (semantic-tag-end   tag))
               xpand (cons clone xpand))
 	;; Set the definition of the cloned tag
 	(semantic-tag-put-attribute clone :default-value value)

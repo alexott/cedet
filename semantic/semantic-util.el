@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-util.el,v 1.143 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semantic-util.el,v 1.144 2010-03-26 22:18:03 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -304,7 +304,8 @@ If TAG is not specified, use the tag at point."
 	)
 
     (with-output-to-temp-buffer (help-buffer)
-      (help-setup-xref (list #'semantic-describe-buffer) (interactive-p))
+      (help-setup-xref (list #'semantic-describe-buffer)
+                       (called-interactively-p 'interactive))
       (with-current-buffer standard-output
 	(princ "Semantic Configuration in ")
 	(princ (buffer-name buff))

@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-complete.el,v 1.66 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: semantic-complete.el,v 1.67 2010-03-26 22:18:02 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -212,7 +212,7 @@ Keeps STRINGS only in the history.")
 						    default-tag initial-input
 						    history)
   "Read a semantic tag, and return a tag for the selection.
-Argument COLLECTOR is an object which can be used to to calculate
+Argument COLLECTOR is an object which can be used to calculate
 a list of possible hits.  See `semantic-completion-collector-engine'
 for details on COLLECTOR.
 Argument DISPLAYOR is an object used to display a list of possible
@@ -408,7 +408,7 @@ Return value can be:
 
 ;;; Keybindings
 ;;
-;; Keys are bound to to perform completion using our mechanisms.
+;; Keys are bound to perform completion using our mechanisms.
 ;; Do that work here.
 (defun semantic-complete-done ()
   "Accept the current input."
@@ -570,10 +570,9 @@ if INLINE, then completion is happening inline in a buffer."
     (define-key km "\C-g" 'semantic-complete-inline-quit)
     (define-key km "?"
       (lambda () (interactive)
-	(describe-variable 'semantic-complete-inline-map)))
+        (describe-variable 'semantic-complete-inline-map)))
     km)
-  "Keymap used while performing Semantic inline completion.
-\\{semantic-complete-inline-map}")
+  "Keymap used while performing Semantic inline completion.")
 
 (defface semantic-complete-inline-face
   '((((class color) (background dark))
@@ -754,7 +753,7 @@ DO NOT CALL THIS IF THE INLINE COMPLETION ENGINE IS NOT ACTIVE."
 (defun semantic-complete-inline-tag-engine
   (collector displayor buffer start end)
   "Perform completion based on semantic tags in a buffer.
-Argument COLLECTOR is an object which can be used to to calculate
+Argument COLLECTOR is an object which can be used to calculate
 a list of possible hits.  See `semantic-completion-collector-engine'
 for details on COLLECTOR.
 Argument DISPLAYOR is an object used to display a list of possible
@@ -2023,7 +2022,7 @@ completion works."
 (defun semantic-complete-jump ()
   "Jump to a semantic symbol."
   (interactive)
-  (let* ((tag (semantic-complete-read-tag-project "Symbol: ")))
+  (let* ((tag (semantic-complete-read-tag-project "Jump to symbol: ")))
     (when (semantic-tag-p tag)
       (push-mark)
       (semantic-go-to-tag tag)
@@ -2064,13 +2063,12 @@ how completion options are displayed."
       (semantic-complete-inline-analyzer
        (semantic-analyze-current-context (point))))
   ;; Report a message if things didn't startup.
-  (if (and (interactive-p)
+  (if (and (called-interactively-p 'any)
 	   (not (semantic-completion-inline-active-p)))
       (message "Inline completion not needed.")
     ;; Since this is most likely bound to something, and not used
     ;; at idle time, throw in a TAB for good measure.
-    (semantic-complete-inline-TAB)
-    ))
+    (semantic-complete-inline-TAB)))
 
 ;;;###autoload
 (defun semantic-complete-analyze-inline-idle ()
@@ -2087,10 +2085,9 @@ to change how completion options are displayed."
       (semantic-complete-inline-analyzer-idle
        (semantic-analyze-current-context (point))))
   ;; Report a message if things didn't startup.
-  (if (and (interactive-p)
+  (if (and (called-interactively-p 'interactive)
 	   (not (semantic-completion-inline-active-p)))
-      (message "Inline completion not needed."))
-  )
+      (message "Inline completion not needed.")))
 
 ;;;###autoload
 (defun semantic-complete-self-insert (arg)

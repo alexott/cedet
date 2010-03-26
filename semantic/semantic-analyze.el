@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-analyze.el,v 1.88 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: semantic-analyze.el,v 1.89 2010-03-26 22:18:02 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -89,7 +89,7 @@
 
 (defun semantic-analyze-push-error (err)
   "Push the error in ERR-DATA onto the error stack.
-Argument ERR"
+Argument ERR."
   (push err semantic-analyze-error-stack))
 
 ;;; Analysis Classes
@@ -130,7 +130,7 @@ See `semantic-analyze-scoped-tags' for details.")
    (errors :initarg :errors
 	   :documentation "Any errors thrown an caught during analysis.")
    )
-  "Base analysis data for a any context.")
+  "Base analysis data for any context.")
 
 (defclass semantic-analyze-context-assignment (semantic-analyze-context)
   ((assignee :initarg :assignee
@@ -138,7 +138,7 @@ See `semantic-analyze-scoped-tags' for details.")
 	     :documentation "A sequence of tags for an assignee.
 This is a variable into which some value is being placed.  The last
 item in the list is the variable accepting the value.  Earlier
-tags represent the variables being derefernece to get to the
+tags represent the variables being dereferenced to get to the
 assignee."))
   "Analysis class for a value in an assignment.")
 
@@ -241,7 +241,7 @@ finding the details on the first element of SEQUENCE in case
 it is not found in the global set of tables.
 Optional argument SCOPE are additional terminals to search which are currently
 scoped.  These are not local variables, but symbols available in a structure
-which doesn't need to be dereferneced.
+which doesn't need to be dereferenced.
 Optional argument TYPERETURN is a symbol in which the types of all found
 will be stored.  If nil, that data is thrown away.
 Optional argument THROWSYM specifies a symbol the throw on non-recoverable error.")
@@ -351,8 +351,8 @@ Optional argument THROWSYM specifies a symbol the throw on non-recoverable error
 
 (defun semantic-analyze-find-tag (name &optional tagclass scope)
   "Return the first tag found with NAME or nil if not found.
-Optional argument TAGCLASS specifies the class of tag to return, such
-as 'function or 'variable.
+Optional argument TAGCLASS specifies the class of tag to return,
+such as 'function or 'variable.
 Optional argument SCOPE specifies a scope object which has
 additional tags which are in SCOPE and do not need prefixing to
 find.
@@ -511,7 +511,7 @@ if a cached copy of the return object is found."
 					     'current-context
 					     'exit-cache-zone)))
 	  ;; Check for interactivity
-	  (when (interactive-p)
+	  (when (called-interactively-p 'any)
 	    (if answer
 		(semantic-analyze-pop-to-context answer)
 	      (message "No Context."))

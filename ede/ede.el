@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede.el,v 1.149 2010-03-15 13:40:54 xscript Exp $
+;; RCS: $Id: ede.el,v 1.150 2010-03-26 22:18:01 xscript Exp $
 (defconst ede-version "1.0pre7"
   "Current version of the Emacs EDE.")
 
@@ -51,10 +51,9 @@
 (require 'custom)
 
 (defgroup ede nil
-  "Emacs Development Environment gloss."
+  "Emacs Development Environment."
   :group 'tools
-  :group 'convenience
-  )
+  :group 'extensions)
 
 (defcustom ede-auto-add-method 'ask
   "*Determines if a new source file should be automatically added to a target.
@@ -729,12 +728,12 @@ Optional argument FORCE forces the file to be removed without asking."
   (ede-invoke-method 'project-compile-target))
 
 (defun ede-debug-target ()
-  "Debug the current buffer's assocated target."
+  "Debug the current buffer's associated target."
   (interactive)
   (ede-invoke-method 'project-debug-target))
 
 (defun ede-run-target ()
-  "Debug the current buffer's assocated target."
+  "Run the current buffer's associated target."
   (interactive)
   (ede-invoke-method 'project-run-target))
 
@@ -825,7 +824,7 @@ Argument COMMAND is the command to use for compiling the target."
   (error "Make-dist not supported by %s" (object-name this)))
 
 (defmethod project-dist-files ((this ede-project))
-  "Return a list of files that constitutes a distribution of THIS project."
+  "Return a list of files that constitute a distribution of THIS project."
   (error "Dist-files is not supported by %s" (object-name this)))
 
 (defmethod project-rescan ((this ede-project))
@@ -934,7 +933,7 @@ Optional ROOTRETURN will return the root project for DIR."
 ;;;###autoload
 (defun ede-parent-project (&optional obj)
   "Return the project belonging to the parent directory.
-nil if there is no previous directory.
+Return nil if there is no previous directory.
 Optional argument OBJ is an object to find the parent of."
   (let* ((proj (or obj ede-object-project)) ;; Current project.
 	 (root (if obj (ede-project-root obj)
@@ -1179,12 +1178,10 @@ Return the first non-nil value returned by PROC."
       (when map
 	;; We can't do a require for the below symbol.
 	(setq semantic-lex-spp-project-macro-symbol-obarray
-	      (semantic-lex-make-spp-table map))
-	)
+	      (semantic-lex-make-spp-table map)))
       (when (consp objs)
 	(message "Choosing preprocessor syms for project %s"
-		 (object-name (car objs))))
-      )))
+		 (object-name (car objs)))))))
 
 (defmethod ede-system-include-path ((this ede-project))
   "Get the system include path used by project THIS."

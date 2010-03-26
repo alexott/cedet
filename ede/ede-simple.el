@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-simple.el,v 1.10 2009-02-25 23:08:25 zappo Exp $
+;; X-RCS: $Id: ede-simple.el,v 1.11 2010-03-26 22:18:01 xscript Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -101,7 +101,7 @@ All directories need at least one target.")
    (file-header-line :initform ";; EDE Simple Project")
    )
   "EDE Simple project class.
-Each directory needs a a project file to control it.")
+Each directory needs a project file to control it.")
 
 (defmethod ede-commit-project ((proj ede-simple-project))
   "Commit any change to PROJ to its file."

@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: codegeneration
-;; X-RCS: $Id: srecode.el,v 1.7 2009-08-30 16:44:55 zappo Exp $
+;; X-RCS: $Id: srecode.el,v 1.8 2010-03-26 22:18:07 xscript Exp $
 
 (eval-and-compile
   ;; Other package depend on this value at compile time via inversion.
@@ -54,6 +54,7 @@
 ;;; Code:
 (defgroup srecode nil
   "Semantic Recoder."
+  :group 'extensions
   :group 'tools)
 
 (defun srecode ()

@@ -6,7 +6,7 @@
 ;; Maintainer: Richard Kim <ryk@dspwiz.com>
 ;; Created: June 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: wisent-python.wy,v 1.38 2010-03-17 00:49:32 scymtym Exp $
+;; X-RCS: $Id: wisent-python.wy,v 1.39 2010-03-26 22:18:06 xscript Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -156,7 +156,7 @@
 
 %keyword BREAK	     "break"
 %put     BREAK summary
-"Terminate 'for' or 'while loop"
+"Terminate 'for' or 'while' loop"
 
 %keyword CLASS	     "class"
 %put     CLASS summary
@@ -164,7 +164,7 @@
 
 %keyword CONTINUE	     "continue"
 %put     CONTINUE summary
-"Skip to the next interation of enclosing for or while loop"
+"Skip to the next iteration of enclosing 'for' or 'while' loop"
 
 %keyword DEF	     "def"
 %put     DEF summary
@@ -188,11 +188,11 @@
 
 %keyword EXEC	     "exec"
 %put     EXEC summary
-"Dynamically execute python code"
+"Dynamically execute Python code"
 
 %keyword FINALLY	     "finally"
 %put     FINALLY summary
-"Specify code to be executed after 'try' statements whether or not an exception occured"
+"Specify code to be executed after 'try' statements whether or not an exception occurred"
 
 %keyword FOR	     "for"
 %put     FOR summary

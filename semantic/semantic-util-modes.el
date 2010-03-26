@@ -6,7 +6,7 @@
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Author: David Ponce <david@dponce.com>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-util-modes.el,v 1.76 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semantic-util-modes.el,v 1.77 2010-03-26 22:18:03 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -307,7 +307,7 @@ minor mode is enabled."
           (not semantic-highlight-edits-mode)))
   (semantic-highlight-edits-mode-setup)
   (run-hooks 'semantic-highlight-edits-mode-hook)
-  (if (interactive-p)
+  (if (called-interactively-p 'interactive)
       (message "highlight-edits minor mode %sabled"
                (if semantic-highlight-edits-mode "en" "dis")))
   (semantic-mode-line-update)
@@ -334,7 +334,7 @@ If ARG is nil, then toggle."
 
 ;;;###autoload
 (defcustom global-semantic-show-unmatched-syntax-mode nil
-  "*If non-nil, enable global use of `semantic-show-unmatched-syntax-mode'.
+  "If non-nil, enable global use of `semantic-show-unmatched-syntax-mode'.
 When this mode is enabled, syntax in the current buffer which the
 semantic parser cannot match is highlighted with a red underline."
   :group 'semantic
@@ -346,7 +346,7 @@ semantic parser cannot match is highlighted with a red underline."
          (global-semantic-show-unmatched-syntax-mode (if val 1 -1))))
 
 (defcustom semantic-show-unmatched-syntax-mode-hook nil
-  "*Hook run at the end of function `semantic-show-unmatched-syntax-mode'."
+  "Hook run at the end of function `semantic-show-unmatched-syntax-mode'."
   :group 'semantic
   :type 'hook)
 
@@ -355,8 +355,8 @@ semantic parser cannot match is highlighted with a red underline."
      (:underline "red"))
     (((class color) (background light))
      (:underline "red")))
-  "*Face used to show unmatched syntax in.
-The face is used in  `semantic-show-unmatched-syntax-mode'."
+  "Face used to show unmatched syntax in.
+The face is used in `semantic-show-unmatched-syntax-mode'."
   :group 'semantic-faces)
 
 (defsubst semantic-unmatched-syntax-overlay-p (overlay)
@@ -515,7 +515,7 @@ minor mode is enabled.
           (not semantic-show-unmatched-syntax-mode)))
   (semantic-show-unmatched-syntax-mode-setup)
   (run-hooks 'semantic-show-unmatched-syntax-mode-hook)
-  (if (interactive-p)
+  (if (called-interactively-p 'interactive)
       (message "show-unmatched-syntax minor mode %sabled"
                (if semantic-show-unmatched-syntax-mode "en" "dis")))
   (semantic-mode-line-update)
@@ -675,7 +675,7 @@ minor mode is enabled."
           (not semantic-show-parser-state-mode)))
   (semantic-show-parser-state-mode-setup)
   (run-hooks 'semantic-show-parser-state-mode-hook)
-  (if (interactive-p)
+  (if (called-interactively-p 'interactive)
       (message "show-parser-state minor mode %sabled"
                (if semantic-show-parser-state-mode "en" "dis")))
   (semantic-mode-line-update)
@@ -786,7 +786,7 @@ This makes it appear that the first line of that tag is
       ]
     [ "Narrow To Headerline Tag" senator-narrow-to-defun
       :active (semantic-current-tag)
-      :help "Narrow to the bounds of the current tag."]
+      :help "Narrow to the bounds of the current tag"]
     [ "Fold Headerline Tag" senator-fold-tag-toggle
       :active (semantic-current-tag)
       :style toggle
@@ -873,7 +873,7 @@ when it lands in the sticky line."
   :type 'string)
 
 (defvar semantic-stickyfunc-old-hlf nil
-  "Value of the header line when entering sticky func mode.")
+  "Value of the header line when entering stickyfunc mode.")
 
 (defconst semantic-stickyfunc-header-line-format
   (cond ((featurep 'xemacs)
@@ -887,7 +887,7 @@ when it lands in the sticky line."
 	 '(:eval (list semantic-stickyfunc-indent-string
 		       (semantic-stickyfunc-fetch-stickyline))))
 	(t nil))
-  "The header line format used by sticky func mode.")
+  "The header line format used by stickyfunc mode.")
 
 (defun semantic-stickyfunc-mode-setup ()
   "Setup option `semantic-stickyfunc-mode'.
@@ -947,7 +947,7 @@ minor mode is enabled."
           (not semantic-stickyfunc-mode)))
   (semantic-stickyfunc-mode-setup)
   (run-hooks 'semantic-stickyfunc-mode-hook)
-  (if (interactive-p)
+  (if (called-interactively-p 'interactive)
       (message "Stickyfunc minor mode %sabled"
                (if semantic-stickyfunc-mode "en" "dis")))
   (semantic-mode-line-update)
@@ -979,7 +979,7 @@ If this is nil, then comments or other text between tags that is
 
 (defun semantic-stickyfunc-fetch-stickyline ()
   "Make the function at the top of the current window sticky.
-Capture it's function declaration, and place it in the header line.
+Capture its function declaration, and place it in the header line.
 If there is no function, disable the header line."
   (save-excursion
     (goto-char (window-start (selected-window)))
@@ -990,7 +990,7 @@ If there is no function, disable the header line."
 	      (end-of-line)
 	      ;; Capture this function
 	      (let* ((tag (semantic-stickyfunc-tag-to-stick)))
-		;; TAG is nil if there was nothing of the apropriate type there.
+		;; TAG is nil if there was nothing of the appropriate type there.
 		(if (not tag)
 		    ;; Set it to be the text under the header line
 		    (if noshow ""
@@ -1067,7 +1067,7 @@ If ARG is nil, then toggle."
 
 ;;;###autoload
 (defcustom global-semantic-highlight-func-mode nil
-  "*If non-nil, enable global use of `semantic-highlight-func-mode'.
+  "If non-nil, enable global use of `semantic-highlight-func-mode'.
 When enabled, the first line of the current tag is highlighted."
   :group 'semantic
   :group 'semantic-modes
@@ -1078,7 +1078,7 @@ When enabled, the first line of the current tag is highlighted."
          (global-semantic-highlight-func-mode (if val 1 -1))))
 
 (defcustom semantic-highlight-func-mode-hook nil
-  "*Hook run at the end of function `semantic-highlight-func-mode'."
+  "Hook run at the end of function `semantic-highlight-func-mode'."
   :group 'semantic
   :type 'hook)
 
@@ -1111,7 +1111,7 @@ When enabled, the first line of the current tag is highlighted."
       ]
     [ "Narrow To Tag" senator-narrow-to-defun
       :active (semantic-current-tag)
-      :help "Narrow to the bounds of the current tag."]
+      :help "Narrow to the bounds of the current tag"]
     [ "Fold Tag" senator-fold-tag-toggle
       :active (semantic-current-tag)
       :style toggle
@@ -1160,7 +1160,7 @@ Use the command `semantic-highlight-func-mode' to change this variable.")
 
 (defun semantic-highlight-func-mode-setup ()
   "Setup option `semantic-highlight-func-mode'.
-For semantic enabled buffers, highlight the first line of the
+For Semantic enabled buffers, highlight the first line of the
 current tag declaration."
   (if semantic-highlight-func-mode
       (progn
@@ -1204,7 +1204,7 @@ minor mode is enabled."
           (not semantic-highlight-func-mode)))
   (semantic-highlight-func-mode-setup)
   (run-hooks 'semantic-highlight-func-mode-hook)
-  (if (interactive-p)
+  (if (called-interactively-p 'interactive)
       (message "Highlight-Func minor mode %sabled"
                (if semantic-highlight-func-mode "en" "dis")))
   semantic-highlight-func-mode)
@@ -1233,7 +1233,7 @@ function was called, move the overlay."
 	(setq semantic-highlight-func-ct-overlay ol)
 	)
 
-      ;; TAG is nil if there was nothing of the apropriate type there.
+      ;; TAG is nil if there was nothing of the appropriate type there.
       (if (or (not tag) disable)
 	  ;; No tag, make the overlay go away.
 	  (progn
