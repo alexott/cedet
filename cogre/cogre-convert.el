@@ -1,9 +1,9 @@
 ;;; cogre-convert.el --- Conversion for cogre charts into other formats
 ;;
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cogre-convert.el,v 1.12 2009-04-11 06:18:11 zappo Exp $
+;; X-RCS: $Id: cogre-convert.el,v 1.13 2010-03-26 01:21:58 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -266,11 +266,11 @@ DOT uses points, where as COGRE uses characters."
 
 (defmethod cogre-export-dot-methodlist ((node cogre-class))
   "Get a list of methods on NODE.  Return as \n separated list."
-  (mapconcat (lambda (s) (cogre-uml-stoken->uml node s)) (oref node methods) "\\n"))
+  (mapconcat (lambda (s) (cogre-uml-stoken->uml node s)) (oref node methods) "\\l"))
 
 (defmethod cogre-export-dot-fieldslist ((node cogre-class))
   "Get a list of fields on NODE.  Return as \n separated list."
-  (mapconcat (lambda (s) (cogre-uml-stoken->uml node s)) (oref node attributes) "\\n"))
+  (mapconcat (lambda (s) (cogre-uml-stoken->uml node s)) (oref node attributes) "\\l"))
 
 (defmethod cogre-export-dot-label ((node cogre-instance))
   "Convert NODE into DOT syntax of semantic tags."
