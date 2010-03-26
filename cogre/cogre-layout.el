@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cogre-layout.el,v 1.4 2010-03-26 01:26:28 zappo Exp $
+;; X-RCS: $Id: cogre-layout.el,v 1.5 2010-03-26 01:51:19 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -81,8 +81,8 @@ This function depends on graphviz `dot' program."
 		       :value))
 	       ;; dot reports width/height as inches, and the position
 	       ;; as points, which is 72 points/inch.
-	       (HH (* (/ (string-to-number height) 2) 72))
-	       (HW (* (/ (string-to-number width) 2) 72))
+	       (HH (* (/ (string-to-number height) 2.0) 72.0))
+	       (HW (* (/ (string-to-number width) 2.0) 72.0))
 	       ;; The node we want to modify
 	       (cogrenode (cogre-find-node-by-name name))
 	       )
@@ -92,8 +92,10 @@ This function depends on graphviz `dot' program."
 		(message "Found new pos %d,%d for matching node %s"
 			 X Y name)
 		(oset cogrenode :position
-		      (vector (max 0 (floor (/ (- X HH) scalex)))
-			      (max 0 (floor (/ (- Y HH) scaley))))))
+		      (vector (max 0 (floor (/ (- X HW) scalex)))
+			      (max 0 (floor (/ (- Y HH) scaley)))))
+		;;(message "Node %s at %S (%d -> %d)" (object-name cogrenode) (oref cogrenode :position) HW X)
+		)
 	    ;; No match?
 	    (message "Could not find node for element %S" E)
 	    ))))
