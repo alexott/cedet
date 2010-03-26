@@ -6,7 +6,7 @@
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Keywords: compatibility
-;; X-RCS: $Id: cedet-compat.el,v 1.8 2010-02-19 22:43:21 zappo Exp $
+;; X-RCS: $Id: cedet-compat.el,v 1.9 2010-03-26 16:02:25 zappo Exp $
 
 ;; This file is not part of Emacs
 
@@ -193,6 +193,33 @@ Like `progn', but prevents compiler warnings in the body.
 Note: Doesn't work if this version is being loaded."
     ;; The implementation for the interpreter is basically trivial.
     (car (last body))))
+
+;;;###autoload
+(if (not (fboundp 'called-interactively-p))
+    (defsubst called-interactively-p (&optional arg)
+      "Compat function.  Calls `interactive-p'"
+      (interactive-p))
+  ;; Else, it is defined, but perhaps too old?
+  (condition-case nil
+      ;; This condition case also prevents this from running twice.
+      (called-interactively-p nil)
+    (error
+     (defvar cedet-compat-called-interactively-p
+       (let ((tmp (symbol-function 'called-interactively-p)))
+	 (if (subrp tmp)
+	     tmp
+	   ;; Did someone else allready override it?
+	   (or cedet-compat-clled-interactively-p tmp)))
+       "Built-in called interactively function.")
+     ;; Create a new one
+     (defun cedet-called-interactively-p (&optional arg)
+       "Revised from the built-in version to accept an optional arg."
+       (case arg
+	 (interactive (interactive-p))
+	 ((any nil) (funcall cedet-compat-called-interactively-p))))
+     ;; Override
+     (fset 'called-interactively-p 'cedet-called-interactively-p)
+     )))
 
 
 (provide 'cedet-compat)
