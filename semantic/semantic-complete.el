@@ -1,10 +1,10 @@
 ;;; semantic-complete.el --- Routines for performing tag completion
 
-;;; Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-complete.el,v 1.67 2010-03-26 22:18:02 xscript Exp $
+;; X-RCS: $Id: semantic-complete.el,v 1.68 2010-03-27 11:19:26 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -2103,15 +2103,17 @@ use `semantic-complete-analyze-inline' to complete."
 
   ;; Prepare for doing completion, but exit quickly if there is keyboard
   ;; input.
-  (when (and (not (semantic-exit-on-input 'csi
-		    (semantic-fetch-tags)
-		    (semantic-throw-on-input 'csi)
-		    nil))
-	     (= arg 1)
-	     (not (semantic-exit-on-input 'csi
-		    (semantic-analyze-current-context)
-		    (semantic-throw-on-input 'csi)
-		    nil)))
+  (when (save-window-excursion
+	  (save-excursion
+	    (and (not (semantic-exit-on-input 'csi
+			(semantic-fetch-tags)
+			(semantic-throw-on-input 'csi)
+			nil))
+		 (= arg 1)
+		 (not (semantic-exit-on-input 'csi
+			(semantic-analyze-current-context)
+			(semantic-throw-on-input 'csi)
+			nil)))))
     (condition-case nil
 	(semantic-complete-analyze-inline)
       ;; Ignore errors.  Seems likely that we'll get some once in a while.
