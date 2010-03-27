@@ -1,10 +1,10 @@
 ;;; semanticdb-global.el --- Semantic database extensions for GLOBAL
 
-;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb-global.el,v 1.12 2010-03-26 22:18:05 xscript Exp $
+;; X-RCS: $Id: semanticdb-global.el,v 1.13 2010-03-27 14:12:12 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -91,7 +91,7 @@ if optional DONT-ERR-IF-NOT-AVAILABLE is non-nil; else throw an error."
 	       '(omniscience))
        )
     (if dont-err-if-not-available
-	(message "No Global support in %s" default-directory)
+	nil; (message "No Global support in %s" default-directory)
       (error "No Global support in %s" default-directory))
     ))
 
