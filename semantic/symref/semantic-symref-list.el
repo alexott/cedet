@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-symref-list.el,v 1.9 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semantic-symref-list.el,v 1.10 2010-03-28 13:04:17 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -110,11 +110,18 @@ Display the references in`semantic-symref-results-mode'."
     (define-key km "n" 'semantic-symref-list-next-line)
     (define-key km "p" 'semantic-symref-list-prev-line)
     (define-key km "q" 'semantic-symref-hide-buffer)
+    (define-key km "\C-c\C-e" 'semantic-symref-list-expand-all)
+    (define-key km "\C-c\C-r" 'semantic-symref-list-contract-all)
     km)
   "Keymap used in `semantic-symref-results-mode'.")
 
+(defcustom semantic-symref-auto-expand-results nil
+  "Non-nil to expand symref results on buffer creation."
+  :group 'semantic-symref
+  :type 'boolean)
+
 (defcustom semantic-symref-results-mode-hook nil
-  "*Hook run when `semantic-symref-results-mode' starts."
+  "Hook run when `semantic-symref-results-mode' starts."
   :group 'semantic-symref
   :type 'hook)
 
@@ -189,6 +196,10 @@ Some useful functions are found in `semantic-format-tag-functions'."
       (insert "\n")
 
       ))
+
+  ;; Auto expand
+  (when semantic-symref-auto-expand-results
+    (semantic-symref-list-expand-all))
 
   ;; Clean up the mess
   (toggle-read-only 1)
@@ -323,6 +334,29 @@ BUTTON is the button that was clicked."
   (interactive)
   (forward-line -1)
   (back-to-indentation))
+
+(defun semantic-symref-list-expand-all ()
+  "Expand all the nodes in the current buffer."
+  (interactive)
+  (let ((start (make-marker)))
+    (move-marker start (point))
+    (goto-char (point-min))
+    (while (re-search-forward "\\[[+]\\]" nil t)
+      (semantic-symref-list-toggle-showing))
+    ;; Restore position
+    (goto-char start)))
+
+(defun semantic-symref-list-contract-all ()
+  "Expand all the nodes in the current buffer."
+  (interactive)
+  (let ((start (make-marker)))
+    (move-marker start (point))
+    (goto-char (point-min))
+    (while (re-search-forward "\\[[-]\\]" nil t)
+      (semantic-symref-list-toggle-showing))
+    ;; Restore position
+    (goto-char start)))
+
 
 (provide 'semantic-symref-list)
 ;;; semantic-symref-list.el ends here
