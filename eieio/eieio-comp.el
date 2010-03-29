@@ -1,10 +1,10 @@
 ;;; eieio-comp.el -- eieio routines to help with byte compilation
 
 ;;;
-;; Copyright (C) 1995,1996, 1998, 1999, 2000, 2001, 2002, 2005, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 1995,1996, 1998, 1999, 2000, 2001, 2002, 2005, 2008, 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio-comp.el,v 1.16 2009-09-13 11:31:55 zappo Exp $
+;; RCS: $Id: eieio-comp.el,v 1.17 2010-03-29 11:22:40 zappo Exp $
 ;; Keywords: oop, lisp, tools
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -36,11 +36,24 @@
 
 ;; Some compatibility stuff
 (eval-and-compile
-  (if (not (fboundp 'byte-compile-compiled-obj-to-list))
-      (defun byte-compile-compiled-obj-to-list (moose) nil))
+  (when (not (fboundp 'byte-compile-compiled-obj-to-list))
 
-  (if (not (boundp 'byte-compile-outbuffer))
-      (defvar byte-compile-outbuffer nil))
+    ;; XEmacs change; b-c-c-o-t-l has been removed in 21.5
+    (defun byte-compile-compiled-obj-to-list (compiled-function)
+      "Convert a compiled function to a list of features of that fcn.
+This is a compatability function installed by eieio-comp.el."
+      (nconc (list
+	      (compiled-function-arglist compiled-function)
+	      (compiled-function-instructions compiled-function)
+	      (compiled-function-constants compiled-function)
+	      (compiled-function-stack-depth compiled-function)
+	      (compiled-function-doc-string compiled-function))
+	     (if (commandp compiled-function)
+		 (list (nth 1 (compiled-function-interactive
+			       compiled-function)))))))
+
+  (when (not (boundp 'byte-compile-outbuffer))
+    (defvar byte-compile-outbuffer nil))
   )
 
 ;; This teaches the byte compiler how to do this sort of thing.
