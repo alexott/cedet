@@ -1,9 +1,9 @@
 ;;; semantic-analyze-complete.el --- Smart Completions
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-analyze-complete.el,v 1.17 2010-03-26 22:18:02 xscript Exp $
+;; X-RCS: $Id: semantic-analyze-complete.el,v 1.18 2010-03-29 11:27:01 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -109,7 +109,7 @@ in a buffer."
 		    (error "Nothing to complete")
 		  (:override))))
       ;; If interactive, display them.
-      (when (called-interactively-p 'any)
+      (when (interactive-p)
 	(with-output-to-temp-buffer "*Possible Completions*"
 	  (semantic-analyze-princ-sequence ans "" (current-buffer)))
 	(shrink-window-if-larger-than-buffer
@@ -128,7 +128,9 @@ Argument CONTEXT is an object specifying the locally derived context."
 	 (completetexttype nil)
 	 (scope (oref a scope))
 	 (localvar (oref scope localvar))
-	 (c nil))
+	 (origc nil)
+	 (c nil)
+	 (any nil))
 
     ;; Calculate what our prefix string is so that we can
     ;; find all our matching text.
@@ -184,27 +186,30 @@ Argument CONTEXT is an object specifying the locally derived context."
 	    )
       )
 
-    (let ((origc c)
+    (let ((loopc c)
 	  (dtname (semantic-tag-name desired-type)))
+
+      ;; Save off our first batch of completions
+      (setq origc c)
 
       ;; Reset c.
       (setq c nil)
 
       ;; Loop over all the found matches, and catagorize them
       ;; as being possible features.
-      (while origc
+      (while loopc
 
 	(cond
 	 ;; Strip operators
-	 ((semantic-tag-get-attribute (car origc) :operator-flag)
+	 ((semantic-tag-get-attribute (car loopc) :operator-flag)
 	  nil
 	  )
 
 	 ;; If we are completing from within some prefix,
 	 ;; then we want to exclude constructors and destructors
 	 ((and completetexttype
-	       (or (semantic-tag-get-attribute (car origc) :constructor-flag)
-		   (semantic-tag-get-attribute (car origc) :destructor-flag)))
+	       (or (semantic-tag-get-attribute (car loopc) :constructor-flag)
+		   (semantic-tag-get-attribute (car loopc) :destructor-flag)))
 	  nil
 	  )
 
@@ -215,17 +220,17 @@ Argument CONTEXT is an object specifying the locally derived context."
 	   ;; Ok, we now have a completion list based on the text we found
 	   ;; we want to complete on.  Now filter that stream against the
 	   ;; type we want to search for.
-	   ((string= dtname (semantic-analyze-type-to-name (semantic-tag-type (car origc))))
-	    (setq c (cons (car origc) c))
+	   ((string= dtname (semantic-analyze-type-to-name (semantic-tag-type (car loopc))))
+	    (setq c (cons (car loopc) c))
 	    )
 
 	   ;; Now anything that is a compound type which could contain
 	   ;; additional things which are of the desired type
-	   ((semantic-tag-type (car origc))
-	    (let ((att (semantic-analyze-tag-type (car origc) scope))
+	   ((semantic-tag-type (car loopc))
+	    (let ((att (semantic-analyze-tag-type (car loopc) scope))
 		)
 	      (if (and att (semantic-tag-type-members att))
-		  (setq c (cons (car origc) c))))
+		  (setq c (cons (car loopc) c))))
 	    )
 
 	   ) ; cond
@@ -233,11 +238,11 @@ Argument CONTEXT is an object specifying the locally derived context."
 
 	 ;; No desired type, no other restrictions.  Just add.
 	 (t
-	  (setq c (cons (car origc) c)))
+	  (setq c (cons (car loopc) c)))
 
 	 ); cond
 
-	(setq origc (cdr origc)))
+	(setq loopc (cdr loopc)))
 
       (when desired-type
 	;; Some types, like the enum in C, have special constant values that
@@ -268,7 +273,7 @@ Argument CONTEXT is an object specifying the locally derived context."
 
     ;; All done!
 
-    c))
+    (or c origc) ))
 
 (provide 'semantic-analyze-complete)
 
