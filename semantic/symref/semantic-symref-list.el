@@ -1,9 +1,9 @@
 ;;; semantic-symref-list.el --- Symref Output List UI.
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-symref-list.el,v 1.10 2010-03-28 13:04:17 zappo Exp $
+;; X-RCS: $Id: semantic-symref-list.el,v 1.11 2010-03-29 01:12:54 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -112,8 +112,47 @@ Display the references in`semantic-symref-results-mode'."
     (define-key km "q" 'semantic-symref-hide-buffer)
     (define-key km "\C-c\C-e" 'semantic-symref-list-expand-all)
     (define-key km "\C-c\C-r" 'semantic-symref-list-contract-all)
+    (define-key km "R" 'semantic-symref-list-rename-open-hits)
     km)
   "Keymap used in `semantic-symref-results-mode'.")
+
+(defvar semantic-symref-list-menu-entries
+  (list
+   "Symref"
+   (senator-menu-item
+    ["Toggle Line Open"
+     semantic-symref-list-toggle-showing
+     :active t
+     :help "Toggle the current line open or closed."
+     ])
+   (senator-menu-item
+    ["Expand All Entries"
+     semantic-symref-list-expand-all
+     :active t
+     :help "Expand every expandable entry."
+     ])
+   (senator-menu-item
+    ["Contract All Entries"
+     semantic-symref-list-contract-all
+     :active t
+     :help "Close every expandable entry."
+     ])
+   (senator-menu-item
+    ["Rename Symbol in Open hits"
+     semantic-symref-list-rename-open-hits
+     :active t
+     :help "Rename the searched for symbol in all hits that are currently open."
+     ])
+   )
+  "Menu entries for the Semantic Symref list mode.")
+   
+(defvar semantic-symref-list-menu nil
+  "Menu keymap build from `semantic-symref-results-mode'.")
+
+(easy-menu-define semantic-symref-list-menu
+  semantic-symref-results-mode-map
+  "Symref Mode Menu"
+  semantic-symref-list-menu-bar)
 
 (defcustom semantic-symref-auto-expand-results nil
   "Non-nil to expand symref results on buffer creation."
@@ -357,6 +396,76 @@ BUTTON is the button that was clicked."
     ;; Restore position
     (goto-char start)))
 
+;;; REFACTORING EDITS
+;;
+;; Utilities and features for refactoring across a list of hits.
+;;
+(defun semantic-symref-list-rename-open-hits (newname)
+  "Rename the discovered symbol references to NEWNAME.
+Only renames the locations that are open in the symref list.
+Closed items will be skipped."
+  (interactive
+   (list (read-string "Rename to: "
+		      (oref (oref semantic-symref-current-results
+				  :created-by)
+			    :searchfor))))
+  (let ((count (semantic-symref-list-map-open-hits
+		(lambda () (replace-match newname nil t)))))
+    (semantic-symref-list-update-open-hits)
+    (message "Renamed %d occurances." count)))
+
+
+
+;;; REFACTORING UTILITIES
+;;
+;; Refactoring tools want to operate on only the "good" stuff the
+;; user selected.
+(defun semantic-symref-list-map-open-hits (function)
+  "For every open hit in the symref buffer, perform FUNCTION.
+The `match-data' will be set to a successful hit of the searched for symbol.
+Return the number of occurances FUNCTION was operated upon."
+
+  ;; First Pass in this function - a straight rename.
+  ;; Second Pass - Allow context specification based on
+  ;;               class members. (Not Done)
+
+  (let ((oldsym (oref (oref semantic-symref-current-results
+			    :created-by)
+		      :searchfor))
+	(count 0))
+    (save-excursion
+      (goto-char (point-min))
+      (while (not (eobp))
+	;; Is this line a "hit" line?
+	(let* ((ol (car (semantic-overlays-at (1- (point))))) ;; trust this for now
+	       (tag (when ol (semantic-overlay-get ol 'tag)))
+	       (line (when ol (semantic-overlay-get ol 'line))))
+	  (when line
+	    ;; The "line" means we have an open hit.
+	    (save-excursion
+	      (set-buffer (semantic-tag-buffer tag))
+	      (goto-line line)
+	      (beginning-of-line)
+	      (while (re-search-forward (regexp-quote oldsym) (point-at-eol) t)
+		(setq count (1+ count))
+		(funcall function)))))
+	;; Go to the next line
+	(forward-line 1)
+	(end-of-line)))
+    count))
+
+(defun semantic-symref-list-update-open-hits ()
+  "Update the text for all the open hits in the symref list."
+  (save-excursion
+    (goto-char (point-min))
+    (while (re-search-forward "\\[-\\]" nil t)
+      (end-of-line)
+      (let* ((ol (car (semantic-overlays-at (1- (point))))) ;; trust this for now
+	     (tag (when ol (semantic-overlay-get ol 'tag))))
+	;; If there is a tag, then close/open it.
+	(when tag
+	  (semantic-symref-list-toggle-showing)
+	  (semantic-symref-list-toggle-showing))))))
 
 (provide 'semantic-symref-list)
 ;;; semantic-symref-list.el ends here
