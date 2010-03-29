@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-symref-list.el,v 1.11 2010-03-29 01:12:54 zappo Exp $
+;; X-RCS: $Id: semantic-symref-list.el,v 1.12 2010-03-29 15:30:59 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -33,6 +33,7 @@
 ;; NOTE: Need to add some refactoring tools.
 
 (require 'semantic-symref)
+(require 'senator)
 (require 'pulse)
 
 ;;; Code:
@@ -152,7 +153,7 @@ Display the references in`semantic-symref-results-mode'."
 (easy-menu-define semantic-symref-list-menu
   semantic-symref-results-mode-map
   "Symref Mode Menu"
-  semantic-symref-list-menu-bar)
+  semantic-symref-list-menu-entries)
 
 (defcustom semantic-symref-auto-expand-results nil
   "Non-nil to expand symref results on buffer creation."
