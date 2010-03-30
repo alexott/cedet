@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.64 2010-03-26 22:18:02 xscript Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.65 2010-03-30 15:51:16 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -42,6 +42,9 @@
 (require 'semantic-ctxt)
 (require 'semantic-util-modes)
 (require 'timer)
+
+;; @TODO - how to make this happen only if someone enables to summary mode?
+(require 'eldoc)
 
 ;;; Code:
 
