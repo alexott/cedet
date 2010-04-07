@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.65 2010-03-30 15:51:16 zappo Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.66 2010-04-07 00:01:52 scymtym Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -904,7 +904,7 @@ visible, then highlight it."
 
 (define-semantic-idle-service semantic-idle-tag-highlight
   "Highlight the tag, and references of the symbol under point.
-Call `semantic-analyze-current-context' to find the refer ence tag.
+Call `semantic-analyze-current-context' to find the reference tag.
 Call `semantic-symref-hits-in-region' to identify local references."
   (when (semantic-idle-summary-useful-context-p)
     (let* ((ctxt (semantic-analyze-current-context))
