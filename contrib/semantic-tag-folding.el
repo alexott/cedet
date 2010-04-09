@@ -1,7 +1,7 @@
 ;;; semantic-tag-folding.el --- semantic decoration style to enable folding of semantic tags
 ;; Time-stamp: <2010-03-08 01:32:31 (lluis)>
 
-;;; Copyright (C) 2005, 2009 Suraj Acharya
+;;; Copyright (C) 2005, 2009, 2010 Suraj Acharya
 
 ;; Author: Suraj Acharya <sacharya@cs.indiana.edu>
 
@@ -254,7 +254,7 @@ minor mode is enabled."
           (not semantic-tag-folding-mode)))
   (semantic-tag-folding-mode-setup)
   (run-hooks 'semantic-tag-folding-mode-hook)
-  (if (interactive-p)
+  (if (cedet-called-interactively-p)
       (message "folding minor mode %sabled"
                (if semantic-tag-folding-mode "en" "dis")))
   semantic-tag-folding-mode)
