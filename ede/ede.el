@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede.el,v 1.150 2010-03-26 22:18:01 xscript Exp $
+;; RCS: $Id: ede.el,v 1.151 2010-04-09 01:41:50 zappo Exp $
 (defconst ede-version "1.0pre7"
   "Current version of the Emacs EDE.")
 
@@ -388,7 +388,7 @@ mode.  nil means to toggle the mode."
       (if (and ede-minor-mode (not ede-constructing))
 	  (ede-initialize-state-current-buffer)
 	;; If we fail to have a project here, turn it back off.
-	(if (not (interactive-p))
+	(if (not (cedet-called-interactively-p))
 	    (setq ede-minor-mode nil))))))
 
 (defun ede-initialize-state-current-buffer ()
