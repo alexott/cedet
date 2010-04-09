@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-symref-grep.el,v 1.9 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semantic-symref-grep.el,v 1.10 2010-04-09 02:26:44 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -137,19 +137,7 @@ This shell should support pipe redirect syntax."
   ;; Find the root of the project, and do a find-grep...
   (let* (;; Find the file patterns to use.
 	 (pat (cdr (assoc major-mode semantic-symref-filepattern-alist)))
-	 (rootdir (cond 
-		   ;; Project root via EDE.
-		   ((eq (oref tool :searchscope) 'project)
-		    (let ((rootproj (when (and (featurep 'ede) ede-minor-mode)
-				      (ede-toplevel))))
-		      (if rootproj
-			  (ede-project-root-directory rootproj)
-			default-directory)))
-		   ;; Calculate the target files as just in
-		   ;; this directory... cause I'm lazy.
-		   ((eq (oref tool :searchscope) 'target)
-		    default-directory)
-		   ))
+	 (rootdir (semantic-symref-calculate-rootdir))
 	 (filepattern (semantic-symref-derive-find-filepatterns))
 	 ;; Grep based flags.
 	 (grepflags (cond ((eq (oref tool :resulttype) 'file)
