@@ -1,12 +1,12 @@
 ;;; wisent-calc.el --- Infix notation calculator
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2009 David Ponce
+;; Copyright (C) 2001, 2002, 2003, 2004, 2009, 2010 David Ponce
 
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 11 Sep 2001
 ;; Keywords: syntax
-;; X-RCS: $Id: wisent-calc.el,v 1.20 2009-12-26 21:38:46 zappo Exp $
+;; X-RCS: $Id: wisent-calc.el,v 1.21 2010-04-09 02:08:09 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -47,10 +47,8 @@
 ;;   calc: 2*2*2; 2^3;
 ;;   -> 8; 8;
 
-;;; History:
-;; 
-
 ;;; Code:
+(require 'cedet-compat)
 (require 'semantic-wisent)
 (require 'wisent-calc-wy)
 
@@ -83,7 +81,7 @@ Parse INPUT string and output the result of computation."
     (insert input)
     (let* ((wisent-lex-istream (semantic-lex-buffer))
 	   (answer (wisent-parse semantic--parse-table 'wisent-lex)))
-      (if (interactive-p)
+      (if (cedet-called-interactively-p)
 	  (message "%s -> %s" input answer))
       answer)))
 
