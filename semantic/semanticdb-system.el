@@ -1,10 +1,10 @@
 ;;; semanticdb-system.el --- Build a file DB for some system files.
 
-;;; Copyright (C) 2002, 2003, 2004, 2005, 2007, 2008 Eric M. Ludlam
+;;; Copyright (C) 2002, 2003, 2004, 2005, 2007, 2008, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb-system.el,v 1.14 2008-06-10 00:51:21 zappo Exp $
+;; X-RCS: $Id: semanticdb-system.el,v 1.15 2010-04-09 01:52:15 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -153,7 +153,7 @@ of symbol `semanticdb-project-database-system' are accepted."
 	  (error "")))
     ;; All set with that path.  Ask about system type.
     (if (not class)
-	(if (interactive-p)
+	(if (cedet-called-interactively-p)
 	    (setq class
 		  (eieio-read-subclass "System Type: "
 				       semanticdb-project-database-system
