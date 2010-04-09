@@ -5,7 +5,7 @@
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Version: 0.4
 ;; Keywords: project, make
-;; RCS: $Id: ede-dired.el,v 1.12 2010-03-15 13:40:54 xscript Exp $
+;; RCS: $Id: ede-dired.el,v 1.13 2010-04-09 01:43:07 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -75,7 +75,7 @@ negative, force off."
 	(not (or (and (null arg) ede-dired-minor-mode)
 		 (<= (prefix-numeric-value arg) 0))))
   (if (and (not (ede-directory-project-p default-directory))
-	   (not (interactive-p)))
+	   (not (cedet-called-interactively-p)))
       (setq ede-dired-minor-mode nil))
   )
 
