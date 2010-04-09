@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-decorate-include.el,v 1.29 2010-03-26 22:18:02 xscript Exp $
+;; X-RCS: $Id: semantic-decorate-include.el,v 1.30 2010-04-09 01:56:22 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -323,7 +323,7 @@ Argument EVENT is the mouse clicked event."
 		  (semanticdb-file-table-object file t))))
     (with-output-to-temp-buffer (help-buffer) ; "*Help*"
       (help-setup-xref (list #'semantic-decoration-include-describe)
-		       (called-interactively-p 'interactive))
+		       (cedet-called-interactively-p 'interactive))
       (princ "Include File: ")
       (princ (semantic-format-tag-name tag nil t))
       (princ "\n")
@@ -422,7 +422,7 @@ Argument EVENT is the mouse clicked event."
 	(mm major-mode))
     (with-output-to-temp-buffer (help-buffer) ; "*Help*"
       (help-setup-xref (list #'semantic-decoration-unknown-include-describe)
-		       (called-interactively-p 'interactive))
+		       (cedet-called-interactively-p 'interactive))
       (princ "Include File: ")
       (princ (semantic-format-tag-name tag nil t))
       (princ "\n\n")
@@ -504,7 +504,7 @@ Argument EVENT is the mouse clicked event."
   (let ((tag (semantic-current-tag)))
     (with-output-to-temp-buffer (help-buffer); "*Help*"
       (help-setup-xref (list #'semantic-decoration-unparsed-include-describe)
-		       (called-interactively-p 'interactive))
+		       (cedet-called-interactively-p 'interactive))
 
       (princ "Include File: ")
       (princ (semantic-format-tag-name tag nil t))
@@ -585,7 +585,7 @@ Argument EVENT describes the event that caused this function to be called."
 	 )
     (with-output-to-temp-buffer (help-buffer) ;"*Help*"
       (help-setup-xref (list #'semantic-decoration-all-include-summary)
-		       (called-interactively-p 'interactive))
+		       (cedet-called-interactively-p 'interactive))
 
       (princ "Include Summary for File: ")
       (princ (file-truename (buffer-file-name)))
