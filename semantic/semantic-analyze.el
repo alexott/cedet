@@ -1,10 +1,10 @@
 ;;; semantic-analyze.el --- Analyze semantic tags against local context
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-analyze.el,v 1.89 2010-03-26 22:18:02 xscript Exp $
+;; X-RCS: $Id: semantic-analyze.el,v 1.90 2010-04-09 01:55:10 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -511,7 +511,7 @@ if a cached copy of the return object is found."
 					     'current-context
 					     'exit-cache-zone)))
 	  ;; Check for interactivity
-	  (when (called-interactively-p 'any)
+	  (when (cedet-called-interactively-p 'any)
 	    (if answer
 		(semantic-analyze-pop-to-context answer)
 	      (message "No Context."))
