@@ -1,9 +1,9 @@
 ;;; srecode-map.el --- Manage a template file map
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-map.el,v 1.18 2010-03-26 22:18:07 xscript Exp $
+;; X-RCS: $Id: srecode-map.el,v 1.19 2010-04-09 01:13:25 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -194,7 +194,7 @@ Optional argument RESET forces a reset of the current map."
   ;; the user asks for one.
   (srecode-map-update-map (not reset))
 
-  (if (called-interactively-p 'any)
+  (if (cedet-called-interactively-p 'any)
       ;; Dump this map.
       (with-output-to-temp-buffer "*SRECODE MAP*"
 	(princ "   -- SRecode Global map --\n")
