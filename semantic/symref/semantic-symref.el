@@ -1,6 +1,6 @@
 ;;; semantic-symref.el --- Symbol Reference API
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -95,16 +95,27 @@ is supported.
 
 If no tools are supported, then 'grep is assumed.")
 
+(defun semantic-symref-calculate-rootdir ()
+  "Calculate the root directory for a symref search.
+Start with and EDE project, or use the default directory."
+  (let* ((rootproj (when (and (featurep 'ede) ede-minor-mode)
+		       (ede-toplevel)))
+	   (rootdirbase (if rootproj
+			    (ede-project-root-directory rootproj)
+			  default-directory)))
+    (if (and rootproj (condition-case nil
+			  ;; Hack for subprojects.
+			  (oref rootproj :metasubproject)
+			(error nil)))
+	(ede-up-directory rootdirbase)
+      rootdirbase)))
+
 (defun semantic-symref-detect-symref-tool ()
   "Detect the symref tool to use for the current buffer."
   (if (not (eq semantic-symref-tool 'detect))
       semantic-symref-tool
     ;; We are to perform a detection for the right tool to use.
-    (let* ((rootproj (when (and (featurep 'ede) ede-minor-mode)
-		       (ede-toplevel)))
-	   (rootdir (if rootproj
-			(ede-project-root-directory rootproj)
-		      default-directory))
+    (let* ((rootdir (semantic-symref-calculate-rootdir))
 	   (tools semantic-symref-tool-alist))
       (while (and tools (eq semantic-symref-tool 'detect))
 	(when (funcall (car (car tools)) rootdir)
@@ -163,7 +174,7 @@ to perform the search.  This was added for use by a test harness."
       (set tool-return inst))
     (prog1
 	(setq semantic-symref-last-result result)
-      (when (called-interactively-p 'interactive)
+      (when (cedet-called-interactively-p 'interactive)
 	(semantic-symref-data-debug-last-result))))
   )
 
@@ -183,7 +194,7 @@ Returns an object of class `semantic-symref-result'."
 	 (result (semantic-symref-get-result inst)))
     (prog1
 	(setq semantic-symref-last-result result)
-      (when (called-interactively-p 'interactive)
+      (when (cedet-called-interactively-p 'interactive)
 	(semantic-symref-data-debug-last-result))))
   )
 
@@ -203,7 +214,7 @@ Returns an object of class `semantic-symref-result'."
 	 (result (semantic-symref-get-result inst)))
     (prog1
 	(setq semantic-symref-last-result result)
-      (when (called-interactively-p 'interactive)
+      (when (cedet-called-interactively-p 'interactive)
 	(semantic-symref-data-debug-last-result))))
   )
 
@@ -223,7 +234,7 @@ Returns an object of class `semantic-symref-result'."
 	 (result (semantic-symref-get-result inst)))
     (prog1
 	(setq semantic-symref-last-result result)
-      (when (called-interactively-p 'interactive)
+      (when (cedet-called-interactively-p 'interactive)
 	(semantic-symref-data-debug-last-result))))
   )
 
@@ -243,7 +254,7 @@ Returns an object of class `semantic-symref-result'."
 	 (result (semantic-symref-get-result inst)))
     (prog1
 	(setq semantic-symref-last-result result)
-      (when (called-interactively-p 'interactive)
+      (when (cedet-called-interactively-p 'interactive)
 	(semantic-symref-data-debug-last-result))))
   )
 
@@ -264,7 +275,7 @@ Returns an object of class `semantic-symref-result'."
 	 (result (semantic-symref-get-result inst)))
     (prog1
 	(setq semantic-symref-last-result result)
-      (when (called-interactively-p 'interactive)
+      (when (cedet-called-interactively-p 'interactive)
 	(semantic-symref-data-debug-last-result))))
   )
 
