@@ -1,9 +1,9 @@
 ;;; semantic-ectag-parse.el --- exuberent CTags into Semantic tags
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-ectag-parse.el,v 1.17 2009-08-30 12:32:29 zappo Exp $
+;; X-RCS: $Id: semantic-ectag-parse.el,v 1.18 2010-04-09 02:02:47 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -53,13 +53,13 @@ Convert the output tags into Semantic tags."
   (when (not semantic-ectag-lang)
     (error "Exuberent CTag support for Semantic not configured for %s"
            major-mode))
-  (let* ((semantic-ectag-collect-errors (interactive-p))
+  (let* ((semantic-ectag-collect-errors (cedet-called-interactively-p 'any))
          (start (current-time))
          (tags
           (semantic-ectag-parse-file-with-mode (buffer-file-name) major-mode))
          (end (current-time)))
 
-    (when (interactive-p)
+    (when (cedet-called-interactively-p 'any)
       (message "Parsed %d tags in %d seconds."
                (length tags)
                (semantic-elapsed-time start end))
