@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.66 2010-04-07 00:01:52 scymtym Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.67 2010-04-09 02:05:56 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -193,7 +193,7 @@ minor mode is enabled."
           (not semantic-idle-scheduler-mode)))
   (semantic-idle-scheduler-mode-setup)
   (run-hooks 'semantic-idle-scheduler-mode-hook)
-  (if (called-interactively-p 'interactive)
+  (if (cedet-called-interactively-p 'interactive)
       (message "idle-scheduler minor mode %sabled"
                (if semantic-idle-scheduler-mode "en" "dis")))
   (semantic-mode-line-update)
@@ -680,7 +680,7 @@ Return non-nil if the minor mode is enabled.")
 		 (not ,mode)))
 	 (,setup)
 	 (run-hooks ,hook)
-	 (if (called-interactively-p 'interactive)
+	 (if (cedet-called-interactively-p 'interactive)
 	     (message "%s %sabled"
 		      (symbol-name ',mode)
 		      (if ,mode "en" "dis")))
