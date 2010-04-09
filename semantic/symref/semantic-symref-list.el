@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-symref-list.el,v 1.12 2010-03-29 15:30:59 zappo Exp $
+;; X-RCS: $Id: semantic-symref-list.el,v 1.13 2010-04-09 02:29:36 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -69,8 +69,8 @@ current project to find references to the input SYM.  The
 references are the organized by file and the name of the function
 they are used in.
 Display the references in`semantic-symref-results-mode'."
-  (interactive (list (car (senator-jump-interactive "Symrefs for: " nil nil t)))
-	       )
+  (interactive (list (car (senator-jump-interactive "Symrefs for: "
+						    nil nil nil))))
   (semantic-fetch-tags)
   (let ((res nil)
 	)
@@ -114,6 +114,9 @@ Display the references in`semantic-symref-results-mode'."
     (define-key km "\C-c\C-e" 'semantic-symref-list-expand-all)
     (define-key km "\C-c\C-r" 'semantic-symref-list-contract-all)
     (define-key km "R" 'semantic-symref-list-rename-open-hits)
+    (define-key km "(" 'semantic-symref-list-create-macro-on-open-hit)
+    (define-key km "E" 'semantic-symref-list-call-macro-on-open-hits)
+    
     km)
   "Keymap used in `semantic-symref-results-mode'.")
 
@@ -397,6 +400,64 @@ BUTTON is the button that was clicked."
     ;; Restore position
     (goto-char start)))
 
+;;; UTILS
+;;
+;; List mode utils for understadning the current line
+
+(defun semantic-symref-list-on-hit-p ()
+  "Return the line number if the cursor is on a buffer line with a hit.
+Hits are the line of code from the buffer, not the tag summar or file lines."
+  (save-excursion
+    (end-of-line)
+    (let* ((ol (car (semantic-overlays-at (1- (point)))))) ;; trust this for now
+      (when ol (semantic-overlay-get ol 'line)))))
+
+
+;;; Keyboard Macros on a Hit
+;;
+;; Record a macro on a hit, and store in a special way for execution later.
+(defun semantic-symref-list-create-macro-on-open-hit ()
+  "Record a keyboard macro at the location of the hit in the current list.
+Under point should be one hit for the active keyword.  Move
+cursor to the beginning of that symbol, then record a macro as if
+`kmacro-start-macro' was pressed.  Use `kmacro-end-macro',
+{kmacro-end-macro} to end the macro, and return to the symbol found list."
+  (interactive)
+  (let* ((oldsym (oref (oref semantic-symref-current-results
+			    :created-by)
+		      :searchfor))
+	 (ol (save-excursion
+	       (end-of-line)
+	       (car (semantic-overlays-at (1- (point))))))
+	 (tag (when ol (semantic-overlay-get ol 'tag)))
+	 (line (when ol (semantic-overlay-get ol 'line))))
+    (when (not line)
+      (error "Cannot create macro on a non-hit line"))
+    ;; Go there, and do something useful.
+    (switch-to-buffer-other-window (semantic-tag-buffer tag))
+    (goto-line line)
+    (when (not (re-search-forward (regexp-quote oldsym) (point-at-eol) t))
+      (error "Cannot find hit.  Cannot record macro"))
+    (goto-char (match-beginning 0))
+    ;; Cursor is now in the right location.  Start recording a macro.
+    (kmacro-start-macro nil)
+    ;; Notify the user
+    (message "Complete with C-x ).  Use E in the symref buffer to call this macro.")))
+
+(defun semantic-symref-list-call-macro-on-open-hits ()
+  "Call the most recently created keyboard macro on each hit.
+Cursor is placed at the beginning of the symbol found, even if
+there is more than one symbol on the current line.  The
+previously recorded macro is then executed."
+  (interactive)
+  (save-window-excursion
+    (let ((count (semantic-symref-list-map-open-hits
+		  (lambda ()
+		    (switch-to-buffer (current-buffer))
+		    (kmacro-call-macro nil)))))
+      (semantic-symref-list-update-open-hits)
+      (message "Executed Macro %d times." count))))
+
 ;;; REFACTORING EDITS
 ;;
 ;; Utilities and features for refactoring across a list of hits.
@@ -411,11 +472,11 @@ Closed items will be skipped."
 				  :created-by)
 			    :searchfor))))
   (let ((count (semantic-symref-list-map-open-hits
+		;; HACK: We know that the map-open-hits call also
+		;; sets the match data, so we can call replace match here.
 		(lambda () (replace-match newname nil t)))))
     (semantic-symref-list-update-open-hits)
     (message "Renamed %d occurances." count)))
-
-
 
 ;;; REFACTORING UTILITIES
 ;;
@@ -449,7 +510,9 @@ Return the number of occurances FUNCTION was operated upon."
 	      (beginning-of-line)
 	      (while (re-search-forward (regexp-quote oldsym) (point-at-eol) t)
 		(setq count (1+ count))
-		(funcall function)))))
+		(save-excursion ;; Leave cursor after the matched name.
+		  (goto-char (match-beginning 0)) ;; Go to beginning of that sym
+		  (funcall function))))))
 	;; Go to the next line
 	(forward-line 1)
 	(end-of-line)))
