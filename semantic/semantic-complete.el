@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-complete.el,v 1.68 2010-03-27 11:19:26 zappo Exp $
+;; X-RCS: $Id: semantic-complete.el,v 1.69 2010-04-09 02:04:30 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -2063,7 +2063,7 @@ how completion options are displayed."
       (semantic-complete-inline-analyzer
        (semantic-analyze-current-context (point))))
   ;; Report a message if things didn't startup.
-  (if (and (called-interactively-p 'any)
+  (if (and (cedet-called-interactively-p 'any)
 	   (not (semantic-completion-inline-active-p)))
       (message "Inline completion not needed.")
     ;; Since this is most likely bound to something, and not used
@@ -2085,7 +2085,7 @@ to change how completion options are displayed."
       (semantic-complete-inline-analyzer-idle
        (semantic-analyze-current-context (point))))
   ;; Report a message if things didn't startup.
-  (if (and (called-interactively-p 'interactive)
+  (if (and (cedet-called-interactively-p 'interactive)
 	   (not (semantic-completion-inline-active-p)))
       (message "Inline completion not needed.")))
 
