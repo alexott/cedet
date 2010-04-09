@@ -1,9 +1,9 @@
 ;;; semantic-symref-filter.el --- Filter symbol reference hits for accuracy.
 ;;
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-symref-filter.el,v 1.6 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semantic-symref-filter.el,v 1.7 2010-04-09 01:56:49 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -96,7 +96,7 @@ tag that contains point, and return that."
        target (lambda (start end prefix) (setq Lcount (1+ Lcount)))
        (semantic-tag-start tag)
        (semantic-tag-end tag))
-      (when (interactive-p)
+      (when (cedet-called-interactively-p)
 	(message "Found %d occurances of %s in %.2f seconds"
 		 Lcount (semantic-tag-name target)
 		 (semantic-elapsed-time start (current-time))))
