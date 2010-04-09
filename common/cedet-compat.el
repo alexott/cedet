@@ -6,7 +6,7 @@
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Keywords: compatibility
-;; X-RCS: $Id: cedet-compat.el,v 1.9 2010-03-26 16:02:25 zappo Exp $
+;; X-RCS: $Id: cedet-compat.el,v 1.10 2010-04-09 01:12:18 zappo Exp $
 
 ;; This file is not part of Emacs
 
@@ -194,33 +194,56 @@ Note: Doesn't work if this version is being loaded."
     ;; The implementation for the interpreter is basically trivial.
     (car (last body))))
 
-;;;###autoload
+
 (if (not (fboundp 'called-interactively-p))
-    (defsubst called-interactively-p (&optional arg)
+    (defmacro cedet-called-interactively-p (&optional arg)
       "Compat function.  Calls `interactive-p'"
-      (interactive-p))
+      '(interactive-p))
   ;; Else, it is defined, but perhaps too old?
   (condition-case nil
-      ;; This condition case also prevents this from running twice.
-      (called-interactively-p nil)
+      (progn
+	;; This condition case also prevents this from running twice.
+	(called-interactively-p nil)
+	;; An alias for the real deal.
+	(defalias 'cedet-called-interactively-p 'called-interactively-p))
     (error
-     (defvar cedet-compat-called-interactively-p
-       (let ((tmp (symbol-function 'called-interactively-p)))
-	 (if (subrp tmp)
-	     tmp
-	   ;; Did someone else allready override it?
-	   (or cedet-compat-clled-interactively-p tmp)))
-       "Built-in called interactively function.")
      ;; Create a new one
-     (defun cedet-called-interactively-p (&optional arg)
+     (defmacro cedet-called-interactively-p (&optional arg)
        "Revised from the built-in version to accept an optional arg."
-       (case arg
-	 (interactive (interactive-p))
-	 ((any nil) (funcall cedet-compat-called-interactively-p))))
-     ;; Override
-     (fset 'called-interactively-p 'cedet-called-interactively-p)
+       (case (eval arg)
+	 (interactive '(interactive-p))
+	 ((any nil) '(called-interactively-p))))
      )))
 
+
+;;; TESTS
+;;
+;;;###autoload
+(defun cedet-compat-utest ()
+  "Test compatability functions."
+  (interactive)
+  (when (not noninteractive)
+    ;; Interactive tests need to be called interactively.
+    (call-interactively 'cedet-utest-interactivep))
+  ;; Other...
+  )
+
+(defun cedet-utest-interactivep ()
+  "Test that `cedet-called-interactively-p' works."
+  (interactive)
+  (unless (cedet-called-interactively-p 'interactive)
+    (error "Failed interactive test"))
+  (unless (cedet-called-interactively-p 'any)
+    (error "Failed interactive any test"))
+  (cedet-utest-interactivep-subfcn)
+  (message "All CEDET called-interactively tests pass."))
+
+(defun cedet-utest-interactivep-subfcn ()
+  "Test that `cedet-called-interactively-p' works noninteractively."
+  (when (cedet-called-interactively-p 'interactive)
+    (error "Failed non-interactive test"))
+  (when (cedet-called-interactively-p 'any)
+    (error "Failed non-interactive any test")))
 
 (provide 'cedet-compat)
 
