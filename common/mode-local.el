@@ -7,7 +7,7 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 27 Apr 2004
 ;; Keywords: syntax
-;; X-RCS: $Id: mode-local.el,v 1.27 2010-03-26 22:17:57 xscript Exp $
+;; X-RCS: $Id: mode-local.el,v 1.28 2010-04-09 02:14:51 zappo Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -779,7 +779,7 @@ invoked interactively."
   "Display mode local bindings active in BUFFER."
   (interactive "b")
   (when (setq buffer (get-buffer buffer))
-    (mode-local-describe-bindings-1 buffer (called-interactively-p 'any))))
+    (mode-local-describe-bindings-1 buffer (cedet-called-interactively-p 'any))))
 
 (defun describe-mode-local-bindings-in-mode (mode)
   "Display mode local bindings active in MODE hierarchy."
@@ -789,7 +789,8 @@ invoked interactively."
           #'(lambda (s) (get s 'mode-local-symbol-table))
           t (symbol-name major-mode))))
   (when (setq mode (intern-soft mode))
-    (mode-local-describe-bindings-1 mode (called-interactively-p 'any))))
+    (mode-local-describe-bindings-1 mode (cedet-called-interactively-p 'any))))
+
 
 ;;; Font-lock support
 ;;
