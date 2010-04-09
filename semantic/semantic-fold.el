@@ -1,10 +1,10 @@
 ;;; semantic-fold.el --- Folding support for Semantic Tags.
 
-;;; Copyright (C) 2005 Eric M. Ludlam
+;;; Copyright (C) 2005, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-fold.el,v 1.6 2005-09-30 20:20:13 zappo Exp $
+;; X-RCS: $Id: semantic-fold.el,v 1.7 2010-04-09 02:00:05 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -190,7 +190,7 @@ minor mode is enabled."
           (not semantic-folding-mode)))
   (semantic-folding-mode-setup)
   (run-hooks 'semantic-folding-mode-hook)
-  (if (interactive-p)
+  (if (cedet-called-interactively-p)
       (message "folding minor mode %sabled"
                (if semantic-folding-mode "en" "dis")))
   semantic-folding-mode)
