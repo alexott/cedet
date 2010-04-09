@@ -1,9 +1,9 @@
 ;;; cedet-cscope.el --- CScope support for CEDET
 ;;
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-cscope.el,v 1.4 2010-03-26 22:17:55 xscript Exp $
+;; X-RCS: $Id: cedet-cscope.el,v 1.5 2010-04-09 02:20:06 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -102,7 +102,7 @@ Return a fully qualified filename."
 	 (ans2 (mapcar (lambda (hit)
 			 (expand-file-name (car (split-string hit " "))))
 		       ans1)))
-    (when (called-interactively-p 'interactive)
+    (when (cedet-called-interactively-p 'interactive)
       (if ans2
 	  (if (= (length ans2) 1)
 	      (message "%s" (car ans2))
@@ -137,7 +137,7 @@ return nil."
 	(rev nil))
     (if (not b)
 	(progn
-	  (when (called-interactively-p 'interactive)
+	  (when (cedet-called-interactively-p 'interactive)
 	    (message "CScope not found."))
 	  nil)
       (with-current-buffer b
@@ -150,7 +150,7 @@ return nil."
 	      (error "Version of CScope is %s.  Need at least %s"
 		     rev cedet-cscope-min-version))
 	  ;; Else, return TRUE, as in good enough.
-	  (when (called-interactively-p 'interactive)
+	  (when (cedet-called-interactively-p 'interactive)
 	    (message "CScope %s  - Good enough for CEDET." rev))
 	  t)))))
 
