@@ -1,6 +1,6 @@
 ;;; wisent-comp.el --- GNU Bison for Emacs - Grammar compiler
 
-;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009 David Ponce
+;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2010 David Ponce
 ;; Copyright (C) 1984, 1986, 1989, 1992, 1995, 2000, 2001
 ;; Free Software Foundation, Inc. (Bison)
 
@@ -8,7 +8,7 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 30 January 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: wisent-comp.el,v 1.29 2010-03-26 22:18:06 xscript Exp $
+;; X-RCS: $Id: wisent-comp.el,v 1.30 2010-04-09 02:08:59 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -198,7 +198,7 @@ If optional LEFT is non-nil insert spaces on left."
   "Toggle whether to report verbose information on generated parser."
   (interactive)
   (setq wisent-verbose-flag (not wisent-verbose-flag))
-  (when (called-interactively-p 'interactive)
+  (when (cedet-called-interactively-p 'interactive)
     (message "Verbose report %sabled"
              (if wisent-verbose-flag "en" "dis"))))
 
