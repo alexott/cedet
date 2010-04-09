@@ -1,10 +1,10 @@
 ;;; semantic-decorate-mode.el --- Minor mode for decorating tags
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008 Eric M. Ludlam
+;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-decorate-mode.el,v 1.30 2010-03-26 22:18:02 xscript Exp $
+;; X-RCS: $Id: semantic-decorate-mode.el,v 1.31 2010-04-09 01:53:36 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -321,7 +321,7 @@ minor mode is enabled."
           (not semantic-decoration-mode)))
   (semantic-decoration-mode-setup)
   (run-hooks 'semantic-decoration-mode-hook)
-  (if (called-interactively-p 'interactive)
+  (if (cedet-called-interactively-p 'interactive)
       (message "decoration-mode minor mode %sabled"
                (if semantic-decoration-mode "en" "dis")))
   (semantic-mode-line-update)
@@ -380,7 +380,7 @@ Return non-nil if the decoration style is enabled."
         (when semantic-decoration-mode
           (semantic-decoration-mode -1)
           (semantic-decoration-mode 1))
-        (when (called-interactively-p 'interactive)
+        (when (cedet-called-interactively-p 'interactive)
           (message "Decoration style %s turned %s" (car style)
                    (if flag "on" "off"))))
       flag)))
