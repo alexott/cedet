@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-analyze-complete.el,v 1.18 2010-03-29 11:27:01 zappo Exp $
+;; X-RCS: $Id: semantic-analyze-complete.el,v 1.19 2010-04-09 02:07:01 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -109,7 +109,7 @@ in a buffer."
 		    (error "Nothing to complete")
 		  (:override))))
       ;; If interactive, display them.
-      (when (interactive-p)
+      (when (cedet-called-interactively-p)
 	(with-output-to-temp-buffer "*Possible Completions*"
 	  (semantic-analyze-princ-sequence ans "" (current-buffer)))
 	(shrink-window-if-larger-than-buffer
