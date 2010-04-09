@@ -1,9 +1,9 @@
 ;;; semantic-ectag-lang.el --- Exuberent Ctags per-language support
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-ectag-lang.el,v 1.11 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semantic-ectag-lang.el,v 1.12 2010-04-09 02:26:05 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -63,6 +63,7 @@ KINDS are the kinds of tags to generate from exuberent ctags."
 ;(semantic-ectag-add-language-support lua-mode "lua" "f")
 (semantic-ectag-add-language-support pascal-mode "pascal" "fp")
 (semantic-ectag-add-language-support perl-mode "perl" "cflpsd")
+(semantic-ectag-add-language-support python-mode "python" "cfmvi")
 ;(semantic-ectag-add-language-support rexx-mode "rexx" "s")
 ;(semantic-ectag-add-language-support sql-mode "sql" "s")
 (semantic-ectag-add-language-support tcl-mode "tcl" "cmp")
@@ -96,6 +97,7 @@ semantic parser."
   ;;(add-hook 'lua-mode-hook 'semantic-ectag-simple-setup)
   (add-hook 'pascal-mode-hook 'semantic-ectag-simple-setup)
   (add-hook 'perl-mode-hook 'semantic-ectag-simple-setup)
+  (add-hook 'python-mode-hook 'semantic-ectag-simple-setup)
   ;;(add-hook 'rexx-mode-hook 'semantic-ectag-simple-setup)
   (add-hook 'tcl-mode-hook 'semantic-ectag-simple-setup)
   ;;(add-hook 'vera-mode-hook 'semantic-ectag-simple-setup)
