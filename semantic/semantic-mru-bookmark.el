@@ -1,9 +1,9 @@
 ;;; semantic-mru-bookmark.el --- Automatic bookmark tracking
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-mru-bookmark.el,v 1.20 2010-03-26 22:18:03 xscript Exp $
+;; X-RCS: $Id: semantic-mru-bookmark.el,v 1.21 2010-04-09 01:54:41 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -330,7 +330,7 @@ minor mode is enabled."
           (not semantic-mru-bookmark-mode)))
   (semantic-mru-bookmark-mode-setup)
   (run-hooks 'semantic-mru-bookmark-mode-hook)
-  (if (called-interactively-p 'interactive)
+  (if (cedet-called-interactively-p 'interactive)
       (message "mru-bookmark minor mode %sabled"
                (if semantic-mru-bookmark-mode "en" "dis")))
   (semantic-mode-line-update)
