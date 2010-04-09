@@ -1,9 +1,9 @@
 ;;; ede-locate.el --- Locate support
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-locate.el,v 1.11 2010-03-26 22:18:01 xscript Exp $
+;; X-RCS: $Id: ede-locate.el,v 1.12 2010-04-09 01:36:33 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -90,17 +90,17 @@ based on `ede-locate-setup-options'."
     (while (and opts (not ans))
       (when (ede-locate-ok-in-project (car opts) root)
 	;; If interactive, check with the user.
-	(when (or (not (called-interactively-p 'any))
+	(when (or (not (cedet-called-interactively-p 'any))
 		  (y-or-n-p (format "Set project locator to %s? " (car opts))))
 	  (setq ans (car opts))))
       (setq opts (cdr opts)))
     ;; No match?  Always create the baseclass for the hashing tool.
     (when (not ans)
-      (when (called-interactively-p 'interactive)
+      (when (cedet-called-interactively-p 'interactive)
 	(message "Setting locator to ede-locate-base"))
       (setq ans 'ede-locate-base))
     (oset proj locate-obj (make-instance ans "Loc" :root root))
-    (when (called-interactively-p 'interactive)
+    (when (cedet-called-interactively-p 'interactive)
       (message "Setting locator to %s" ans))
     ))
 
