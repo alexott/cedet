@@ -6,7 +6,7 @@
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Author: David Ponce <david@dponce.com>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-util-modes.el,v 1.77 2010-03-26 22:18:03 xscript Exp $
+;; X-RCS: $Id: semantic-util-modes.el,v 1.78 2010-04-09 02:24:54 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -307,7 +307,7 @@ minor mode is enabled."
           (not semantic-highlight-edits-mode)))
   (semantic-highlight-edits-mode-setup)
   (run-hooks 'semantic-highlight-edits-mode-hook)
-  (if (called-interactively-p 'interactive)
+  (if (cedet-called-interactively-p 'interactive)
       (message "highlight-edits minor mode %sabled"
                (if semantic-highlight-edits-mode "en" "dis")))
   (semantic-mode-line-update)
@@ -515,7 +515,7 @@ minor mode is enabled.
           (not semantic-show-unmatched-syntax-mode)))
   (semantic-show-unmatched-syntax-mode-setup)
   (run-hooks 'semantic-show-unmatched-syntax-mode-hook)
-  (if (called-interactively-p 'interactive)
+  (if (cedet-called-interactively-p 'interactive)
       (message "show-unmatched-syntax minor mode %sabled"
                (if semantic-show-unmatched-syntax-mode "en" "dis")))
   (semantic-mode-line-update)
@@ -675,7 +675,7 @@ minor mode is enabled."
           (not semantic-show-parser-state-mode)))
   (semantic-show-parser-state-mode-setup)
   (run-hooks 'semantic-show-parser-state-mode-hook)
-  (if (called-interactively-p 'interactive)
+  (if (cedet-called-interactively-p 'interactive)
       (message "show-parser-state minor mode %sabled"
                (if semantic-show-parser-state-mode "en" "dis")))
   (semantic-mode-line-update)
@@ -947,7 +947,7 @@ minor mode is enabled."
           (not semantic-stickyfunc-mode)))
   (semantic-stickyfunc-mode-setup)
   (run-hooks 'semantic-stickyfunc-mode-hook)
-  (if (called-interactively-p 'interactive)
+  (if (cedet-called-interactively-p 'interactive)
       (message "Stickyfunc minor mode %sabled"
                (if semantic-stickyfunc-mode "en" "dis")))
   (semantic-mode-line-update)
@@ -1204,7 +1204,7 @@ minor mode is enabled."
           (not semantic-highlight-func-mode)))
   (semantic-highlight-func-mode-setup)
   (run-hooks 'semantic-highlight-func-mode-hook)
-  (if (called-interactively-p 'interactive)
+  (if (cedet-called-interactively-p 'interactive)
       (message "Highlight-Func minor mode %sabled"
                (if semantic-highlight-func-mode "en" "dis")))
   semantic-highlight-func-mode)
