@@ -1,13 +1,13 @@
 ;;; wisent.el --- GNU Bison for Emacs - Runtime
 
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007 David Ponce
 
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 30 January 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: wisent.el,v 1.42 2010-03-26 22:18:07 xscript Exp $
+;; X-RCS: $Id: wisent.el,v 1.43 2010-04-09 02:07:37 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -141,7 +141,7 @@ POSITIONS are available."
   "Toggle whether to issue more messages while parsing."
   (interactive)
   (setq wisent-parse-verbose-flag (not wisent-parse-verbose-flag))
-  (when (called-interactively-p 'interactive)
+  (when (cedet-called-interactively-p 'interactive)
     (message "More messages while parsing %sabled"
              (if wisent-parse-verbose-flag "en" "dis"))))
 
