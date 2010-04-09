@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-scope.el,v 1.38 2010-03-26 22:18:03 xscript Exp $
+;; X-RCS: $Id: semantic-scope.el,v 1.39 2010-04-09 01:59:47 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -660,7 +660,7 @@ The class returned from the scope calculation is variable
   (if (not (and (featurep 'semanticdb) semanticdb-current-database))
       nil ;; Don't do anything...
     (if (not point) (setq point (point)))
-    (when (called-interactively-p 'any)
+    (when (cedet-called-interactively-p 'any)
       (semantic-fetch-tags)
       (semantic-scope-reset-cache))
     (save-excursion
@@ -721,7 +721,7 @@ The class returned from the scope calculation is variable
 	;; Make sure we become dependant on the typecache.
 	(semanticdb-typecache-add-dependant scopecache)
 	;; Handy debug output.
-	(when (called-interactively-p 'any)
+	(when (cedet-called-interactively-p 'any)
 	  (data-debug-show scopecache))
 	;; Return ourselves
 	scopecache))))
