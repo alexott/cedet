@@ -1,9 +1,9 @@
 ;;; ede-make.el --- General information about "make"
 ;;
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-make.el,v 1.3 2010-03-26 22:18:01 xscript Exp $
+;; X-RCS: $Id: ede-make.el,v 1.4 2010-04-09 01:36:48 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -88,7 +88,7 @@ If NOERROR is nil, then throw an error on failure.  Return t otherwise."
 	(setq ans (not (inversion-check-version rev nil ede-make-min-version))))
 
       ;; Answer reporting.
-      (when (and (called-interactively-p 'interactive) ans)
+      (when (and (cedet-called-interactively-p 'interactive) ans)
 	(message "GNU Make version %s.  Good enough for CEDET." rev))
 
       (when (and (not noerror) (not ans))
