@@ -1,9 +1,9 @@
 ;;; semantic-ectag-util.el --- Utilities for Exuberent CTags and Semantic
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-ectag-util.el,v 1.7 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: semantic-ectag-util.el,v 1.8 2010-04-09 02:01:20 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -163,7 +163,7 @@ The returned buffer will be recycled in future calls to this function."
 		   )))
 	    (message "Exuberent CTags not found.  Found %s" whatver)
 	    nil)
-	(when (interactive-p)
+	(when (cedet-called-interactively-p)
 	  (message "Detected Exuberent CTags version : %s %s"
 		   str
 		   (if ropt
