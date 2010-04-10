@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semanticdb-typecache.el,v 1.44 2010-03-26 22:18:05 xscript Exp $
+;; X-RCS: $Id: semanticdb-typecache.el,v 1.45 2010-04-10 00:50:13 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -398,8 +398,10 @@ TYPE is the datatype to find.
 PATH is the search path, which should be one table object.
 If FIND-FILE-MATCH is non-nil, then force the file belonging to the
 found tag to be loaded."
-  (semanticdb-typecache-find-method (or path semanticdb-current-table)
-				    type find-file-match))
+  (if (not (and (featurep 'semanticdb) semanticdb-current-database))
+      nil ;; No DB, no search
+    (semanticdb-typecache-find-method (or path semanticdb-current-table)
+				      type find-file-match)))
 
 (defun semanticdb-typecache-find-by-name-helper (name table)
   "Find the tag with NAME in TABLE, which is from a typecache.
