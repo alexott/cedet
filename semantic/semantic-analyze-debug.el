@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-analyze-debug.el,v 1.12 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: semantic-analyze-debug.el,v 1.13 2010-04-10 00:52:16 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -49,6 +49,8 @@
 
     ))
 
+;; @TODO - If this happens, but the last found type is
+;; a datatype, then the below is wrong
 (defun semantic-analyzer-debug-found-prefix (ctxt)
   "Debug the prefix found by the analyzer output CTXT."
   (let* ((pf (oref ctxt prefix))
@@ -92,7 +94,7 @@ Argument COMP are possible completions here."
 	)
     (with-output-to-temp-buffer (help-buffer)
       (with-current-buffer standard-output
-	(princ "Unable to find prefix ")
+	(princ "Unable to find symbol ")
 	(princ prefix)
 	(princ ".\n\n")
 
@@ -212,7 +214,7 @@ Argument COMP are possible completions here."
     (when (not dt) (error "Missing Innertype debugger is confused"))
     (with-output-to-temp-buffer (help-buffer)
       (with-current-buffer standard-output
-	(princ "Cannot find prefix \"")
+	(princ "Cannot find symbol \"")
 	(princ prefixitem)
 	(princ "\" in datatype:
   ")
