@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-analyze-complete.el,v 1.19 2010-04-09 02:07:01 zappo Exp $
+;; X-RCS: $Id: semantic-analyze-complete.el,v 1.20 2010-04-10 00:51:22 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -127,7 +127,7 @@ Argument CONTEXT is an object specifying the locally derived context."
 	 (completetext nil)
 	 (completetexttype nil)
 	 (scope (oref a scope))
-	 (localvar (oref scope localvar))
+	 (localvar (when scope (oref scope localvar)))
 	 (origc nil)
 	 (c nil)
 	 (any nil))
@@ -180,7 +180,7 @@ Argument CONTEXT is an object specifying the locally derived context."
 	       ;; Argument list and local variables
 	       (semantic-find-tags-for-completion completetext localvar)
 	       ;; The current scope
-	       (semantic-find-tags-for-completion completetext (oref scope fullscope))
+	       (semantic-find-tags-for-completion completetext (when scope (oref scope fullscope)))
 	       ;; The world
 	       (semantic-analyze-find-tags-by-prefix completetext))
 	    )
