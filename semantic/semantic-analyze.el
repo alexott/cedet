@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-analyze.el,v 1.90 2010-04-09 01:55:10 zappo Exp $
+;; X-RCS: $Id: semantic-analyze.el,v 1.91 2010-04-10 00:51:01 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -259,7 +259,7 @@ Optional argument THROWSYM specifies a symbol the throw on non-recoverable error
 	(tag nil)			; tag return list
 	(tagtype nil)			; tag types return list
 	(fname nil)
-	(miniscope (clone scope))
+	(miniscope (when scope (clone scope)))
 	)
     ;; First order check.  Is this wholely contained in the typecache?
     (setq tmp (semanticdb-typecache-find sequence))
@@ -303,11 +303,12 @@ Optional argument THROWSYM specifies a symbol the throw on non-recoverable error
 	      ;; and we can use it directly.
 	      (cond ((semantic-tag-of-class-p tmp 'type)
 		     ;; update the miniscope when we need to analyze types directly.
-		     (let ((rawscope
-			    (apply 'append
-				   (mapcar 'semantic-tag-type-members
-					   tagtype))))
-		       (oset miniscope fullscope rawscope))
+		     (when miniscope
+		       (let ((rawscope
+			      (apply 'append
+				     (mapcar 'semantic-tag-type-members
+					     tagtype))))
+			 (oset miniscope fullscope rawscope)))
 		     ;; Now analayze the type to remove metatypes.
 		     (or (semantic-analyze-type tmp miniscope)
 			 tmp))
