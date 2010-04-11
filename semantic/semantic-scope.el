@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-scope.el,v 1.39 2010-04-09 01:59:47 zappo Exp $
+;; X-RCS: $Id: semantic-scope.el,v 1.40 2010-04-11 00:48:34 scymtym Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -61,7 +61,7 @@
 	       :documentation
 	       "The list of types currently in scope.
 For C++, this would contain anonymous namespaces known, and
-anything labled by a `using' statement.")
+anything labeled by a `using' statement.")
    (parents :initform nil
 	    :documentation
 	    "List of parents in scope w/in the body of this function.
