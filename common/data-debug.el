@@ -1,9 +1,9 @@
 ;;; data-debug.el --- Datastructure Debugger
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: data-debug.el,v 1.27 2010-03-26 22:17:57 xscript Exp $
+;; X-RCS: $Id: data-debug.el,v 1.28 2010-04-11 14:00:57 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -829,11 +829,19 @@ If PARENT is non-nil, it is somehow related as a parent to thing."
 	  (dolist (test data-debug-thing-alist)
 	    (when (funcall (car test) thing)
 	      (condition-case nil
-		  (funcall (cdr test) thing prefix prebuttontext parent)
+		  (progn
+		    (funcall (cdr test) thing prefix prebuttontext parent)
+		    (throw 'done nil))
 		(error
-		 (funcall (cdr test) thing prefix prebuttontext)))
-	      (throw 'done nil))
-	    )
+		 (condition-case nil
+		     (progn
+		       (funcall (cdr test) thing prefix prebuttontext)
+		       (throw 'done nil))
+		   (error nil))))
+	      ;; Only throw the 'done if no error was caught.
+	      ;; If an error was caught, skip this predicate as being
+	      ;; unsuccessful, and move on.
+	      ))
 	  nil)
     (data-debug-insert-simple-thing (format "%S" thing)
 				    prefix
