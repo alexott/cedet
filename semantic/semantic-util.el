@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-util.el,v 1.145 2010-04-09 02:09:30 zappo Exp $
+;; X-RCS: $Id: semantic-util.el,v 1.146 2010-04-12 11:09:37 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -131,44 +131,6 @@ buffer, or a filename.  If SOMETHING is nil return nil."
 
 (semantic-alias-obsolete 'semantic-something-to-stream
 			 'semantic-something-to-tag-table)
-
-;;; Recursive searching through dependency trees
-;;
-;; This will depend on the general searching APIS defined above.
-;; but will add full recursion through the dependencies list per
-;; stream.
-(defun semantic-recursive-find-nonterminal-by-name (name buffer)
-  "Recursively find the first occurrence of NAME.
-Start search with BUFFER.  Recurse through all dependencies till found.
-The return item is of the form (BUFFER TOKEN) where BUFFER is the buffer
-in which TOKEN (the token found to match NAME) was found.
-
-THIS ISN'T USED IN SEMANTIC.  DELETE ME SOON."
-  (with-current-buffer buffer
-    (let* ((stream (semantic-fetch-tags))
-	   (includelist (or (semantic-find-tags-by-class 'include stream)
-			    "empty.silly.thing"))
-	   (found (semantic-find-first-tag-by-name name stream))
-	   (unfound nil))
-      (while (and (not found) includelist)
-	(let ((fn (semantic-dependency-tag-file (car includelist))))
-	  (if (and fn (not (member fn unfound)))
-          (with-current-buffer (save-match-data
-                                 (find-file-noselect fn))
-		(message "Scanning %s" (buffer-file-name))
-		(setq stream (semantic-fetch-tags))
-		(setq found (semantic-find-first-tag-by-name name stream))
-		(if found
-		    (setq found (cons (current-buffer) (list found)))
-		  (setq includelist
-			(append includelist
-				(semantic-find-tags-by-class
-				 'include stream))))
-		(setq unfound (cons fn unfound)))))
-	(setq includelist (cdr includelist)))
-      found)))
-(make-obsolete 'semantic-recursive-find-nonterminal-by-name
-	       "Do not use this function.")
 
 ;;; Completion APIs
 ;;
@@ -314,11 +276,12 @@ If TAG is not specified, use the tag at point."
 	(princ "Buffer specific configuration items:\n")
 	(let ((vars '(major-mode
 		      semantic-case-fold
-		      semantic-expand-nonterminal
+		      semantic-tag-expand-function
 		      semantic-parser-name
 		      semantic-parse-tree-state
 		      semantic-lex-analyzer
 		      semantic-lex-reset-hooks
+		      semantic-lex-syntax-modifications
 		      )))
 	  (dolist (V vars)
 	    (semantic-describe-buffer-var-helper V buff)))
@@ -333,7 +296,8 @@ If TAG is not specified, use the tag at point."
 		      semantic-after-toplevel-cache-change-hook
 		      semantic-before-toplevel-cache-flush-hook
 		      semantic-dump-parse
-
+		      semantic-type-relation-separator-character
+		      semantic-command-separation-character
 		      )))
 	  (dolist (V vars)
 	    (semantic-describe-buffer-var-helper V buff)))
@@ -342,42 +306,6 @@ If TAG is not specified, use the tag at point."
 	(mode-local-describe-bindings-2 buff)
 	)))
   )
-
-(defun semantic-current-tag-interactive (p)
-  "Display the current token.
-Argument P is the point to search from in the current buffer."
-  (interactive "d")
-  (let ((tok (semantic-brute-find-innermost-tag-by-position
-	      p (current-buffer))))
-    (message (mapconcat 'semantic-abbreviate-nonterminal tok ","))
-    (car tok))
-  )
-
-(defun semantic-hack-search ()
-  "Display info about something under the cursor using generic methods."
-  (interactive)
-  (let (
-	;(name (thing-at-point 'symbol))
-	(strm (cdr (semantic-fetch-tags)))
-	(res nil))
-;    (if name
-	(setq res
-;	      (semantic-find-nonterminal-by-name name strm)
-;	      (semantic-find-nonterminal-by-type name strm)
-;	      (semantic-recursive-find-nonterminal-by-name name (current-buffer))
-	      (semantic-brute-find-tag-by-position (point) strm)
-
-	      )
-;	)
-    (if res
-	(progn
-	  (pop-to-buffer "*SEMANTIC HACK RESULTS*")
-	  (require 'pp)
-	  (erase-buffer)
-	  (insert (pp-to-string res) "\n")
-	  (goto-char (point-min))
-	  (shrink-window-if-larger-than-buffer))
-      (message "nil"))))
 
 (defun semantic-assert-valid-token (tok)
   "Assert that TOK is a valid token."
@@ -422,7 +350,8 @@ NOTFIRST indicates that this was not the first call in the recursive use."
 			      'unmatched)))
 	    (setq o (cons (car over) o)))
 	  (setq over (cdr over)))
-	(message "Remaining overlays: %S" o)))
+	(when (cedet-called-interactively-p 'any)
+	  (message "Remaining overlays: %S" o))))
   over)
 
 (provide 'semantic-util)
