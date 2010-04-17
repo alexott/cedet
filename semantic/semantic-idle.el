@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.68 2010-04-17 14:35:17 scymtym Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.69 2010-04-17 22:23:38 scymtym Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -762,7 +762,7 @@ by semanticdb as a time-saving measure."
 	   nil))
 	)
     (save-excursion
-      ;; use whicever has success first.
+      ;; use whichever has success first.
       (or
        (semantic-idle-summary-current-symbol-keyword)
 
