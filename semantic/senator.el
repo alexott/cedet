@@ -6,7 +6,7 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 10 Nov 2000
 ;; Keywords: syntax
-;; X-RCS: $Id: senator.el,v 1.147 2010-04-09 02:01:00 zappo Exp $
+;; X-RCS: $Id: senator.el,v 1.148 2010-04-17 14:35:58 scymtym Exp $
 
 ;; This file is not part of Emacs
 
@@ -463,7 +463,7 @@ Uses `semanticdb' when available."
               (setq tagsa (semantic-analyze-possible-completions
                            ctxt))
             (error nil)))))
-    
+
     (if tagsa
         tagsa
       ;; If the analyzer fails, then go into boring completion
@@ -1786,6 +1786,17 @@ minor mode entry."
  '(global-semantic-stickyfunc-mode
    :help "Automatically enable sticky function mode in all Semantic buffers."
    :save global-semantic-stickyfunc-mode
+   )
+ )
+
+(senator-register-mode-menu-entry
+ "Idle Breadcrumbs Display"
+ '(semantic-idle-breadcrumbs-mode
+   :help "Display breadcrumbs for the tag under point and its parents."
+   )
+ '(global-semantic-idle-breadcrumbs-mode
+   :help "Automatically enable sticky function mode in all Semantic buffers."
+   :save global-semantic-idle-breadcrumbs-mode
    )
  )
 
