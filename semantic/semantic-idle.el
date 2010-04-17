@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.67 2010-04-09 02:05:56 zappo Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.68 2010-04-17 14:35:17 scymtym Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -42,6 +42,7 @@
 (require 'semantic-ctxt)
 (require 'semantic-util-modes)
 (require 'timer)
+(require 'senator) ;; For `senator-menu-item'
 
 ;; @TODO - how to make this happen only if someone enables to summary mode?
 (require 'eldoc)
@@ -1001,6 +1002,267 @@ completion.
 \\{semantic-complete-inline-map}"
   ;; Add the ability to override sometime.
   (semantic-idle-completion-list-default))
+
+
+;;; Breadcrumbs for tag under point
+;;
+;; Service that displays a breadcrumbs indication of the tag under
+;; point and its parents in the header or mode line.
+;;
+
+(defcustom semantic-idle-breadcrumbs-display-function
+  #'semantic-idle-breadcrumbs--display-in-header-line
+  "Specify how to display the tag under point in idle time.
+This function should take a list of Semantic tags as its only
+argument. The tag are sorted according to their nesting order,
+starting with the outermost tag."
+  :group 'semantic
+  :type  '(choice
+	   (const    :tag "Display in header line"
+		     semantic-idle-breadcrumbs--display-in-header-line)
+	   (const    :tag "Display in mode line"
+		     semantic-idle-breadcrumbs--display-in-mode-line)
+	   (function :tag "Other function")))
+
+(defcustom semantic-idle-breadcrumbs-format-tag-function
+  #'semantic-format-tag-abbreviate
+  "Function to call to format information about tag under point.
+This function should take a single argument, a Semantic tag, and
+return a string to display.
+Some useful functions are found in `semantic-format-tag-functions'."
+   :group 'semantic
+   :type  semantic-format-tag-custom-list)
+
+(defcustom semantic-idle-breadcrumbs-separator 'mode-specific
+  "Specify how to separate tags in the breadcrumbs string.
+An arbitrary string or a mode-specific scope nesting
+string (like, for example, \"::\" in C++, or \".\" in Java) can
+be used."
+  :group 'semantic
+  :type  '(choice
+	   (const  :tag "Use mode specific separator"
+		   mode-specific)
+	   (string :tag "Specify separator string")))
+
+(defcustom semantic-idle-breadcrumbs-header-line-prefix
+  semantic-stickyfunc-indent-string ;; TODO not optimal
+  "String used to indent the breadcrumbs string.
+Customize this string to match the space used by scrollbars and
+fringe."
+  :group 'semantic
+  :type  'string)
+
+(defun semantic-idle-breadcrumbs--popup-menu (event)
+  "Popup a menu that displays things to do to the clicked tag.
+Argument EVENT describes the event that caused this function to
+be called."
+  (interactive "e")
+  (let ((old-window (selected-window))
+	(window     (semantic-event-window event)))
+    (select-window window t)
+    (semantic-popup-menu semantic-idle-breadcrumbs-popup-menu)
+    (select-window old-window)))
+
+(defmacro semantic-idle-breadcrumbs--tag-function (function)
+  "Return lambda expression calling FUNCTION when called from a popup."
+  `(lambda (event)
+     (interactive "e")
+     (let* ((old-window (selected-window))
+	    (window     (semantic-event-window event))
+	    (column     (car (nth 6 (nth 1 event)))) ;; TODO semantic-event-column?
+	    (tag        (progn
+			  (select-window window t)
+			  (plist-get
+			   (text-properties-at column header-line-format)
+			   'tag))))
+       (,function tag)
+       (select-window old-window)))
+  )
+
+;; TODO does this work for mode-line case?
+(defvar semantic-idle-breadcrumbs-popup-map
+  (let ((map (make-sparse-keymap)))
+    (define-key map
+      [ header-line mouse-1 ]
+      (semantic-idle-breadcrumbs--tag-function
+       semantic-go-to-tag))
+    (define-key map
+      [ header-line mouse-3 ]
+      'semantic-idle-breadcrumbs--popup-menu)
+    map)
+  "Keymap for semantic idle breadcrumbs minor mode.")
+
+(defvar semantic-idle-breadcrumbs-popup-menu nil
+  "Menu used when a tag displayed by `semantic-idle-breadcrumbs-mode' is clicked.")
+
+(easy-menu-define
+  semantic-idle-breadcrumbs-popup-menu
+  semantic-idle-breadcrumbs-popup-map
+  "Semantic Breadcrumbs Mode Menu"
+  (list
+   "Breadcrumb Tag"
+   (senator-menu-item
+    (vector
+     "Go to Tag"
+     (semantic-idle-breadcrumbs--tag-function
+      semantic-go-to-tag)
+     :active t
+     :help  "Jump to this tag"))
+   ;; TODO these entries need minor changes (optional tag argument) in
+   ;; senator-copy-tag etc
+  ;;  (senator-menu-item
+  ;;   (vector
+  ;;    "Copy Tag"
+  ;;    (semantic-idle-breadcrumbs--tag-function
+  ;;     senator-copy-tag)
+  ;;    :active t
+  ;;    :help   "Copy this tag"))
+  ;;   (senator-menu-item
+  ;;    (vector
+  ;;     "Kill Tag"
+  ;;     (semantic-idle-breadcrumbs--tag-function
+  ;;      senator-kill-tag)
+  ;;     :active t
+  ;;     :help   "Kill tag text to the kill ring, and copy the tag to
+  ;; the tag ring"))
+  ;;   (senator-menu-item
+  ;;    (vector
+  ;;     "Copy Tag to Register"
+  ;;     (semantic-idle-breadcrumbs--tag-function
+  ;;      senator-copy-tag-to-register)
+  ;;     :active t
+  ;;     :help   "Copy this tag"))
+  ;;   (senator-menu-item
+  ;;    (vector
+  ;;     "Narrow to Tag"
+  ;;     (semantic-idle-breadcrumbs--tag-function
+  ;;      senator-narrow-to-defun)
+  ;;     :active t
+  ;;     :help   "Narrow to the bounds of the current tag"))
+  ;;   (senator-menu-item
+  ;;    (vector
+  ;;     "Fold Tag"
+  ;;     (semantic-idle-breadcrumbs--tag-function
+  ;;      senator-fold-tag-toggle)
+  ;;     :active   t
+  ;;     :style    'toggle
+  ;;     :selected '(let ((tag (semantic-current-tag)))
+  ;; 		   (and tag (semantic-tag-folded-p tag)))
+  ;;     :help     "Fold the current tag to one line"))
+    "---"
+    (senator-menu-item
+     (vector
+      "About this Header Line"
+      (lambda ()
+	(interactive)
+	(describe-function 'semantic-idle-breadcrumbs-mode))
+      :active t
+      :help   "Display help about this header line."))
+    )
+  )
+
+(define-semantic-idle-service semantic-idle-breadcrumbs
+  "Display breadcrumbs for the tag under point and its parents."
+  (let* ((scope    (semantic-calculate-scope))
+	 (tag-list (if scope
+		       ;; If there is a scope, extract the tag and its
+		       ;; parents.
+		       (append (oref scope parents)
+			       (when (oref scope tag)
+				 (list (oref scope tag))))
+		     ;; Fall back to tags by overlay
+		     (semantic-find-tag-by-overlay))))
+    ;; Display the tags.
+    (funcall semantic-idle-breadcrumbs-display-function tag-list)))
+
+(defun semantic-idle-breadcrumbs--display-in-header-line (tag-list)
+  "Display the tags in TAG-LIST in the header line of their buffer."
+  (let ((width (- (nth 2 (window-edges))
+		  (nth 0 (window-edges)))))
+    ;; Format TAG-LIST and put the formatted string into the header
+    ;; line.
+    (setq header-line-format
+	  (concat
+	   semantic-idle-breadcrumbs-header-line-prefix
+	   (if tag-list
+	       (semantic-idle-breadcrumbs--make-format
+		tag-list
+		(- width
+		   (length semantic-idle-breadcrumbs-header-line-prefix)))
+	     (propertize
+	      "<not on tags>"
+	      'face
+	      'font-lock-comment-face)))))
+
+  ;; Update the header line.
+  (force-mode-line-update))
+
+(defun semantic-idle-breadcrumbs--display-in-mode-line (tag-list)
+  "Display the tags in TAG-LIST in the mode line of their buffer.
+TODO THIS FUNCTION DOES NOT WORK YET."
+  (error "This function does not work yet")
+  (let ((width (- (nth 2 (window-edges))
+		  (nth 0 (window-edges)))))
+    (setq mode-line-format
+	  (semantic-idle-breadcrumbs--make-format tag-list width)))
+
+  (force-mode-line-update))
+
+(defun semantic-idle-breadcrumbs--make-format (tag-list max-length)
+  "Format TAG-LIST ensuring the string does not get longer than MAX-LENGTH."
+  (let* ((format-pieces   (mapcar
+			   #'semantic-idle-breadcrumbs--format-tag
+			   tag-list))
+	 ;; Format tag list, putting configured separators between the
+	 ;; tags.
+	 (complete-format (cond
+			   ;; Mode specific separator.
+			   ((eq semantic-idle-breadcrumbs-separator 'mode-specific)
+			    (semantic-analyze-unsplit-name format-pieces))
+
+			   ;; Custom separator.
+			   ((stringp semantic-idle-breadcrumbs-separator)
+			    (mapconcat
+			     #'identity
+			     format-pieces
+			     semantic-idle-breadcrumbs-separator))))
+	 ;; Determine length of complete format.
+	 (complete-length (length complete-format)))
+    ;; Shorten string if necessary.
+    (if (<= complete-length max-length)
+	complete-format
+      (concat "... "
+	      (substring
+	       complete-format
+	       (- complete-length (- max-length 4))))))
+  )
+
+(defun semantic-idle-breadcrumbs--format-tag (tag)
+  "Format TAG using the configured formatting function.
+This function also adds text properties for help-echo, mouse
+highlighting and a keymap."
+  (let ((formatted (funcall
+		    semantic-idle-breadcrumbs-format-tag-function
+		    tag nil t)))
+    (add-text-properties
+     0 (length formatted)
+     (list
+      'tag
+      tag
+      'help-echo
+      (format
+       "Tag %s
+Type: %s
+mouse-1: jump to tag
+mouse-3: popup context menu"
+       (semantic-tag-name tag)
+       (semantic-tag-class tag))
+      'mouse-face
+      'highlight
+      'keymap
+      semantic-idle-breadcrumbs-popup-map)
+     formatted)
+    formatted))
 
 (provide 'semantic-idle)
 
