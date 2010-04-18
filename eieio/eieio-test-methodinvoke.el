@@ -1,10 +1,10 @@
 ;;; eieio-testsinvoke.el -- eieio tests for method invokation
 
 ;;;
-;; Copyright (C) 2005, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2005, 2008, 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio-test-methodinvoke.el,v 1.11 2009-11-19 01:20:25 scymtym Exp $
+;; RCS: $Id: eieio-test-methodinvoke.el,v 1.12 2010-04-18 21:43:18 zappo Exp $
 ;; Keywords: oop, lisp, tools
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -317,7 +317,7 @@
 	     )))
   (F (D nil))
   (setq eieio-test-method-order-list (nreverse eieio-test-method-order-list))
-  (message "%S" eieio-test-method-order-list)
+  ;(message "%S" eieio-test-method-order-list)
   (eieio-test-match ans)
   )
 
@@ -357,7 +357,7 @@
 	     )))
   (F (E nil))
   (setq eieio-test-method-order-list (nreverse eieio-test-method-order-list))
-  (message "%S" eieio-test-method-order-list)
+  ;(message "%S" eieio-test-method-order-list)
   (eieio-test-match ans)
   )
 
@@ -367,23 +367,21 @@
   ())
 
 (defmethod initialize-instance :after ((this Ja) &rest slots)
-  (message "+Ja")
-
+  ;(message "+Ja")
   (when (next-method-p)
     (call-next-method))
-
-  (message "-Ja"))
+  ;(message "-Ja")
+  )
 
 (defclass Jb ()
   ())
 
 (defmethod initialize-instance :after ((this Jb) &rest slots)
-  (message "+Jb")
-
+  ;(message "+Jb")
   (when (next-method-p)
     (call-next-method))
-
-  (message "-Jb"))
+  ;(message "-Jb")
+  )
 
 (defclass Jc (Jb)
   ())
@@ -392,12 +390,11 @@
   ())
 
 (defmethod initialize-instance ((this Jd) &rest slots)
-  (message "+Jd")
-
+  ;(message "+Jd")
   (when (next-method-p)
     (call-next-method))
-
-  (message "-Jd"))
+  ;(message "-Jd")
+  )
 
 (Jd "test")
 
