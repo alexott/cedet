@@ -1,13 +1,13 @@
 ;;; cedet.el --- Setup CEDET environment
 
-;; Copyright (C) 2007, 2008, 2009 by Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 by Eric M. Ludlam
 ;; Copyright (C) 2002, 2003, 2004, 2005, 2006 by David Ponce
 
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: CEDET developers <http://sf.net/projects/cedet>
 ;; Created: 09 Dec 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: cedet.el,v 1.37 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: cedet.el,v 1.38 2010-04-18 22:25:04 zappo Exp $
 
 ;; This file is not part of Emacs
 
@@ -81,7 +81,7 @@
   (require 'cl)
   )
 
-(defconst cedet-version "1.0pre7"
+(defconst cedet-version "1.0"
   "Current version of CEDET.")
 
 (defconst cedet-emacs-min-version "21.1"
@@ -91,15 +91,15 @@
 
 (defconst cedet-packages
   `(
-    ;;PACKAGE   MIN-VERSION      INSTALLDIR DOCDIR
-    (cedet         ,cedet-version "common"  "common" 	   )
-    (eieio         "1.2"           nil      "eieio"        )
-    (semantic      "2.0pre7"       nil      "semantic/doc" )
-    (srecode       "1.0pre7"       nil      "srecode"      ) 
-    (ede           "1.0pre7"       nil      "ede"    	   )    
-    (speedbar      "1.0.3"         nil      "speedbar"     )
-    (cogre         "1.0pre7"       nil      "cogre"  	   )
-    (cedet-contrib "1.0pre7"      "contrib"  nil           )
+    ;;PACKAGE   MIN-VERSION      INSTALLDIR  DOCDIR
+    (cedet         ,cedet-version "common"   "common" 	   )
+    (eieio         "1.2"           nil       "eieio"       )
+    (semantic      "2.0"           nil       "semantic/doc")
+    (srecode       "1.0"           nil       "srecode"     ) 
+    (ede           "1.0"           nil       "ede"    	   )    
+    (speedbar      "1.0.3"         nil       "speedbar"    )
+    (cogre         "1.0"           nil       "cogre"  	   )
+    (cedet-contrib "1.0"           "contrib" nil           )
     )
   "Table of CEDET packages to install.")
 
