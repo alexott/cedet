@@ -22,7 +22,7 @@ ELISPPRELOAD= cedet-compat
 setup_LISP=cedet-contrib.el
 wy_SEMANTIC_GRAMMAR_EL=wisent-csharp-wy.el wisent-ruby-wy.el wisent-php-wy.el
 lisp_LISP=wisent-csharp.el semantic-tag-folding.el eassist.el wisent-ruby.el wisent-php.el ede-gnustep.el semantic-ectag-scala.el
-VERSION=1.0pre7
+VERSION=1.0
 DISTDIR=$(top)Contrib-$(VERSION)
 
 
