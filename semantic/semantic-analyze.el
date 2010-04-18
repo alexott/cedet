@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-analyze.el,v 1.91 2010-04-10 00:51:01 zappo Exp $
+;; X-RCS: $Id: semantic-analyze.el,v 1.92 2010-04-18 21:45:44 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -358,7 +358,7 @@ Optional argument SCOPE specifies a scope object which has
 additional tags which are in SCOPE and do not need prefixing to
 find.
 
-This is a wrapper on top of semanticdb, semanticdb-typecache,
+This is a wrapper on top of semanticdb, semanticdb typecache,
 semantic-scope, and semantic search functions.  Almost all
 searches use the same arguments."
   (let ((namelst (if (consp name) name ;; test if pre-split.
