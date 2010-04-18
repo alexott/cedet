@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-m3.el,v 1.4 2010-03-24 16:29:37 zappo Exp $
+;; X-RCS: $Id: cedet-m3.el,v 1.5 2010-04-18 22:28:55 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -221,6 +221,7 @@ ATTRIBUTES are easymenu compatible attributes."
 	(refs (cedet-m3-ref-items))
 	(recode (cedet-m3-srecode-items))
 	(project (cedet-m3-ede-items))
+	(cogre (cedet-m3-cogre-items))
 	(easy nil)
 	)
     (setq easy (cons "CEDET"
@@ -228,6 +229,7 @@ ATTRIBUTES are easymenu compatible attributes."
 			     context
 			     refs
 			     recode
+			     cogre
 			     project)))
     
     (easy-menu-define cedet-m3-minor-menu
@@ -391,6 +393,29 @@ ATTRIBUTES are easymenu compatible attributes."
 	:help "Compile the current target with EDE.")
        )
       )))
+
+(defun cedet-m3-cogre-items ()
+  "Return a list of menu items based on COGRE features."
+  (when (locate-library "cogre")
+    (let* ((ctxt (semantic-analyze-current-context))
+	   (pt (reverse (oref ctxt :prefixtypes)))
+	   (items nil)
+	   )
+      (dolist (DT pt)
+	(when (and (semantic-tag-p DT)
+		   (semantic-tag-of-class-p DT 'type)
+		   (semantic-tag-of-type-p DT "class"))
+	  (push
+	   (cedet-m3-menu-item
+	    (concat "Browse UML: (" (semantic-format-tag-name DT) ")")
+	    `(lambda ()
+	       (interactive)
+	       (cogre-uml-quick-class (quote , DT)))
+	    :active t
+	    :help "Browse a UML diagram with COGRE.")
+	   items)
+	  ))
+      items)))
 
 ;; Use the semantic minor mode magic stuff.
 (semantic-add-minor-mode 'cedet-m3-minor-mode
