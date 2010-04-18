@@ -127,7 +127,7 @@ use the mailing list cedet-devel.net via the URL:
 @chapter Overview
 
 The @cedet{} collection is made up of several tools.  Each tool has
-it's own manual with details for that tool.
+its own manual with details for that tool.
 
 At the core of the @cedet{} suite is @eieio{}, which is an
 @i{Implementation of Emacs Interpreted Objects}.  This provides a CLOS
@@ -154,7 +154,7 @@ coveted ``Smart Completion'' feature.
 Another mid-level tool is @srecode{} or the @i{Semantic Recoder}.
 @srecode{} is a template management system designed with the goal of
 providing a way to build code-generating applications that are easily
-modified or extended by users.  At it's core is a template authoring
+modified or extended by users.  At its core is a template authoring
 and insertion system.  A minor mode provides a simple way to insert
 templates from the various template libraries.
 
@@ -662,7 +662,7 @@ Table of @var{c} Preprocessor keywords used by the Semantic @var{c} lexer.
 Each entry is a cons cell like this:
   ( ``@var{keyword}`` . ''REPLACEMENT'' )
 Where @var{keyword} is the macro that gets replaced in the lexical phase,
-and @var{replacement} is a string that is inserted in it's place.  Empty string
+and @var{replacement} is a string that is inserted in its place.  Empty string
 implies that the lexical analyzer will discard @var{keyword} when it is encountered.
 
 Alternately, it can be of the form:
