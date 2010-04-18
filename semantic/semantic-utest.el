@@ -1,9 +1,9 @@
 ;;; semantic-utest.el --- Tests for semantic's parsing system.
 
-;;; Copyright (C) 2003, 2004, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2003, 2004, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-utest.el,v 1.16 2010-03-17 00:11:06 scymtym Exp $
+;; X-RCS: $Id: semantic-utest.el,v 1.17 2010-04-18 21:44:04 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -727,6 +727,8 @@ Pre-fill the buffer with CONTENTS."
       (semantic-utest-last-invalid semantic-utest-C-name-contents '("fun2") "/\\*1\\*/" "/* Deleted this line */")
       (semantic-utest-verify-names semantic-utest-C-name-contents)
 
+      (semantic-sanity-check)
+
       (set-buffer-modified-p nil)
       ;; Clean up
       ;; (kill-buffer buff)
@@ -769,6 +771,8 @@ INSERTME is the text to be inserted after the deletion."
       ;;(message "Invalid tag test %s." testname)
       (semantic-utest-last-invalid name-contents names-removed killme insertme)
       (semantic-utest-verify-names name-contents)
+
+      (semantic-sanity-check)
 
       (set-buffer-modified-p nil)
       ;; Clean up
