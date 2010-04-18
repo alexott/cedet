@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-shared.el,v 1.14 2010-03-15 13:40:54 xscript Exp $
+;; RCS: $Id: ede-proj-shared.el,v 1.15 2010-04-18 00:24:52 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -125,7 +125,7 @@ Use ldlibs to add addition libraries.")
 	 :rules (list (ede-makefile-rule
 		       "c++-inference-rule-libtool"
 		       :target "%.o"
-		       :dependencies "%.c"
+		       :dependencies "%.cpp"
 		       :rules '("@echo '$(LTCOMPILE) -o $@ $<'; \\"
 				"$(LTCOMPILE) -o $@ $<"
 				)
