@@ -10,10 +10,10 @@ top=
 ede_FILES=Project.ede Makefile
 
 Misc_AUX=ChangeLog
-LOADPATH= ../ede/ ../common/ ../semantic/ ../eieio/
 EMACSFLAGS=-batch --no-site-file
 EMACS=emacs
-LOADPATH= ../common/  ../speedbar/ ../eieio/ ../semantic/bovine/ ../semantic/ ../semantic/wisent/
+LOADPATH= ../common/  ../ede/ ../semantic/ ../eieio/\
+    ../speedbar/ ../semantic/bovine/ ../semantic/wisent/
 LOADDEFS=srecode-loaddefs.el
 LOADDIRS=.
 lang_SEMANTIC_GRAMMAR=srecode-template.wy
@@ -24,7 +24,7 @@ doc_TEXINFOS=srecode.texi
 MAKEINFO=makeinfo
 tests_LISP=srecode-test.el srecode-test-getset.el
 document_LISP=srecode-document.el srecode-document-vars.el
-VERSION=1.0pre7
+VERSION=1.0
 DISTDIR=$(top)srecode-$(VERSION)
 
 
