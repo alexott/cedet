@@ -1,10 +1,10 @@
 ;;; ede-proj-prog.el --- EDE Generic Project program support
 
-;;;  Copyright (C) 1998, 1999, 2000, 2001, 2005, 2008, 2009  Eric M. Ludlam
+;;;  Copyright (C) 1998, 1999, 2000, 2001, 2005, 2008, 2009, 2010  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-prog.el,v 1.13 2010-03-25 15:07:50 xscript Exp $
+;; RCS: $Id: ede-proj-prog.el,v 1.14 2010-04-18 00:29:46 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -68,27 +68,29 @@ Note: Not currently used.  This bug needs to be fixed.")
   "Insert bin_PROGRAMS variables needed by target THIS."
   (ede-pmake-insert-variable-shared
       (concat (ede-name this) "_LDADD")
-    (mapc (lambda (c) (insert " -l" c)) (oref this ldlibs)))
+    (mapc (lambda (c) (insert " " c)) (oref this ldflags))
+    (when (oref this ldlibs)
+      (insert " $(" (ede-name this) "_DEPENDENCIES)")))
   ;; For other targets THIS depends on
   ;;
-  ;; NOTE: FIX THIS
-  ;;
-  ;;(ede-pmake-insert-variable-shared
-  ;;    (concat (ede-name this) "_DEPENDENCIES")
-  ;;  (mapcar (lambda (d) (insert d)) (oref this FOOOOOOOO)))
+  (when (oref this ldlibs)
+    (ede-pmake-insert-variable-shared
+	(concat (ede-name this) "_DEPENDENCIES")
+      (mapcar (lambda (d) (insert d)) (oref this ldlibs))))
+
   (call-next-method))
 
-(defmethod ede-proj-makefile-insert-rules ((this ede-proj-target-makefile-program))
-  "Insert rules needed by THIS target."
-  (let ((ede-proj-compiler-object-linkflags
-	 (mapconcat 'identity (oref this ldflags) " ")))
+(defmethod ede-proj-makefile-insert-variables ((this ede-proj-target-makefile-program))
+  "Insert variables needed by the compiler THIS."
+  (call-next-method)
+  (let ((lf (mapconcat 'identity (oref this ldflags) " ")))
     (with-slots (ldlibs) this
       (if ldlibs
-	  (setq ede-proj-compiler-object-linkflags
-		(concat ede-proj-compiler-object-linkflags
-			" -l"
-			(mapconcat 'identity ldlibs " -l")))))
-    (call-next-method)))
+	  (setq lf
+		(concat lf " -l" (mapconcat 'identity ldlibs " -l")))))
+    ;; LDFLAGS as needed.
+    (when (and lf (not (string= "" lf)))
+      (ede-pmake-insert-variable-once "LDDEPS" (insert lf)))))
 
 (defmethod project-debug-target ((obj ede-proj-target-makefile-program))
   "Debug a program target OBJ."
