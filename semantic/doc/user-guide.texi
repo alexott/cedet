@@ -25,7 +25,7 @@
 @copying
 This is the Semantic User's Manual
 
-Copyright @copyright{} 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
+Copyright @copyright{} 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 Copyright @copyright{} 2001, 2002, 2003, 2004 David Ponce
 Copyright @copyright{} 2002, 2003 Richard Y. Kim
 
@@ -844,16 +844,48 @@ they are used in.
 Display the references in@dfn{semantic-symref-results-mode}
 @end deffn
 
-The results are listed by file, then by tag within those files.  You
-can expand tag hits to see the line of code a given match is on.  You
-can jump to the matched file, tag, or line from this mode.
+@menu
+* SymRef Results Mode::
+* Configuring SymRef::
+@end menu
+
+@node SymRef Results Mode
+@section SymRef Results Mode
+
+When a symref command identifies several hits, a new buffer is created
+to display the results which is placed in @code{semantic-symref-results-mode}.
+
+The results are listed by file, then by tag within those files.  Files
+and tags can be expanded or contracted to show or hide more detail
+about a given hit by clicking on the @code{[+]} or @code{[-]} buttons.
+
+Clicking on a file name, tag name, or hit result will display the
+location in another window.  Using @kbd{SPC} on one of the buttons is
+the same as clicking on it.
+
+Simple navigation commands:
+@table @kbd
+@item -
+@item =
+@itemx +
+Expand or contract the current line.
+@item C-c C-e
+Expand all tag items in the results buffer.
+@item C-c C-r
+Contract all tag items in the results buffer.
+@end table
+
+
+
+@node Configuring SymRef
+@section Configuring SymRef
 
 The type of external tool used for finding references determines the
 kind of results found.  Each available tool, such as GNU Global, will
 identify when it can be used.  If no such tool is available, then a
 find/grep combination will be used instead.
 
-For best results, install, and use GNU Global for your project.
+For best results, install and use GNU Global for your project.
 @semantic{} symref does not manage your GNU Global tables for you.
 You must manage those yourself.  The symref tool is not meant to
 replace the standard grep-like interface available with GNU Global.
@@ -875,9 +907,6 @@ is supported.
 
 If no tools are supported, then @code{'grep} is assumed.
 @end defun
-
-@@TODO - This mode is supposed to be the starting point of refactoring
-tools.  Doc those features here once they are written.
 
 @node Document
 @chapter Document
