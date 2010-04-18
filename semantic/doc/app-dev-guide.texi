@@ -25,7 +25,7 @@
 @copying
 This manual documents Application Development with Semantic.
 
-Copyright @copyright{} 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009 Eric M. Ludlam
+Copyright @copyright{} 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
 Copyright @copyright{} 2001, 2002, 2003, 2004 David Ponce
 Copyright @copyright{} 2002, 2003 Richard Y. Kim
 
@@ -397,17 +397,6 @@ Find tags for which @var{PREDICATE} is non-@code{nil} in @var{TABLE}.
 Find tags for which @var{FORM} is non-@code{nil} in @var{TABLE}.
 @var{TABLE} is a semantic tags table.  See @dfn{semantic-something-to-tag-table}.
 @end defun
-
-@c @defun semantic-recursive-find-nonterminal-by-name name buffer
-@c Recursivly find the first occurance of @var{NAME}.
-@c Start search with @var{BUFFER}.  Recurse through all dependencies till
-@c found.  The return item is of the form (@var{BUFFER} @var{TOKEN})
-@c where @var{BUFFER} is the buffer in which @var{TOKEN} (the token found
-@c to match @var{NAME}) was found.
-@c 
-@c @var{THIS} ISN'T @var{USED} @var{IN} @var{SEMANTIC}.  @var{DELETE}
-@c @var{ME} @var{SOON}.
-@c @end defun
 
 @node Tags at Point
 @chapter Tags at Point
