@@ -1,10 +1,10 @@
 ;;; ede-proj-obj.el --- EDE Generic Project Object code generation support
 
-;;;  Copyright (C) 1998, 1999, 2000, 2005, 2008, 2009  Eric M. Ludlam
+;;;  Copyright (C) 1998, 1999, 2000, 2005, 2008, 2009, 2010  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-obj.el,v 1.18 2010-03-15 13:40:54 xscript Exp $
+;; RCS: $Id: ede-proj-obj.el,v 1.19 2010-04-18 00:32:34 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -117,7 +117,7 @@ file.")
    :name "cc"
    :sourcetype '(ede-source-c)
    :variables  '(("C_LINK" . "$(CC) $(CFLAGS) $(LDFLAGS) -L."))
-   :commands '("$(C_LINK) -o $@ $^")
+   :commands '("$(C_LINK) -o $@ $^ $(LDDEPS)")
    :objectextention "")
    "Linker for C sourcecode.")
 
@@ -160,7 +160,7 @@ file.")
    ;; Only use this linker when c++ exists.
    :sourcetype '(ede-source-c++)
    :variables  '(("CXX_LINK" . "$(CXX) $(CFLAGS) $(LDFLAGS) -L."))
-   :commands '("$(CXX_LINK) -o $@ $^")
+   :commands '("$(CXX_LINK) -o $@ $^ $(LDDEPS)")
    :autoconf '("AC_PROG_CXX")
    :objectextention "")
   "Linker needed for c++ programs.")
@@ -235,7 +235,7 @@ file.")
    :name "ld"
    :variables  '(("LD" . "ld")
 		 ("LD_LINK" . "$(LD) $(LDFLAGS) -L."))
-   :commands '("$(LD_LINK) -o $@ $^")
+   :commands '("$(LD_LINK) -o $@ $^ $(LDDEPS)")
    :objectextention "")
   "Linker needed for c++ programs.")
 
