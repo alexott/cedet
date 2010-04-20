@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.69 2010-04-17 22:23:38 scymtym Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.70 2010-04-20 00:41:27 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -848,10 +848,10 @@ current tag to display information."
 ;; of all uses of the symbol that is under the cursor.
 ;;
 ;; This is to mimic the Eclipse tool of a similar nature.
-(defvar semantic-idle-summary-highlight-face 'region
+(defvar semantic-idle-symbol-highlight-face 'region
   "Face used for the summary highlight.")
 
-(defun semantic-idle-summary-maybe-highlight (tag)
+(defun semantic-idle-symbol-maybe-highlight (tag)
   "Perhaps add highlighting onto TAG.
 TAG was found as the thing under point.  If it happens to be
 visible, then highlight it."
@@ -873,12 +873,12 @@ visible, then highlight it."
 		    (point) (get-buffer-window (current-buffer) 'visible))
 	       (if (< (semantic-overlay-end region) (point-at-eol))
 		   (pulse-momentary-highlight-overlay
-		    region semantic-idle-summary-highlight-face)
+		    region semantic-idle-symbol-highlight-face)
 		 ;; Not the same
 		 (pulse-momentary-highlight-region
 		  (semantic-overlay-start region)
 		  (point-at-eol)
-		  semantic-idle-summary-highlight-face)))
+		  semantic-idle-symbol-highlight-face)))
 	     ))
 	  ((vectorp region)
 	   (let ((start (aref region 0))
@@ -898,13 +898,13 @@ visible, then highlight it."
 		   (pulse-momentary-highlight-region
 		    start (if (<= end (point-at-eol)) end
 			    (point-at-eol))
-		    semantic-idle-summary-highlight-face)))
+		    semantic-idle-symbol-highlight-face)))
 	       ))))
     nil))
 
 
-(define-semantic-idle-service semantic-idle-tag-highlight
-  "Highlight the tag, and references of the symbol under point.
+(define-semantic-idle-service semantic-idle-local-symbol-highlight
+  "Highlight the tag, and symbol references of the symbol under point.
 Call `semantic-analyze-current-context' to find the reference tag.
 Call `semantic-symref-hits-in-region' to identify local references."
   (when (semantic-idle-summary-useful-context-p)
@@ -918,7 +918,7 @@ Call `semantic-symref-hits-in-region' to identify local references."
       (when ctxt
 	;; Highlight the original tag?  Protect against problems.
 	(condition-case nil
-	    (semantic-idle-summary-maybe-highlight target)
+	    (semantic-idle-symbol-maybe-highlight target)
 	  (error nil))
 	;; Identify all hits in this current tag.
 	(when (semantic-tag-p target)
@@ -926,7 +926,7 @@ Call `semantic-symref-hits-in-region' to identify local references."
 	   target (lambda (start end prefix)
 		    (when (/= start (car Hbounds))
 		      (pulse-momentary-highlight-region
-		       start end semantic-idle-summary-highlight-face))
+		       start end semantic-idle-symbol-highlight-face))
 		    (semantic-throw-on-input 'symref-highlight)
 		    )
 	   (semantic-tag-start tag)
