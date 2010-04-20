@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.70 2010-04-20 00:41:27 zappo Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.71 2010-04-20 00:45:47 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -849,11 +849,11 @@ current tag to display information."
 ;;
 ;; This is to mimic the Eclipse tool of a similar nature.
 (defvar semantic-idle-symbol-highlight-face 'region
-  "Face used for the summary highlight.")
+  "Face used for the highlighting local symbols.")
 
 (defun semantic-idle-symbol-maybe-highlight (tag)
-  "Perhaps add highlighting onto TAG.
-TAG was found as the thing under point.  If it happens to be
+  "Perhaps add highlighting onto the symbol represented by TAG.
+TAG was found as the symbol under point.  If it happens to be
 visible, then highlight it."
   (let* ((region (when (and (semantic-tag-p tag)
 			    (semantic-tag-with-position-p tag))
@@ -904,7 +904,7 @@ visible, then highlight it."
 
 
 (define-semantic-idle-service semantic-idle-local-symbol-highlight
-  "Highlight the tag, and symbol references of the symbol under point.
+  "Highlight the tag and symbol references of the symbol under point.
 Call `semantic-analyze-current-context' to find the reference tag.
 Call `semantic-symref-hits-in-region' to identify local references."
   (when (semantic-idle-summary-useful-context-p)
