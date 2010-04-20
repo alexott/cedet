@@ -24,6 +24,7 @@ that can assist in programming Semantic supported languages.
 @menu
 * Sticky Function Mode::
 * Highlight Func Mode::	
+* Local Symbol Highlight Mode:: 
 * Tag Decoration Mode::
 * MRU Bookmarks Mode::
 @end menu
@@ -90,6 +91,26 @@ minor mode is enabled.
 @defun semantic-highlight-func-current-tag-face
 @anchor{semantic-highlight-func-current-tag-face}
 Face used to show the top of current function.
+@end defun
+
+@node Local Symbol Highlight Mode
+@subsection Local Symbol Highlight Mode
+@cindex semantic-idle-local-symbol-highlight
+
+Highlight Local Symbol Mode will put a highlight overlay over
+references to the symbol under point.  Within the context of the
+function or method body point is in, all occurances of that symbol
+will be highlighted.  Each location will be analyzed to make sure it
+is the same as the location where point is.
+
+Unlike @ref{Highlight Func Mode} which lighlights the tag the point is
+in, this highlights uses of the symbol the point is in.  Note that the
+``current tag'' is an entity that may contain code that the point is
+in.  A symbol is a single word or symbol under point.
+
+@defun semantic-idle-symbol-highlight-face
+@anchor{semantic-idle-symbol-highlight-face}
+Face used for the highlighting local symbols.
 @end defun
 
 @node Tag Decoration Mode
