@@ -6,7 +6,7 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 10 Nov 2000
 ;; Keywords: syntax
-;; X-RCS: $Id: senator.el,v 1.148 2010-04-17 14:35:58 scymtym Exp $
+;; X-RCS: $Id: senator.el,v 1.149 2010-04-20 00:41:58 zappo Exp $
 
 ;; This file is not part of Emacs
 
@@ -1756,12 +1756,12 @@ minor mode entry."
 
 (senator-register-mode-menu-entry
  "Idle Symbol Highlight"
- '(semantic-idle-tag-highlight-mode
+ '(semantic-idle-local-symbol-highlight-mode
    :help "Highlight symbols matching symbol under point in idle time."
    )
- '(global-semantic-idle-tag-highlight-mode
+ '(global-semantic-idle-local-symbol-highlight-mode
    :help "Highlight symbols matching symbol under point in idle time in all buffers."
-   :save global-semantic-idle-tag-highlight-mode
+   :save global-semantic-idle-local-symbol-highlight-mode
    )
  )
 
