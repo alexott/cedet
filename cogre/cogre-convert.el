@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cogre-convert.el,v 1.14 2010-04-21 16:00:43 zappo Exp $
+;; X-RCS: $Id: cogre-convert.el,v 1.15 2010-04-21 18:02:02 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -216,10 +216,12 @@ This works similarly to `semantic-tag-put-attribute'."
 (defun cogre-calculate-node-position-scale ()
   "Calculate the node-position scale from the default face."
   ;; The height is reported in units of 1/10th of a point.
-  (let ((height (/ (face-attribute 'default :height) 10.0)))
+  (let ((height (face-attribute 'default :height)))
     ;; There is probaly somoething better to do here, like find out if
     ;; the :width is 'normal, or 'condensed, or whatever.
-    (cons (/ height 2) height)))
+    (if (and height (numberp height))
+	(cons (/ height 20) (/ height 10))
+      (cons 6 12))))
 
 (defcustom cogre-dot-node-position-scale
   (cogre-calculate-node-position-scale)
