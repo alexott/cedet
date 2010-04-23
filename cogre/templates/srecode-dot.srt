@@ -47,10 +47,12 @@ template cogre :time :dot :cogre
 context declaration
 
 template digraph-tag :blank
-"Insert a digraph structure."
+"Insert a digraph structure.
+NOTE: Using Courier font allows Emacs monospace fonts to match the
+layout specified by dot with a simple ratio."
 ----
 digraph structs {
-	node [shape=record fontsize=12];
+	node [shape=record fontsize=12 fontname=Courier];
 	{{^}}
 }
 ----
