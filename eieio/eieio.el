@@ -5,10 +5,10 @@
 ;; Copyright (C) 1995,1996,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio.el,v 1.194 2010-03-03 01:34:03 scymtym Exp $
+;; RCS: $Id: eieio.el,v 1.195 2010-04-23 00:08:27 zappo Exp $
 ;; Keywords: OO, lisp
 
-(defvar eieio-version "1.2"
+(defvar eieio-version "1.3"
   "Current version of EIEIO.")
 
 ;;
