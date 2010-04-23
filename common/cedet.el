@@ -7,7 +7,7 @@
 ;; Maintainer: CEDET developers <http://sf.net/projects/cedet>
 ;; Created: 09 Dec 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: cedet.el,v 1.38 2010-04-18 22:25:04 zappo Exp $
+;; X-RCS: $Id: cedet.el,v 1.39 2010-04-23 00:09:30 zappo Exp $
 
 ;; This file is not part of Emacs
 
@@ -93,7 +93,7 @@
   `(
     ;;PACKAGE   MIN-VERSION      INSTALLDIR  DOCDIR
     (cedet         ,cedet-version "common"   "common" 	   )
-    (eieio         "1.2"           nil       "eieio"       )
+    (eieio         "1.3"           nil       "eieio"       )
     (semantic      "2.0"           nil       "semantic/doc")
     (srecode       "1.0"           nil       "srecode"     ) 
     (ede           "1.0"           nil       "ede"    	   )    
