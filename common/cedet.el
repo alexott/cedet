@@ -7,7 +7,7 @@
 ;; Maintainer: CEDET developers <http://sf.net/projects/cedet>
 ;; Created: 09 Dec 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: cedet.el,v 1.39 2010-04-23 00:09:30 zappo Exp $
+;; X-RCS: $Id: cedet.el,v 1.40 2010-04-23 00:14:00 zappo Exp $
 
 ;; This file is not part of Emacs
 
@@ -183,43 +183,49 @@ memory and (presumably) running in this Emacs instance.  Value is X
 if the package has not been loaded."
   (interactive)
   (with-output-to-temp-buffer "*CEDET*"
-    (princ "CEDET Version:\t") (princ cedet-version)
-    (princ "\n  \t\t\tRequested\tFile\t\tLoaded")
-    (princ "\n  Package\t\tVersion\t\tVersion\t\tVersion")
-    (princ "\n  ----------------------------------------------------------")
-    (let ((p cedet-packages))
-      (while p
-	(let ((sym (symbol-name (car (car p)))))
-	  (princ "\n  ")
-	  (princ sym)
-	  (princ ":\t")
-	  (if (< (length sym) 5)
-	      (princ "\t"))
-	  (if (< (length sym) 13)
-	      (princ "\t"))
-	  (let ((reqver (nth 1 (car p)))
-		(filever (car (inversion-find-version sym)))
-		(loadver (when (featurep (car (car p)))
-			   (symbol-value (intern-soft (concat sym "-version"))))))
-	    (princ reqver)
-	    (if (< (length reqver) 8) (princ "\t"))
-	    (princ "\t")
-	    (if (string= filever reqver)
-		;; I tried the words "check" and "match", but that
-		;; just looked lame.
-		(princ "ok\t")
-	      (princ filever)
-	      (if (< (length filever) 8) (princ "\t")))
-	    (princ "\t")
-	    (if loadver
-		(if (string= loadver reqver)
-		    (princ "ok")
-		  (princ loadver))
-	      (princ "Not Loaded"))
-	    ))
-	(setq p (cdr p))))
-    (princ "\n\n\nC-h f cedet-version RET\n  for details on output format.")
-    ))
+    (cedet-version-print)
+    (princ "\n\n\nC-h f cedet-version RET\n  for details on output format.")))
+
+(defun cedet-version-print ()
+  "Print the versions of CEDET packages to standard out.
+See `cedet-version' for details."
+  (princ "CEDET Version:\t") (princ cedet-version)
+  (princ "\n  \t\t\tRequested\tFile\t\tLoaded")
+  (princ "\n  Package\t\tVersion\t\tVersion\t\tVersion")
+  (princ "\n  ----------------------------------------------------------")
+  (let ((p cedet-packages))
+    (while p
+      (let ((sym (symbol-name (car (car p)))))
+	(princ "\n  ")
+	(princ sym)
+	(princ ":\t")
+	(if (< (length sym) 5)
+	    (princ "\t"))
+	(if (< (length sym) 13)
+	    (princ "\t"))
+	(let ((reqver (nth 1 (car p)))
+	      (filever (car (inversion-find-version sym)))
+	      (loadver (when (featurep (car (car p)))
+			 (symbol-value (intern-soft (concat sym "-version"))))))
+	  (princ reqver)
+	  (if (< (length reqver) 8) (princ "\t"))
+	  (princ "\t")
+	  (if (string= filever reqver)
+	      ;; I tried the words "check" and "match", but that
+	      ;; just looked lame.
+	      (princ "ok\t")
+	    (princ filever)
+	    (if (< (length filever) 8) (princ "\t")))
+	  (princ "\t")
+	  (if loadver
+	      (if (string= loadver reqver)
+		  (princ "ok")
+		(princ loadver))
+	    (princ "Not Loaded"))
+	  ))
+      (setq p (cdr p))))
+  
+  )
 
 (provide 'cedet)
 
