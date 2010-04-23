@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-utests.el,v 1.23 2010-04-09 02:12:51 zappo Exp $
+;; X-RCS: $Id: cedet-utests.el,v 1.24 2010-04-23 00:14:21 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -30,6 +30,7 @@
 ;;; Code:
 (defvar cedet-utest-test-alist
   '(
+    ("cedet versions" . cedet-version-print)
     ;;
     ;; COMMON
     ;;
