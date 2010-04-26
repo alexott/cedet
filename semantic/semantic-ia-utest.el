@@ -1,9 +1,9 @@
 ;;; semantic-ia-utest.el --- Analyzer unit tests
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-ia-utest.el,v 1.31 2009-09-13 11:43:53 zappo Exp $
+;; X-RCS: $Id: semantic-ia-utest.el,v 1.32 2010-04-26 22:39:53 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -210,6 +210,9 @@ If the error occurs w/ a C or C++ file, rethrow the error."
 	      (setq desired (read bss))
 	    (error (setq desired (format "  FAILED TO PARSE: %S"
 					 bss)))))
+
+	(setq actual (sort actual 'string<))
+	(setq desired (sort desired 'string<))
 
 	(if (equal actual desired)
 	    (setq pass (cons idx pass))
