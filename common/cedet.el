@@ -7,7 +7,7 @@
 ;; Maintainer: CEDET developers <http://sf.net/projects/cedet>
 ;; Created: 09 Dec 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: cedet.el,v 1.40 2010-04-23 00:14:00 zappo Exp $
+;; X-RCS: $Id: cedet.el,v 1.41 2010-04-26 22:39:13 zappo Exp $
 
 ;; This file is not part of Emacs
 
@@ -224,8 +224,7 @@ See `cedet-version' for details."
 	    (princ "Not Loaded"))
 	  ))
       (setq p (cdr p))))
-  
-  )
+  (princ "\n"))
 
 (provide 'cedet)
 
