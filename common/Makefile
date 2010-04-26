@@ -12,7 +12,7 @@ ede_FILES=Project.ede Makefile
 Doc_TEXINFOS=cedet.texi
 MAKEINFO=makeinfo
 misc_AUX=ChangeLog
-tests_LISP=cedet-utests.el
+ELISPPRELOAD= cedet-compat.el
 EMACSFLAGS=-batch --no-site-file
 EMACS=emacs
 LOADPATH= ./
@@ -21,6 +21,7 @@ LOADDIRS=.
 init_LISP=cedet-load.el
 setup_LISP=cedet.el
 common_LISP=cedet-autogen.el cedet-compat.el ezimage.el inversion.el pprint.el fame.el working.el cedet-edebug.el mode-local.el cedet-files.el pulse.el data-debug.el cedet-global.el cedet-idutils.el cedet-cscope.el cedet-graphviz.el
+tests_LISP=cedet-utests.el
 VERSION=1.0
 DISTDIR=$(top)common-$(VERSION)
 
