@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-ia.el,v 1.35 2010-03-26 22:18:02 xscript Exp $
+;; X-RCS: $Id: semantic-ia.el,v 1.36 2010-04-27 00:44:46 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -243,6 +243,46 @@ Completion options are calculated with `semantic-analyze-possible-completions'."
 	)
     (when pf
       (message "%s" (semantic-format-tag-summarize pf nil t)))))
+
+;;; Variants
+;;
+;; Show all variants for the symbol under point.
+
+;;;###autoload
+(defun semantic-ia-show-variants (point)
+  "Display a list of all variants for the symbol under POINT."
+  (interactive "P")
+  (let* ((ctxt (semantic-analyze-current-context point))
+	 (comp nil)
+	 )
+    
+    ;; We really want to look at the function if we are on an
+    ;; argument.  Are there some additional rules we care about for
+    ;; changing the CTXT we look at?
+    (when (semantic-analyze-context-functionarg-p ctxt)
+      (goto-char (cdr (oref ctxt bounds)))
+      (setq ctxt (semantic-analyze-current-context (point))))
+
+    ;; Get the "completion list", but remove ALL filters to get the master list
+    ;; of all the possible things.
+    (setq comp (semantic-analyze-possible-completions ctxt 'no-unique 'no-tc))
+
+    ;; Special case for a single type.  List the constructors?
+    (when (and (= (length comp) 1) (semantic-tag-of-class-p (car comp) 'type))
+      (setq comp (semantic-find-tags-by-name (semantic-tag-name (car comp))
+					     (semantic-tag-type-members (car comp)))))
+
+    ;; Display the results.
+    (cond ((= (length comp) 0)
+	   (message "No Variants found."))
+	  ((= (length comp) 1)
+	   (message "%s" (semantic-format-tag-summarize (car comp) nil t)))
+	  (t
+	   (with-output-to-temp-buffer "*Symbol Variants*"
+	     (semantic-analyze-princ-sequence comp "" (current-buffer)))
+	   (shrink-window-if-larger-than-buffer
+	    (get-buffer-window "*Symbol Variants*")))
+	  )))
 
 ;;; FAST Jump
 ;;
