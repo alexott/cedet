@@ -552,6 +552,11 @@ symbol in question in different ways.
 Display a summary for the symbol under @var{point}.
 @end deffn
 
+@defun semantic-ia-show-variants point
+@anchor{semantic-ia-show-variants}
+Display a list of all variants for the symbol under @var{POINT}.
+@end defun
+
 @deffn Command semantic-ia-show-doc point
 @anchor{semantic-ia-show-doc}
 Display the code-level documentation for the symbol at @var{point}.
