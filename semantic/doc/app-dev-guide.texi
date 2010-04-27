@@ -2551,13 +2551,15 @@ This function can be overloaded (see @dfn{define-mode-local-override} for detail
 @end deffn
 
 
-@deffn Command semantic-analyze-possible-completions context
+@defun semantic-analyze-possible-completions context flags
 @anchor{semantic-analyze-possible-completions}
 Return a list of semantic tags which are possible completions.
-@var{context} is either a position (such as point), or a precalculated
+@var{CONTEXT} is either a position (such as point), or a precalculated
 context.  Passing in a context is useful if the caller also needs
 to access parts of the analysis.
-Completions run through the following filters:
+The remaining @var{FLAGS} arguments are passed to the mode specific completion engine.
+Bad flags should be ignored by modes that don't use them.
+See @dfn{semantic-analyze-possible-completions-default} for details on the default @var{FLAGS}.
 
 @itemize
 @item
@@ -2583,8 +2585,9 @@ Argument to a function with type constraints.
 
 When called interactively, displays the list of possible completions
 in a buffer.
-This function can be overloaded (see @dfn{define-mode-local-override} for details).
-@end deffn
+This function can be overloaded with @dfn{define-mode-local-override}.
+@end defun
+
 
 @menu
 * Analysis Overview::           A description of how the analyzer works.
