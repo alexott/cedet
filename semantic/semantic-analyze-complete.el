@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-analyze-complete.el,v 1.20 2010-04-10 00:51:22 zappo Exp $
+;; X-RCS: $Id: semantic-analyze-complete.el,v 1.21 2010-04-27 00:44:23 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -81,11 +81,15 @@ Used as options when completing.")
 ;;
 ;;
 ;;;###autoload
-(define-overloadable-function semantic-analyze-possible-completions (context)
+(define-overloadable-function semantic-analyze-possible-completions (context &rest flags)
   "Return a list of semantic tags which are possible completions.
 CONTEXT is either a position (such as point), or a precalculated
 context.  Passing in a context is useful if the caller also needs
 to access parts of the analysis.
+The remaining FLAGS arguments are passed to the mode specific completion engine.
+Bad flags should be ignored by modes that don't use them.
+See `semantic-analyze-possible-completions-default' for details on the default FLAGS.
+
 Completions run through the following filters:
   * Elements currently in scope
   * Constants currently in scope
@@ -116,9 +120,13 @@ in a buffer."
 	 (get-buffer-window "*Possible Completions*")))
       ans)))
 
-(defun semantic-analyze-possible-completions-default (context)
+(defun semantic-analyze-possible-completions-default (context &optional flags)
   "Default method for producing smart completions.
-Argument CONTEXT is an object specifying the locally derived context."
+Argument CONTEXT is an object specifying the locally derived context.
+The optional argument FLAGS changes which return options are returned.
+FLAGS can be any number of:
+  'no-tc     - do not apply data-type constraint.
+  'no-unique - do not apply unique by name filtering."
   (let* ((a context)
 	 (desired-type (semantic-analyze-type-constraint a))
 	 (desired-class (oref a prefixclass))
@@ -130,7 +138,10 @@ Argument CONTEXT is an object specifying the locally derived context."
 	 (localvar (when scope (oref scope localvar)))
 	 (origc nil)
 	 (c nil)
-	 (any nil))
+	 (any nil)
+	 (do-typeconstraint (not (memq 'no-tc flags)))
+	 (do-unique (not (memq 'no-unique flags)))
+	 )
 
     ;; Calculate what our prefix string is so that we can
     ;; find all our matching text.
@@ -197,7 +208,7 @@ Argument CONTEXT is an object specifying the locally derived context."
 
       ;; Loop over all the found matches, and catagorize them
       ;; as being possible features.
-      (while loopc
+      (while (and loopc do-typeconstraint)
 
 	(cond
 	 ;; Strip operators
@@ -264,16 +275,17 @@ Argument CONTEXT is an object specifying the locally derived context."
     (when desired-class
       (setq c (semantic-analyze-tags-of-class-list c desired-class)))
 
-    ;; Pull out trash.
-    ;; NOTE TO SELF: Is this too slow?
-    ;; OTHER NOTE: Do we not want to strip duplicates by name and
-    ;; only by position?  When are duplicate by name but not by tag
-    ;; useful?
-    (setq c (semantic-unique-tag-table-by-name c))
+    (if do-unique
+	(if c
+	    ;; Pull out trash.
+	    ;; NOTE TO SELF: Is this too slow?
+	    (setq c (semantic-unique-tag-table-by-name c))
+	  (setq c (semantic-unique-tag-table-by-name origc)))
+      (when (not c)
+	(setq c origc)))
 
     ;; All done!
-
-    (or c origc) ))
+    c))
 
 (provide 'semantic-analyze-complete)
 
