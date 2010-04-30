@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-m3.el,v 1.5 2010-04-18 22:28:55 zappo Exp $
+;; X-RCS: $Id: cedet-m3.el,v 1.6 2010-04-30 01:41:41 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -74,6 +74,7 @@
 (defvar cedet-m3-mode-map
   (let ((km (make-sparse-keymap)))
     (define-key km cedet-m3-prefix-key 'cedet-m3-menu)
+    (define-key km "\C-x " 'cedet-m3-menu-kbd)
     km)
   "Keymap for cedet-m3 minor mode.")
 
@@ -141,6 +142,14 @@ Argument EVENT describes the event that caused this function to be called."
       (select-window startwin))
     ))
 
+(defun cedet-m3-menu-kbd ()
+  "Popup a menu at the cursor to help a user figure out what is at that point."
+  (interactive)
+  (cedet-m3-create-menu)
+  (sit-for 0)
+  (semantic-popup-menu cedet-m3-minor-menu (senator-completion-menu-point-as-event))
+  )
+
 ;;; WHATISIT?
 ;;
 (defun cedet-m3-whatisit ()
@@ -161,40 +170,70 @@ The what is under the cursor."
 	      )
 
 	  ;; Found something
-	  (princ "You have found the ")
-	  (if (stringp (car rpf))
-	      (let ((comp (save-excursion
-			    (set-buffer (oref ctxt :buffer))
-			    (condition-case nil
-				(semantic-analyze-possible-completions ctxt)
-			      (error nil)))))
-		(princ "text ")
-		(princ (car rpf))
-		(princ "\n\n")
-		(if (not comp)
-		    (princ "There are no known completions.")
-		  (princ "There are ")
-		  (prin1 (length comp))
-		  (princ " possible completions:\n")
-		  (dolist (C comp)
-		    (princ "   ")
-		    (princ C)
-		    (princ "\n"))
-		  ))
-	    ;; The last symbol is a tag, so get funky with it.
-	    (princ "symbol:\n  ")
-	    (princ (semantic-format-tag-prototype (car rpf)
+	  (princ "You have found ")
+	  (cond
+
+	   ;; RAW String - unknown symbol
+	   ((stringp (car rpf))
+		 (let ((comp (save-excursion
+			       (set-buffer (oref ctxt :buffer))
+			       (condition-case nil
+				   (semantic-analyze-possible-completions ctxt)
+				 (error nil)))))
+		   (princ "the text ")
+		   (princ (car rpf))
+		   (princ "\n\n")
+		   (if (not comp)
+		       (princ "There are no known completions.")
+		     (if (cdr comp)
+			 (progn
+			   (princ "There are ")
+			   (prin1 (length comp))
+			   (princ " possible completions:\n"))
+		       (princ "There is one possible completion:\n"))
+
+		     (dolist (C comp)
+		       (princ "   ")
+		       (princ (semantic-format-tag-summarize C))
+		       (princ "\n"))
+		     )))
+
+	   ;; A Semantic Tag
+	   ((semantic-tag-p (car rpf))
+	    (princ "the symbol:\n  ")
+	    (princ (semantic-format-tag-summarize (car rpf)
 						  (car (cdr rpf))
 						  t))
 	    (princ "\n\n")
 
+		 
 	    ;; Filename
 	    (when (semantic-tag-file-name (car rpf))
 	      (princ "This tag is found in:\n  ")
 	      (princ (semantic-tag-file-name (car rpf)))
+	      (let ((line (semantic-tag-get-attribute (car rpf) :line))
+		    (start (when (semantic-tag-with-position-p (car rpf))
+			     (semantic-tag-start (car rpf)))))
+		(cond (line
+		       (princ "\n  on Line: ")
+		       (princ line))
+		      (start
+		       (princ "\n  at character: ")
+		       (princ start))
+		      ))
 	      (princ "\n\n"))
-	      
-	    ))))))
+	    
+	    ;; Raw Tag Data
+	    (princ "The Raw Tag Data Structure is:\n\n")
+	    (prin1 (car rpf))
+	    )
+
+	   ;; Something else?
+	   (t
+
+	    (princ "absolutely nothing...")
+
+	    )))))))
 
 ;;; UTILITIES
 ;;
@@ -276,6 +315,7 @@ ATTRIBUTES are easymenu compatible attributes."
 	  ;; with semantic-symref-rename-local-variable
 	  (when (and (semantic-tag-p sym)
 		     (semantic-tag-of-class-p sym 'variable)
+		     (semantic-tag-with-position-p sym)
 		     ;; within this tag
 		     (or (> (semantic-tag-start sym) (semantic-tag-start tag))
 			 (< (semantic-tag-end sym) (semantic-tag-end tag)))
