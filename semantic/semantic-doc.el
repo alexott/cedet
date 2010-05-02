@@ -1,10 +1,10 @@
 ;;; semantic-doc.el --- Routines for documentation strings
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2005, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2005, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-doc.el,v 1.16 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: semantic-doc.el,v 1.17 2010-05-02 12:50:42 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -81,7 +81,8 @@ just the lexical token and not the string."
 	   (start (if starttag
 		      (semantic-tag-end starttag)
 		    (point-min))))
-      (when (re-search-backward comment-start-skip start t)
+      (when (and comment-start-skip
+		 (re-search-backward comment-start-skip start t))
 	;; We found a comment that doesn't belong to the body
 	;; of a function.
 	(semantic-doc-snarf-comment-for-tag nosnarf)))
