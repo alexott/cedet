@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-ia.el,v 1.36 2010-04-27 00:44:46 zappo Exp $
+;; X-RCS: $Id: semantic-ia.el,v 1.37 2010-05-02 12:49:57 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -420,18 +420,21 @@ See `semantic-ia-fast-jump' for details on how it works.
       ;; The default tries to find a comment in front of the tag
       ;; and then strings off comment prefixes.
       (let ((doc (semantic-documentation-for-tag (car pf))))
-	(with-output-to-temp-buffer "*TAG DOCUMENTATION*"
-	  (princ "Tag: ")
-	  (princ (semantic-format-tag-prototype (car pf)))
-	  (princ "\n")
-	  (princ "\n")
-	  (princ "Snarfed Documentation: ")
-	  (princ "\n")
-	  (princ "\n")
-	  (if doc
-	      (princ doc)
-	    (princ "  Documentation unavailable."))
-	  )))
+	(if (or (null doc) (string= doc ""))
+	    (message "Doc unavailable for: %s"
+		     (semantic-format-tag-prototype (car pf)))
+	  (with-output-to-temp-buffer "*TAG DOCUMENTATION*"
+	    (princ "Tag: ")
+	    (princ (semantic-format-tag-prototype (car pf)))
+	    (princ "\n")
+	    (princ "\n")
+	    (princ "Snarfed Documentation: ")
+	    (princ "\n")
+	    (princ "\n")
+	    (if doc
+		(princ doc)
+	      (princ "  Documentation unavailable."))
+	    ))))
      (t
       (message "Unknown tag.")))
     ))
