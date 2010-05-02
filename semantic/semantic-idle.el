@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.71 2010-04-20 00:45:47 zappo Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.72 2010-05-02 15:08:39 scymtym Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -1014,8 +1014,10 @@ completion.
   #'semantic-idle-breadcrumbs--display-in-header-line
   "Specify how to display the tag under point in idle time.
 This function should take a list of Semantic tags as its only
-argument. The tag are sorted according to their nesting order,
-starting with the outermost tag."
+argument. The tags are sorted according to their nesting order,
+starting with the outermost tag. The function should call
+`semantic-idle-breadcrumbs-format-tag-list-function' to convert
+the tag list into a string."
   :group 'semantic
   :type  '(choice
 	   (const    :tag "Display in header line"
@@ -1024,9 +1026,25 @@ starting with the outermost tag."
 		     semantic-idle-breadcrumbs--display-in-mode-line)
 	   (function :tag "Other function")))
 
+(defcustom semantic-idle-breadcrumbs-format-tag-list-function
+  #'semantic-idle-breadcrumbs--format-linear
+  "Specify how to format the list of tags containing point.
+This function should take a list of Semantic tags as its only
+argument. The tags are sorted according to their nesting order,
+starting with the outermost tag. Single tags should be formatted
+using `semantic-idle-breadcrumbs-format-tag-function' unless
+special formatting is required."
+  :group 'semantic
+  :type  '(choice
+	   (const    :tag "Format tags as list, innermost last"
+		     semantic-idle-breadcrumbs--format-linear)
+	   (const    :tag "Innermost tag with details, followed by remaining tags"
+		     semantic-idle-breadcrumbs--format-innermost-first)
+	   (function :tag "Other function")))
+
 (defcustom semantic-idle-breadcrumbs-format-tag-function
   #'semantic-format-tag-abbreviate
-  "Function to call to format information about tag under point.
+  "Function to call to format information about tags.
 This function should take a single argument, a Semantic tag, and
 return a string to display.
 Some useful functions are found in `semantic-format-tag-functions'."
@@ -1082,10 +1100,12 @@ be called."
 ;; TODO does this work for mode-line case?
 (defvar semantic-idle-breadcrumbs-popup-map
   (let ((map (make-sparse-keymap)))
+    ;; mouse-1 goes to clicked tag
     (define-key map
       [ header-line mouse-1 ]
       (semantic-idle-breadcrumbs--tag-function
        semantic-go-to-tag))
+    ;; mouse-3 pops up a context menu
     (define-key map
       [ header-line mouse-3 ]
       'semantic-idle-breadcrumbs--popup-menu)
@@ -1185,7 +1205,7 @@ be called."
 	  (concat
 	   semantic-idle-breadcrumbs-header-line-prefix
 	   (if tag-list
-	       (semantic-idle-breadcrumbs--make-format
+	       (semantic-idle-breadcrumbs--format-tag-list
 		tag-list
 		(- width
 		   (length semantic-idle-breadcrumbs-header-line-prefix)))
@@ -1200,15 +1220,36 @@ be called."
 (defun semantic-idle-breadcrumbs--display-in-mode-line (tag-list)
   "Display the tags in TAG-LIST in the mode line of their buffer.
 TODO THIS FUNCTION DOES NOT WORK YET."
+
   (error "This function does not work yet")
+
   (let ((width (- (nth 2 (window-edges))
 		  (nth 0 (window-edges)))))
     (setq mode-line-format
-	  (semantic-idle-breadcrumbs--make-format tag-list width)))
+	  (semantic-idle-breadcrumbs--format-tag-list tag-list width)))
 
   (force-mode-line-update))
 
-(defun semantic-idle-breadcrumbs--make-format (tag-list max-length)
+(defun semantic-idle-breadcrumbs--format-tag-list (tag-list max-length)
+  "Format TAG-LIST using configured functions respecting MAX-LENGTH.
+If the initial formatting result is longer than MAX-LENGTH, it is
+shortened at the beginning."
+  ;; Format TAG-LIST using the configured formatting function.
+  (let* ((complete-format (funcall
+			   semantic-idle-breadcrumbs-format-tag-list-function
+			   tag-list))
+	 ;; Determine length of complete format.
+	 (complete-length (length complete-format)))
+    ;; Shorten string if necessary.
+    (if (<= complete-length max-length)
+	complete-format
+      (concat "... "
+	      (substring
+	       complete-format
+	       (- complete-length (- max-length 4))))))
+  )
+
+(defun semantic-idle-breadcrumbs--format-linear (tag-list)
   "Format TAG-LIST ensuring the string does not get longer than MAX-LENGTH."
   (let* ((format-pieces   (mapcar
 			   #'semantic-idle-breadcrumbs--format-tag
@@ -1225,16 +1266,18 @@ TODO THIS FUNCTION DOES NOT WORK YET."
 			    (mapconcat
 			     #'identity
 			     format-pieces
-			     semantic-idle-breadcrumbs-separator))))
-	 ;; Determine length of complete format.
-	 (complete-length (length complete-format)))
-    ;; Shorten string if necessary.
-    (if (<= complete-length max-length)
-	complete-format
-      (concat "... "
-	      (substring
-	       complete-format
-	       (- complete-length (- max-length 4))))))
+			     semantic-idle-breadcrumbs-separator)))))
+    complete-format)
+  )
+
+(defun semantic-idle-breadcrumbs--format-innermost-first (tag-list)
+  "Format TAG-LIST placing the innermost tag first."
+  (concat (semantic-format-tag-prototype (car (last tag-list)) nil t)
+	  (when (butlast tag-list)
+	    (concat
+	     " | "
+	     (semantic-idle-breadcrumbs--format-linear (butlast tag-list))
+	     "")))
   )
 
 (defun semantic-idle-breadcrumbs--format-tag (tag)
