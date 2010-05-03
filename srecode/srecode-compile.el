@@ -38,7 +38,7 @@
 
 ;;; Template Class
 ;;
-;; Templatets describe a patter of text that can be inserted into a
+;; Templates describe a pattern of text that can be inserted into a
 ;; buffer.
 ;;
 (defclass srecode-template (eieio-named)
@@ -102,13 +102,13 @@ stack is broken."
   ((secondname :initarg :secondname
 	       :type (or null string)
 	       :documentation
-	       "If there is a colon in the inserter's name, it represents 
+	       "If there is a colon in the inserter's name, it represents
 additional static argument data."))
   "This represents an item to be inserted via a template macro.
 Plain text strings are not handled via this baseclass."
   :abstract t)
 
-(defmethod srecode-parse-input ((ins srecode-template-inserter) 
+(defmethod srecode-parse-input ((ins srecode-template-inserter)
 				tag input STATE)
   "For the template inserter INS, parse INPUT.
 Shorten input only by the amount needed.
@@ -151,7 +151,7 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
    )
   "Current state of the compile.")
 
-(defmethod srecode-compile-add-prompt ((state srecode-compile-state) 
+(defmethod srecode-compile-add-prompt ((state srecode-compile-state)
 				       prompttag)
   "Add PROMPTTAG to the current list of prompts."
   (with-slots (prompts) state
@@ -228,7 +228,7 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
        ((eq class 'prompt)
 	(srecode-compile-add-prompt STATE tag)
 	)
-	    
+
        ;; VARIABLE tags can specify operational control
        ((eq class 'variable)
 	(let* ((name (semantic-tag-name tag))
@@ -289,7 +289,7 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
 
     ;;
     ;; Calculate priority
-    ;; 
+    ;;
     (if (not priority)
 	(let ((d (expand-file-name (file-name-directory (buffer-file-name))))
 	      (sd (expand-file-name (file-name-directory (locate-library "srecode"))))
@@ -340,7 +340,7 @@ STATE is the current compile state as an object `srecode-compile-state'."
       (when (eq (car addargs) :blank)
 	;; If we have a wrap, then put wrap inserters on both
 	;; ends of the code.
-	(setq code (append 
+	(setq code (append
 		    (list (srecode-compile-inserter "BLANK"
 						    "\r"
 						    STATE
@@ -526,9 +526,9 @@ A list of defined variables VARS provides a variable table."
 	(contexthash (make-hash-table :test 'equal :size 10))
 	(lp templates)
 	)
-    
+
     (while lp
-      
+
       (let* ((objname (oref (car lp) :object-name))
 	     (context (oref (car lp) :context))
 	     (globalname (concat context ":" objname))
@@ -567,7 +567,7 @@ A list of defined variables VARS provides a variable table."
 	(oset (car tmpl) :table table)
 	(setq tmpl (cdr tmpl))))
     ))
-    
+
 
 
 ;;; DEBUG
