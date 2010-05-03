@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-symref-grep.el,v 1.10 2010-04-09 02:26:44 zappo Exp $
+;; X-RCS: $Id: semantic-symref-grep.el,v 1.11 2010-05-03 01:13:41 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -88,7 +88,7 @@ Optional argument MODE specifies the `major-mode' to test."
 			      " -o ")
 		   " \\)"))
 	  (t
-	   (error "Configuration for `semantic-symref-tool-grep' needed for %s" major-mode))
+	   (error "Customize `semantic-symref-filepattern-alist' for %s" major-mode))
 	  )))
 
 (defvar semantic-symref-grep-expand-keywords
