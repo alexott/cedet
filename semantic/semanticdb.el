@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb.el,v 1.141 2010-03-26 22:18:05 xscript Exp $
+;; X-RCS: $Id: semanticdb.el,v 1.142 2010-05-03 01:13:16 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -819,12 +819,14 @@ Always append `semanticdb-project-system-databases' if
     (setq root (run-hook-with-args-until-success
 		'semanticdb-project-root-functions
 		dir))
-    ;; Find roots based on strings
-    (while (and roots (not root))
-      (let ((r (file-truename (car roots))))
-	(if (string-match (concat "^" (regexp-quote r)) dir)
-	    (setq root r)))
-      (setq roots (cdr roots)))
+    (if root
+	(setq root (file-truename root))
+      ;; Else, Find roots based on strings
+      (while roots
+	(let ((r (file-truename (car roots))))
+	  (if (string-match (concat "^" (regexp-quote r)) dir)
+	      (setq root r)))
+	(setq roots (cdr roots))))
 
     ;; If no roots are found, use this directory.
     (unless root (setq root dir))
