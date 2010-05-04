@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.72 2010-05-02 15:08:39 scymtym Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.73 2010-05-04 23:32:03 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -755,21 +755,16 @@ Use the semantic analyzer to find the symbol information."
   "Return a string message describing the current context.
 This function will disable loading of previously unloaded files
 by semanticdb as a time-saving measure."
-  (let (
-	(semanticdb-find-default-throttle
-	 (if (featurep 'semanticdb-find)
-	     (remq 'unloaded semanticdb-find-default-throttle)
-	   nil))
-	)
-    (save-excursion
-      ;; use whichever has success first.
-      (or
-       (semantic-idle-summary-current-symbol-keyword)
+  (semanticdb-without-unloaded-file-searches
+      (save-excursion
+	;; use whichever has success first.
+	(or
+	 (semantic-idle-summary-current-symbol-keyword)
 
-       (semantic-idle-summary-current-symbol-info-context)
+	 (semantic-idle-summary-current-symbol-info-context)
 
-       (semantic-idle-summary-current-symbol-info-brutish)
-       ))))
+	 (semantic-idle-summary-current-symbol-info-brutish)
+	 ))))
 
 (defvar semantic-idle-summary-out-of-context-faces
   '(
@@ -908,7 +903,9 @@ visible, then highlight it."
 Call `semantic-analyze-current-context' to find the reference tag.
 Call `semantic-symref-hits-in-region' to identify local references."
   (when (semantic-idle-summary-useful-context-p)
-    (let* ((ctxt (semantic-analyze-current-context))
+    (let* ((ctxt 
+	    (semanticdb-without-unloaded-file-searches
+		(semantic-analyze-current-context)))
 	   (Hbounds (when ctxt (oref ctxt bounds)))
 	   (target (when ctxt (car (reverse (oref ctxt prefix)))))
 	   (tag (semantic-current-tag))
@@ -966,16 +963,9 @@ doing fancy completions."
     ;; If something doesn't do what you expect, run
     ;; the below command by hand instead.
     (condition-case nil
-	(let (
-	      ;; Don't go loading in oodles of header libraries in
-	      ;; IDLE time.
-	      (semanticdb-find-default-throttle
-	       (if (featurep 'semanticdb-find)
-		   (remq 'unloaded semanticdb-find-default-throttle)
-		 nil))
-	      )
-	  ;; Use idle version.
-	  (semantic-complete-analyze-inline-idle)
+	(semanticdb-without-unloaded-file-searches
+	    ;; Use idle version.
+	    (semantic-complete-analyze-inline-idle)
 	  )
       (error nil))
     ))
