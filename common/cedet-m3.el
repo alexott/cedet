@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-m3.el,v 1.6 2010-04-30 01:41:41 zappo Exp $
+;; X-RCS: $Id: cedet-m3.el,v 1.7 2010-05-04 23:30:54 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -156,84 +156,85 @@ Argument EVENT describes the event that caused this function to be called."
   "Try and explain what this is.
 The what is under the cursor."
   (interactive)
-  (let* ((ctxt (semantic-analyze-current-context))
-	 (pf (when ctxt (oref ctxt prefix)))
-	 (rpf (reverse pf))
-	 )
-    (with-output-to-temp-buffer (help-buffer)
-      (with-current-buffer standard-output
-	(if (not ctxt)
-	    (progn
-	      ;; @TODO - what might we say about that location?
-	      (princ "You have selected some uninteresting location:\n")
-	      (princ "   whitespace, punctuation, comment, or string content.")
-	      )
+  (semanticdb-without-unloaded-file-searches
+      (let* ((ctxt (semantic-analyze-current-context))
+	     (pf (when ctxt (oref ctxt prefix)))
+	     (rpf (reverse pf))
+	     )
+	(with-output-to-temp-buffer (help-buffer)
+	  (with-current-buffer standard-output
+	    (if (not ctxt)
+		(progn
+		  ;; @TODO - what might we say about that location?
+		  (princ "You have selected some uninteresting location:\n")
+		  (princ "   whitespace, punctuation, comment, or string content.")
+		  )
 
-	  ;; Found something
-	  (princ "You have found ")
-	  (cond
+	      ;; Found something
+	      (princ "You have found ")
+	      (cond
 
-	   ;; RAW String - unknown symbol
-	   ((stringp (car rpf))
-		 (let ((comp (save-excursion
-			       (set-buffer (oref ctxt :buffer))
-			       (condition-case nil
-				   (semantic-analyze-possible-completions ctxt)
-				 (error nil)))))
-		   (princ "the text ")
-		   (princ (car rpf))
-		   (princ "\n\n")
-		   (if (not comp)
-		       (princ "There are no known completions.")
-		     (if (cdr comp)
-			 (progn
-			   (princ "There are ")
-			   (prin1 (length comp))
-			   (princ " possible completions:\n"))
-		       (princ "There is one possible completion:\n"))
+	       ;; RAW String - unknown symbol
+	       ((stringp (car rpf))
+		(let ((comp (save-excursion
+			      (set-buffer (oref ctxt :buffer))
+			      (condition-case nil
+				  (semantic-analyze-possible-completions ctxt)
+				(error nil)))))
+		  (princ "the text ")
+		  (princ (car rpf))
+		  (princ "\n\n")
+		  (if (not comp)
+		      (princ "There are no known completions.")
+		    (if (cdr comp)
+			(progn
+			  (princ "There are ")
+			  (prin1 (length comp))
+			  (princ " possible completions:\n"))
+		      (princ "There is one possible completion:\n"))
 
-		     (dolist (C comp)
-		       (princ "   ")
-		       (princ (semantic-format-tag-summarize C))
-		       (princ "\n"))
-		     )))
+		    (dolist (C comp)
+		      (princ "   ")
+		      (princ (semantic-format-tag-summarize C))
+		      (princ "\n"))
+		    )))
 
-	   ;; A Semantic Tag
-	   ((semantic-tag-p (car rpf))
-	    (princ "the symbol:\n  ")
-	    (princ (semantic-format-tag-summarize (car rpf)
-						  (car (cdr rpf))
-						  t))
-	    (princ "\n\n")
+	       ;; A Semantic Tag
+	       ((semantic-tag-p (car rpf))
+		(princ "the symbol:\n  ")
+		(princ (semantic-format-tag-summarize (car rpf)
+						      (car (cdr rpf))
+						      t))
+		(princ "\n\n")
 
 		 
-	    ;; Filename
-	    (when (semantic-tag-file-name (car rpf))
-	      (princ "This tag is found in:\n  ")
-	      (princ (semantic-tag-file-name (car rpf)))
-	      (let ((line (semantic-tag-get-attribute (car rpf) :line))
-		    (start (when (semantic-tag-with-position-p (car rpf))
-			     (semantic-tag-start (car rpf)))))
-		(cond (line
-		       (princ "\n  on Line: ")
-		       (princ line))
-		      (start
-		       (princ "\n  at character: ")
-		       (princ start))
-		      ))
-	      (princ "\n\n"))
+		;; Filename
+		(when (semantic-tag-file-name (car rpf))
+		  (princ "This tag is found in:\n  ")
+		  (princ (semantic-tag-file-name (car rpf)))
+		  (let ((line (semantic-tag-get-attribute (car rpf) :line))
+			(start (when (semantic-tag-with-position-p (car rpf))
+				 (semantic-tag-start (car rpf)))))
+		    (cond (line
+			   (princ "\n  on Line: ")
+			   (princ line))
+			  (start
+			   (princ "\n  at character: ")
+			   (princ start))
+			  ))
+		  (princ "\n\n"))
 	    
-	    ;; Raw Tag Data
-	    (princ "The Raw Tag Data Structure is:\n\n")
-	    (prin1 (car rpf))
-	    )
+		;; Raw Tag Data
+		(princ "The Raw Tag Data Structure is:\n\n")
+		(prin1 (car rpf))
+		)
 
-	   ;; Something else?
-	   (t
+	       ;; Something else?
+	       (t
 
-	    (princ "absolutely nothing...")
+		(princ "absolutely nothing...")
 
-	    )))))))
+		))))))))
 
 ;;; UTILITIES
 ;;
@@ -251,31 +252,32 @@ ATTRIBUTES are easymenu compatible attributes."
 
 (defun cedet-m3-create-menu ()
   "Create a menu custom to this location."
-  (let ((baseitems (list
-		    (cedet-m3-menu-item
-		     "What is this?"
-		     'cedet-m3-whatisit
-		     :active t)))
-	(context (cedet-m3-context-items))
-	(refs (cedet-m3-ref-items))
-	(recode (cedet-m3-srecode-items))
-	(project (cedet-m3-ede-items))
-	(cogre (cedet-m3-cogre-items))
-	(easy nil)
-	)
-    (setq easy (cons "CEDET"
-		     (append baseitems
-			     context
-			     refs
-			     recode
-			     cogre
-			     project)))
+  (semanticdb-without-unloaded-file-searches
+      (let ((baseitems (list
+			(cedet-m3-menu-item
+			 "What is this?"
+			 'cedet-m3-whatisit
+			 :active t)))
+	    (context (cedet-m3-context-items))
+	    (refs (cedet-m3-ref-items))
+	    (recode (cedet-m3-srecode-items))
+	    (project (cedet-m3-ede-items))
+	    (cogre (cedet-m3-cogre-items))
+	    (easy nil)
+	    )
+	(setq easy (cons "CEDET"
+			 (append baseitems
+				 context
+				 refs
+				 recode
+				 cogre
+				 project)))
     
-    (easy-menu-define cedet-m3-minor-menu
-      cedet-m3-hack-map
-      "Cedet-M3 Minor Mode Menu"
-      easy)
-    ))
+	(easy-menu-define cedet-m3-minor-menu
+	  cedet-m3-hack-map
+	  "Cedet-M3 Minor Mode Menu"
+	  easy)
+	)))
 
 (defun cedet-m3-context-items ()
   "Return a list of menu items if the cursor is on some useful code constrct."
