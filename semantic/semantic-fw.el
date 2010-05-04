@@ -2,7 +2,7 @@
 
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
-;; X-CVS: $Id: semantic-fw.el,v 1.84 2010-05-04 23:24:13 zappo Exp $
+;; X-CVS: $Id: semantic-fw.el,v 1.85 2010-05-04 23:25:34 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -476,7 +476,7 @@ FILE, NOWARN, RAWFILE, and WILDCARDS are passed into `find-file-noselect'"
 	      (remq 'unloaded semanticdb-find-default-throttle)
 	    nil)))
      ,forms))
-(put 'semantic-db-without-unloaded-file-searches 'lisp-indent-function 1)
+(put 'semanticdb-without-unloaded-file-searches 'lisp-indent-function 1)
 
 
 ;;; Editor goodies ;-)
