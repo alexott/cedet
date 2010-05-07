@@ -5,7 +5,7 @@
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;;         Jan Moringen <scymtym@users.sourceforge.net>
-;; X-RCS: $Id: srecode-cpp.el,v 1.6 2010-02-03 01:32:02 scymtym Exp $
+;; X-RCS: $Id: srecode-cpp.el,v 1.7 2010-05-07 22:57:30 scymtym Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -22,11 +22,14 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
 
+
 ;;; Commentary:
 ;;
 ;; Supply some C++ specific dictionary fillers and helpers
 
+
 ;;; Code:
+;;
 
 (require 'semantic-tag)
 
@@ -107,21 +110,21 @@ special behavior for tag of classes include, using and function."
 	 (class (semantic-tag-class tag)))
 
     ;; Add additional information based on the class of the tag.
-    (cond
+    (case class
      ;;
      ;; INCLUDE
      ;;
-     ((eq class 'include)
+     (include
       ;; For include tags, we have to discriminate between system-wide
       ;; and local includes.
       (if (semantic-tag-include-system-p tag)
-	(srecode-dictionary-show-section dict "SYSTEM")
+	  (srecode-dictionary-show-section dict "SYSTEM")
 	(srecode-dictionary-show-section dict "LOCAL")))
 
      ;;
      ;; USING
      ;;
-     ((eq class 'using)
+     (using
       ;; Insert the subject (a tag) of the include statement as VALUE
       ;; entry into the dictionary.
       (let ((value-tag  (semantic-tag-get-attribute tag :value))
@@ -131,6 +134,7 @@ special behavior for tag of classes include, using and function."
 	 (srecode-semantic-tag (semantic-tag-name value-tag)
 			       :prime value-tag)
 	 value-dict))
+
       ;; Discriminate using statements referring to namespaces and
       ;; types.
       (when (eq (semantic-tag-get-attribute tag :kind) 'namespace)
@@ -139,13 +143,14 @@ special behavior for tag of classes include, using and function."
      ;;
      ;; FUNCTION
      ;;
-     ((eq class 'function)
+     (function
       ;; @todo It would be nice to distinguish member functions from
       ;; free functions and only apply the const and pure modifiers,
       ;; when they make sense. My best bet would be
       ;; (semantic-tag-function-parent tag), but it is not there, when
       ;; the function is defined in the scope of a class.
-      (let ((member    't)
+      (let ((member    t)
+	    (templates (semantic-tag-get-attribute tag :template))
 	    (modifiers (semantic-tag-modifiers tag)))
 
 	;; Add modifiers into the dictionary
@@ -153,6 +158,9 @@ special behavior for tag of classes include, using and function."
 	  (let ((modifier-dict (srecode-dictionary-add-section-dictionary
 				dict "MODIFIERS")))
 	    (srecode-dictionary-set-value modifier-dict "NAME" modifier)))
+
+	;; Add templates into child dictionaries.
+	(srecode-cpp-apply-templates dict templates)
 
 	;; When the function is a member function, it can have
 	;; additional modifiers.
@@ -167,9 +175,38 @@ special behavior for tag of classes include, using and function."
 	  ;; entry.
 	  (when (semantic-tag-get-attribute tag :pure-virtual-flag)
 	    (srecode-dictionary-show-section dict "PURE"))
-	  )
-	))
+	  )))
+
+     ;;
+     ;; CLASS
+     ;;
+     (type
+      ;; For classes, add template parameters.
+      (when (or (semantic-tag-of-type-p tag "class")
+		(semantic-tag-of-type-p tag "struct"))
+
+	;; Add templates into child dictionaries.
+	(let ((templates (semantic-tag-get-attribute tag :template)))
+	  (srecode-cpp-apply-templates dict templates))))
      ))
+  )
+
+
+;;; Helper functions
+;;
+
+(defun srecode-cpp-apply-templates (dict templates)
+  "Add section dictionaries for TEMPLATES to DICT."
+  (when templates
+    (let ((templates-dict (srecode-dictionary-add-section-dictionary
+			   dict "TEMPLATES")))
+      (dolist (template templates)
+	(let ((template-dict (srecode-dictionary-add-section-dictionary
+			      templates-dict "ARGS")))
+	  (srecode-semantic-apply-tag-to-dict
+	   (srecode-semantic-tag (semantic-tag-name template)
+				 :prime template)
+	   template-dict)))))
   )
 
 (provide 'srecode-cpp)
