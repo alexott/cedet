@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-generic.el,v 1.1 2010-05-08 15:54:29 zappo Exp $
+;; X-RCS: $Id: ede-generic.el,v 1.2 2010-05-09 14:37:51 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -65,7 +65,7 @@
 		  :documentation
 		  "Command used for building this project.")
    (debug-command :initarg :debug-command
-		  :initform "gdb %s"
+		  :initform "gdb "
 		  :type string
 		  :custom string
 		  :group (default build)
@@ -161,11 +161,17 @@ The class allocated value is replace by different sub classes.")
 	  ;; Create a new one.
 	  (setq config (ede-generic-config 
 			"Configuration"
-			:file fname)))
+			:file fname))
+	  ;; Set initial values based on project.
+	  (ede-generic-setup-configuration proj config))
 	;; Link things together.
 	(oset proj config config)
 	(oset config project proj)))
     config))
+
+(defmethod ede-generic-setup-configuration ((proj ede-generic-project) config)
+  "Default configuration setup method."
+  nil)
 
 (defmethod ede-commit-project ((proj ede-generic-project))
   "Commit any change to PROJ to its file."
@@ -314,9 +320,10 @@ the new configuration."
 				   :name "Make" :file 'ede-generic-make
 				   :proj-file "Makefile"
 				   :load-type 'ede-generic-load
-				   :class-sym 'ede-generic-makefile-project)
-	     ;; Generics must go at the end, since more specific types can create
-	     ;; Makefiles also.
+				   :class-sym 'ede-generic-makefile-project
+				   :new-p nil)
+	     ;; Generics must go at the end, since more specific types
+	     ;; can create Makefiles also.
 	     t)
 
 (defclass ede-generic-makefile-project (ede-generic-project)
@@ -324,7 +331,59 @@ the new configuration."
    )
   "Generic Project for makefiles.")
 
+(defmethod ede-generic-setup-configuration ((proj ede-generic-makefile-project) config)
+  "Default configuration setup method."
+  (oset config build-command "make -k")
+  (oset config debug-command "gdb ")
+  )
 
+
+;;; SCONS
+(add-to-list 'ede-project-class-files
+	     (ede-project-autoload "edeproject-scons"
+				   :name "SCons" :file 'ede-generic-make
+				   :proj-file "SConstruct"
+				   :load-type 'ede-generic-load
+				   :class-sym 'ede-generic-scons-project
+				   :new-p nil)
+	     ;; Generics must go at the end, since more specific types
+	     ;; can create Scons also.
+	     t)
+
+(defclass ede-generic-scons-project (ede-generic-project)
+  ((buildfile :initform "SConstruct")
+   )
+  "Generic Project for scons.")
+
+(defmethod ede-generic-setup-configuration ((proj ede-generic-scons-project) config)
+  "Default configuration setup method."
+  (oset config build-command "scons")
+  (oset config debug-command "gdb ")
+  )
+
+
+;;; CMAKE
+(add-to-list 'ede-project-class-files
+	     (ede-project-autoload "edeproject-cmake"
+				   :name "CMake" :file 'ede-generic-make
+				   :proj-file "CMakeLists"
+				   :load-type 'ede-generic-load
+				   :class-sym 'ede-generic-cmake-project
+				   :new-p nil)
+	     ;; Generics must go at the end, since more specific types
+	     ;; can create Cmake also.
+	     t)
+
+(defclass ede-generic-cmake-project (ede-generic-project)
+  ((buildfile :initform "CMakeLists")
+   )
+  "Generic Project for cmake.")
+
+(defmethod ede-generic-setup-configuration ((proj ede-generic-cmake-project) config)
+  "Default configuration setup method."
+  (oset config build-command "cmake")
+  (oset config debug-command "gdb ")
+  )
 
 (provide 'ede-generic)
 
