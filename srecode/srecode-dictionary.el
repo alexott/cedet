@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-dictionary.el,v 1.17 2010-05-11 00:06:47 scymtym Exp $
+;; X-RCS: $Id: srecode-dictionary.el,v 1.18 2010-05-11 01:03:37 scymtym Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -329,21 +329,27 @@ inserted dictionaries."
      (oref otherdict namehash))))
 
 (defmethod srecode-dictionary-lookup-name ((dict srecode-dictionary)
-					   name)
-  "Return information about the current DICT's value for NAME.
-DICT is a dictionary, and NAME is a string that is the name of
-a symbol in the dictionary.
-This function derives values for some special NAMEs, such as `FIRST'
-and 'LAST'."
+					   name &optional non-recursive)
+  "Return information about DICT's value for NAME.
+DICT is a dictionary, and NAME is a string that is treated as the
+name of an entry in the dictionary. If such an entry exists, its
+value is returned. Otherwise, nil is returned. Normally, the
+lookup is recursive in the sense that the parent of DICT is
+searched for NAME if it is not found in DICT.  This recursive
+lookup can be disabled by the optional argument NON-RECURSIVE.
+
+This function derives values for some special NAMEs, such as
+'FIRST' and 'LAST'."
   (if (not (slot-boundp dict 'namehash))
       nil
     ;; Get the value of this name from the dictionary
-    (or (with-slots (namehash) dict
-	  (gethash name namehash))
-	(and (not (member name '("FIRST" "LAST" "NOTFIRST" "NOTLAST")))
-	     (oref dict parent)
-	     (srecode-dictionary-lookup-name (oref dict parent) name))
-	)))
+    (with-slots (namehash parent) dict
+      (or (gethash name namehash)
+	  (and (not non-recursive)
+	       (not (member name '("FIRST" "LAST" "NOTFIRST" "NOTLAST")))
+	       parent
+	       (srecode-dictionary-lookup-name parent name)))))
+  )
 
 (defmethod srecode-root-dictionary ((dict srecode-dictionary))
   "For dictionary DICT, return the root dictionary.
