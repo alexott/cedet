@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-dictionary.el,v 1.16 2010-03-26 22:18:07 xscript Exp $
+;; X-RCS: $Id: srecode-dictionary.el,v 1.17 2010-05-11 00:06:47 scymtym Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -68,7 +68,7 @@ a string."
   :abstract t)
 
 ;;;###autoload
-(defclass srecode-dictionary-compound-variable 
+(defclass srecode-dictionary-compound-variable
   (srecode-dictionary-compound-value)
   ((value :initarg :value
 	  :documentation
@@ -109,7 +109,7 @@ Makes sure that :value is compiled."
 
     (when (not state)
       (error "Cannot create compound variable without :state"))
-    
+
     (call-next-method this (nreverse newfields))
     (when (not (slot-boundp this 'compiled))
       (let ((val (oref this :value))
@@ -122,7 +122,7 @@ Makes sure that :value is compiled."
 		  ((and (listp nval)
 			(equal (car nval) 'macro))
 		   (setq comp (cons
-			       (srecode-compile-parse-inserter 
+			       (srecode-compile-parse-inserter
 				(cdr nval)
 				state)
 			       comp)))
@@ -148,40 +148,49 @@ buffer's table.
 If BUFFER-OR-PARENT is t, then this dictionary should not be
 associated with a buffer or parent."
   (save-excursion
+    ;; Handle the parent
     (let ((parent nil)
 	  (buffer nil)
 	  (origin nil)
 	  (initfrombuff nil))
-      (cond ((bufferp buffer-or-parent)
-	     (set-buffer buffer-or-parent)
-	     (setq buffer buffer-or-parent
-		   origin (buffer-name buffer-or-parent)
-		   initfrombuff t))
-	    ((srecode-dictionary-child-p buffer-or-parent)
-	     (setq parent buffer-or-parent
-		   buffer (oref buffer-or-parent buffer)
-		   origin (concat (object-name buffer-or-parent) " in "
-				  (if buffer (buffer-name buffer)
-				    "no buffer")))
-	     (when buffer
-	       (set-buffer buffer)))
-	    ((eq buffer-or-parent t)
-	     (setq buffer nil
-		   origin "Unspecified Origin"))
-	    (t
-	     (setq buffer (current-buffer)
-		   origin (concat "Unspecified.  Assume "
-				  (buffer-name buffer))
-		   initfrombuff t)
-	     )
-	    )
+      (cond
+       ;; Parent is a buffer
+       ((bufferp buffer-or-parent)
+	(set-buffer buffer-or-parent)
+	(setq buffer buffer-or-parent
+	      origin (buffer-name buffer-or-parent)
+	      initfrombuff t))
+
+       ;; Parent is another dictionary
+       ((srecode-dictionary-child-p buffer-or-parent)
+	(setq parent buffer-or-parent
+	      buffer (oref buffer-or-parent buffer)
+	      origin (concat (object-name buffer-or-parent) " in "
+			     (if buffer (buffer-name buffer)
+			       "no buffer")))
+	(when buffer
+	  (set-buffer buffer)))
+
+       ;; No parent
+       ((eq buffer-or-parent t)
+	(setq buffer nil
+	      origin "Unspecified Origin"))
+
+       ;; Default to unspecified parent
+       (t
+	(setq buffer (current-buffer)
+	      origin (concat "Unspecified.  Assume "
+			     (buffer-name buffer))
+	      initfrombuff t)))
+
+      ;; Create the new dictionary object.
       (let ((dict (srecode-dictionary
 		   major-mode
-		   :buffer buffer
-		   :parent parent
-		   :namehash  (make-hash-table :test 'equal
-					       :size 20)
-		   :origin origin)))
+		   :buffer   buffer
+		   :parent   parent
+		   :namehash (make-hash-table :test 'equal
+					      :size 20)
+		   :origin   origin)))
 	;; Only set up the default variables if we are being built
 	;; directroy for a particular buffer.
 	(when initfrombuff
@@ -437,7 +446,7 @@ inserted with a new editable field.")
        ;; Insert strings
        ((stringp dv) (insert dv))
        ;; Some other issue
-       (t 
+       (t
 	(error "Unknown default value for value %S" name)))
 
       ;; Create a field from the inserter.
@@ -568,4 +577,3 @@ STATE is the current compiler state."
 
 (provide 'srecode-dictionary)
 ;;; srecode-dictionary.el ends here
-
