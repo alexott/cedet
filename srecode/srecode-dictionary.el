@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-dictionary.el,v 1.20 2010-05-14 01:04:04 scymtym Exp $
+;; X-RCS: $Id: srecode-dictionary.el,v 1.21 2010-05-14 01:26:13 scymtym Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -566,6 +566,53 @@ STATE is the current compiler state."
 	  )
 	(setq sectiondicts (cdr sectiondicts)))
       new)))
+
+(defun srecode-create-dictionaries-from-tags (tags state)
+  "Create a dictionary with entries according to TAGS.
+
+TAGS should be in the format produced by the template file
+grammar. That is
+
+TAGS = (ENTRY_1 ENTRY_2 ...)
+
+where
+
+ENTRY_N = (NAME ENTRY_N_1 ENTRY_N_2 ...) | TAG
+
+where TAG is a semantic tag of class 'variable. The (NAME ... )
+form creates a child dictionary which is stored under the name
+NAME. The TAG form creates a value entry or section dictionary
+entry whose name is the name of the tag.
+
+STATE is the current compiler state."
+  (let ((dict    (srecode-create-dictionary t))
+	(entries (apply #'append
+			(mapcar
+			 (lambda (entry)
+			   (cond
+			    ;; Entry is a tag
+			    ((semantic-tag-p entry)
+			     (let ((name  (semantic-tag-name entry))
+				   (value (semantic-tag-variable-default entry)))
+			       (list name
+				     (if (and (listp value)
+					      (= (length value) 1)
+					      (stringp (car value)))
+					 (car value)
+				       value))))
+
+			    ;; Entry is a nested dictionary
+			    (t
+			     (let ((name    (car entry))
+				   (entries (cdr entry)))
+			       (list name
+				     (srecode-create-dictionaries-from-tags
+				      entries state))))))
+			 tags))))
+    (srecode-dictionary-add-entries
+     dict entries state)
+    dict)
+  )
 
 ;;; DUMP DICTIONARY
 ;;
