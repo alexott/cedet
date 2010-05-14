@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-dictionary.el,v 1.18 2010-05-11 01:03:37 scymtym Exp $
+;; X-RCS: $Id: srecode-dictionary.el,v 1.19 2010-05-14 00:42:41 scymtym Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -225,15 +225,16 @@ TPL is an object representing a compiled template file."
 					 name value)
   "In dictionary DICT, set NAME to have VALUE."
   ;; Validate inputs
-  (if (not (stringp name))
-      (signal 'wrong-type-argument (list name 'stringp)))
+  (unless (stringp name)
+    (signal 'wrong-type-argument (list name 'stringp)))
+
   ;; Add the value.
   (with-slots (namehash) dict
     (puthash name value namehash))
   )
 
 (defmethod srecode-dictionary-add-section-dictionary ((dict srecode-dictionary)
-						      name &optional show-only)
+						      name &optional show-only force)
   "In dictionary DICT, add a section dictionary for section macro NAME.
 Return the new dictionary.
 
@@ -256,10 +257,11 @@ which will enable SECTIONS to be enabled.
 Adding a new dictionary will alter these values in previously
 inserted dictionaries."
   ;; Validate inputs
-  (if (not (stringp name))
-      (signal 'wrong-type-argument (list name 'stringp)))
+  (unless (stringp name)
+    (signal 'wrong-type-argument (list name 'stringp)))
+
   (let ((new (srecode-create-dictionary dict))
-	(ov (srecode-dictionary-lookup-name dict name)))
+	(ov  (srecode-dictionary-lookup-name dict name t)))
 
     (when (not show-only)
       ;; Setup the FIRST/NOTFIRST and LAST/NOTLAST entries.
@@ -276,7 +278,9 @@ inserted dictionaries."
 	(srecode-dictionary-show-section new "LAST"))
       )
 
-    (when (or (not show-only) (null ov))
+    (when (or force
+	      (not show-only)
+	      (null ov))
       (srecode-dictionary-set-value dict name (append ov (list new))))
     ;; Return the new sub-dictionary.
     new))
@@ -284,8 +288,9 @@ inserted dictionaries."
 (defmethod srecode-dictionary-show-section ((dict srecode-dictionary) name)
   "In dictionary DICT, indicate that the section NAME should be exposed."
   ;; Validate inputs
-  (if (not (stringp name))
-      (signal 'wrong-type-argument (list name 'stringp)))
+  (unless (stringp name)
+    (signal 'wrong-type-argument (list name 'stringp)))
+
   ;; Showing a section is just like making a section dictionary, but
   ;; with no dictionary values to add.
   (srecode-dictionary-add-section-dictionary dict name t)
@@ -295,37 +300,44 @@ inserted dictionaries."
   "In dictionary DICT, indicate that the section NAME should be hidden."
   ;; We need to find the has value, and then delete it.
   ;; Validate inputs
-  (if (not (stringp name))
-      (signal 'wrong-type-argument (list name 'stringp)))
+  (unless (stringp name)
+    (signal 'wrong-type-argument (list name 'stringp)))
+
   ;; Add the value.
   (with-slots (namehash) dict
     (remhash name namehash))
   nil)
 
-(defmethod srecode-dictionary-merge ((dict srecode-dictionary) otherdict)
-  "Merge into DICT the dictionary entries from OTHERDICT."
+(defmethod srecode-dictionary-merge ((dict srecode-dictionary) otherdict
+				     &optional force)
+  "Merge into DICT the dictionary entries from OTHERDICT.
+Unless the optional argument FORCE is non-nil, values in DICT are
+not modified, even if there are values of the same names in
+OTHERDICT."
   (when otherdict
     (maphash
      (lambda (key entry)
-       ;; Only merge in the new values if there was no old value.
+       ;; The new values is only merged in if there was no old value
+       ;; or FORCE is non-nil.
+       ;;
        ;; This protects applications from being whacked, and basically
        ;; makes these new section dictionary entries act like
        ;; "defaults" instead of overrides.
-       (when (not (srecode-dictionary-lookup-name dict key))
-	 (cond ((and (listp entry) (srecode-dictionary-p (car entry)))
-		;; A list of section dictionaries.
-		;; We need to merge them in.
-		(while entry
-		  (let ((new-sub-dict
-			 (srecode-dictionary-add-section-dictionary
-			  dict key)))
-		    (srecode-dictionary-merge new-sub-dict (car entry)))
-		  (setq entry (cdr entry)))
-		  )
+       (when (or force
+		 (not (srecode-dictionary-lookup-name dict key t)))
+	 (cond
+	  ;; A list of section dictionaries. We need to merge them in.
+	  ((and (listp entry)
+		(srecode-dictionary-p (car entry)))
+	   (dolist (sub-dict entry)
+	     (srecode-dictionary-merge
+	      (srecode-dictionary-add-section-dictionary
+	       dict key t t)
+	      sub-dict force)))
 
-	       (t
-		(srecode-dictionary-set-value dict key entry)))
-	       ))
+	  ;; Other values can be set directly.
+	  (t
+	   (srecode-dictionary-set-value dict key entry)))))
      (oref otherdict namehash))))
 
 (defmethod srecode-dictionary-lookup-name ((dict srecode-dictionary)
@@ -342,7 +354,8 @@ This function derives values for some special NAMEs, such as
 'FIRST' and 'LAST'."
   (if (not (slot-boundp dict 'namehash))
       nil
-    ;; Get the value of this name from the dictionary
+    ;; Get the value of this name from the dictionary or its parent
+    ;; unless the lookup should be non-recursive..
     (with-slots (namehash parent) dict
       (or (gethash name namehash)
 	  (and (not non-recursive)
