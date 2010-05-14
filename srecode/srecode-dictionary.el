@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-dictionary.el,v 1.19 2010-05-14 00:42:41 scymtym Exp $
+;; X-RCS: $Id: srecode-dictionary.el,v 1.20 2010-05-14 01:04:04 scymtym Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -307,6 +307,57 @@ inserted dictionaries."
   (with-slots (namehash) dict
     (remhash name namehash))
   nil)
+
+(defmethod srecode-dictionary-add-entries ((dict srecode-dictionary)
+					   entries &optional state)
+  "Add ENTRIES to DICT.
+
+ENTRIES is a list of even length of dictionary entries to
+add. ENTRIES looks like this:
+
+  (NAME_1 VALUE_1 NAME_2 VALUE_2 ...)
+
+The following rules apply:
+ * NAME_N is a string
+and for values
+ * If VALUE_N is t, the section NAME_N is shown.
+ * If VALUE_N is a string, an ordinary value is inserted.
+ * If VALUE_N is a dictionary, it is inserted as entry NAME_N.
+ * Otherwise, a compound variable is created for VALUE_N.
+
+The optional argument STATE has to non-nil when compound values
+are inserted. An error is signaled if ENTRIES contains compound
+values but STATE is nil."
+  (while entries
+    (let ((name  (nth 0 entries))
+	  (value (nth 1 entries)))
+      (cond
+       ;; Value is t; show a section.
+       ((eq value t)
+	(srecode-dictionary-show-section dict name))
+
+       ;; Value is a simple string; create an ordinary dictionary
+       ;; entry
+       ((stringp value)
+	(srecode-dictionary-set-value dict name value))
+
+       ;; Value is a dictionary; insert as child dictionary.
+       ((srecode-dictionary-child-p value)
+	(srecode-dictionary-merge
+	 (srecode-dictionary-add-section-dictionary dict name)
+	 value t))
+
+       ;; Value is some other object; create a compound value.
+       (t
+	(unless state
+	  (error "Cannot insert compound values without state."))
+
+	(srecode-dictionary-set-value
+	 dict name
+	 (srecode-dictionary-compound-variable
+	  name :value value :state state)))))
+    (setq entries (nthcdr 2 entries)))
+  dict)
 
 (defmethod srecode-dictionary-merge ((dict srecode-dictionary) otherdict
 				     &optional force)
