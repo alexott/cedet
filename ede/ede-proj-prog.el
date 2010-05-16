@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-prog.el,v 1.15 2010-04-18 00:31:05 zappo Exp $
+;; RCS: $Id: ede-proj-prog.el,v 1.16 2010-05-16 13:11:54 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -32,7 +32,16 @@
 ;;; Code:
 (defclass ede-proj-target-makefile-program
   (ede-proj-target-makefile-objectcode)
-  ((ldlibs :initarg :ldlibs
+  ((ldflags :initarg :ldflags
+	    :initform nil
+	    :type list
+	    :custom (repeat (string :tag "Link Flag"))
+	    :documentation
+	    "Additional flags to add when linking this target.
+Use this to specify specific options to the linker.
+A Common use may be to add -L to specify in-project locations of libraries
+specified with ldlibs.")
+   (ldlibs :initarg :ldlibs
 	   :initform nil
 	   :type list
 	   :custom (repeat (string :tag "Library"))
@@ -40,19 +49,11 @@
 	   "Libraries, such as \"m\" or \"Xt\" which this program depends on.
 The linker flag \"-l\" is automatically prepended.  Do not include a \"lib\"
 prefix, or a \".so\" suffix.
+Use the 'ldflags' slot to specify where in-project libraries might be.
 
 Note: Currently only used for Automake projects."
 	   )
-   (ldflags :initarg :ldflags
-	    :initform nil
-	    :type list
-	    :custom (repeat (string :tag "Link Flag"))
-	    :documentation
-	    "Additional flags to add when linking this target.
-Use ldlibs to add addition libraries.  Use this to specify specific
-options to the linker.
-
-Note: Not currently used.  This bug needs to be fixed.")
+   
    )
    "This target is an executable program.")
 
@@ -70,14 +71,8 @@ Note: Not currently used.  This bug needs to be fixed.")
       (concat (ede-name this) "_LDADD")
     (mapc (lambda (c) (insert " " c)) (oref this ldflags))
     (when (oref this ldlibs)
-      (insert " $(" (ede-name this) "_DEPENDENCIES)")))
-  ;; For other targets THIS depends on
-  ;;
-  (when (oref this ldlibs)
-    (ede-pmake-insert-variable-shared
-	(concat (ede-name this) "_DEPENDENCIES")
-      (mapc (lambda (d) (insert d)) (oref this ldlibs))))
-
+      (mapc (lambda (d) (insert " " d)) (oref this ldlibs)))
+    )
   (call-next-method))
 
 (defmethod ede-proj-makefile-insert-variables ((this ede-proj-target-makefile-program))
