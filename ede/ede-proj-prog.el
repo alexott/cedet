@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-prog.el,v 1.16 2010-05-16 13:11:54 zappo Exp $
+;; RCS: $Id: ede-proj-prog.el,v 1.17 2010-05-16 13:31:42 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -32,7 +32,18 @@
 ;;; Code:
 (defclass ede-proj-target-makefile-program
   (ede-proj-target-makefile-objectcode)
-  ((ldflags :initarg :ldflags
+  ((ldlibs-local :initarg :ldlibs-local
+		 :initform nil
+		 :type list
+		 :custom (repeat (string :tag "Local Library"))
+		 :documentation
+	   "Libraries that are part of this project.
+The full path to these libraries should be specified, such as:
+../lib/libMylib.la  or ../ar/myArchive.a
+
+Note: Currently only used for Automake projects."
+	   )
+   (ldflags :initarg :ldflags
 	    :initform nil
 	    :type list
 	    :custom (repeat (string :tag "Link Flag"))
@@ -69,9 +80,10 @@ Note: Currently only used for Automake projects."
   "Insert bin_PROGRAMS variables needed by target THIS."
   (ede-pmake-insert-variable-shared
       (concat (ede-name this) "_LDADD")
+    (mapc (lambda (l) (insert " " l)) (oref this ldlibs-local))
     (mapc (lambda (c) (insert " " c)) (oref this ldflags))
     (when (oref this ldlibs)
-      (mapc (lambda (d) (insert " " d)) (oref this ldlibs)))
+      (mapc (lambda (d) (insert " -l" d)) (oref this ldlibs)))
     )
   (call-next-method))
 
