@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cit-cpp.el,v 1.11 2010-05-16 13:12:26 zappo Exp $
+;; X-RCS: $Id: cit-cpp.el,v 1.12 2010-05-16 13:32:27 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -233,6 +233,18 @@ Argument MAKE-TYPE is the type of make project to create."
 	(progn
 	  (oset mt :ldflags '("-L../lib"))
 	  (oset mt :ldlibs '("testlib")))
+      ;; FIX THIS
+      (oset mt :ldflags '("../lib/bar.o"));;HACK for libtool!
+      ))
+  (cit-compile-and-wait)
+
+  ;; Use the local libs version also to make sure it works.
+  (let ((mt ede-object))
+    (if (string= make-type "Automake")
+	(progn
+	  (oset mt :ldlibs-local '("../lib/libtestlib.la"))
+	  (oset mt :ldflags nil)
+	  (oset mt :ldlibs nil))
       ;; FIX THIS
       (oset mt :ldflags '("../lib/bar.o"));;HACK for libtool!
       ))
