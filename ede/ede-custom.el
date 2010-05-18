@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-custom.el,v 1.2 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: ede-custom.el,v 1.3 2010-05-18 00:40:58 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -44,43 +44,48 @@
 ;; These commands initialize custoization of EDE control objects.
 
 ;;;###autoload
-(defun ede-customize-project (&optional group)
-  "Edit fields of the current project through EIEIO & Custom.
-Optional GROUP specifies the subgroup of slots to customize."
-  (interactive "P")
+(defun ede-customize-project ()
+  "Edit fields of the current project through EIEIO & Custom."
+  (interactive)
   (require 'eieio-custom)
   (let* ((ov (oref (ede-current-project) local-variables))
-	 (cp (ede-current-project))
-	 (group (if group (eieio-read-customization-group cp))))
-    (eieio-customize-object cp group)
+	 (cp (ede-current-project)))
+    (ede-customize cp)
     (make-local-variable 'eieio-ede-old-variables)
     (setq eieio-ede-old-variables ov)))
+
 ;;;###autoload
 (defalias 'customize-project 'ede-customize-project)
 
 ;;;###autoload
-(defun ede-customize-current-target(&optional group)
+(defun ede-customize-current-target()
   "Edit fields of the current target through EIEIO & Custom.
-Optional argument OBJ is the target object to customize.
-Optional argument GROUP is the slot group to display."
-  (interactive "P")
+Optional argument OBJ is the target object to customize."
+  (interactive)
   (require 'eieio-custom)
   (if (not (obj-of-class-p ede-object ede-target))
       (error "Current file is not part of a target"))
-  (let ((group (if group (eieio-read-customization-group ede-object))))
-    (ede-customize-target ede-object group)))
+  (ede-customize-target ede-object))
+
 ;;;###autoload
 (defalias 'customize-target 'ede-customize-current-target)
 
 ;;;###autoload
-(defun ede-customize-target (obj group)
+(defun ede-customize-target (obj)
   "Edit fields of the current target through EIEIO & Custom.
-Optional argument OBJ is the target object to customize.
-Optional argument GROUP is the slot group to display."
+Optional argument OBJ is the target object to customize."
   (require 'eieio-custom)
   (if (and obj (not (obj-of-class-p obj ede-target)))
       (error "No logical target to customize"))
-  (eieio-customize-object obj (or group 'default)))
+  (ede-customize obj))
+
+(defmethod ede-customize ((proj ede-project))
+  "Customize the EDE project PROJ."
+  (eieio-customize-object proj 'default))
+
+(defmethod ede-customize ((target ede-target))
+  "Customize the EDE TARGET."
+  (eieio-customize-object target 'default))
 
 ;;; Target Sorting
 ;;
