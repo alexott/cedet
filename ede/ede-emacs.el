@@ -1,9 +1,9 @@
 ;;; ede-emacs.el --- Special project for Emacs
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-emacs.el,v 1.11 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: ede-emacs.el,v 1.12 2010-05-18 00:42:14 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -162,7 +162,7 @@ All directories need at least one target.")
 
 (defmethod initialize-instance ((this ede-emacs-project)
 				&rest fields)
-  "Make sure the :file is fully expanded."
+  "Make sure the targets slot is bound."
   (call-next-method)
   (unless (slot-boundp this 'targets)
     (oset this :targets nil)))
