@@ -316,51 +316,52 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
     )
 )
 
-(defun srecode-compile-one-template-tag (tag STATE)
-  "Compile a template tag TAG into an srecode template class.
-STATE is the current compile state as an object `srecode-compile-state'."
-  (let* ((context (oref STATE context))
-	 (codeout  (srecode-compile-split-code
-		    tag (semantic-tag-get-attribute tag :code)
-		    STATE))
-	 (code (cdr codeout))
-	 (args (semantic-tag-function-arguments tag))
-	 (binding (semantic-tag-get-attribute tag :binding))
-	 (rawdicts (semantic-tag-get-attribute tag :dictionaries))
-	 (sdicts (srecode-create-section-dictionary rawdicts STATE))
-	 (addargs nil)
-	 )
-;    (message "Compiled %s to %d codes with %d args and %d prompts."
-;	     (semantic-tag-name tag)
-;	     (length code)
-;	     (length args)
-;	     (length prompts))
-    (while args
-      (setq addargs (cons (intern (car args)) addargs))
-      (when (eq (car addargs) :blank)
-	;; If we have a wrap, then put wrap inserters on both
-	;; ends of the code.
-	(setq code (append
-		    (list (srecode-compile-inserter "BLANK"
-						    "\r"
-						    STATE
-						    :secondname nil
-						    :where 'begin))
-		    code
-		    (list (srecode-compile-inserter "BLANK"
-						    "\r"
-						    STATE
-						    :secondname nil
-						    :where 'end))
-			  )))
-      (setq args (cdr args)))
+(defun srecode-compile-one-template-tag (tag state)
+  "Compile a template tag TAG into a srecode template object.
+STATE is the current compile state as an object of class
+`srecode-compile-state'."
+  (let* ((context   (oref state context))
+	 (code      (cdr (srecode-compile-split-code
+			  tag (semantic-tag-get-attribute tag :code)
+			  state)))
+	 (args      (semantic-tag-function-arguments tag))
+	 (binding   (semantic-tag-get-attribute tag :binding))
+	 (dict-tags (semantic-tag-get-attribute tag :dictionaries))
+	 (root-dict (when dict-tags
+		      (srecode-create-dictionaries-from-tags
+		       dict-tags state)))
+	 (addargs))
+    ;; Examine arguments.
+    (dolist (arg args)
+      (let ((symbol (intern arg)))
+	(push symbol addargs)
+
+	;; If we have a wrap, then put wrap inserters on both ends of
+	;; the code.
+	(when (eq symbol :blank)
+	  (setq code (append
+		      (list (srecode-compile-inserter
+			     "BLANK"
+			     "\r"
+			     state
+			     :secondname nil
+			     :where 'begin))
+		      code
+		      (list (srecode-compile-inserter
+			     "BLANK"
+			     "\r"
+			     state
+			     :secondname nil
+			     :where 'end)))))))
+
+    ;; Construct and return the template object.
     (srecode-template (semantic-tag-name tag)
-		      :context context
-		      :args (nreverse addargs)
-		      :dictionary sdicts
-		      :binding binding
-		      :code code)
-    ))
+		      :context    context
+		      :args       (nreverse addargs)
+		      :dictionary root-dict
+		      :binding    binding
+		      :code       code))
+  )
 
 (defun srecode-compile-do-hard-newline-p (comp)
   "Examine COMP to decide if the upcoming newline should be hard.
