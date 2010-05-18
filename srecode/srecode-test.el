@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-test.el,v 1.13 2010-02-16 02:06:47 zappo Exp $
+;; X-RCS: $Id: srecode-test.el,v 1.14 2010-05-18 23:19:33 scymtym Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -34,79 +34,82 @@
 ;;; OUTPUT TESTING
 ;;
 (defclass srecode-utest-output ()
-  ((name :initarg :name
-	 :documentation "Name of the template tested.")
-   (output :initarg :output
-	   :documentation "Expected Outupt of the template.")
-   (dict-entries :initarg :dict-entries
+  ((name         :initarg  :name
+		 :type     string
+	         :documentation
+		 "Name of the template tested.")
+   (output       :initarg  :output
+		 :type     string
+	         :documentation
+		 "Expected output of the template.")
+   (dict-entries :initarg  :dict-entries
 		 :initform nil
-		 :documentation "Extra dictionary entries to specify.")
-   (pre-fill :initarg :pre-fill
-	     :initform nil
-	     :documentation "Text to prefill a buffer with.
+		 :type     list
+		 :documentation
+		 "Additional dictionary entries to specify.")
+   (pre-fill     :initarg  :pre-fill
+		 :type     (or null string)
+	         :initform nil
+	         :documentation
+		 "Text to prefill a buffer with.
 Place cursor on the ! and delete it.
-If there is a second !, the put the mark there.")
-   )
+If there is a second !, the put the mark there."))
   "A single template test.")
 
 (defmethod srecode-utest-test ((o srecode-utest-output))
   "Perform the insertion and test the output.
 Assumes that the current buffer is the testing buffer."
-  (erase-buffer)
+  (with-slots (name (output-1 :output) dict-entries pre-fill) o
+    ;; Prepare buffer: erase content and maybe insert pre-fill
+    ;; content.
+    (erase-buffer)
+    (insert (or pre-fill ""))
+    (goto-char (point-min))
+    (let ((start nil))
+      (when (re-search-forward "!" nil t)
+	(goto-char (match-beginning 0))
+	(setq start (point))
+	(replace-match ""))
+      (when (re-search-forward "!" nil t)
+	(push-mark (match-beginning 0) t t)
+	(replace-match ""))
+      (when start (goto-char start)))
 
-  ;;(cedet-utest-log " * Entry %s ..." (object-print o))
+    ;; Find a template, perform an insertion and validate the output.
+    (let ((dict (srecode-create-dictionary))
+	  (temp (or (srecode-template-get-table
+		     (srecode-table) name "test" 'tests)
+		    (progn
+		      (srecode-map-update-map)
+		      (srecode-template-get-table
+		       (srecode-table) name "test" 'tests))
+		    (error "Test template \"%s\" for `%s' not loaded!"
+			   name major-mode)))
+	  (srecode-handle-region-when-non-active-flag t))
 
-  (insert (or (oref o pre-fill) ""))
-  (goto-char (point-min))
-  (let ((start nil))
-    (when (re-search-forward "!" nil t)
-      (goto-char (match-beginning 0))
-      (setq start (point))
-      (replace-match ""))
-    (when (re-search-forward "!" nil t)
-      (push-mark (match-beginning 0) t t)
-      (replace-match ""))
-    (when start (goto-char start)))
+      ;; RESOLVE AND INSERT
+      (let ((entry dict-entries))
+	(while entry
+	  (srecode-dictionary-set-value
+	   dict (nth 0 entry) (nth 1 entry))
+	  (setq entry (nthcdr 1 entry))))
 
-  (let* ((dict (srecode-create-dictionary))
-	 (temp (srecode-template-get-table (srecode-table)
-					   (oref o name)
-					   "test"
-					   'tests
-					   ))
-	 (srecode-handle-region-when-non-active-flag t)
-	 )
-    (when (not temp)
-      (srecode-map-update-map)
-      (setq temp (srecode-template-get-table (srecode-table)
-					     (oref o name)
-					     "test"
-					     'tests
-					     ))
-      )
-    (when (not temp)
-      (error "Test template \"%s\" for `%s' not loaded!"
-	     (oref o name) major-mode))
+      (srecode-insert-fcn temp dict)
 
-    ;; RESOLVE AND INSERT
-    (let ((entries (oref o dict-entries)))
-      (while entries
-	(srecode-dictionary-set-value dict
-				      (car entries)
-				      (car (cdr entries)))
-	(setq entries (cdr (cdr entries)))))
-    (srecode-insert-fcn temp dict)
+      ;; COMPARE THE OUTPUT
+      (let ((actual (buffer-substring-no-properties
+		     (point-min) (point-max))))
+	(if (string= output-1 actual)
+	    (cedet-utest-log " * Entry %s passed." (object-print o))
 
-    ;; COMPARE THE OUTPUT
-    (if (string= (oref o output) (buffer-string))
-	(cedet-utest-log " * Entry %s passed." (object-print o))
-      
-      (goto-char (point-max))
-      (insert "\n\n ------------- ^^ actual ^^ ------------\n\n
- ------------- v expected vv ------------\n\n" (oref o output))
-      (pop-to-buffer (current-buffer))
-      (error "Entry %s failed!" (object-name o)))
-  ))
+	  (goto-char (point-max))
+	  (insert "\n\n ------------- ^^  actual  ^^ ------------\n\n
+ ------------- vv expected vv ------------\n\n"
+		  output-1)
+	  (pop-to-buffer (current-buffer))
+	  (error "Entry %s failed; expected: %s; actual: %s"
+		 (object-name o) output-1 actual)))))
+  )
 
 ;;; ARG HANDLER
 ;;
@@ -248,10 +251,21 @@ INSIDE SECTION: ARG HANDLER ONE")
    (srecode-utest-output
     "custom-arg-w-subdict" :name "custom-arg-w-subdict"
     :output "All items here: item1 item2 item3")
-   )
+
+   ;; Test cases for new "section ... end" dictionary syntax
+   (srecode-utest-output
+    "nested-dictionary-syntax-flat"
+    :name   "nested-dictionary-syntax-flat"
+    :output "sub item1")
+   (srecode-utest-output
+    "nested-dictionary-syntax-nesting"
+    :name   "nested-dictionary-syntax-nesting"
+    :output "item11-item11-item21-item31  item21-item11-item21-item31  item31-item311-item321  ")
+   (srecode-utest-output
+    "nested-dictionary-syntax-mixed"
+    :name   "nested-dictionary-syntax-mixed"
+    :output "item1 item2"))
   "Test point entries for the template output tests.")
-
-
 
 ;;; Master Harness
 ;;
@@ -283,7 +297,7 @@ INSIDE SECTION: ARG HANDLER ONE")
 	(srecode-utest-test p)
 	)
 
-      (cedet-utest-log-shutdown 
+      (cedet-utest-log-shutdown
        "SRECODE Templates"
        nil ; How to detect a problem?
        )
@@ -296,7 +310,7 @@ INSIDE SECTION: ARG HANDLER ONE")
 (defun srecode-utest-project ()
   "Test that project filtering works ok."
   (interactive)
-  
+
   (save-excursion
     (let ((testbuff (find-file-noselect srecode-utest-testfile))
 	  (temp nil))
@@ -308,7 +322,7 @@ INSIDE SECTION: ARG HANDLER ONE")
 
       (if (not (srecode-table major-mode))
 	  (error "No template table found for mode %s" major-mode))
-  
+
       (erase-buffer)
 
 
