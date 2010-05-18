@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede.el,v 1.152 2010-04-18 21:42:19 zappo Exp $
+;; RCS: $Id: ede.el,v 1.153 2010-05-18 00:41:51 zappo Exp $
 (defconst ede-version "1.0"
   "Current version of the Emacs EDE.")
 
@@ -110,7 +110,9 @@ This object's class determines how to compile and debug from a buffer.")
 If `ede-object' is nil, then commands will operate on this object.")
 
 (defvar ede-constructing nil
-  "Non nil when constructing a project hierarchy.")
+  "Non nil when constructing a project hierarchy.
+If the project is being constructed from an autoload, then the
+value is the autoload object being used.")
 
 (defvar ede-deep-rescan nil
   "Non nil means scan down a tree, otherwise rescans are top level only.
@@ -896,7 +898,7 @@ Optional ROOTRETURN will return the root project for DIR."
 			    ede-projects))
       (if (not o)
 	  ;; If not, get it now.
-	  (let ((ede-constructing t))
+	  (let ((ede-constructing pfc))
 	    (setq o (funcall (oref pfc load-type) toppath))
 	    (when (not o)
 	      (error "Project type error: :load-type failed to create a project"))
