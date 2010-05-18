@@ -18,7 +18,7 @@
 ;; Boston, MA 02110-1301, USA.
 
 ;;; Commentary:
-;; 
+;;
 
 (require 'srecode-template)
 (require 'semantic)
@@ -42,7 +42,7 @@
     (modify-syntax-entry ?\` "'"     table) ;; Prefix ` (backquote)
     (modify-syntax-entry ?\' "'"     table) ;; Prefix ' (quote)
     (modify-syntax-entry ?\, "'"     table) ;; Prefix , (comma)
-    
+
     table)
   "Syntax table used in semantic recoder macro buffers.")
 
@@ -60,13 +60,17 @@
      (3 font-lock-builtin-face ))
     ("^\\(sectiondictionary\\)\\s-+\""
      (1 font-lock-keyword-face))
+    ("^\\s\s*\\(section\\)\\s-+\""
+     (1 font-lock-keyword-face))
+    ("^\\s\s*\\(end\\)"
+     (1 font-lock-keyword-face))
     ("^\\(bind\\)\\s-+\""
      (1 font-lock-keyword-face))
     ;; Variable type setting
-    ("^\\(set\\)\\s-+\\(\\w+\\)\\s-+"
+    ("^\\s\s*\\(set\\)\\s-+\\(\\w+\\)\\s-+"
      (1 font-lock-keyword-face)
      (2 font-lock-variable-name-face))
-    ("^\\(show\\)\\s-+\\(\\w+\\)\\s-*$"
+    ("^\\s\s*\\(show\\)\\s-+\\(\\w+\\)\\s-*$"
      (1 font-lock-keyword-face)
      (2 font-lock-variable-name-face))
     ("\\<\\(macro\\)\\s-+\""
@@ -220,7 +224,7 @@ we can tell font lock about them.")
 	(insert name)
 	(insert ee))))
   )
-  
+
 
 (defun srecode-macro-help ()
   "Provide help for working with macros in a template."
@@ -409,7 +413,7 @@ Moves to the end of one named section."
       (if name
 	  ;; Lookup any subdictionaries in TAG.
 	  (let ((res nil))
-	    
+
 	    (while (and (not res) subdicts)
 	      ;; Find the subdictionary with the same name.  Those variables
 	      ;; are now local to this section.
@@ -419,7 +423,7 @@ Moves to the end of one named section."
 	    ;; Pre-pend our global vars.
 	    (append global res))
 	;; If we aren't in a subsection, just do the global variables
-	global	    
+	global
 	))))
 
 (define-mode-local-override semantic-get-local-arguments
@@ -439,7 +443,7 @@ Moves to the end of one named section."
       ;; Resolve args into our temp dictionary
       (srecode-resolve-argument-list argsym dict)
 
-      (maphash 
+      (maphash
        (lambda (key entry)
 	 (setq argvars
 	       (cons (semantic-tag-new-variable key nil entry)
@@ -534,13 +538,13 @@ section or ? for an ask variable."
 	   )
 
       (oset scope fullscope (append (oref scope localvar) globalvar))
-      
+
       (when prefix
 	;; First, try to find the variable for the first
 	;; entry in the prefix list.
 	(setq prefix-var (semantic-find-first-tag-by-name
 			  (car prefix) (oref scope fullscope)))
-	
+
 	(cond
 	 ((and (or (not key) (string= key "?"))
 	       (> (length prefix) 1))
@@ -576,7 +580,7 @@ section or ? for an ask variable."
 	    (let ((toc (srecode-template-find-templates-of-context
 			(read (semantic-tag-name prefix-context))))
 		  )
-	      (setq prefix-function 
+	      (setq prefix-function
 		    (or (semantic-find-first-tag-by-name
 			(car (last prefix)) toc)
 			;; Not in this buffer?  Search the master
@@ -655,7 +659,7 @@ section or ? for an ask variable."
 	     )
 	    ((eq argtype 'macro)
 	     (let ((scope (oref context scope)))
-	       (setq matches 
+	       (setq matches
 		     (semantic-find-tags-for-completion
 		      prefixstr (oref scope fullscope))))
 	     )
@@ -748,8 +752,8 @@ When optional BUFFER is provided, search that buffer."
 ;;	;; Well, we have a mode, lets try turning on mmm-mode.
 ;;
 ;;	;; (mmm-mode-on)
-;;    
-;;	
+;;
+;;
 ;;
 ;;	))))
 ;;
