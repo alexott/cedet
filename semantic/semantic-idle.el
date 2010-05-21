@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.74 2010-05-21 00:50:52 scymtym Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.75 2010-05-21 23:05:13 scymtym Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -1019,8 +1019,11 @@ the tag list into a string."
 (defcustom semantic-idle-breadcrumbs-format-tag-list-function
   #'semantic-idle-breadcrumbs--format-linear
   "Specify how to format the list of tags containing point.
-This function should take a list of Semantic tags as its only
-argument. The tags are sorted according to their nesting order,
+This function should take a list of Semantic tags and an optional
+maximum length of the produced string as its arguments. The
+maximum length is a hint and can be ignored. When the maximum
+length is omitted, an unconstrained string should be
+produced. The tags are sorted according to their nesting order,
 starting with the outermost tag. Single tags should be formatted
 using `semantic-idle-breadcrumbs-format-tag-function' unless
 special formatting is required."
@@ -1227,7 +1230,7 @@ shortened at the beginning."
   ;; Format TAG-LIST using the configured formatting function.
   (let* ((complete-format (funcall
 			   semantic-idle-breadcrumbs-format-tag-list-function
-			   tag-list))
+			   tag-list max-length))
 	 ;; Determine length of complete format.
 	 (complete-length (length complete-format)))
     ;; Shorten string if necessary.
@@ -1239,8 +1242,10 @@ shortened at the beginning."
 	       (- complete-length (- max-length 4))))))
   )
 
-(defun semantic-idle-breadcrumbs--format-linear (tag-list)
-  "Format TAG-LIST ensuring the string does not get longer than MAX-LENGTH."
+(defun semantic-idle-breadcrumbs--format-linear
+  (tag-list &optional max-length)
+  "Format TAG-LIST as a linear list, starting with the outermost tag.
+MAX-LENGTH is not used."
   (let* ((format-pieces   (mapcar
 			   #'semantic-idle-breadcrumbs--format-tag
 			   tag-list))
@@ -1248,7 +1253,8 @@ shortened at the beginning."
 	 ;; tags.
 	 (complete-format (cond
 			   ;; Mode specific separator.
-			   ((eq semantic-idle-breadcrumbs-separator 'mode-specific)
+			   ((eq semantic-idle-breadcrumbs-separator
+				'mode-specific)
 			    (semantic-analyze-unsplit-name format-pieces))
 
 			   ;; Custom separator.
@@ -1260,16 +1266,42 @@ shortened at the beginning."
     complete-format)
   )
 
-(defun semantic-idle-breadcrumbs--format-innermost-first (tag-list)
-  "Format TAG-LIST placing the innermost tag first."
-  (concat (semantic-idle-breadcrumbs--format-tag
-	   (car (last tag-list))
-	   #'semantic-format-tag-prototype)
-	  (when (butlast tag-list)
-	    (concat
-	     " | "
-	     (semantic-idle-breadcrumbs--format-linear (butlast tag-list))
-	     "")))
+(defun semantic-idle-breadcrumbs--format-innermost-first
+  (tag-list &optional max-length)
+  "Format TAG-LIST placing the innermost tag first, separated from its parents.
+If MAX-LENGTH is non-nil, the innermost tag is shortened."
+  (let* (;; Separate and format remaining tags. Calculate length of
+	 ;; resulting string.
+	 (rest-tags       (butlast tag-list))
+	 (rest-format     (if rest-tags
+			      (concat
+			       " | "
+			       (semantic-idle-breadcrumbs--format-linear
+				rest-tags))
+			    ""))
+	 (rest-length     (length rest-format))
+	 ;; Format innermost tag and calculate length of resulting
+	 ;; string.
+	 (inner-format    (semantic-idle-breadcrumbs--format-tag
+			   (car (last tag-list))
+			   #'semantic-format-tag-prototype))
+	 (inner-length    (length inner-format))
+	 ;; Calculate complete length and shorten string for innermost
+	 ;; tag if MAX-LENGTH is non-nil and the complete string is
+	 ;; too long.
+	 (complete-length (+ inner-length rest-length))
+	 (inner-short     (if (and max-length
+				   (<= complete-length max-length))
+			      inner-format
+			    (concat (substring
+				     inner-format
+				     0
+				     (- inner-length
+					(- complete-length max-length)
+					4))
+				    " ..."))))
+    ;; Concat both parts.
+    (concat inner-short rest-format))
   )
 
 (defun semantic-idle-breadcrumbs--format-tag (tag &optional format-function)
