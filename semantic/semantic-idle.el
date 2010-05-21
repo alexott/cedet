@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-idle.el,v 1.73 2010-05-04 23:32:03 zappo Exp $
+;; X-RCS: $Id: semantic-idle.el,v 1.74 2010-05-21 00:50:52 scymtym Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -903,7 +903,7 @@ visible, then highlight it."
 Call `semantic-analyze-current-context' to find the reference tag.
 Call `semantic-symref-hits-in-region' to identify local references."
   (when (semantic-idle-summary-useful-context-p)
-    (let* ((ctxt 
+    (let* ((ctxt
 	    (semanticdb-without-unloaded-file-searches
 		(semantic-analyze-current-context)))
 	   (Hbounds (when ctxt (oref ctxt bounds)))
@@ -1262,7 +1262,9 @@ shortened at the beginning."
 
 (defun semantic-idle-breadcrumbs--format-innermost-first (tag-list)
   "Format TAG-LIST placing the innermost tag first."
-  (concat (semantic-format-tag-prototype (car (last tag-list)) nil t)
+  (concat (semantic-idle-breadcrumbs--format-tag
+	   (car (last tag-list))
+	   #'semantic-format-tag-prototype)
 	  (when (butlast tag-list)
 	    (concat
 	     " | "
@@ -1270,12 +1272,13 @@ shortened at the beginning."
 	     "")))
   )
 
-(defun semantic-idle-breadcrumbs--format-tag (tag)
-  "Format TAG using the configured formatting function.
+(defun semantic-idle-breadcrumbs--format-tag (tag &optional format-function)
+  "Format TAG using the configured function or FORMAT-FUNCTION.
 This function also adds text properties for help-echo, mouse
 highlighting and a keymap."
   (let ((formatted (funcall
-		    semantic-idle-breadcrumbs-format-tag-function
+		    (or format-function
+			semantic-idle-breadcrumbs-format-tag-function)
 		    tag nil t)))
     (add-text-properties
      0 (length formatted)
