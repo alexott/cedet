@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-semantic.el,v 1.15 2010-03-15 13:40:55 xscript Exp $
+;; X-RCS: $Id: srecode-semantic.el,v 1.16 2010-05-21 01:08:28 scymtym Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -86,7 +86,7 @@ If this is nil, then `senator-tag-ring' is used.")
 ;;; :tag ARGUMENT HANDLING
 ;;
 ;; When a :tag argument is required, identify the current :tag,
-;; and apply it's parts into the dictionary.
+;; and apply its parts into the dictionary.
 ;;;###autoload
 (defun srecode-semantic-handle-:tag (dict)
   "Add macros into the dictionary DICT based on the current :tag."
@@ -127,7 +127,7 @@ to be augmented.")
 
 ;;;###autoload
 (define-overload srecode-semantic-apply-tag-to-dict (tagobj dict)
-  "Insert fewatures of TAGOBJ into the dictionary DICT.
+  "Insert features of TAGOBJ into the dictionary DICT.
 TAGOBJ is an object of class `srecode-semantic-tag'.  This class
 is a compound inserter value.
 DICT is a dictionary object.
@@ -147,7 +147,7 @@ variable default values, and other things."
 
     (srecode-dictionary-set-value dict "NAME" (semantic-tag-name tag))
     (srecode-dictionary-set-value dict "TYPE" (semantic-format-tag-type tag nil))
-  
+
     (run-hook-with-args 'srecode-semantic-apply-tag-augment-hook tag dict)
 
     (cond
@@ -311,8 +311,8 @@ or `code'.
 
 For various conditions, this function looks for a template with
 the name CLASS-tag, where CLASS is the tag class.  If it cannot
-find that, it will look for that template in the
-`declaration'context (if the current context was not `declaration').
+find that, it will look for that template in the `declaration'
+context (if the current context was not `declaration').
 
 If PROTOTYPE is specified, it will first look for templates with
 the name CLASS-tag-prototype, or CLASS-prototype as above.
@@ -388,7 +388,7 @@ as `function' will leave point where code might be inserted."
       (error "Cannot find template %s in %s for inserting tag %S"
 	     errtype top (semantic-format-tag-summarize tag)))
 
-    ;; Resolve Arguments
+    ;; Resolve arguments.
     (let ((srecode-semantic-selected-tag tag))
       (srecode-resolve-arguments temp dict))
 
@@ -418,7 +418,7 @@ as `function' will leave point where code might be inserted."
        ((semantic-tag-of-class-p tag 'type)
 	;; Insert all the members at the current insertion point.
 	(dolist (m (semantic-tag-type-members tag))
-	  
+
 	  (when (stringp m)
 	    (setq m (semantic-tag-new-variable m nil nil)))
 
@@ -435,4 +435,3 @@ as `function' will leave point where code might be inserted."
 (provide 'srecode-semantic)
 
 ;;; srecode-semantic.el ends here
-
