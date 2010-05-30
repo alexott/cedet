@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: srecode.texi,v 1.23 2010-05-30 02:39:28 emacsman Exp $
+@c $Id: srecode.texi,v 1.24 2010-05-30 20:22:40 scymtym Exp $
 @c
 @c %**start of header
 @setfilename srecode.info
@@ -583,7 +583,7 @@ template TEMPLATENAME :arg1 :arg2
 ----
 The text to your template goes here.
 ----
-binding "a"
+bind "a"
 @end example
 
 Templates are stored in a template table by name, and are inserted by
@@ -634,7 +634,7 @@ If a variable is declared like this (where $ is the escape character):
 
 @example
 template variable :el
-"Inert a variable.
+"Insert a variable.
 DOC is optional."
 ----
 (defvar $?NAME$ $^$
@@ -741,7 +741,7 @@ and @var{THAT} will be inserted and either trimmed to, or expanded to
 4 characters in width.
 
 Macros that are prefixed with the ``#'' symbol denote a section.  A
-macro of the same name with a ``\\'' prefix denotes the end of that
+macro of the same name with a ``/'' prefix denotes the end of that
 section.
 
 @example
@@ -1447,7 +1447,7 @@ For example:
 
 @example
 (defun my-srecode-insert (template-name)
-  "Inesrt the template TEMPLATE-NAME into the current buffer at point."
+  "Insert the template TEMPLATE-NAME into the current buffer at point."
 
   ;; Read in a template name.
   (interactive (list (srecode-read-template-name "Template Name: ")))
@@ -1455,8 +1455,8 @@ For example:
       (error "No template table found for mode %s" major-mode))
   (let ((temp (srecode-template-get-table (srecode-table) template-name))
 
-        ;; Create a new dictionary
-        (newdict (srecode-create-dictionary)))
+       ;; Create a new dictionary
+	(newdict (srecode-create-dictionary)))
 
     (if (not temp)
         (error "No Template named %s" template-name))
@@ -1575,7 +1575,7 @@ will generally use the default copyright insertion mechanism.
 
 @section Context: Declaration
 
-Functional languages should attempt to support the folowing:
+Functional languages should attempt to support the following:
 
 @table @code
 @item function
@@ -1673,7 +1673,7 @@ templates to make it work.
 
 @defun srecode-semantic-insert-tag tag &optional style-option point-insert-fcn &rest dict-entries
 @anchor{srecode-semantic-insert-tag}
-Insert @var{tag} into a buffer useing srecode templates at point.
+Insert @var{tag} into a buffer using srecode templates at point.
 
 Optional @var{style-option} is a list of minor configuration of styles,
 such as the symbol @code{'prototype} for prototype functions, or
@@ -1706,7 +1706,7 @@ the dictionary when the templates are called.
 
 This function returns to location in the buffer where the
 inserted tag @var{ends}, and will leave point inside the inserted
-text based on any occurance of a point-inserter.  Templates such
+text based on any occurrence of a point-inserter.  Templates such
 as @dfn{function} will leave point where code might be inserted.
 @end defun
 
