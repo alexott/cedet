@@ -95,7 +95,7 @@ based language.
 @menu
 * Overview::                    
 * Grammar File::                
-* Grammar Development Cycle::	
+* Grammar Development Cycle::
 * Working with grammars::       
 * Adding a new grammar mode::   
 * GNU Free Documentation License::  

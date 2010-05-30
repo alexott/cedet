@@ -848,7 +848,7 @@ For example:
 
 @example
 (defun semantic-complete-read-tag-buffer-deep (prompt &optional
-						      default-tag initial-input history)
+                                                      default-tag initial-input history)
   "Ask for a tag by name from the current buffer.
 PROMPT is a string to prompt with.
 DEFAULT-TAG is a semantic tag or string to use as the default value.
@@ -1069,8 +1069,8 @@ For more on override methods, @inforef{Semantic Overload Mechanism, , lang-suppo
 * Format Tag::                  Converting Tokens into text strings
 * Tag Members::                 Tags in tags
 * Tag Details::                 Arbitrary token detail fetching
-* Tag File Reference::	        Files a tag references.
-* Jump to a Tag::	        Go to a tag's location
+* Tag File Reference::          Files a tag references.
+* Jump to a Tag::               Go to a tag's location
 * Making New Methods::          How to add your own methods for your own tool
 @end menu
 

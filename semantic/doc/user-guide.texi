@@ -164,7 +164,7 @@ in your @file{.emacs} file:
 
 @example
 (add-hook 'semantic-init-hooks (lambda ()
-                               	   (imenu-add-to-menubar "TAGS")))
+                                   (imenu-add-to-menubar "TAGS")))
 @end example
 
 Also supported is @dfn{which-func-mode}.  This usually uses imenu
@@ -1229,12 +1229,12 @@ specific to a major mode.  For example, in jde mode:
 @example
 (defvar-mode-local jde-mode semantic-idle-summary-out-of-context-faces
    (append (default-value 'semantic-idle-summary-out-of-context-faces)
-	   '(jde-java-font-lock-doc-tag-face
-	     jde-java-font-lock-link-face
-	     jde-java-font-lock-bold-face
-	     jde-java-font-lock-underline-face
-	     jde-java-font-lock-pre-face
-	     jde-java-font-lock-code-face)))
+           '(jde-java-font-lock-doc-tag-face
+             jde-java-font-lock-link-face
+             jde-java-font-lock-bold-face
+             jde-java-font-lock-underline-face
+             jde-java-font-lock-pre-face
+             jde-java-font-lock-code-face)))
 @end example
 
 @end defvar
@@ -1594,8 +1594,8 @@ To set the throttle, use a command like this:
 
 @example
 (setq-mode-local c-mode
-		 semanticdb-find-default-throttle
-		 '(project unloaded system recursive))
+                 semanticdb-find-default-throttle
+                 '(project unloaded system recursive))
 @end example
 
 The default value of the throttle is for maximum accuracy at the

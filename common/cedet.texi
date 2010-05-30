@@ -31,7 +31,7 @@ License''.
 @ifinfo
 @dircategory Emacs
 @direntry
-* CEDET: (cedet).	Collection of Emacs Development Environment Tools
+* CEDET: (cedet).       Collection of Emacs Development Environment Tools
 @end direntry
 @end ifinfo
 
@@ -113,12 +113,12 @@ use the mailing list cedet-devel.net via the URL:
 * ECB Target::
 * Project Management::
 * Code Completion::
-* Code Generation::	
-* C++ Features::	
-* GNU Global::	
-* ID Utils::	
-* CScope::	
-* Maintenance::	Maintaining your @cedet{} Data files
+* Code Generation::     
+* C++ Features::        
+* GNU Global::  
+* ID Utils::    
+* CScope::      
+* Maintenance:: Maintaining your @cedet{} Data files
 * GNU Free Documentation License::  
 * Index::                       
 @end menu
@@ -178,7 +178,7 @@ variables.
 @menu
 * EIEIO::       Object system for Emacs.
 * Semantic::    Parser generator and tag management tool.
-* SRecode::	Semantic Recoder Template manager
+* SRecode::     Semantic Recoder Template manager
 * Speedbar::    File and tag explorer, plus more.
 * EDE::         Project Management tool.
 * COGRE::       Diagram editor for object design.

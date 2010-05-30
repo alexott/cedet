@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: C99-gram.texi,v 1.1 2003-07-07 21:04:00 ponced Exp $
+@c $Id: C99-gram.texi,v 1.2 2010-05-30 02:39:28 emacsman Exp $
 @c
 @setfilename C99-gram.info
 @settitle The C99 context free grammar
@@ -22,7 +22,7 @@ License''.
 
 @dircategory Emacs
 @direntry
-* C99: (C99-gram).	The C99 context free grammar
+* C99: (C99-gram).      The C99 context free grammar
 @end direntry
 
 @c Combine indices.

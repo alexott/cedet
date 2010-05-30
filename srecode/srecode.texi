@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: srecode.texi,v 1.22 2010-02-22 02:55:24 zappo Exp $
+@c $Id: srecode.texi,v 1.23 2010-05-30 02:39:28 emacsman Exp $
 @c
 @c %**start of header
 @setfilename srecode.info
@@ -56,14 +56,14 @@ ease.
 
 @menu
 * Quick Start::                 Basic Setup for template insertion.
-* User Templates::	        Custom User Templates
-* Parts of SRecode::		Parts of the system
-* SRecode Minor Mode::		A minor mode for using templates
-* Template Writing::		How to write a template
+* User Templates::              Custom User Templates
+* Parts of SRecode::            Parts of the system
+* SRecode Minor Mode::          A minor mode for using templates
+* Template Writing::            How to write a template
 * Dictionaries::                How dictionaries work
 * Developing Template Functions:: How to write your own template insert functions.
 * Template Naming Conventions:: Creating a set of core templates
-* Inserting Tag Lists::	        Inserting Semantic tags via templates
+* Inserting Tag Lists::         Inserting Semantic tags via templates
 * Application Writing::         Writing an @srecode{}r application
 * Index::
 @end menu
@@ -921,9 +921,9 @@ the @ref{Template Argument Dictionary Entries} section.
 
 @menu
 * Create a Dictionary::
-* Setting Dictionary Values::	Basic dictionary values
-* Compound Dictionary Values::	Complex dictionary values
-* Argument Resolution::	        Automatic template argument resolution
+* Setting Dictionary Values::   Basic dictionary values
+* Compound Dictionary Values::  Complex dictionary values
+* Argument Resolution::         Automatic template argument resolution
 * Creating new Arguments::      Create new arguments for use in templates
 * Querying a Dictionary::       Querying a dictionary for values.
 * Template Argument Dictionary Entries:: Catalog of arguments
@@ -1039,16 +1039,16 @@ Here is an example of wrapping a semantic tag in a compound value:
 @example
 (defclass srecode-semantic-tag (srecode-dictionary-compound-value)
   ((prime :initarg :prime
-	  :type semantic-tag
-	  :documentation
-	  "This is the primary insertion tag.")
+          :type semantic-tag
+          :documentation
+          "This is the primary insertion tag.")
    )
   "Wrap up a collection of semantic tag information.
 This class will be used to derive dictionary values.")
 
 (defmethod srecode-compound-toString((cp srecode-semantic-tag)
-				     function
-				     dictionary)
+                                     function
+                                     dictionary)
   "Convert the compound dictionary value CP to a string.
 If FUNCTION is non-nil, then FUNCTION is somehow applied to an
 aspect of the compound value."

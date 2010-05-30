@@ -617,7 +617,7 @@ Narrow to @var{tag}, and execute @var{body}.
 * Tag Properties Internals::
 * Tag Overlay Internals::
 * Creating Tags::
-* Copying Tags::	
+* Copying Tags::
 * Misc Tag Internals::
 @end menu
 

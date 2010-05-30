@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: ede.texi,v 1.26 2010-02-20 14:26:41 zappo Exp $
+@c $Id: ede.texi,v 1.27 2010-05-30 02:39:27 emacsman Exp $
 @c
 @setfilename ede.info
 @settitle Emacs Development Environment
@@ -456,8 +456,8 @@ lookup for @semantic{}, improving code completion performance.
 @menu
 * ede-cpp-root::        This project marks the root of a C/C++ code project.
 * ede-simple subclassing:: Create your own simple project.
-* ede-emacs::		A project for working with Emacs.
-* ede-linux::		A project for working with Linux kernels.
+* ede-emacs::           A project for working with Emacs.
+* ede-linux::           A project for working with Linux kernels.
 * Custom Locate::       Customizing how to locate files in a simple project
 @end menu
 
@@ -577,14 +577,14 @@ Return nil if there isn't one."
   )
 
 (add-to-list 'ede-project-class-files
-	     (ede-project-autoload "cpp-root"
-	      :name "CPP ROOT"
-	      :file 'ede-cpp-root
-	      :proj-file 'MY-FILE-FOR-DIR
+             (ede-project-autoload "cpp-root"
+              :name "CPP ROOT"
+              :file 'ede-cpp-root
+              :proj-file 'MY-FILE-FOR-DIR
               :proj-root 'MY-ROOT-FCN
-	      :load-type 'MY-LOAD
-	      :class-sym 'ede-cpp-root)
-	     t)
+              :load-type 'MY-LOAD
+              :class-sym 'ede-cpp-root)
+             t)
 @end example
 
 This example only creates an auto-loader, and does not create a new kind
@@ -762,27 +762,27 @@ loading those projects into memory.
 Here is a high-level UML diagram for the @ede{} system created with @cogre{}..
 
 @example
-+-----------------------+	 +-----------------------+
++-----------------------+        +-----------------------+
 |                       |        |ede-project-placeholder|
 |ede-project-class-files|        +-----------------------+
 |                       |        +-----------------------+
 +-----------------------+        +-----------------------+
-	   /\ 				     ^ 
-	   \/				    /_\
-	    |				     |
- +--------------------+		       +-----------+	     +----------+
+           /\                                ^ 
+           \/                               /_\
+            |                                |
+ +--------------------+                +-----------+         +----------+
  |ede-project-autoload|                |ede-project|         |ede-target|
  +--------------------+<>--------------+-----------+<>-------+----------+
  +--------------------+                +-----------+         +----------+
  +--------------------+                +-----------+         +----------+
-					     ^ 
-					    /_\
-					     |
-		       +---------------------+-----------------+
-		       |		     |		       |
-		       |		     |		       |
-		       |		     |		       |
-	      +----------------+   +-------------------+  +---------+
+                                             ^ 
+                                            /_\
+                                             |
+                       +---------------------+-----------------+
+                       |                     |                 |
+                       |                     |                 |
+                       |                     |                 |
+              +----------------+   +-------------------+  +---------+
               |ede-proj-project|   |project-am-makefile|  |ede-emacs|
               +----------------+   +-------------------+  +---------+
               +----------------+   +-------------------+  +---------+
@@ -958,9 +958,9 @@ Here is an example for an instantiation of an Emacs Lisp source code object:
 @example
 (defvar ede-source-emacs
   (ede-sourcecode "ede-emacs-source"
-		  :name "Emacs Lisp"
-		  :sourcepattern "\\.el$"
-		  :garbagepattern '("*.elc"))
+                  :name "Emacs Lisp"
+                  :sourcepattern "\\.el$"
+                  :garbagepattern '("*.elc"))
   "Emacs Lisp source code definition.")
 @end example
 
