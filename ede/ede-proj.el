@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj.el,v 1.70 2010-06-04 08:42:56 zappo Exp $
+;; RCS: $Id: ede-proj.el,v 1.71 2010-06-04 08:46:26 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -538,12 +538,13 @@ Converts all symbols into the objects to be used."
 		  (if c (setq comp (cons c comp)))))
 	    (setq st (cdr st)))
 	  ;; Provide a good error msg.
-	  (when (not comp)
-	    (error "Could not find compiler match for source code extension \"%s\".
-You may need to add support for this type of file."
-		   (if sources
-		       (file-name-extension (car sources))
-		     "")))))
+;;;	  (unless comp
+;;;	    (error "Could not find compiler match for source code extension \"%s\".
+;;;You may need to add support for this type of file."
+;;;		   (if sources
+;;;		       (file-name-extension (car sources))
+;;;		     "")))
+	  ))
       ;; Return the disovered compilers
       comp)))
 
@@ -577,7 +578,14 @@ Converts all symbols into the objects to be used."
 	    ;; the first that has no source type requirement.
 	    (while (and avail (not (eieio-instance-inheritor-slot-boundp (car avail) 'sourcetype)))
 	      (setq avail (cdr avail)))
-	    (setq link (cdr avail)))))
+	    (setq link (cdr avail)))
+;;;	  (unless link
+;;;	    (error "Could not find linker match for source code extension \"%s\".
+;;;You may need to add support for this type of file."
+;;;		   (if sources
+;;;		       (file-name-extension (car sources))
+;;;		     "")))
+	  ))
       ;; Return the disovered linkers
       link)))
 
