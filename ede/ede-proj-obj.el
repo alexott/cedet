@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-obj.el,v 1.19 2010-04-18 00:32:34 zappo Exp $
+;; RCS: $Id: ede-proj-obj.el,v 1.20 2010-06-06 14:15:58 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -124,8 +124,8 @@ file.")
 (defvar ede-source-c++
   (ede-sourcecode "ede-source-c++"
 		  :name "C++"
-		  :sourcepattern "\\.\\(cpp\\|cc\\|cxx\\)$"
-		  :auxsourcepattern "\\.\\(hpp\\|hh?\\|hxx\\)$"
+		  :sourcepattern "\\.\\(c\\(pp?\\|c\\|xx\\|++\\)\\|C\\\(PP\\)?\\)$"
+		  :auxsourcepattern "\\.\\(hpp?\\|hh?\\|hxx\\|H\\)$"
 		  :garbagepattern '("*.o" "*.obj" ".deps/*.P" ".lo"))
   "C++ source code definition.")
 
