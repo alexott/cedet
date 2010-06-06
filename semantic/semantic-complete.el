@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-complete.el,v 1.70 2010-06-06 15:35:41 zappo Exp $
+;; X-RCS: $Id: semantic-complete.el,v 1.71 2010-06-06 15:46:08 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -2080,14 +2080,18 @@ completion works."
 (defun semantic-complete-jump-local-members ()
   "Jump to a semantic symbol."
   (interactive)
-  (let ((tag (semantic-complete-read-tag-local-members "Jump to symbol: ")))
+  (let* ((tag (semantic-complete-read-tag-local-members "Jump to symbol: ")))
     (when (semantic-tag-p tag)
-      (push-mark)
-      (goto-char (semantic-tag-start tag))
-      (semantic-momentary-highlight-tag tag)
-      (working-message "%S: %s "
-                       (semantic-tag-class tag)
-                       (semantic-tag-name  tag)))))
+      (let ((start (condition-case nil (semantic-tag-start tag)
+		     (error nil))))
+	(unless start
+	  (error "Tag %s has no location" (semantic-format-tag-prototype tag)))
+	(push-mark)
+	(goto-char start)
+	(semantic-momentary-highlight-tag tag)
+	(working-message "%S: %s "
+			 (semantic-tag-class tag)
+			 (semantic-tag-name  tag))))))
 
 ;;;###autoload
 (defun semantic-complete-analyze-and-replace ()
