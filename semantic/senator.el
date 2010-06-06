@@ -6,7 +6,7 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 10 Nov 2000
 ;; Keywords: syntax
-;; X-RCS: $Id: senator.el,v 1.149 2010-04-20 00:41:58 zappo Exp $
+;; X-RCS: $Id: senator.el,v 1.150 2010-06-06 15:46:32 zappo Exp $
 
 ;; This file is not part of Emacs
 
@@ -1897,6 +1897,7 @@ This is a buffer local variable.")
     (define-key km "f"    'senator-search-set-tag-class-filter)
     (define-key km "i"    'senator-isearch-toggle-semantic-mode)
     (define-key km "j"    'semantic-complete-jump-local) ;senator-jump)
+    (define-key km "m"    'semantic-complete-jump-local-members)
     (define-key km "J"    'semantic-complete-jump)
     (define-key km "g"    'semantic-symref-symbol) ; g for "grep" like behavior.
     (define-key km "G"    'semantic-symref)
@@ -1953,6 +1954,12 @@ This is a buffer local variable.")
       semantic-complete-jump-local
       :active t
       :help "Jump to a semantic symbol"
+      ])
+    (senator-menu-item
+     ["Jump to tag local members ..."
+      semantic-complete-jump-local-members
+      :active t
+      :help "Jump to a semantic symbol that is part of a local datatype."
       ])
     (senator-menu-item
      ["Jump to any tag..."
