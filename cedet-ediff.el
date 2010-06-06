@@ -3,7 +3,7 @@
 ;;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: cedet-ediff.el,v 1.3 2010-03-06 01:56:10 zappo Exp $
+;; X-RCS: $Id: cedet-ediff.el,v 1.4 2010-06-06 15:34:10 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -74,6 +74,7 @@
     ("semantic/wisent/wisent-" . "cedet/semantic/wisent/")
     ("semantic/semanticdb-" . "cedet/semantic/db-")
     ("common/" . "cedet/")
+    ("eieio/" . "emacs-lisp/")
     )
   "Map files names in the CEDET repository to files in the Emacs repository.")
 
