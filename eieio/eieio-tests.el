@@ -1,10 +1,10 @@
 ;;; eieio-tests.el -- eieio tests routines
 
 ;;;
-;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio-tests.el,v 1.48 2009-08-30 01:01:31 zappo Exp $
+;; RCS: $Id: eieio-tests.el,v 1.49 2010-06-12 00:27:28 zappo Exp $
 ;; Keywords: oop, lisp, tools
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -138,7 +138,19 @@
     (error "defgeneric did not make a generic method."))
 
 (defmethod generic1 ((c class-a))
-  "Method on generic1.")
+  "Method on generic1."
+  'monkey)
+
+(defmethod generic1 (not-an-object)
+  "Method generic1 that can take a non-object."
+  not-an-object)
+
+(let ((ans-obj (generic1 (class-a "test")))
+      (ans-num (generic1 666)))
+  (when (not (eq ans-obj 'monkey))
+    (error "Specialized method called wrong method."))
+  (when (not (eq ans-num 666))
+    (error "Generic method called wrong method.")))
 
 ;;; Class with a static method
 ;;
@@ -509,6 +521,33 @@ METHOD is the method that was attempting to be called."
 
 (if (slot-boundp class-a 'classslot)
     (error "Class allocatd slot thought bound when it is unbound."))
+
+
+;;; initforms that need to be evalled at construction time.
+(defvar eieio-test-permuting-value 1)
+(setq eieio-test-permuting-value 1)
+
+(defclass inittest nil
+  ((staticval :initform 1)
+   (symval :initform eieio-test-permuting-value)
+   (evalval :initform (symbol-value 'eieio-test-permuting-value))
+   (evalnow :initform (symbol-value 'eieio-test-permuting-value)
+	    :allocation :class)
+   )
+  "Test initforms that eval.")
+
+(setq eieio-test-permuting-value 2)
+
+(setq pvinit (inittest "permuteme"))
+
+(when (not (eq (oref pvinit staticval) 1))
+  (error "Error with initial value for staticval slot."))
+(when (not (eq (oref pvinit symval) 'eieio-test-permuting-value))
+  (error "Error with initial value for symval slot."))
+(when (not (eq (oref pvinit evalval) 2))
+  (error "Error with initial value for evalval slot."))
+(when (not (eq (oref pvinit evalnow) 1))
+  (error "Error with initial value for evalnow slot."))
 
 
 ;;; Inheritance status
