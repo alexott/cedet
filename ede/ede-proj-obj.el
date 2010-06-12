@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-obj.el,v 1.20 2010-06-06 14:15:58 zappo Exp $
+;; RCS: $Id: ede-proj-obj.el,v 1.21 2010-06-12 00:35:59 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -41,28 +41,28 @@
    (configuration-variables :initform ("debug" . (("CFLAGS" . "-g")
 						  ("LDFLAGS" . "-g"))))
    ;; @TODO - add an include path.
-   (availablecompilers :initform (ede-gcc-compiler
-				  ede-g++-compiler
-				  ede-gfortran-compiler
-				  ede-gfortran-module-compiler
-				  ;; More C and C++ compilers, plus
-				  ;; fortran or pascal can be added here
-				  ))
-   (availablelinkers :initform (ede-g++-linker
-				ede-cc-linker
-				ede-ld-linker
-				ede-gfortran-linker
-				;; Add more linker thingies here.
-				))
-   (sourcetype :initform (ede-source-c
-			  ede-source-c++
-			  ede-source-f77
-			  ede-source-f90
-			  ;; ede-source-other
-			  ;; This object should take everything that
-			  ;; gets compiled into objects like fortran
-			  ;; and pascal.
-			  ))
+   (availablecompilers :initform '(ede-gcc-compiler
+				   ede-g++-compiler
+				   ede-gfortran-compiler
+				   ede-gfortran-module-compiler
+				   ;; More C and C++ compilers, plus
+				   ;; fortran or pascal can be added here
+				   ))
+   (availablelinkers :initform '(ede-g++-linker
+				 ede-cc-linker
+				 ede-ld-linker
+				 ede-gfortran-linker
+				 ;; Add more linker thingies here.
+				 ))
+   (sourcetype :initform '(ede-source-c
+			   ede-source-c++
+			   ede-source-f77
+			   ede-source-f90
+			   ;; ede-source-other
+			   ;; This object should take everything that
+			   ;; gets compiled into objects like fortran
+			   ;; and pascal.
+			   ))
    )
   "Abstract class for Makefile based object code generating targets.
 Belonging to this group assumes you could make a .o from an element source
