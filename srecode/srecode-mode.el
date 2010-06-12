@@ -122,6 +122,12 @@
       :active t
       :help "Calculate a dump a dictionary for point."
       ])
+    (senator-menu-item
+     ["Show Macro Help"
+      srecode-macro-help
+      :active t
+      :help "Display the different types of macros available."
+      ])
     )
    )
   "Menu for srecode minor mode.")
