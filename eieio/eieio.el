@@ -5,7 +5,7 @@
 ;; Copyright (C) 1995,1996,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio.el,v 1.195 2010-04-23 00:08:27 zappo Exp $
+;; RCS: $Id: eieio.el,v 1.196 2010-06-12 00:26:05 zappo Exp $
 ;; Keywords: OO, lisp
 
 (defvar eieio-version "1.3"
@@ -193,6 +193,13 @@ Stored outright without modifications or stripping.")
 (defconst method-generic-primary 5 "Index into generic :primary tag on a method.")
 (defconst method-generic-after 6 "Index into generic :after tag on a method.")
 (defconst method-num-slots 7 "Number of indexes into a method's vector.")
+
+(defsubst eieio-specialized-key-to-generic-key (key)
+  "Convert a specialized KEY into a generic method key."
+  (cond ((eq key method-static) 0) ;; don't convert
+	((< key method-num-lists) (+ key 3)) ;; The conversion
+	(t key) ;; already generic.. maybe.
+	))
 
 ;; How to specialty compile stuff.
 (autoload 'byte-compile-file-form-defmethod "eieio-comp"
@@ -1355,7 +1362,7 @@ Summary:
       (if (= key -1)
 	  (signal 'wrong-type-argument (list :static 'non-class-arg)))
       ;; generics are higher
-      (setq key (+ key 3)))
+      (setq key (eieio-specialized-key-to-generic-key key)))
     ;; Put this lambda into the symbol so we can find it
     (if (byte-code-function-p (car-safe body))
 	(eieiomt-add method (car-safe body) key argclass)
@@ -1489,11 +1496,15 @@ Fills in OBJ's SLOT with its default value."
 
 (defun eieio-default-eval-maybe (val)
   "Check VAL, and return what `oref-default' would provide."
-  ;; check for quoted things, and unquote them
-  (if (and (listp val) (eq (car val) 'quote))
-      (car (cdr val))
-    ;; return it verbatim
-    val))
+  (cond
+   ;; Is it a function call?  If so, evaluate it.
+   ((and (consp val) (symbolp (car val)) (fboundp (car val)))
+    (eval val))
+   ;;;; check for quoted things, and unquote them
+   ;;((and (consp val) (eq (car val) 'quote))
+   ;; (car (cdr val)))
+   ;; return it verbatim
+   (t val)))
 
 ;;; Object Set macros
 ;;
@@ -1732,7 +1743,7 @@ If a consistent order does not exist, signal an error."
   "Return (transitively closed) list of parents of CLASS.
 The order, in which the parents are returned depends on the
 method invocation orders of the involved classes."
-  (if (eq class 'eieio-default-superclass)
+  (if (or (null class) (eq class 'eieio-default-superclass))
       nil
     (case (class-method-invocation-order class)
       (:depth-first
@@ -2055,6 +2066,13 @@ This should only be called from a generic function."
       ;; :primary methods
       (setq tlambdas
 	    (or (and mclass (eieio-generic-form method method-primary mclass))
+
+		;; @TODO - June 2010 -
+		;; I think this coding pattern for :before, :after, and :primary
+		;; of checking mclass and if nil doing the below was in an
+		;; old implementation, and now you can't get here because
+		;; of the when statement above forcing only objects through here.
+
 		(eieio-generic-form method method-primary nil)))
       (when tlambdas
 	(setq lambdas (cons tlambdas lambdas)
@@ -2074,14 +2092,26 @@ This should only be called from a generic function."
 	    keys (append (make-list (length tlambdas) method-before) keys))
       )
 
-    ;; If there were no methods found, then there could be :static methods.
-    (when (not lambdas)
+    (if mclass
+	;; For the case of a class,
+	;; if there were no methods found, then there could be :static methods.
+	(when (not lambdas)
+	  (setq tlambdas
+		(eieio-generic-form method method-static mclass))
+	  (setq lambdas (cons tlambdas lambdas)
+		keys (cons method-static keys)
+		primarymethodlist  ;; Re-use even with bad name here
+		(eieiomt-method-list method method-static mclass)))
+      ;; For the case of no class (ie - mclass == nil) then there may
+      ;; be a primary method.
       (setq tlambdas
-	    (eieio-generic-form method method-static mclass))
-      (setq lambdas (cons tlambdas lambdas)
-	    keys (cons method-static keys)
-	    primarymethodlist  ;; Re-use even with bad name here
-	    (eieiomt-method-list method method-static mclass)))
+	    (eieio-generic-form method method-primary nil))
+      (when tlambdas
+	(setq lambdas (cons tlambdas lambdas)
+	      keys (cons method-primary keys)
+	      primarymethodlist
+	      (eieiomt-method-list method method-primary nil)))
+      )
 
     (run-hook-with-args 'eieio-pre-method-execution-hooks
 			primarymethodlist)
@@ -2373,7 +2403,7 @@ form, but has a parent class, then trace to that parent class.  The
 first time a form is requested from a symbol, an optimized path is
 memoized for future faster use."
  (let ((emto (aref (get method 'eieio-method-obarray)
-		   (if class key (+ key 3)))))
+		   (if class key (eieio-specialized-key-to-generic-key key)))))
    (if (class-p class)
        ;; 1) find our symbol
        (let ((cs (intern-soft (symbol-name class) emto)))
@@ -2406,7 +2436,7 @@ memoized for future faster use."
 	       nil)))
      ;; for a generic call, what is a list, is the function body we want.
      (let ((emtl (aref (get method 'eieio-method-tree)
-		       (if class key (+ key 3)))))
+		       (if class key (eieio-specialized-key-to-generic-key key)))))
        (if emtl
 	   ;; The car of EMTL is supposed to be a class, which in this
 	   ;; case is nil, so skip it.
@@ -2569,6 +2599,17 @@ dynamically set from SLOTS."
 	   (slot (aref scoped-class class-public-a))
 	   (defaults (aref scoped-class class-public-d)))
       (while slot
+	;; For each slot, see if we need to evaluate it.
+	;;
+	;; Paul Landes said in an email: 
+	;; > CL evaluates it if it can, and otherwise, leaves it as
+	;; > the quoted thing as you already have.  This is by the
+	;; > Sonya E. Keene book and other things I've look at on the
+	;; > web.
+	(let ((dflt (eieio-default-eval-maybe (car defaults))))
+	  (when (not (eq dflt (car defaults)))
+	    (eieio-oset this (car slot) dflt) ))
+	;; Next.
 	(setq slot (cdr slot)
 	      defaults (cdr defaults))))
     ;; Shared initialize will parse our slots for us.
