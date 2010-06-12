@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: srecode-map.el,v 1.19 2010-04-09 01:13:25 zappo Exp $
+;; X-RCS: $Id: srecode-map.el,v 1.20 2010-06-12 00:45:51 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -294,10 +294,15 @@ if that file is NEW, otherwise assume the mode has not changed."
 
     ;; 2) Do we not have a current map?  If so load.
     (when (not srecode-current-map)
-      (setq srecode-current-map
-	    (eieio-persistent-read srecode-map-save-file))
+      (condition-case nil
+	  (setq srecode-current-map
+		(eieio-persistent-read srecode-map-save-file))
+	(error
+	 ;; There was an error loading the old map.  Create a new one.
+	 (setq srecode-current-map
+	       (srecode-map "SRecode Map"
+			    :file srecode-map-save-file))))
       )
-
     )
 
   ;;
