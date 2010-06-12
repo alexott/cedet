@@ -1,10 +1,10 @@
 ;;; ede-proj-shared.el --- EDE Generic Project shared library support
 
-;;;  Copyright (C) 1998, 1999, 2000, 2009  Eric M. Ludlam
+;;;  Copyright (C) 1998, 1999, 2000, 2009, 2010  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-shared.el,v 1.15 2010-04-18 00:24:52 zappo Exp $
+;; RCS: $Id: ede-proj-shared.el,v 1.16 2010-06-12 00:36:12 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -35,15 +35,15 @@
 ;;; Code:
 (defclass ede-proj-target-makefile-shared-object
   (ede-proj-target-makefile-program)
-  ((availablecompilers :initform (ede-gcc-libtool-shared-compiler
-				  ;;ede-gcc-shared-compiler
-				  ede-g++-libtool-shared-compiler
-				  ;;ede-g++-shared-compiler
-				  ))
-   (availablelinkers :initform (ede-cc-linker-libtool
-				ede-g++-linker-libtool
-				;; Add more linker thingies here.
-				))
+  ((availablecompilers :initform '(ede-gcc-libtool-shared-compiler
+				   ;;ede-gcc-shared-compiler
+				   ede-g++-libtool-shared-compiler
+				   ;;ede-g++-shared-compiler
+				   ))
+   (availablelinkers :initform '(ede-cc-linker-libtool
+				 ede-g++-linker-libtool
+				 ;; Add more linker thingies here.
+				 ))
    (ldflags :custom (repeat (string :tag "Libtool flag"))
 	    :documentation
 	    "Additional flags to add when linking this shared library.
