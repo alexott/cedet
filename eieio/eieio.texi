@@ -1,7 +1,7 @@
 
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: eieio.texi,v 1.65 2010-05-30 02:39:27 emacsman Exp $
+@c $Id: eieio.texi,v 1.66 2010-06-12 00:45:09 zappo Exp $
 @c
 
 @c
@@ -295,10 +295,14 @@ Each element of @var{superclass-list} must be a class.  These classes
 are the parents of the class being created.  Every slot that appears
 in each parent class is replicated in the new class.
 
-  If two parents share the same slot name, the parent which appears in
-the @var{superclass-list} first sets the tags for that slot.  If
-a slot in the new class' slot list matches a parent, then the new
-specifications for the child class override that of the parent.
+If two parents share the same slot name, the parent which appears in
+the @var{superclass-list} first sets the tags for that slot.  If a
+slot in the new class' slot list matches a parent, then some of the
+new specifications for the child class override that of the parent.
+
+When overriding a slot, some slot attributes cannot be overriden
+because they break basic OO rules.  You cannot override @code{:type}
+or @code{:protection}.
 
 Whenever defclass is used to create a new class, two predicates are
 created for it.  The predicate names are @code{@var{CLASS-NAME}-p} and
