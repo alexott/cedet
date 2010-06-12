@@ -1,10 +1,10 @@
 ;;; ede-proj-archive.el --- EDE Generic Project archive support
 
-;;;  Copyright (C) 1998, 1999, 2000, 2001  Eric M. Ludlam
+;;;  Copyright (C) 1998, 1999, 2000, 2001, 2010  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-archive.el,v 1.10 2009-09-12 22:18:11 davenar Exp $
+;; RCS: $Id: ede-proj-archive.el,v 1.11 2010-06-12 00:34:01 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -31,7 +31,7 @@
 ;;; Code:
 (defclass ede-proj-target-makefile-archive
   (ede-proj-target-makefile-objectcode)
-  ((availablelinkers :initform (ede-archive-linker)))
+  ((availablelinkers :initform '(ede-archive-linker)))
   "This target generates an object code archive.")
 
 (defvar ede-archive-linker
