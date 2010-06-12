@@ -1,10 +1,10 @@
 ;;; ede-proj-misc.el --- EDE Generic Project Emacs Lisp support
 
-;;;  Copyright (C) 1998, 1999, 2000, 2001, 2008  Eric M. Ludlam
+;;;  Copyright (C) 1998, 1999, 2000, 2001, 2008, 2010  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-misc.el,v 1.9 2010-03-15 13:40:54 xscript Exp $
+;; RCS: $Id: ede-proj-misc.el,v 1.10 2010-06-12 00:35:37 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -35,8 +35,8 @@
 
 ;; FIXME this isn't how you spell "miscellaneous". :(
 (defclass ede-proj-target-makefile-miscelaneous (ede-proj-target-makefile)
-  ((sourcetype :initform (ede-misc-source))
-   (availablecompilers :initform (ede-misc-compile))
+  ((sourcetype :initform '(ede-misc-source))
+   (availablecompilers :initform '(ede-misc-compile))
    (submakefile :initarg :submakefile
 		:initform ""
 		:type string
