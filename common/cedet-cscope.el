@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-cscope.el,v 1.5 2010-04-09 02:20:06 zappo Exp $
+;; X-RCS: $Id: cedet-cscope.el,v 1.6 2010-06-13 01:15:40 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -27,7 +27,7 @@
 (require 'inversion)
 
 (defvar cedet-cscope-min-version "16.0"
-  "Minimum version of GNU global required.")
+  "Minimum version of CScope required.")
 
 ;;;###autoload
 (defcustom cedet-cscope-command "cscope"
@@ -73,6 +73,12 @@ SCOPE is the scope of the search, such as 'project or 'subdirs."
 	     )
 	)
     (cedet-cscope-call (list "-d" "-L" idx searchtext))))
+
+(defun cedet-cscope-create (flags)
+  "Create a CScope database at the current directory.
+FLAGS are additional flags to pass to cscope beyond the
+options -cR."
+  (cedet-cscope-call (append (list "-cR") flags)))
 
 (defun cedet-cscope-call (flags)
   "Call CScope with the list of FLAGS."
@@ -128,7 +134,7 @@ the error code."
 (defun cedet-cscope-version-check (&optional noerror)
   "Check the version of the installed CScope command.
 If optional programatic argument NOERROR is non-nil, then
-instead of throwing an error if Global isn't available, then
+instead of throwing an error if cscope isn't available, then
 return nil."
   (interactive)
   (let ((b (condition-case nil
