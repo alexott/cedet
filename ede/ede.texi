@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: ede.texi,v 1.28 2010-06-13 13:13:46 zappo Exp $
+@c $Id: ede.texi,v 1.29 2010-06-13 13:22:53 zappo Exp $
 @c
 @setfilename ede.info
 @settitle Emacs Development Environment
@@ -455,7 +455,7 @@ lookup for @semantic{}, improving code completion performance.
 
 @menu
 * Generic::             Detect generic Make, SCons or CMake projects
-* Add Generic Support:  Support more build types with Generic projects
+* Add Generic Support:: Support more build types with Generic projects
 * ede-cpp-root::        This project marks the root of a C/C++ code project.
 * ede-emacs::           A project for working with Emacs.
 * ede-linux::           A project for working with Linux kernels.
