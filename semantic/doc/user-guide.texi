@@ -849,6 +849,16 @@ they are used in.
 Display the references in@dfn{semantic-symref-results-mode}
 @end deffn
 
+@defun semantic-symref-regexp sym
+@anchor{semantic-symref-regexp}
+Find references to the a symbol regexp @var{SYM}.
+This command uses the currently configured references tool within the
+current project to find references to the input @var{SYM}.  The
+references are the organized by file and the name of the function
+they are used in.
+Display the references in@dfn{semantic-symref-results-mode}.
+@end defun
+
 @menu
 * SymRef Results Mode::
 * Configuring SymRef::
