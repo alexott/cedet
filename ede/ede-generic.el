@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-generic.el,v 1.3 2010-06-13 12:12:38 zappo Exp $
+;; X-RCS: $Id: ede-generic.el,v 1.4 2010-06-13 13:55:19 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -321,9 +321,14 @@ the new configuration."
   (eieio-persistent-save config))
 
 (defun ede-generic-new-autoloader (internal-name external-name
-				   projectfile class
-				   &rest initforms)
-  "Add a new EDE Autoload instance for identifying a generic project."
+						 projectfile class)
+  "Add a new EDE Autoload instance for identifying a generic project.
+INTERNAL-NAME is a long name that identifies thsi project type.
+EXTERNAL-NAME is a shorter human readable name to describe the project.
+PROJECTFILE is a file name that identifies a project of this type to EDE, such as 
+a Makefile, or SConstruct file.
+CLASS is the EIEIO class that is used to track this project.  It should subclass
+the class `ede-generic-project' project."
   (add-to-list 'ede-project-class-files
 	       (ede-project-autoload internal-name
 				     :name external-name
