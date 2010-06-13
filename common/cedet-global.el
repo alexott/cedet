@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-global.el,v 1.10 2010-04-09 02:17:27 zappo Exp $
+;; X-RCS: $Id: cedet-global.el,v 1.11 2010-06-13 01:16:16 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -32,6 +32,13 @@
 ;;;###autoload
 (defcustom cedet-global-command "global"
   "Command name for the GNU Global executable."
+  :type 'string
+  :group 'cedet)
+
+;;;###autoload
+(defcustom cedet-global-gtags-command "gtags"
+  "Command name for the GNU Global gtags executable.
+GTAGS is used to create the tags table queried by the 'global' command."
   :type 'string
   :group 'cedet)
 
@@ -76,6 +83,19 @@ SCOPE is the scope of the search, such as 'project or 'subdirs."
       (setq default-directory cd)
       (erase-buffer))
     (apply 'call-process cedet-global-command
+	   nil b nil
+	   flags)
+    b))
+
+(defun cedet-gnu-global-gtags-call (flags)
+  "Create GNU Global TAGS using gtags with FLAGS."
+  (let ((b (get-buffer-create "*CEDET Global gtags*"))
+	(cd default-directory)
+	)
+    (with-current-buffer b
+      (setq default-directory cd)
+      (erase-buffer))
+    (apply 'call-process cedet-global-gtags-command
 	   nil b nil
 	   flags)
     b))
