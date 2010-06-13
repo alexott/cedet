@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-symref-list.el,v 1.13 2010-04-09 02:29:36 zappo Exp $
+;; X-RCS: $Id: semantic-symref-list.el,v 1.14 2010-06-13 01:17:31 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -77,6 +77,24 @@ Display the references in`semantic-symref-results-mode'."
     ;; Gather results and tags
     (message "Gathering References...")
     (setq res (semantic-symref-find-references-by-name sym))
+    (semantic-symref-produce-list-on-results res sym)))
+
+;;;###autoload
+(defun semantic-symref-regexp (sym)
+  "Find references to the a symbol regexp SYM.
+This command uses the currently configured references tool within the
+current project to find references to the input SYM.  The
+references are the organized by file and the name of the function
+they are used in.
+Display the references in`semantic-symref-results-mode'."
+  (interactive (list (car (senator-jump-interactive "Symrefs for: "
+						    nil nil nil))))
+  (semantic-fetch-tags)
+  (let ((res nil)
+	)
+    ;; Gather results and tags
+    (message "Gathering References...")
+    (setq res (semantic-symref-find-text sym))
     (semantic-symref-produce-list-on-results res sym)))
 
 
