@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: ede.texi,v 1.27 2010-05-30 02:39:27 emacsman Exp $
+@c $Id: ede.texi,v 1.28 2010-06-13 13:13:46 zappo Exp $
 @c
 @setfilename ede.info
 @settitle Emacs Development Environment
@@ -454,12 +454,106 @@ It can be configured with minimal lisp knowledge to do header file
 lookup for @semantic{}, improving code completion performance.
 
 @menu
+* Generic::             Detect generic Make, SCons or CMake projects
+* Add Generic Support:  Support more build types with Generic projects
 * ede-cpp-root::        This project marks the root of a C/C++ code project.
-* ede-simple subclassing:: Create your own simple project.
 * ede-emacs::           A project for working with Emacs.
 * ede-linux::           A project for working with Linux kernels.
 * Custom Locate::       Customizing how to locate files in a simple project
 @end menu
+
+@node Generic
+@subsection Generic Projects
+
+The Generic project system provides a way for EDE to identify a
+project based on the build system.  Simple aspects of how this project
+builds or interacts with @semantic{} can be done via the Customize
+interface.
+
+For C++ projects, even if the build system is supported by Generic,
+may want to use @ref{ede-cpp-root} which has addtional options for
+C/C++.
+
+Generic projects are new, and disabled by default to prevent possible
+conflicts with other types of projects, to enable them, use
+@code{ede-enable-generic-projects}.
+
+@defun ede-enable-generic-projects
+@anchor{ede-enable-generic-projects}
+Enable generic project loaders.
+@end defun
+
+When a generic project identifies your code, you can use:
+
+@example
+M-x ede-customize-project
+@end example
+
+to create an customization buffer and edit any configuration items for
+your project.  It will save the configuration in @file{EDEConfig.el}
+at the root of your project.
+
+Generic projects also support @ref{Building and Debugging} for the
+different project types.
+
+@node Add Generic Support
+@subsection Add Generic Support for new build systems
+
+The Generic EDE project type can support almost any kind of build
+system.  To add support for a new build system using the Generic type
+is pretty easy.  Here is an example for supporting SCons:
+
+@example
+;;; SCONS
+(defclass ede-generic-scons-project (ede-generic-project)
+  ((buildfile :initform "SConstruct")
+   )
+  "Generic Project for scons.")
+
+(defmethod ede-generic-setup-configuration ((proj ede-generic-scons-project) config)
+  "Setup a configuration for SCONS."
+  (oset config build-command "scons")
+  (oset config debug-command "gdb ")
+  )
+@end example
+
+The first block of code creates a new class for the SCons project
+type.  It inherits from @code{ede-generic-project}.  The only
+configuration really needed is to specify the initial value for the
+@code{buildfile} slot.  This is @file{SConstruct} for SCons, and is
+@file{Makefile} for supporting Make.
+
+The second thing to do is implement a method for your build system
+that will setup the Configuration.  Each generic project gets a common
+Configuration object which contains details on how to work with the
+different kinds of Source code.  It also contains the build and debug
+commands which should be setup here.  These are the defaults.  A user
+of your generic project can customize the configuration and change
+these values later.
+
+Once the class is created, it needs to be registered.  If you wish to
+permanently add this to ede-generic.el, then you would edit
+@code{ede-enable-generic-projects}.  If you write support just for
+you, you would add a line of code like this example from SCons.
+
+@example
+(ede-generic-new-autoloader "edeproject-scons" "SCons"
+			    "SConstruct" 'ede-generic-scons-project)
+@end example
+
+Adding a generic autoloader tells EDE how to identify, and
+automatically create your project.
+
+@defun ede-generic-new-autoloader internal-name external-name projectfile class
+@anchor{ede-generic-new-autoloader}
+Add a new @var{EDE} Autoload instance for identifying a generic project.
+@var{INTERNAL-NAME} is a long name that identifies thsi project type.
+@var{EXTERNAL-NAME} is a shorter human readable name to describe the project.
+@var{PROJECTFILE} is a file name that identifies a project of this type to @var{EDE}, such as 
+a Makefile, or SConstruct file.
+@var{CLASS} is the @var{EIEIO} class that is used to track this project.  It should subclass
+the class @dfn{ede-generic-project} project.
+@end defun
 
 @node ede-cpp-root
 @subsection ede-cpp-root
@@ -589,13 +683,6 @@ Return nil if there isn't one."
 
 This example only creates an auto-loader, and does not create a new kind
 of project.
-
-@node ede-simple subclassing
-@subsection ede-simple Subclassing
-
-todo - Write some doc.
-
-  In the meantime look in the commentary of ede-simple.el
 
 @node ede-emacs
 @subsection ede-emacs
