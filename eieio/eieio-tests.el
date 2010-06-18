@@ -4,7 +4,7 @@
 ;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio-tests.el,v 1.49 2010-06-12 00:27:28 zappo Exp $
+;; RCS: $Id: eieio-tests.el,v 1.50 2010-06-18 00:08:17 zappo Exp $
 ;; Keywords: oop, lisp, tools
 ;;
 ;; This program is free software; you can redistribute it and/or modify
@@ -548,6 +548,29 @@ METHOD is the method that was attempting to be called."
   (error "Error with initial value for evalval slot."))
 (when (not (eq (oref pvinit evalnow) 1))
   (error "Error with initial value for evalnow slot."))
+
+
+;;; Init forms with types that don't match the runnable.
+(defclass test-subordinate nil
+  ((text :initform "" :type string))
+  "Test class that will be a calculated value.")
+
+(defclass test-superior nil
+  ((sub :initform (test-subordinate "test")
+	:type test-subordinate))
+  "A class with an initform that creates a class.")
+
+(setq tests (test-superior "test"))
+
+(condition-case err
+    (progn
+      (defclass broken-init nil
+	((broken :initform 1
+		 :type string))
+	"This class should break.")
+      (error t))
+  (invalid-slot-type nil) ;; This is the error
+  (error (error "Wrong type of error thrown from broken init class.")))
 
 
 ;;; Inheritance status
