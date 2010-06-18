@@ -5,7 +5,7 @@
 ;; Copyright (C) 1995,1996,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio.el,v 1.196 2010-06-12 00:26:05 zappo Exp $
+;; RCS: $Id: eieio.el,v 1.197 2010-06-18 00:07:25 zappo Exp $
 ;; Keywords: OO, lisp
 
 (defvar eieio-version "1.3"
@@ -829,11 +829,11 @@ OPTIONS-AND-DOC as the toplevel documentation for this class."
 (defun eieio-perform-slot-validation-for-default (slot spec value skipnil)
   "For SLOT, signal if SPEC does not match VALUE.
 If SKIPNIL is non-nil, then if VALUE is nil, return t."
-  (let ((val (eieio-default-eval-maybe value)))
-    (if (and (not eieio-skip-typecheck)
-	     (not (and skipnil (null val)))
-	     (not (eieio-perform-slot-validation spec val)))
-	(signal 'invalid-slot-type (list slot spec val)))))
+  (if (and (not (eieio-eval-default-p value))
+	   (not eieio-skip-typecheck)
+	   (not (and skipnil (null value)))
+	   (not (eieio-perform-slot-validation spec value)))
+      (signal 'invalid-slot-type (list slot spec value))))
 
 (defun eieio-add-new-slot (newc a d doc type cust label custg print prot init alloc
 				 &optional defaultoverride skipnil)
@@ -1494,11 +1494,15 @@ Fills in OBJ's SLOT with its default value."
 	 (eieio-default-eval-maybe val))
        obj cl 'oref-default))))
 
+(defun eieio-eval-default-p (val)
+  "Should the default value VAL be evaluated for use?"
+  (and (consp val) (symbolp (car val)) (fboundp (car val))))
+
 (defun eieio-default-eval-maybe (val)
   "Check VAL, and return what `oref-default' would provide."
   (cond
    ;; Is it a function call?  If so, evaluate it.
-   ((and (consp val) (symbolp (car val)) (fboundp (car val)))
+   ((eieio-eval-default-p val)
     (eval val))
    ;;;; check for quoted things, and unquote them
    ;;((and (consp val) (eq (car val) 'quote))
@@ -2601,7 +2605,7 @@ dynamically set from SLOTS."
       (while slot
 	;; For each slot, see if we need to evaluate it.
 	;;
-	;; Paul Landes said in an email: 
+	;; Paul Landes said in an email:
 	;; > CL evaluates it if it can, and otherwise, leaves it as
 	;; > the quoted thing as you already have.  This is by the
 	;; > Sonya E. Keene book and other things I've look at on the
