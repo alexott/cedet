@@ -7,7 +7,7 @@
 ;; Maintainer: CEDET developers <http://sf.net/projects/cedet>
 ;; Created: 09 Dec 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: cedet.el,v 1.41 2010-04-26 22:39:13 zappo Exp $
+;; X-RCS: $Id: cedet.el,v 1.42 2010-07-17 13:34:12 zappo Exp $
 
 ;; This file is not part of Emacs
 
@@ -166,6 +166,65 @@
 
 (eval-when-compile
   (require 'inversion))
+
+(defun cedet ()
+  "Display basic information/help about CEDET.
+
+Also output the results of `cedet-version-print'.
+
+See also function `cedet-version'."
+  (interactive)
+  (with-output-to-temp-buffer "*CEDET*"
+    (princ "You have invoked the `cedet' command.
+
+CEDET is a Collection of Emacs Development Environment Tools.
+CEDET is made up of several tools.
+
+Project Management:  EDE
+  EDE is a project managment system.  It can either create Makefiles
+  for your project, or identify different pre-existing project styles
+  including Automake, Make, SCons, CMake, Emacs or Linux.
+
+  (global-ede-mode 1)
+
+  Use M-x ede-new RET to create new projects.
+
+Code Completion, Smart Jump, Context Sensitive Help:  Semantic
+  Semantic is the infrastructure upon which helpful context sensitive
+  tools can be built.  Those tools include:
+  * Smart Completion
+  * Smart Help/Jump/Navigation
+  * Symbol Reference tools
+
+  The Semantic Manual can help setup and use a wide suite of these tools.
+  For CEDET distributed independently of Emacs, see semantic-load.el
+
+Code Generation, Template Insertion:  SRecode
+  SRecode, or the Semantic Re-Coder is a template system for code generation.
+  Templates can be used for code snippets, or to convert tags from
+  Semantic back into code for applications.
+
+  (global-srecode-minor-mode 1)
+
+  to enable the SRecode Menu for code generation.
+
+UML and other structured diagrams:  COGRE
+  COGRE is a Connected Graph Editor.
+
+  Use M-x cogre RET to create a new diagram using the keyboard and mouse.
+
+  Use M-x cogre-uml-quick-class RET to generate a UML diagram from source
+  code of your OO program.
+
+  COGRE requires that the 'dot' program is installed for
+  performing diagram layout.
+
+CLOS For Emacs: EIEIO
+  EIEIO is a CLOS clone for Emacs that allows you to write Emacs Lisp
+   programs in an object oriented way.")
+    (princ "\n\n")
+    (cedet-version-print)
+    (princ "\n\n\nC-h f cedet-version RET\n  for details on output format.")))
 
 (defun cedet-version ()
   "Display all active versions of CEDET and Dependant packages.
