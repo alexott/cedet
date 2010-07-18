@@ -13,7 +13,7 @@ misc_AUX=README ede-proj-skel.el ChangeLog
 EMACSFLAGS=-batch --no-site-file
 EMACS=emacs
 LOADPATH= ../common/  ../srecode/ ../speedbar/ ../eieio/\
-   
+   ../semantic ../semantic/bovine
 LOADDEFS=ede-loaddefs.el
 LOADDIRS=.
 init_LISP=ede-load.el
