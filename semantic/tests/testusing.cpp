@@ -172,3 +172,15 @@ void func10()
   s2.//-14-
     ; //#14# ( "four" "three" )
 }
+
+// make sure unfound using statements don't crash stuff.
+using something::cantbe::Found;
+
+void unfoundfunc()
+{
+  NotFound notfound; // Variable can't be found.
+
+  notfound.//-15-
+    ; //#15# ( )  Nothing here since this is an undefined class
+
+}
