@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-m3.el,v 1.8 2010-05-19 03:31:56 zappo Exp $
+;; X-RCS: $Id: cedet-m3.el,v 1.9 2010-07-18 21:57:11 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -45,8 +45,6 @@
     (car (car (cdr event))))
   )
 
-
-
 (defcustom global-cedet-m3-minor-mode nil
   "Non-nil in buffers with Semantic Recoder macro keybindings."
   :group 'cedet-m3
@@ -74,7 +72,7 @@
 (defvar cedet-m3-mode-map
   (let ((km (make-sparse-keymap)))
     (define-key km cedet-m3-prefix-key 'cedet-m3-menu)
-    ;(define-key km "\C-x " 'cedet-m3-menu-kbd)
+    ;;(define-key km "\C-x," 'cedet-m3-menu-kbd)
     km)
   "Keymap for cedet-m3 minor mode.")
 
@@ -440,7 +438,7 @@ ATTRIBUTES are easymenu compatible attributes."
   "Return a list of menu items based on COGRE features."
   (when (locate-library "cogre")
     (let* ((ctxt (semantic-analyze-current-context))
-	   (pt (reverse (oref ctxt :prefixtypes)))
+	   (pt (if ctxt (reverse (oref ctxt :prefixtypes)) nil))
 	   (items nil)
 	   )
       (dolist (DT pt)
