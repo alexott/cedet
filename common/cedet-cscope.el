@@ -3,7 +3,7 @@
 ;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-cscope.el,v 1.6 2010-06-13 01:15:40 zappo Exp $
+;; X-RCS: $Id: cedet-cscope.el,v 1.7 2010-07-24 23:58:38 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -122,13 +122,19 @@ Return a fully qualified filename."
 If DIR is not supplied, use the current default directory.
 This works by running cscope on a bogus symbol, and looking for
 the error code."
+  (interactive "DDirectory: ")
   (save-excursion
     (let ((default-directory (or dir default-directory)))
       (set-buffer (cedet-cscope-call (list "-d" "-L" "-7" "moose")))
       (goto-char (point-min))
-      (if (looking-at "[^ \n]*cscope: ")
-	  nil
-	t))))
+      (let ((ans (looking-at "[^ \n]*cscope: ")))
+	(if (cedet-called-interactively-p 'interactive)
+	    (if ans
+		(message "No support for CScope in %s" default-directory)
+	      (message "CScope is supported in %s" default-directory))
+	  (if ans
+	      nil
+	    t))))))
 
 ;;;###autoload
 (defun cedet-cscope-version-check (&optional noerror)
@@ -159,6 +165,14 @@ return nil."
 	  (when (cedet-called-interactively-p 'interactive)
 	    (message "CScope %s  - Good enough for CEDET." rev))
 	  t)))))
+
+(defun cedet-cscope-create/update-database (&optional dir)
+  "Create a CScope database in DIR.
+CScope will automatically choose incremental rebuild if
+there is already a database in DIR."
+  (interactive "DDirectory: ")
+  (let ((default-directory dir))
+    (cedet-cscope-create nil)))
 
 (provide 'cedet-cscope)
 ;;; cedet-cscope.el ends here
