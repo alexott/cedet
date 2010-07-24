@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-global.el,v 1.11 2010-06-13 01:16:16 zappo Exp $
+;; X-RCS: $Id: cedet-global.el,v 1.12 2010-07-24 23:58:53 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -180,6 +180,18 @@ return nil."
 			 hits)))
       ;; Return the results
       (nreverse hits))))
+
+(defun cedet-gnu-global-create/update-database (&optional dir)
+  "Create a GNU Global database in DIR.
+If a database already exists, then just update it."
+  (interactive "DDirectory: ")
+  (let ((root (cedet-gnu-global-root dir)))
+    (if root (setq dir root))
+    (let ((default-directory dir))
+      (cedet-gnu-global-gtags-call
+       (when root
+	 '("-i");; Incremental update flag.
+	 )))))
 
 (provide 'cedet-global)
 ;;; cedet-global.el ends here
