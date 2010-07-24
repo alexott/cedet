@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede-proj-obj.el,v 1.21 2010-06-12 00:35:59 zappo Exp $
+;; RCS: $Id: ede-proj-obj.el,v 1.22 2010-07-24 13:54:53 zappo Exp $
 
 ;; This software is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -45,6 +45,8 @@
 				   ede-g++-compiler
 				   ede-gfortran-compiler
 				   ede-gfortran-module-compiler
+				   ede-lex-compiler
+				   ede-yacc-compiler
 				   ;; More C and C++ compilers, plus
 				   ;; fortran or pascal can be added here
 				   ))
@@ -58,6 +60,8 @@
 			   ede-source-c++
 			   ede-source-f77
 			   ede-source-f90
+			   ede-source-lex
+			   ede-source-yacc
 			   ;; ede-source-other
 			   ;; This object should take everything that
 			   ;; gets compiled into objects like fortran
@@ -164,6 +168,38 @@ file.")
    :autoconf '("AC_PROG_CXX")
    :objectextention "")
   "Linker needed for c++ programs.")
+
+;;; LEX
+(defvar ede-source-lex
+  (ede-sourcecode "ede-source-lex"
+		  :name "lex"
+		  :sourcepattern "\\.l\\(l\\|pp\\|++\\)")
+  "Lex source code definition.
+No garbage pattern since it creates C or C++ code.")
+
+(defvar ede-lex-compiler
+  (ede-object-compiler
+   "ede-lex-compiler"
+   ;; Can we support regular makefiles too??
+   :autoconf '("AC_PROG_LEX")
+   :sourcetype '(ede-source-lex))
+  "Compiler used for Lexical source.")
+
+;;; YACC
+(defvar ede-source-yacc
+  (ede-sourcecode "ede-source-yacc"
+		  :name "yacc"
+		  :sourcepattern "\\.y\\(y\\|pp\\|++\\)")
+  "Yacc source code definition.
+No garbage pattern since it creates C or C++ code.")
+
+(defvar ede-yacc-compiler
+  (ede-object-compiler
+   "ede-yacc-compiler"
+   ;; Can we support regular makefiles too??
+   :autoconf '("AC_PROG_YACC")
+   :sourcetype '(ede-source-yacc))
+  "Compiler used for yacc/bison grammar files source.")
 
 ;;; Fortran Compiler/Linker
 ;;
