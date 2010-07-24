@@ -1,11 +1,11 @@
 ;;; semantic-imenu.el --- Use Semantic as an imenu tag generator
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008 Paul Kinnucan & Eric Ludlam
+;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2010 Paul Kinnucan & Eric Ludlam
 ;;; Copyright (C) 2001, 2002, 2003 Eric Ludlam
 
 ;; Created By: Paul Kinnucan
 ;; Maintainer: Eric Ludlam
-;; X-RCS: $Id: semantic-imenu.el,v 1.60 2010-02-18 02:26:25 zappo Exp $
+;; X-RCS: $Id: semantic-imenu.el,v 1.61 2010-07-24 11:55:22 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -118,7 +118,7 @@ nil means to keep them in the same order.
 Overriden to nil if `semantic-imenu-bucketize-file' is nil."
   :group 'semantic-imenu
   :type 'boolean)
-(make-variable-buffer-local 'semantic-imenu-bucketize-type-parts)
+(make-variable-buffer-local 'semantic-imenu-bucketize-type-members)
 (semantic-varalias-obsolete 'semantic-imenu-bucketize-type-parts
                             'semantic-imenu-bucketize-type-members)
 
