@@ -1,6 +1,6 @@
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: ede.texi,v 1.29 2010-06-13 13:22:53 zappo Exp $
+@c $Id: ede.texi,v 1.30 2010-07-25 14:12:32 zappo Exp $
 @c
 @setfilename ede.info
 @settitle Emacs Development Environment
@@ -917,6 +917,12 @@ function, then it calls that function and expects it to return a file
 name or nil.  If the file exists, then this directory is assumed to be
 part of a project, and @code{ede-directory-project-p} returns the
 instance of @code{ede-project-autoload} that matched.
+
+If the current directory contains the file @code{.ede-ignore} then
+that directory is automatically assumed to contain no projects, even
+if there is a matching pattern.  Use this type of file in a directory
+that may contain many other sub projects, but still has a Makefile of
+some sort.
 
 If the current directory is a project, then @ede{} scans upwards till
 it finds the top of the project.  It does this by calling
