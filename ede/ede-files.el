@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-files.el,v 1.22 2010-03-26 22:18:01 xscript Exp $
+;; X-RCS: $Id: ede-files.el,v 1.23 2010-07-25 14:03:35 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -237,27 +237,30 @@ Do this whenever a new project is created, as opposed to loaded."
 (defun ede-directory-project-p (dir &optional force)
   "Return a project description object if DIR has a project.
 Optional argument FORCE means to ignore a hash-hit of 'nomatch.
-This depends on an up to date `ede-project-class-files' variable."
-  (let* ((dirtest (expand-file-name dir))
-	 (match (ede-directory-project-from-hash dirtest)))
-    (cond
-     ((and (eq match 'nomatch) (not force))
-      nil)
-     ((and match (not (eq match 'nomatch)))
-      match)
-     (t
-      (let ((types ede-project-class-files)
-	    (ret nil))
-	;; Loop over all types, loading in the first type that we find.
-	(while (and types (not ret))
-	  (if (ede-dir-to-projectfile (car types) dirtest)
-	      (progn
-		;; We found one!  Require it now since we will need it.
-		(require (oref (car types) file))
-		(setq ret (car types))))
-	  (setq types (cdr types)))
-	(ede-directory-project-add-description-to-hash dirtest (or ret 'nomatch))
-	ret)))))
+This depends on an up to date `ede-project-class-files' variable.
+Any directory that contains the file .ede-ignore will allways
+return nil."
+  (when (not (file-exists-p (expand-file-name ".ede-ignore" dir)))
+    (let* ((dirtest (expand-file-name dir))
+	   (match (ede-directory-project-from-hash dirtest)))
+      (cond
+       ((and (eq match 'nomatch) (not force))
+	nil)
+       ((and match (not (eq match 'nomatch)))
+	match)
+       (t
+	(let ((types ede-project-class-files)
+	      (ret nil))
+	  ;; Loop over all types, loading in the first type that we find.
+	  (while (and types (not ret))
+	    (if (ede-dir-to-projectfile (car types) dirtest)
+		(progn
+		  ;; We found one!  Require it now since we will need it.
+		  (require (oref (car types) file))
+		  (setq ret (car types))))
+	    (setq types (cdr types)))
+	  (ede-directory-project-add-description-to-hash dirtest (or ret 'nomatch))
+	  ret))))))
 
 ;;; TOPLEVEL
 ;;
