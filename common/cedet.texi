@@ -947,22 +947,18 @@ Something like this can work in your @file{.emacs} file.
 
 @section @semantic{} Database
 
-@@TODO
-
 @semantic{} could use CScope as a back end for database searches,
 but this has not been implemented yet.  
 
-@ignore
 @example
-(semanticdb-enable-cscope-databases 'c++-mode)
+(semanticdb-enable-cscope-databases)
 @end example
 
-where the first argument is a @code{major-mode} in which to use it.
+This will enable the use of cscope for all C and C++ buffers.
 
 CScope will then be used for project-wide searches as a backup when
 pre-existing @semantic{} database searches may not have parsed all
 your files.
-@end ignore
 
 @section @semantic Symref
 
