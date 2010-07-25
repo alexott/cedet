@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb-global.el,v 1.13 2010-03-27 14:12:12 zappo Exp $
+;; X-RCS: $Id: semanticdb-global.el,v 1.14 2010-07-25 00:01:04 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -64,8 +64,7 @@ in a GNU Global supported hierarchy."
   )
 
 (defun semanticdb-enable-gnu-global-hook ()
-  "Add support for GNU Global in the current buffer via `semantic-init-hook'.
-MODE is the major mode to support."
+  "Add support for GNU Global in the current buffer via `semantic-init-hook'."
   (semanticdb-enable-gnu-global-in-buffer t))
 
 (defclass semanticdb-project-database-global
