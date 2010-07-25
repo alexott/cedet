@@ -3,7 +3,7 @@
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semanticdb-cscope.el,v 1.5 2010-07-25 00:02:17 zappo Exp $
+;; X-RCS: $Id: semanticdb-cscope.el,v 1.6 2010-07-25 00:05:15 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -199,10 +199,10 @@ Like `semanticdb-find-tags-for-completion-method' for cscope."
 ;;; TEST
 ;;
 ;; Here is a testing fcn to try out searches via the Cscope database.
-(defvar semanticdb-test-gnu-cscope-startfile "~/src/cscope-5.7.3/cscope/cscope.c"
+(defvar semanticdb-test-cscope-startfile "~/src/cscope-15.7/src/main.c"
   "File to use for testing.")
 
-(defun semanticdb-test-gnu-cscope (searchfor &optional standardfile)
+(defun semanticdb-test-cscope (searchfor &optional standardfile)
   "Test the CScope semanticdb.
 Argument SEARCHFOR is the text to search for.
 If optional arg STANDARDFILE is non nil, use a standard file w/ cscope enabled."
@@ -211,15 +211,15 @@ If optional arg STANDARDFILE is non nil, use a standard file w/ cscope enabled."
   (save-excursion
     (when standardfile
       (save-match-data
-	(set-buffer (find-file-noselect semanticdb-test-gnu-cscope-startfile))))
+	(set-buffer (find-file-noselect semanticdb-test-cscope-startfile))))
 
     (condition-case err
-	(semanticdb-enable-gnu-cscope-in-buffer)
+	(semanticdb-enable-cscope-in-buffer)
       (error (if standardfile
 		 (error err)
 	       (save-match-data
-		 (set-buffer (find-file-noselect semanticdb-test-gnu-cscope-startfile)))
-	       (semanticdb-enable-gnu-cscope-in-buffer))))
+		 (set-buffer (find-file-noselect semanticdb-test-cscope-startfile)))
+	       (semanticdb-enable-cscope-in-buffer))))
 
     (let* ((db (semanticdb-project-database-cscope "cscope"))
 	   (tab (semanticdb-file-table db (buffer-file-name)))
