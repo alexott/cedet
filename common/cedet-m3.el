@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-m3.el,v 1.9 2010-07-18 21:57:11 zappo Exp $
+;; X-RCS: $Id: cedet-m3.el,v 1.10 2010-07-27 00:18:24 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -415,24 +415,30 @@ ATTRIBUTES are easymenu compatible attributes."
   "Return a list of menu items based on EDE project stats."
   ;; Only create items if EDE is active.
   (when ede-object
-    ;; If the active item is a PROJECT, provide a project level compile.
-    (if (ede-project-child-p ede-object)
-	(list
-	 (cedet-m3-menu-item
-	  (concat "Compile Project: (" (ede-name ede-object) ")")
-	  'ede-compile-project
-	  :active t
-	  :help "Compile the current project with EDE.")
-	 )
-      ;; Else, we can compile a target.
-      (list
-       (cedet-m3-menu-item
-	(concat "Compile Target: (" (ede-name ede-object) ")")
-	'ede-compile-target
-	:active t
-	:help "Compile the current target with EDE.")
-       )
-      )))
+    (let ((objs (if (eieio-object-p ede-object)
+		    (list ede-object)
+		  ede-object))
+	  (items nil))
+      ;; Do this for every target.
+      (dolist (OBJ objs)
+	;; If the active item is a PROJECT, provide a project level compile.
+	(if (ede-project-child-p OBJ)
+	    (setq items
+		  (cons (cedet-m3-menu-item
+			 (concat "Compile Project: (" (ede-name OBJ) ")")
+			 'ede-compile-project
+			 :active t
+			 :help "Compile the current project with EDE.")
+			items))
+	  ;; Else, we can compile a target.
+	  (setq items
+		(cons (cedet-m3-menu-item
+		       (concat "Compile Target: (" (ede-name OBJ) ")")
+		       `(lambda () (interactive) (project-compile-target ,OBJ))
+		       :active t
+		       :help "Compile the current target with EDE.")
+		      items))))
+      items)))
 
 (defun cedet-m3-cogre-items ()
   "Return a list of menu items based on COGRE features."
