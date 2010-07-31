@@ -3,7 +3,7 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-base.el,v 1.4 2010-03-26 22:18:01 xscript Exp $
+;; X-RCS: $Id: ede-base.el,v 1.5 2010-07-31 01:13:08 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -88,11 +88,9 @@ which files this object is interested in."
 		:accessor ede-object-keybindings)
    (menu :allocation :class
 	 :initform ( [ "Debug target" ede-debug-target
-		       (and ede-object
-			    (obj-of-class-p ede-object ede-target)) ]
+		       (ede-buffer-belongs-to-target-p) ]
 		     [ "Run target" ede-run-target
-		       (and ede-object
-			    (obj-of-class-p ede-object ede-target)) ]
+		       (ede-buffer-belongs-to-target-p) ]
 		     )
 	 :documentation "Menu specialized to this type of target."
 	 :accessor ede-object-menu)
@@ -267,9 +265,7 @@ and target specific elements such as build variables.")
 	  "--"
 	  [ "Rescan Project Files" ede-rescan-toplevel t ]
 	  [ "Edit Projectfile" ede-edit-file-target
-	    (and ede-object
-		 (or (listp ede-object)
-		     (not (obj-of-class-p ede-object ede-project)))) ]
+	    (ede-buffer-belongs-to-project-p) ]
 	  )
 	 :documentation "Menu specialized to this type of target."
 	 :accessor ede-object-menu)
