@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede.el,v 1.153 2010-05-18 00:41:51 zappo Exp $
+;; RCS: $Id: ede.el,v 1.154 2010-07-31 01:12:34 zappo Exp $
 (defconst ede-version "1.0"
   "Current version of the Emacs EDE.")
 
@@ -193,6 +193,18 @@ Argument LIST-O-O is the list of objects to choose from."
 		 (cons 'ede-minor-mode ede-minor-keymap))
     ))
 
+(defun ede-buffer-belongs-to-target-p ()
+  "Return non-nil if this buffer belongs to at least one target."
+  (let ((obj ede-object))
+    (if (consp obj)
+	(setq obj (car obj)))
+    (and obj (obj-of-class-p obj ede-target))))
+
+(defun ede-buffer-belongs-to-project-p ()
+  "Return non-nil if this buffer belongs to at least one target."
+  (if (or (null ede-object) (consp ede-object)) nil
+    (obj-of-class-p ede-object ede-project)))
+
 (defun ede-menu-obj-of-class-p (class)
   "Return non-nil if some member of `ede-object' is a child of CLASS."
   (if (listp ede-object)
@@ -254,9 +266,7 @@ Argument MENU-DEF is the menu definition to use."
 	   (and (ede-current-project)
 		(oref (ede-current-project) targets)) ]
 	 [ "Remove File" ede-remove-file
-	   (and ede-object
-		(or (listp ede-object)
-		    (not (obj-of-class-p ede-object ede-project)))) ]
+	   (ede-buffer-belongs-to-project-p) ]
 	 "-")
        (if (not obj)
 	   nil
@@ -1084,7 +1094,7 @@ This includes buffers controlled by a specific target of PROJECT."
 	(pl nil))
     (while bl
       (with-current-buffer (car bl)
-	(if (and ede-object (eq (ede-current-project) project))
+	(if (ede-buffer-belongs-to-project-p)
 	    (setq pl (cons (car bl) pl))))
       (setq bl (cdr bl)))
     pl))
