@@ -7,7 +7,7 @@
 ;;         David Ponce <david@dponce.com>
 ;;         Klaus Berndl <klaus.berndl@sdm.de>
 ;;
-;; X-RCS: $Id: c.by,v 1.62 2010-02-19 02:57:10 zappo Exp $
+;; X-RCS: $Id: c.by,v 1.63 2010-08-05 03:01:00 zappo Exp $
 ;;
 ;; c.by is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -494,7 +494,7 @@ opt-template-specifier
   : template-specifier
     ( ,$1 )
   | ;;EMPTY
-    ()
+    ( )
   ;
 
 template-specifier
@@ -783,7 +783,7 @@ func-decl
           ;; Extra stuff goes in here.
           ;; Continue with the stuff we found in
           ;; this definition
-          $2 $3 $7 $9 $8 ,$1 ,$11 ,$5)
+          $2 $3 $7 $9 $8 ,$1 ,$11 $5 ,$10)
   | opt-stars opt-class opt-destructor functionname
     opt-template-specifier
     opt-under-p
@@ -796,7 +796,7 @@ func-decl
           ;; Extra stuff goes in here.
           ;; Continue with the stuff we found in
           ;; this definition
-          $2 $3 nil $8 $7 ,$1 ,$10 ,$5)
+          $2 $3 nil $8 $7 ,$1 ,$10 $5 ,$9)
   ;
 
 var-decl
