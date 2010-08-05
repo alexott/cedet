@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-ia-utest.el,v 1.32 2010-04-26 22:39:53 zappo Exp $
+;; X-RCS: $Id: semantic-ia-utest.el,v 1.33 2010-08-05 03:03:39 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -201,7 +201,7 @@ If the error occurs w/ a C or C++ file, rethrow the error."
 		(condition-case nil
 		    (semantic-analyze-possible-completions ctxt)
 		  (error nil))))
-	  (setq actual (mapcar 'semantic-tag-name acomp)))
+	  (setq actual (mapcar 'semantic-format-tag-name acomp)))
 
 	(goto-char a)
 
@@ -327,9 +327,12 @@ If the error occurs w/ a C or C++ file, rethrow the error."
 	    ;; We failed.
 	    (setq fail (cons idx fail))
 	    (semantic-ia-utest-log
-	     "    Failed %d.  For %s (Num impls %d) (Num protos %d)"
-	     idx (if ct (semantic-tag-name ct) "<No tag found>")
-	     (length impl) (length proto))
+	     "    Failed %d.  For %S (Impls %S) (Protos %S)"
+	     idx
+	     (if ct (semantic-format-tag-name ct) "<No tag found>")
+	     (mapcar 'semantic-format-tag-name impl)
+	     (mapcar 'semantic-format-tag-name proto)
+	     )
 	    (add-to-list 'semantic-ia-utest-error-log-list
 			 (list (buffer-name) idx)
 			 )
@@ -386,7 +389,7 @@ If the error occurs w/ a C or C++ file, rethrow the error."
 	     tag)
 
       (setq actual-result (semantic-symref-find-references-by-name
-			   (semantic-tag-name tag) 'target
+			   (semantic-format-tag-name tag) 'target
 			   'symref-tool-used))
 
       (if (not actual-result)
