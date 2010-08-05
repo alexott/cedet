@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-ia.el,v 1.37 2010-05-02 12:49:57 zappo Exp $
+;; X-RCS: $Id: semantic-ia.el,v 1.38 2010-08-05 03:03:04 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -241,8 +241,9 @@ Completion options are calculated with `semantic-analyze-possible-completions'."
 	       ;; tag associated with the current context.
 	       (semantic-analyze-interesting-tag ctxt)))
 	)
-    (when pf
-      (message "%s" (semantic-format-tag-summarize pf nil t)))))
+    (if pf
+	(message "%s" (semantic-format-tag-summarize pf nil t))
+      (message "No summary info availalble"))))
 
 ;;; Variants
 ;;
