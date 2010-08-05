@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semanticdb-find.el,v 1.89 2010-03-26 22:18:05 xscript Exp $
+;; X-RCS: $Id: semanticdb-find.el,v 1.90 2010-08-05 03:02:31 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -1046,10 +1046,10 @@ is still made current."
 FCN takes two arguments.  The first is a TAG, and the
 second is a DB from whence TAG originated.
 Returns result."
-  (mapc (lambda (sublst)
-	  (mapc (lambda (tag)
-		  (funcall fcn tag (car sublst)))
-		(cdr sublst)))
+  (mapc (lambda (sublst-icky)
+	  (mapc (lambda (tag-icky)
+		  (funcall fcn tag-icky (car sublst-icky)))
+		(cdr sublst-icky)))
 	result)
   result)
 
