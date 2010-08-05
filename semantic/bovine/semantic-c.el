@@ -3,7 +3,7 @@
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-c.el,v 1.144 2010-04-09 01:54:03 zappo Exp $
+;; X-RCS: $Id: semantic-c.el,v 1.145 2010-08-05 03:01:57 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -1205,6 +1205,7 @@ Optional argument STAR and REF indicate the number of * and & in the typedef."
 					(car tokenpart)))
 			  (and (stringp (car (nth 2 tokenpart)))
 			       (string= (car (nth 2 tokenpart)) (car tokenpart)))
+			  (nth 10 tokenpart) ; initializers
 			  )
 		      (not (car (nth 3 tokenpart)))))
 		(fcnpointer (string-match "^\\*" (car tokenpart)))
@@ -1235,7 +1236,10 @@ Optional argument STAR and REF indicate the number of * and & in the typedef."
 			 (semantic-tag-new-type
 			  ;; name
 			  (or (car semantic-c-classname)
-			      (car (nth 2 tokenpart)))
+			      (let ((split (semantic-analyze-split-name-c-mode
+					    (car (nth 2 tokenpart)))))
+				(if (stringp split) split
+				  (car (last split)))))
 			  ;; type
 			  (or (cdr semantic-c-classname)
 			      "class")
