@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: semantic-analyze-refs.el,v 1.9 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: semantic-analyze-refs.el,v 1.10 2010-08-05 03:00:29 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -97,6 +97,7 @@ Use `semantic-analyze-current-tag' to debug this fcn."
   "Return the implementations derived in the reference analyzer REFS.
 Optional argument IN-BUFFER indicates that the returned tag should be in an active buffer."
   (let ((allhits (oref refs rawsearchdata))
+	(tag (oref refs :tag))
 	(impl nil)
 	)
     (semanticdb-find-result-mapc
@@ -106,7 +107,8 @@ Optional argument IN-BUFFER indicates that the returned tag should be in an acti
 	      (aT (cdr ans))
 	      (aDB (car ans))
 	      )
-	 (when (not (semantic-tag-prototype-p aT))
+	 (when (and (not (semantic-tag-prototype-p aT))
+		    (semantic-tag-similar-p tag aT :prototype-flag :parent))
 	   (when in-buffer (save-excursion (semantic-go-to-tag aT aDB)))
 	   (push aT impl))))
      allhits)
@@ -116,6 +118,7 @@ Optional argument IN-BUFFER indicates that the returned tag should be in an acti
   "Return the prototypes derived in the reference analyzer REFS.
 Optional argument IN-BUFFER indicates that the returned tag should be in an active buffer."
   (let ((allhits (oref refs rawsearchdata))
+	(tag (oref refs :tag))
 	(proto nil))
     (semanticdb-find-result-mapc
      (lambda (T DB)
@@ -124,7 +127,8 @@ Optional argument IN-BUFFER indicates that the returned tag should be in an acti
 	      (aT (cdr ans))
 	      (aDB (car ans))
 	      )
-	 (when (semantic-tag-prototype-p aT)
+	 (when (and (semantic-tag-prototype-p aT)
+		    (semantic-tag-similar-p tag aT :prototype-flag :parent))
 	   (when in-buffer (save-excursion (semantic-go-to-tag aT aDB)))
 	   (push aT proto))))
      allhits)
