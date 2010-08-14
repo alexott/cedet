@@ -3,7 +3,7 @@
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-files.el,v 1.23 2010-07-25 14:03:35 zappo Exp $
+;; X-RCS: $Id: ede-files.el,v 1.24 2010-08-14 14:07:49 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -43,7 +43,7 @@
 There is no completion at the prompt.  FILE is searched for within
 the current EDE project."
   (interactive "sFile: ")
-  (let ((fname (ede-expand-filename (ede-current-project) file))
+  (let ((fname (ede-expand-filename (ede-toplevel) file))
 	)
     (unless fname
       (error "Could not find %s in %s"
