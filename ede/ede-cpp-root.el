@@ -1,9 +1,9 @@
 ;;; ede-cpp-root.el --- A simple way to wrap a C++ project with a single root
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-cpp-root.el,v 1.23 2010-03-26 22:18:01 xscript Exp $
+;; X-RCS: $Id: ede-cpp-root.el,v 1.24 2010-08-19 23:29:09 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -513,6 +513,20 @@ Also set up the lexical preprocessor map."
   "Get the pre-processor map for project THIS."
   (ede-preprocessor-map  (ede-target-parent this)))
 
+;;; Quick Hack
+(defun ede-create-lots-of-projects-under-dir (dir projfile &rest attributes)
+  "Create a bunch of projects under directory DIR.
+PROJFILE is a file name sans directory that indicates a subdirectory
+is a project directory.
+Generic ATTRIBUTES, such as :include-path can be added.
+Note: This needs some work."
+  (let ((files (directory-files dir t)))
+    (dolist (F files)
+      (if (file-exists-p (expand-file-name projfile F))
+	  `(ede-cpp-root-project (file-name-nondirectory F)
+				 :name (file-name-nondirectory F)
+				 :file (expand-file-name projfile F)
+				 attributes)))))
 
 (provide 'ede-cpp-root)
 ;;; ede-cpp-root.el ends here
