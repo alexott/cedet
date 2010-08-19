@@ -1,7 +1,7 @@
 
 \input texinfo   @c -*-texinfo-*-
 @c
-@c $Id: eieio.texi,v 1.66 2010-06-12 00:45:09 zappo Exp $
+@c $Id: eieio.texi,v 1.67 2010-08-19 23:27:15 zappo Exp $
 @c
 
 @c
@@ -620,10 +620,12 @@ Search for methods in the class hierarchy in breadth first order.
 This is the default.
 @item :depth-first
 Search for methods in the class hierarchy in a depth first order.
+@item :c3
+Searches for methods in in a learnarized way that most closely matches
+what CLOS does when CLOS when a monotonic class structure is defined.
 @end table
 
 For more on method invocation order, @ref{Method Invocation}.
-
 
 @item :metaclass
 Unsupported CLOS option.  Enables the use of a different base class other
@@ -1013,7 +1015,36 @@ TODO - Write some more about static methods here
 @node Method Invocation
 @chapter Method Invocation
 
-TODO - writeme
+When classes are defined, you can specify the
+@code{:method-invocation-order}.  This is a feature specific to EIEIO.
+
+This controls the order in which method resolution occurs for
+@code{:primary} methods in cases of multiple inheritance.  The order
+affects which method is called first in a tree, and if
+@code{call-next-method} is used, it controls the order in which the
+stack of methods are run.
+
+The original EIEIO order turned out to be broken for multiple
+inheritance, but some programs depended on it.  As such this option
+was added when the default invocation order was fixed to something
+that made more sense in that case.
+
+Valid values are:
+
+@table @code
+@item :breadth-first
+Search for methods in the class hierarchy in breadth first order.
+This is the default.
+@item :depth-first
+Search for methods in the class hierarchy in a depth first order.
+@item :c3
+Searches for methods in in a learnarized way that most closely matches
+what CLOS does when CLOS when a monotonic class structure is defined.
+
+This is derived from the Dylan language documents by
+Kim Barrett et al.: A Monotonic Superclass Linearization for Dylan
+Retrieved from: http://192.220.96.201/dylan/linearization-oopsla96.html
+@end table
 
 @node Predicates
 @comment  node-name,  next,  previous,  up
