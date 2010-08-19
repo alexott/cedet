@@ -1,12 +1,12 @@
 ;;; semantic-grammar.el --- Major mode framework for Semantic grammars
 ;;
-;; Copyright (C) 2002, 2003, 2004, 2005, 2007, 2008, 2009 David Ponce
+;; Copyright (C) 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 David Ponce
 ;;
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 15 Aug 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic-grammar.el,v 1.79 2010-03-15 13:40:54 xscript Exp $
+;; X-RCS: $Id: semantic-grammar.el,v 1.80 2010-08-19 23:28:10 zappo Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -908,6 +908,12 @@ Lisp code."
         ;; If running interactively, eval declarations and epilogue
         ;; code, then pop to the buffer visiting the generated file.
         (eval-region (point) (point-max))
+	;; Loop over the defvars and eval them explicitly to force
+	;; them to be evaluated and ready to use.
+        (goto-char (point-min))
+	(while (re-search-forward "(defvar " nil t)
+	  (eval-defun nil))
+	;; Move cursor to a logical spot in the generated code.
         (goto-char (point-min))
         (pop-to-buffer (current-buffer))
         ;; The generated code has been evaluated and updated into
@@ -915,7 +921,7 @@ Lisp code."
         ;; have created this language for, and force them to call our
         ;; setup function again, refreshing all semantic data, and
         ;; enabling them to work with the new code just created.
-;;;; FIXME?
+
         ;; At this point, I don't know any user's defined setup code :-(
         ;; At least, what I can do for now, is to run the generated
         ;; parser-install function.
