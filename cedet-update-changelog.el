@@ -3,7 +3,7 @@
 ;;; Copyright (C) 2005, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: cedet-update-changelog.el,v 1.13 2010-02-20 22:57:09 zappo Exp $
+;; X-RCS: $Id: cedet-update-changelog.el,v 1.14 2010-08-22 16:02:21 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -35,15 +35,17 @@
 (require 'cedet)
 ;;; Code:
 
-(defvar cuc-my-machine-name (let ((sn (system-name)))
-			      ;; Only the first part of the name...
-			      (if (string-match "\\." sn)
-				  (concat
-				   (substring sn 0 (match-beginning 0))
-				   "\\("
-				   (substring sn (match-beginning 0))
-				   "\\)?")
-				sn))
+(defvar cuc-my-machine-name 
+  (let* ((sn (system-name))
+	 (ans ;; Only the first part of the name...
+	  (if (string-match "\\." sn)
+	      (concat
+	       (substring sn 0 (match-beginning 0))
+	       "\\("
+	       (substring sn (match-beginning 0))
+	       "\\)?")
+	    sn)))
+    (concat ans "\\|choochoo"))
   "The name of the machine running this code as output by rcs2diff.")
 
 (defvar cuc-dirs
