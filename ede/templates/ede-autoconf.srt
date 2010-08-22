@@ -1,9 +1,9 @@
-;; ede-autoconf.srt --- 
+;; ede-autoconf.srt --- Templates for autoconf used by EDE.
 ;;
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: ede-autoconf.srt,v 1.1 2010-07-24 13:53:35 zappo Exp $
+;; X-RCS: $Id: ede-autoconf.srt,v 1.2 2010-08-22 15:56:54 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
