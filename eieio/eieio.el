@@ -1258,12 +1258,12 @@ IMPL is the symbol holding the method implementation."
 
 (defun eieio-defgeneric (method doc-string)
   "Engine part to `defgeneric' macro defining METHOD with DOC-STRING."
-  (if (and (fboundp method) (not (generic-p method))
-	   (or (byte-code-function-p (symbol-function method))
-	       (not (eq 'autoload (car (symbol-function method)))))
-	   )
-      (error "You cannot create a generic/method over an existing symbol: %s"
-	     method))
+  (when (and (fboundp method) (not (generic-p method))
+	     (or (byte-code-function-p (symbol-function method))
+		 (not (eq 'autoload (car-safe (symbol-function method))))))
+    (error "You cannot create a generic/method over an existing symbol: %s"
+	   method))
+
   ;; Don't do this over and over.
   (unless (fboundp 'method)
     ;; This defun tells emacs where the first definition of this
