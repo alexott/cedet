@@ -112,7 +112,7 @@ bind "f"
 prompt NAME "Name of new variable: "
 
 template variable :blank
-"Inert a variable."
+"Insert a variable."
 ----
 set $?NAME$ "$^$"
 ----
@@ -140,7 +140,7 @@ set application "$^$"
 template context :blank
 "Insert a context statement."
 ----
-context $NAME$
+context $?NAME$
 ----
 bind "c"
 
