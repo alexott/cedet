@@ -35,7 +35,7 @@
 ;;; Code:
 
 (require 'semantic)
-(require 'wisent)
+(require 'semantic/wisent/wisent)
 
 ;;; Lexical analysis
 ;;

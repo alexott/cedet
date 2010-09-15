@@ -22,7 +22,7 @@
 
 (require 'srecode/template)
 (require 'semantic)
-(require 'wisent)
+(require 'semantic/wisent)
 
 ;;; Code:
 (defvar srecode-template-mode-syntax-table

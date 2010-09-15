@@ -43,7 +43,7 @@
 ;;
 
 ;;; Code:
-(require 'wisent)
+(require 'semantic/wisent)
 (require 'working)
 
 ;;;; -------------------

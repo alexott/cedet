@@ -40,7 +40,7 @@
 ;;
 
 ;;; Code:
-(require 'wisent)
+(require 'semantic/wisent)
 (require 'debug)
 
 (defsubst wisent-debug-on-entry-p (function)

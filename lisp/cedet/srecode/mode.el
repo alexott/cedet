@@ -29,7 +29,7 @@
 (require 'srecode/find)
 (require 'srecode/map)
 (require 'senator)
-(require 'wisent)
+(require 'semantic/wisent)
 
 ;;; Code:
 (defcustom global-srecode-minor-mode nil

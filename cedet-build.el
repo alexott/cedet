@@ -164,7 +164,7 @@ OVERRIDE-CHECK to override cedet short-cicuit."
   (save-excursion
     (global-ede-mode 1)
     (require 'semantic-ede-grammar)
-    (require 'wisent))
+    (require 'semantic/wisent))
   (cedet-build-msg "done.\n\n")
 
   ;; Load in the Makefile

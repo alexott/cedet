@@ -42,7 +42,7 @@
 ;;
 
 ;;; Code:
-(provide 'wisent)
+(provide 'semantic/wisent/wisent)
 
 (defgroup wisent nil
   "
