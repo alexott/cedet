@@ -35,7 +35,7 @@
 (require 'srecode/insert)
 (require 'srecode/dictionary)
 (require 'semantic/tag)
-(require 'senator)
+(require 'semantic/senator)
 
 
 ;;; The SEMANTIC TAG inserter

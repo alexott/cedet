@@ -42,7 +42,7 @@
 (eval-when-compile
   (require 'semantic/ctxt)
   (require 'semantic/imenu)
-  (require 'senator))
+  (require 'semantic/senator))
 
 (define-lex-simple-regex-analyzer semantic-erlang-lex-char
   "Detect and create Erlang CHAR tokens."

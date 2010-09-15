@@ -40,7 +40,7 @@
   (require 'semantic/util)
   (require 'semantic/ctxt)
   (require 'semantic/imenu)
-  (require 'senator))
+  (require 'semantic/senator))
 
 ;;;;
 ;;;; Simple parser error reporting function

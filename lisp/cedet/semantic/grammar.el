@@ -37,7 +37,7 @@
 (require 'pp)
 
 (eval-when-compile
-  (require 'senator)
+  (require 'semantic/senator)
   (require 'semantic/edit)
   (require 'semantic/find)
   (require 'semantic/format)

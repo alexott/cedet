@@ -41,7 +41,7 @@
 (eval-when-compile
   (require 'semantic/ctxt)
   (require 'semantic/imenu)
-  (require 'senator))
+  (require 'semantic/senator))
 
 ;;; Code:
 

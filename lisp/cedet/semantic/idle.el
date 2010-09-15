@@ -41,7 +41,7 @@
 (require 'semantic/ctxt)
 (require 'semantic/util-modes)
 (require 'timer)
-(require 'senator) ;; For `senator-menu-item'
+(require 'semantic/senator) ;; For `senator-menu-item'
 
 ;; @TODO - how to make this happen only if someone enables to summary mode?
 (require 'eldoc)

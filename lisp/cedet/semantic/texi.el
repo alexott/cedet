@@ -38,7 +38,7 @@
   (require 'semantic/ctxt)
   (require 'semantic/imenu)
   (require 'semantic/doc)
-  (require 'senator))
+  (require 'semantic/senator))
 
 (defvar semantic-texi-super-regex
   "^@\\(top\\|chapter\\|\\(sub\\)*section\\|unnumbered\\(\\(sub\\)*sec\\)?\\|\

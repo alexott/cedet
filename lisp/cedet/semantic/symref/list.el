@@ -32,7 +32,7 @@
 ;; NOTE: Need to add some refactoring tools.
 
 (require 'semantic/symref)
-(require 'senator)
+(require 'semantic/senator)
 (require 'pulse)
 
 ;;; Code:

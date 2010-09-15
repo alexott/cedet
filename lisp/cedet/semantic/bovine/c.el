@@ -36,7 +36,7 @@
   (require 'semantic/ctxt)
   (require 'semantic/imenu)
   (require 'semantic/tag-ls)
-  (require 'senator)
+  (require 'semantic/senator)
   (require 'cc-mode)
   )
 

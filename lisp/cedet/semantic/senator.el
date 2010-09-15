@@ -3016,6 +3016,6 @@ Use a senator search function when semantic isearch mode is enabled."
 (add-hook 'isearch-mode-hook     'senator-isearch-mode-hook)
 (add-hook 'isearch-mode-end-hook 'senator-isearch-mode-hook)
 
-(provide 'senator)
+(provide 'semantic/senator)
 
 ;;; senator.el ends here

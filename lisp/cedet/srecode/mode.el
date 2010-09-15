@@ -28,7 +28,7 @@
 (require 'srecode/insert)
 (require 'srecode/find)
 (require 'srecode/map)
-(require 'senator)
+(require 'semantic/senator)
 (require 'semantic/wisent)
 
 ;;; Code:
