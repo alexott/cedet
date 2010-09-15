@@ -87,7 +87,7 @@
      (semantic-lex-token class start end))))
 
 ;; Provide auto-generated analyzers and the lexer.
-(require 'semantic/grammar.wy)
+(require 'semantic/grammar-wy)
 
 ;;; Test the lexer
 ;;
