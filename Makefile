@@ -30,14 +30,14 @@ CEDET_HOME="$(CURDIR)"
 
 ## The CEDET's packages installed
 CEDET_ELISP_PACKAGES=\
-common \
-speedbar \
-eieio \
-semantic \
-srecode \
-ede \
-cogre \
-contrib
+lisp/common \
+lisp/speedbar \
+lisp/eieio \
+lisp/semantic \
+lisp/srecode \
+lisp/ede \
+lisp/cogre \
+lisp/contrib
 
 CEDET_PACKAGES=\
 $(CEDET_ELISP_PACKAGES) \
@@ -62,7 +62,7 @@ INFO_DIR=$(PREFIX)/share/info
 INSTALL_INFO=ginstall-info
 
 ############### Internal part of the Makefile ###############
-CEDET_VERSION=$(shell grep "defconst cedet-version" common/cedet.el | cut -d " " -f 3)
+CEDET_VERSION=$(shell grep "defconst cedet-version" lisp/common/cedet.el | cut -d " " -f 3)
 
 CEDET_FILES=Makefile INSTALL cedet-build.el cedet-update-version.el PRERELEASE_CHECKLIST USING_CEDET_FROM_CVS
 DIST_ROOT=cedet-$(CEDET_VERSION)
@@ -102,7 +102,7 @@ $(__BUILD_AUTOLOADS):
 
 recompile: autoloads
 	cd $(CEDET_HOME) && \
-	"$(EMACS)" $(EMACSFLAGS) -l common/cedet.el \
+	"$(EMACS)" $(EMACSFLAGS) -l lisp/common/cedet.el \
 	-f batch-byte-recompile-directory $(CEDET_PACKAGES)
 
 ## Cleanup
@@ -143,7 +143,7 @@ clean-all: clean clean-elc clean-info clean-grammars clean-autoloads
 ## Run the master CEDET unit-test suite.
 .PHONY: utest itest
 utest:
-	$(EMACS) $(EMACSFLAGS) -l "common/cedet.el" -f cedet-utest-batch
+	$(EMACS) $(EMACSFLAGS) -l "lisp/common/cedet.el" -f cedet-utest-batch
 
 itest:
 	cd tests; ./cit-test.sh Make
