@@ -879,8 +879,8 @@ in the distribution:
 nonterminal:
     SYMBOL
     ;; Mid-rule action
-    (setq semantic/grammar.wy--nterm $1
-          semantic/grammar.wy--rindx 0)
+    (setq semantic/grammar-wy--nterm $1
+          semantic/grammar-wy--rindx 0)
     COLON rules SEMI
     ;; End-of-rule action
     (TAG $1 'nonterminal :children $4)

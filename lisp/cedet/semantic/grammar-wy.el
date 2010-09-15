@@ -3,7 +3,7 @@
 ;; Copyright (C) 2002, 2003, 2004 David Ponce
 
 ;; Author: David Ponce <david@dponce.com>
-;; Created: 2004-03-20 12:34:58+0100
+;; Created: 26 Aug 2002
 ;; Keywords: syntax
 
 ;; This file is not part of GNU Emacs.
@@ -28,21 +28,18 @@
 ;; PLEASE DO NOT MANUALLY EDIT THIS FILE!  It is automatically
 ;; generated from the grammar file semantic/grammar.wy.
 
-;;; History:
-;;
-
 ;;; Code:
 
 ;;; Prologue
 ;;
 ;; Current parsed nonterminal name.
-  (defvar semantic-grammar-wy--nterm nil)
+  (defvar semantic/grammar-wy--nterm nil)
   ;; Index of rule in a nonterminal clause.
-  (defvar semantic-grammar-wy--rindx nil)
+  (defvar semantic/grammar-wy--rindx nil)
 
 ;;; Declarations
 ;;
-(defconst semantic-grammar-wy--keyword-table
+(defconst semantic/grammar-wy--keyword-table
   (semantic-lex-make-keyword-table
    '(("%default-prec" . DEFAULT-PREC)
      ("%no-default-prec" . NO-DEFAULT-PREC)
@@ -63,7 +60,7 @@
    'nil)
   "Table of language keywords.")
 
-(defconst semantic-grammar-wy--token-table
+(defconst semantic/grammar-wy--token-table
   (semantic-lex-make-type-table
    '(("punctuation"
       (GT . ">")
@@ -110,7 +107,7 @@
      ("keyword" :declared t)))
   "Table of lexical tokens.")
 
-(defconst semantic-grammar-wy--parse-table
+(defconst semantic/grammar-wy--parse-table
   (progn
     (eval-when-compile
       (require 'semantic/wisent/comp))
@@ -315,7 +312,7 @@
          (list $1)))
        (nonterminal
         ((SYMBOL
-          (setq semantic-grammar-wy--nterm $1 semantic-grammar-wy--rindx 0)
+          (setq semantic/grammar-wy--nterm $1 semantic/grammar-wy--rindx 0)
           COLON rules SEMI)
          (wisent-raw-tag
           (semantic-tag $1 'nonterminal :children $4))))
@@ -331,12 +328,12 @@
        (rule
         ((rhs)
          (let*
-             ((nterm semantic-grammar-wy--nterm)
-              (rindx semantic-grammar-wy--rindx)
+             ((nterm semantic/grammar-wy--nterm)
+              (rindx semantic/grammar-wy--rindx)
               (rhs $1)
               comps prec action elt)
-           (setq semantic-grammar-wy--rindx
-                 (1+ semantic-grammar-wy--rindx))
+           (setq semantic/grammar-wy--rindx
+                 (1+ semantic/grammar-wy--rindx))
            (while rhs
              (setq elt
                    (car rhs)
@@ -345,7 +342,7 @@
              (cond
               ((vectorp elt)
                (if prec
-                   (error "Duplicate %%prec in `%s:%d' rule" nterm rindx))
+                   (error "duplicate %%prec in `%s:%d' rule" nterm rindx))
                (setq prec
                      (aref elt 0)))
               ((consp elt)
@@ -353,8 +350,8 @@
                    (or action comps)
                    (setq comps
                          (cons elt comps)
-                         semantic-grammar-wy--rindx
-                         (1+ semantic-grammar-wy--rindx))
+                         semantic/grammar-wy--rindx
+                         (1+ semantic/grammar-wy--rindx))
                  (setq action
                        (car elt))))
               (t
@@ -411,15 +408,15 @@
      '(grammar prologue epilogue declaration nonterminal rule put_names put_values use_names)))
   "Parser table.")
 
-(defun semantic-grammar-wy--install-parser ()
+(defun semantic/grammar-wy--install-parser ()
   "Setup the Semantic Parser."
   (semantic-install-function-overrides
    '((parse-stream . wisent-parse-stream)))
   (setq semantic-parser-name "LALR"
-        semantic--parse-table semantic-grammar-wy--parse-table
-        semantic-debug-parser-source "semantic/grammar.wy"
-        semantic-flex-keywords-obarray semantic-grammar-wy--keyword-table
-        semantic-lex-types-obarray semantic-grammar-wy--token-table)
+        semantic--parse-table semantic/grammar-wy--parse-table
+        semantic-debug-parser-source "grammar.wy"
+        semantic-flex-keywords-obarray semantic/grammar-wy--keyword-table
+        semantic-lex-types-obarray semantic/grammar-wy--token-table)
   ;; Collect unmatched syntax lexical tokens
   (semantic-make-local-hook 'wisent-discarding-token-functions)
   (add-hook 'wisent-discarding-token-functions
@@ -430,21 +427,21 @@
 ;;
 (require 'semantic/lex)
 
-(define-lex-sexp-type-analyzer semantic-grammar-wy--<sexp>-sexp-analyzer
+(define-lex-sexp-type-analyzer semantic/grammar-wy--<sexp>-sexp-analyzer
   "sexp analyzer for <sexp> tokens."
   "\\="
   'SEXP)
 
-(define-lex-sexp-type-analyzer semantic-grammar-wy--<qlist>-sexp-analyzer
+(define-lex-sexp-type-analyzer semantic/grammar-wy--<qlist>-sexp-analyzer
   "sexp analyzer for <qlist> tokens."
   "\\s'\\s-*("
   'PREFIXED_LIST)
 
-(define-lex-keyword-type-analyzer semantic-grammar-wy--<keyword>-keyword-analyzer
+(define-lex-keyword-type-analyzer semantic/grammar-wy--<keyword>-keyword-analyzer
   "keyword analyzer for <keyword> tokens."
   "\\(\\sw\\|\\s_\\)+")
 
-(define-lex-block-type-analyzer semantic-grammar-wy--<block>-block-analyzer
+(define-lex-block-type-analyzer semantic/grammar-wy--<block>-block-analyzer
   "block analyzer for <block> tokens."
   "\\s(\\|\\s)"
   '((("(" LPAREN PAREN_BLOCK)
@@ -453,24 +450,24 @@
     ("}" RBRACE))
   )
 
-(define-lex-regex-type-analyzer semantic-grammar-wy--<char>-regexp-analyzer
+(define-lex-regex-type-analyzer semantic/grammar-wy--<char>-regexp-analyzer
   "regexp analyzer for <char> tokens."
   semantic-grammar-lex-c-char-re
   nil
   'CHARACTER)
 
-(define-lex-sexp-type-analyzer semantic-grammar-wy--<string>-sexp-analyzer
+(define-lex-sexp-type-analyzer semantic/grammar-wy--<string>-sexp-analyzer
   "sexp analyzer for <string> tokens."
   "\\s\""
   'STRING)
 
-(define-lex-regex-type-analyzer semantic-grammar-wy--<symbol>-regexp-analyzer
+(define-lex-regex-type-analyzer semantic/grammar-wy--<symbol>-regexp-analyzer
   "regexp analyzer for <symbol> tokens."
   ":?\\(\\sw\\|\\s_\\)+"
   '((PERCENT_PERCENT . "\\`%%\\'"))
   'SYMBOL)
 
-(define-lex-string-type-analyzer semantic-grammar-wy--<punctuation>-string-analyzer
+(define-lex-string-type-analyzer semantic/grammar-wy--<punctuation>-string-analyzer
   "string analyzer for <punctuation> tokens."
   "\\(\\s.\\|\\s$\\|\\s'\\)+"
   '((GT . ">")
@@ -491,21 +488,21 @@ It ignores whitespaces, newlines and comments."
   ;; Must detect prologue/epilogue before other symbols/keywords!
   semantic-grammar-lex-prologue
   semantic-grammar-lex-epilogue
-  semantic-grammar-wy--<keyword>-keyword-analyzer
-  semantic-grammar-wy--<symbol>-regexp-analyzer
-  semantic-grammar-wy--<char>-regexp-analyzer
-  semantic-grammar-wy--<string>-sexp-analyzer
+  semantic/grammar-wy--<keyword>-keyword-analyzer
+  semantic/grammar-wy--<symbol>-regexp-analyzer
+  semantic/grammar-wy--<char>-regexp-analyzer
+  semantic/grammar-wy--<string>-sexp-analyzer
   ;; Must detect comments after strings because `comment-start-skip'
   ;; regexp match semicolons inside strings!
   semantic-lex-ignore-comments
   ;; Must detect prefixed list before punctuation because prefix chars
   ;; are also punctuations!
-  semantic-grammar-wy--<qlist>-sexp-analyzer
+  semantic/grammar-wy--<qlist>-sexp-analyzer
   ;; Must detect punctuations after comments because the semicolon can
   ;; be a punctuation or a comment start!
-  semantic-grammar-wy--<punctuation>-string-analyzer
-  semantic-grammar-wy--<block>-block-analyzer
-  semantic-grammar-wy--<sexp>-sexp-analyzer
+  semantic/grammar-wy--<punctuation>-string-analyzer
+  semantic/grammar-wy--<block>-block-analyzer
+  semantic/grammar-wy--<sexp>-sexp-analyzer
   )
 
 (provide 'semantic/grammar-wy)

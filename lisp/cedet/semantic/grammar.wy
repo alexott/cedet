@@ -26,12 +26,12 @@
 
 %{
   ;; Current parsed nonterminal name.
-  (defvar semantic-grammar-wy--nterm nil)
+  (defvar semantic/grammar-wy--nterm nil)
   ;; Index of rule in a nonterminal clause.
-  (defvar semantic-grammar-wy--rindx nil)
+  (defvar semantic/grammar-wy--rindx nil)
   }
 
-;;%package grammar-wy
+;;%package semantic/grammar-wy
 
 %languagemode wy-mode
 
@@ -333,8 +333,8 @@ lifo_symbols:
 ;;
 nonterminal:
     SYMBOL
-    (setq semantic-grammar-wy--nterm $1
-          semantic-grammar-wy--rindx 0)
+    (setq semantic/grammar-wy--nterm $1
+          semantic/grammar-wy--rindx 0)
     COLON rules SEMI
     (TAG $1 'nonterminal :children $4)
   ;
@@ -353,11 +353,11 @@ lifo_rules:
 
 rule:
     rhs
-    (let* ((nterm semantic-grammar-wy--nterm)
-           (rindx semantic-grammar-wy--rindx)
+    (let* ((nterm semantic/grammar-wy--nterm)
+           (rindx semantic/grammar-wy--rindx)
            (rhs   $1)
            comps prec action elt)
-      (setq semantic-grammar-wy--rindx (1+ semantic-grammar-wy--rindx))
+      (setq semantic/grammar-wy--rindx (1+ semantic/grammar-wy--rindx))
       (while rhs
         (setq elt (car rhs)
               rhs (cdr rhs))
@@ -375,8 +375,8 @@ rule:
               ;; a mid-rule action
               (setq comps (cons elt comps)
                     ;; keep rule and action index synchronized
-                    semantic-grammar-wy--rindx
-                    (1+ semantic-grammar-wy--rindx))
+                    semantic/grammar-wy--rindx
+                    (1+ semantic/grammar-wy--rindx))
             ;; the end-of-rule action
             (setq action (car elt))))
          ;; item
@@ -438,21 +438,21 @@ It ignores whitespaces, newlines and comments."
   ;; Must detect prologue/epilogue before other symbols/keywords!
   semantic-grammar-lex-prologue
   semantic-grammar-lex-epilogue
-  semantic-grammar-wy--<keyword>-keyword-analyzer
-  semantic-grammar-wy--<symbol>-regexp-analyzer
-  semantic-grammar-wy--<char>-regexp-analyzer
-  semantic-grammar-wy--<string>-sexp-analyzer
+  semantic/grammar-wy--<keyword>-keyword-analyzer
+  semantic/grammar-wy--<symbol>-regexp-analyzer
+  semantic/grammar-wy--<char>-regexp-analyzer
+  semantic/grammar-wy--<string>-sexp-analyzer
   ;; Must detect comments after strings because `comment-start-skip'
   ;; regexp match semicolons inside strings!
   semantic-lex-ignore-comments
   ;; Must detect prefixed list before punctuation because prefix chars
   ;; are also punctuations!
-  semantic-grammar-wy--<qlist>-sexp-analyzer
+  semantic/grammar-wy--<qlist>-sexp-analyzer
   ;; Must detect punctuations after comments because the semicolon can
   ;; be a punctuation or a comment start!
-  semantic-grammar-wy--<punctuation>-string-analyzer
-  semantic-grammar-wy--<block>-block-analyzer
-  semantic-grammar-wy--<sexp>-sexp-analyzer
+  semantic/grammar-wy--<punctuation>-string-analyzer
+  semantic/grammar-wy--<block>-block-analyzer
+  semantic/grammar-wy--<sexp>-sexp-analyzer
   )
 
 ;;; semantic/grammar.wy ends here

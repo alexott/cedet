@@ -237,10 +237,20 @@ That is tag names plus names defined in tag attribute `:rest'."
            "\n"))
       "")))
 
-(defsubst semantic-grammar-buffer-file (&optional buffer)
-  "Return name of file sans directory BUFFER is visiting.
-No argument or nil as argument means use the current buffer."
-  (file-name-nondirectory (buffer-file-name buffer)))
+(defun semantic-grammar-source-file ()
+  "Hack to generate a meaningful path to describe the file."
+  (let (match)
+    (mapc '(lambda (path)
+             (unless match
+               (when (string-equal path
+                                   (substring (buffer-file-name)
+                                              0 (string-width path)))
+                 (setq match (substring (buffer-file-name)
+                                        (string-width path))))))
+          load-path)
+    (unless match
+      (error "The impossible has happened!"))
+    match))
 
 (defun semantic-grammar-package ()
   "Return the %package value as a string.
@@ -249,10 +259,10 @@ package name derived from the grammar file name.  For example, the
 default package name for the grammar file foo.wy is foo-wy, and for
 foo.by it is foo-by."
   (or (semantic-grammar-first-tag-name 'package)
-      (let* ((file (semantic-grammar-buffer-file))
-             (ext  (file-name-extension file))
-             (i    (string-match (format "\\([.]\\)%s\\'" ext) file)))
-        (concat (substring file 0 i) "-" ext))))
+      (let* ((source (semantic-grammar-source-file))
+             (ext  (file-name-extension source))
+             (i    (string-match (format "\\([.]\\)%s\\'" ext) source)))
+        (concat (substring source 0 i) "-" ext))))
 
 (defsubst semantic-grammar-languagemode ()
   "Return the %languagemode value as a list of symbols or nil."
@@ -475,31 +485,19 @@ Also load the specified macro libraries."
 
 (defsubst semantic-grammar-keywordtable ()
   "Return the variable name of the keyword table."
-  (concat (file-name-sans-extension
-           (semantic-grammar-buffer-file
-            semantic--grammar-output-buffer))
-          "--keyword-table"))
+  (concat package "--keyword-table"))
 
 (defsubst semantic-grammar-tokentable ()
   "Return the variable name of the token table."
-  (concat (file-name-sans-extension
-           (semantic-grammar-buffer-file
-            semantic--grammar-output-buffer))
-          "--token-table"))
+  (concat package "--token-table"))
 
 (defsubst semantic-grammar-parsetable ()
   "Return the variable name of the parse table."
-  (concat (file-name-sans-extension
-           (semantic-grammar-buffer-file
-            semantic--grammar-output-buffer))
-          "--parse-table"))
+  (concat package "--parse-table"))
 
 (defsubst semantic-grammar-setupfunction ()
   "Return the name of the parser setup function."
-  (concat (file-name-sans-extension
-           (semantic-grammar-buffer-file
-            semantic--grammar-output-buffer))
-          "--install-parser"))
+  (concat package "--install-parser"))
 
 (defmacro semantic-grammar-as-string (object)
   "Return OBJECT as a string value."
@@ -613,7 +611,7 @@ The symbols in the list are local variables in
 (defun semantic-grammar-header ()
   "Return text of a generated standard header."
   (let ((file package-output)
-        (gram (semantic-grammar-buffer-file))
+        (gram (semantic-grammar-source-file))
         (vcid (concat "$" "Id" "$")) ;; Avoid expansion
         ;; Try to get the copyright from the input grammar, or
         ;; generate a new one if not found.
@@ -745,11 +743,8 @@ Block definitions are read from the current table of lexical types."
     ;; explicitly declared in a %type statement, and if at least the
     ;; syntax property has been provided.
     (when (and declared syntax)
-      (setq prefix (file-name-sans-extension
-                    (semantic-grammar-buffer-file
-                     semantic--grammar-output-buffer))
-            mtype (or (get type 'matchdatatype) 'regexp)
-            name (intern (format "%s--<%s>-%s-analyzer" prefix type mtype))
+      (setq mtype (or (get type 'matchdatatype) 'regexp)
+            name (intern (format "%s--<%s>-%s-analyzer" package type mtype))
             doc (format "%s analyzer for <%s> tokens." mtype type))
       (cond
        ;; Regexp match analyzer
@@ -1293,7 +1288,7 @@ the change bounds to encompass the whole nonterminal tag."
          ;; simplifying our keywords significantly
          ((?_ . "w") (?- . "w"))))
   ;; Setup Semantic to parse grammar
-  (semantic-grammar-wy--install-parser)
+  (semantic/grammar-wy--install-parser)
   (setq semantic-lex-comment-regex ";;"
         semantic-lex-analyzer 'semantic-grammar-lexer
         semantic-type-relation-separator-character '(":")
