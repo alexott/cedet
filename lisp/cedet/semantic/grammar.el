@@ -927,7 +927,7 @@ Lisp code."
          (semantic-grammar-languagemode)))
       )
     ;; Return the name of the generated package file.
-    output))
+    package-output))
 
 (defun semantic-grammar-recreate-package ()
   "Unconditionally create Lisp code from grammar in current buffer.
