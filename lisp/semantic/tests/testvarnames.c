@@ -32,7 +32,7 @@ struct inline2struct {
 /* Structures with names that then declare variables
  * should also be completable.
  *
- * Getting this to work is the bugfix in semantic-c.el CVS v 1.122
+ * Getting this to work is the bugfix in semantic/bovine/c.el CVS v 1.122
  */
 struct inlinestruct in_var1;
 struct inline2struct in_var2;

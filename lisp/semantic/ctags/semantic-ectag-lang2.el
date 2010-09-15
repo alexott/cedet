@@ -26,7 +26,7 @@
 ;; already have a regular Semantic parser.  These parsers can be used
 ;; on files not in buffers.
 
-(require 'semantic-fw)
+(require 'semantic/fw)
 (require 'semantic-ectag-parse)
 
 ;;; Code:

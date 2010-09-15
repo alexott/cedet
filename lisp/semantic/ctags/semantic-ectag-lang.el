@@ -28,7 +28,7 @@
 ;;  * Specification of tag 'kind' to get
 ;;  * Signature parsing.
 
-(require 'semantic-fw)
+(require 'semantic/fw)
 (require 'semantic-ectag-parse)
 
 ;;; Code:

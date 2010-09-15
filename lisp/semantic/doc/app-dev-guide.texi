@@ -2641,7 +2641,7 @@ a summary of the return value.  This is useful when debugging.
 @c Execute the below line with C-x C-e
 @c
 
-@c (progn (require 'semantic-analyze) (eieiodoc-class semantic-analyze-context "analyze"))
+@c (progn (require 'semantic/analyze) (eieiodoc-class semantic-analyze-context "analyze"))
 
 NOTE: Need to regenerate this section
 

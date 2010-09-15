@@ -78,7 +78,7 @@ class longclasslist(xx.yyy,
     foo=1
                     
 
-# wisent-python.wy chokes on this! -ryk 6/17/02
+# semantic/wisent/python.wy chokes on this! -ryk 6/17/02
 
 class HTTPServer(xxx.yyy):
     allow_reuse_address = 1    # Seems to make sense in testing environment

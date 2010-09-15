@@ -94,11 +94,11 @@
 
 ;;; Code:
 (require 'semantic)
-(require 'semantic-ctxt)
-(require 'semantic-imenu)
+(require 'semantic/ctxt)
+(require 'semantic/imenu)
 (eval-when-compile
-  (require 'semanticdb)
-  (require 'semanticdb-find)
+  (require 'semantic/db)
+  (require 'semantic/db-find)
   (require 'cl)
   )
 

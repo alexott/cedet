@@ -265,7 +265,7 @@ arguments as the entry created with @code{define-overload}.
 
 One way to overload @code{semantic-parse-region} is via
 @code{semantic-install-function-overrides}.
-An example from @file{semantic-texi.el} file is shown below:
+An example from @file{semantic/texi.el} file is shown below:
 
 @example
 (defun semantic-default-texi-setup ()
@@ -290,7 +290,7 @@ without the leading @i{semantic-} prefix.
 
 Another way to over-ride a built-in @semantic{} function is via
 @code{define-mode-overload-implementation}.
-An example from @file{wisent-python.el} file is shown below.
+An example from @file{semantic/wisent/python.el} file is shown below.
 
 @example
 (define-mode-overload-implementation
@@ -1030,7 +1030,7 @@ non-regular languages, or external programs for speed.
 @node External Parsers
 @section External Parsers
 
-The texinfo parser in @file{semantic-texi.el} is an example of an
+The texinfo parser in @file{semantic/texi.el} is an example of an
 external parser.  To make your parser work, you need to have a setup
 function to replace the regular region parsing mechanism.
 

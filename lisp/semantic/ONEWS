@@ -27,7 +27,7 @@
 
 ** User Visible Features
 
-*** semantic-load.el simplifies installation.
+*** semantic/load.el simplifies installation.
 
 *** Added partial reparseing of buffers where only token contents have changed.
 
@@ -48,7 +48,7 @@
 
 *** Added semantic-scm for parsing Scheme (guile) scripts
 
-*** semantic-el now has a much faster Emacs Lisp parser.
+*** semantic.el now has a much faster Emacs Lisp parser.
     It uses the built in Emacs read command.
 
 *** semantic-c updates
@@ -79,7 +79,7 @@
 
 **** java.bnf from JDE by Paul Kinnucan and David Ponce
 
-**** semantic-java.el derived from JDE.
+**** semantic/bovine/java.el derived from JDE.
 
 **** eldoc support in bnf modes.
 

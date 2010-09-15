@@ -197,7 +197,7 @@ Code Completion, Smart Jump, Context Sensitive Help:  Semantic
   * Symbol Reference tools
 
   The Semantic Manual can help setup and use a wide suite of these tools.
-  For CEDET distributed independently of Emacs, see semantic-load.el
+  For CEDET distributed independently of Emacs, see semantic/load.el
 
 Code Generation, Template Insertion:  SRecode
   SRecode, or the Semantic Re-Coder is a template system for code generation.

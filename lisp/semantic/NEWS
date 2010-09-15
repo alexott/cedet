@@ -126,7 +126,7 @@ table.
 
 *** Lexical support for a pre-processor
 
-semantic-lex-spp.el is a new library for handling preprocessor style
+semantic/lex-spp.el is a new library for handling preprocessor style
 commands at lexical analysis time.  You can create ifdef/else/end
 style blocks which will cut out lexical tokens that aren't to be
 processed, and also substitue named symbols with other lexical values.
@@ -338,7 +338,7 @@ is showing.
 
 * Database.
 
-** semanticdb.el
+** semantic/db.el
 
 *** `semanticdb-abstract-table'
 New base class for all tables of tokens lists.
@@ -349,7 +349,7 @@ Inherits from the abstract table.
 *** `semanticdb-project-database'
 No longer saves itself to a file.
 
-** semanticdb-file.el
+** semantic/db-file.el
 New routines for databases saved to disk in plain EIEIO save files.
 Depends on `inversion' for save file compatibility tests.
 
@@ -360,10 +360,10 @@ File based project database type.
 New command to tidy up cache files against directories that no longer
 exist.
 
-** semanticdb-search.el
+** semantic/db-search.el
 All old search routines have been moved into this file.
 All old search routines are now methods on database projects.
-All old search routines have been obsoleted.  Use semanticdb-find.el
+All old search routines have been obsoleted.  Use semantic/db-find.el
 based routines instead.  These functions are still maintained because
 the semanticdb-find based routines do not yet handle all the same
 search paramters as the old routines.
@@ -379,7 +379,7 @@ Searches in databases have been broken into three classes.
 - Generic search - Takes a predicate.  System databases cannot usually
   support this style of search.
 
-** semanticdb-find.el
+** semantic/db-find.el
 New prefered search routines which start with `semanticdb-find...'.
 These routines take fewer parameters.  There are more types of search
 routines than before to make up for the missing parameters.
@@ -414,14 +414,14 @@ semanticdb-find-result-nth
 Find results can be passed into any semanticdb-find routine as the
 path and only those results will be scanned.
 
-*** New types of searches not originally in semanticdb-search.el
+*** New types of searches not originally in semantic/db-search.el
 
 **** semanticdb-find-*-by-name-for-completion
 Searches "for completion" use different matching constraints
 equivalent to the regular expression "^chars", which provide a speed
 improvement.
 
-** semanticdb-system.el
+** semantic/db-system.el
 Representation of a database belonging to system libraries.
 These databases may not come from source code, and can represent
 object files, header file libraries and the like.
@@ -436,7 +436,7 @@ Baseclass for any system database.
 *** `semanticdb-project-database-system-c'
 Class for C libraries of header files.
 
-** semanticdb-el.el
+** semantic/db-el.el
 Special system database representing Emacs' internal state.
 Implements all search routines optimized as much as possible.
 
@@ -446,7 +446,7 @@ Table representing search results for Emacs Lisp symbols.
 *** `semanticdb-project-database-emacs-lisp'
 Database representing Emacs' internal symbol obarray.
 
-** semanticdb-ebrowse.el
+** semantic/db-ebrowse.el
 Special system database using ebrowse as a backend for providing C/C++
 tagging information.
 
@@ -543,8 +543,8 @@ There is now excellent smart completion support.
 
 ** Emacs lisp parser improved.
 The Emacs Lisp parser is now more flexible.  Using the new macros
-`semantic-elisp-setup-form-parser' and
-`semantic-elisp-reuse-form-parser', it is easy to parse all kind of
+`semantic.elisp-setup-form-parser' and
+`semantic.elisp-reuse-form-parser', it is easy to parse all kind of
 Lisp forms to produce semantic tags.
 
 ** Texinfo parser improved

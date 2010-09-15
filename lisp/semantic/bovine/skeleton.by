@@ -26,7 +26,7 @@
 ;; Replace start, and scopestart names with something apropriate for
 ;; your language.
 
-%package semantic-skeleton-by
+%package skeleton-by
 
 %languagemode  skeleton-mode
 %start         starting_rule

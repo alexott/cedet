@@ -28,12 +28,12 @@
 
 ;;; Code:
 
-(require 'semantic-wisent)
+(require 'semantic/wisent)
 (require 'wisent-php-wy)
 (eval-when-compile
-  (require 'semantic-util)
-  (require 'semantic-ctxt)
-  (require 'semantic-imenu)
+  (require 'semantic/util)
+  (require 'semantic/ctxt)
+  (require 'semantic/imenu)
   (require 'senator))
 
 ;;;;

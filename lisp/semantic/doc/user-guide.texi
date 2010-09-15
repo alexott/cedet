@@ -118,13 +118,13 @@ Speedbar supports the display of tags through the Semantic parser.  To
 use this utility, add a line like this to your @file{.emacs} file:
 
 @example
-(add-hook 'speedbar-load-hook (lambda () (require 'semantic-sb)))
+(add-hook 'speedbar-load-hook (lambda () (require 'semantic/sb)))
 @end example
 
 or you can simply add:
 
 @example
-(require 'semantic-sb)
+(require 'semantic/sb)
 @end example
 
 Once installed, speedbar will use semantic to find tags, and will
@@ -132,7 +132,7 @@ display them appropriately.  Tags from semantic will have additional
 details which can be seen, such as return type, or arguments to
 functions.
 
-If you use @file{semantic-load.el}, you do not need to add the above
+If you use @file{semantic/load.el}, you do not need to add the above
 lines in your @file{.emacs} file.
 
 Two additional speedbar modes are described in @ref{Speedbar Analysis}
@@ -171,7 +171,7 @@ Also supported is @dfn{which-func-mode}.  This usually uses imenu
 tags to show the current function.  The semantic support for this
 function uses overlays, which is much faster.
 
-If you use @file{semantic-load.el}, you do not need to add the above
+If you use @file{semantic/load.el}, you do not need to add the above
 lines in your @file{.emacs} file.
 
 You can customize imenu with the following options:
@@ -417,7 +417,7 @@ use this:
 (add-hook 'semantic-init-hooks 'senator-minor-mode)
 @end example
 
-If you use @file{semantic-load.el}, you do not need to add the above
+If you use @file{semantic/load.el}, you do not need to add the above
 lines in your @file{.emacs} file.
 
 To customize navigation around different types of tokens, use the
@@ -508,7 +508,7 @@ in a buffer.
 @node Smart Completion
 @section Smart Completion
 
-The file @file{semantic-ia.el} contains two commands for performing
+The file @file{semantic/ia.el} contains two commands for performing
 smart completion using the analysis library.  Analysis to calculate
 these completions are done through the analyzer and completion
 mechanism.  These functions just provide commands that can be bound
@@ -907,7 +907,7 @@ replace the standard grep-like interface available with GNU Global.
 It is meant to be a starting point for tools that can take advantage
 of reference information.
 
-To add support for a new tool, use semantic-symref-global.el as a
+To add support for a new tool, use semantic/symref/global.el as a
 starting point.  Then update @code{semantic-symref-tool-alist} to
 allow the new tool to be detected.
 
@@ -1325,11 +1325,11 @@ alternate form of persistent storage.
 To use semanticdb, add the following to your @file{.emacs} file:
 
 @example
-(require 'semanticdb)
+(require 'semantic/db)
 (global-semanticdb-minor-mode 1)
 @end example
 
-If you use @file{semantic-load.el}, or the default CEDET install
+If you use @file{semantic/load.el}, or the default CEDET install
 mechanism, you do not need to add the above lines in your
 @file{.emacs} file.
 
@@ -1814,10 +1814,10 @@ show parser state mode
 @section Profiling
 
 To help identify speed issues with the @semantic{} analyzer, you can
-use the @file{semantic-elp.el} tool.  To use it type:
+use the @file{semantic.elp.el} tool.  To use it type:
 
 @example
-M-x semantic-elp-analyze RET
+M-x semantic.elp-analyze RET
 @end example
 
 It will do a full run for each stage of analysis keeping profiling
@@ -1831,7 +1831,7 @@ navigate through the results.
 Use @kbd{SPC} to open sections of the tree.  Use @kbd{SPC} on the sort
 option to change sorting of the results table.
 
-Use @kbd{M-x semantic-elp-load-old-run} to restore an old run and view
+Use @kbd{M-x semantic.elp-load-old-run} to restore an old run and view
 it again.
 
 @node GNU Free Documentation License

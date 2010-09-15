@@ -1642,7 +1642,7 @@ After parsing completes, it results in a tree of expanded tags.
 
 The following example is a snippet of the iterative style Java grammar
 provided in the @semantic{} distribution in the file
-@file{wisent-java-tags.wy}.
+@file{semantic/wisent/java-tags.wy}.
 
 @example
 @group
@@ -1713,7 +1713,7 @@ grammar start nonterminal.
 
 The following example is a snippet of the Bison style Java grammar
 provided in the @semantic{} distribution in the file
-@file{wisent-java.wy}.
+@file{semantic/wisent/java.wy}.
 
 @example
 @group

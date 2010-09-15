@@ -3,8 +3,8 @@
 top=
 ede_FILES=Project.ede Makefile
 
-example_MISC=semantic-skel.el skeleton.bnf
-init_LISP=semantic-load.el
+example_MISC=semantic/bovine/skel.el skeleton.bnf
+init_LISP=semantic/load.el
 DISTDIR=$(top)semantic-$(VERSION)
 
 # really goofy & variables tabs

@@ -39,7 +39,7 @@
 
 
 ;;; Code:
-(require 'semantic-wisent)
+(require 'semantic/wisent)
 (require 'semantic)
 (require 'wisent-dot-wy)
 

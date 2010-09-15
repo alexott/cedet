@@ -25,7 +25,7 @@
 ;; Basic SRecode support for COGRE related activities.
 
 (require 'srecode)
-(require 'srecode-dictionary)
+(require 'srecode/dictionary)
 
 ;;; Code:
 ;;;###autoload
@@ -40,7 +40,7 @@
       (error "Unable to location COGRE Templates directory"))
 
     ;; Rig up the map.
-    (require 'srecode-map)
+    (require 'srecode/map)
     (add-to-list 'srecode-map-load-path tmpdir)
     (srecode-map-update-map t)
     

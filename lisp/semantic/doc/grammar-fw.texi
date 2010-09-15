@@ -872,15 +872,15 @@ There is no way to set the value of the entire rule with a mid-rule
 action.  The only way to set the value for the entire rule is with an
 ordinary action at the end of the rule.
 
-Here is an example taken from the @file{semantic-grammar.wy} grammar
+Here is an example taken from the @file{semantic/grammar.wy} grammar
 in the distribution:
 
 @example
 nonterminal:
     SYMBOL
     ;; Mid-rule action
-    (setq semantic-grammar-wy--nterm $1
-          semantic-grammar-wy--rindx 0)
+    (setq semantic/grammar.wy--nterm $1
+          semantic/grammar.wy--rindx 0)
     COLON rules SEMI
     ;; End-of-rule action
     (TAG $1 'nonterminal :children $4)

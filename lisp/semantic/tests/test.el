@@ -10,7 +10,7 @@
 ;; tags encapsulated in eval-when-compile and eval-and-compile
 ;; should be expanded out into the outer environment.
 (eval-when-compile
-  (require 'semantic-imenu)
+  (require 'semantic/imenu)
   )
 
 (eval-and-compile

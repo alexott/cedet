@@ -47,7 +47,7 @@
   (require 'eieio "eieio.el")
   (require 'ede "ede.el"))
 
-(require 'ede-make)
+(require 'ede/make)
 (require 'makefile-edit)
 (require 'autoconf-edit)
 (require 'semantic) ;; for semantic-find-tags-by-...
@@ -55,9 +55,9 @@
 ;; (declare-function 'semantic-find-tags-by-class "semantic-find")
 ;; (declare-function 'semantic-find-tags-by-name-regexp "semantic-find")
 
-(eval-when-compile (require 'ede-speedbar "ede-speedbar.el"))
+(eval-when-compile (require 'ede-speedbar "ede/speedbar.el"))
 (eval-when-compile (require 'compile)
-		   (require 'ede-shell))
+		   (require 'ede/shell))
 
 ;;; Code:
 (defgroup project-am nil
@@ -405,7 +405,7 @@ Argument COMMAND is the command to use for compiling the target."
 	(cmd nil))
     (unwind-protect
 	(progn
-	  (require 'ede-shell)
+	  (require 'ede/shell)
 	  (set-buffer tb)
 	  (setq default-directory dd)
 	  (setq cmd (read-from-minibuffer
@@ -422,7 +422,7 @@ Argument COMMAND is the command to use for compiling the target."
 	(cmd nil))
     (unwind-protect
 	(progn
-	  (require 'ede-shell)
+	  (require 'ede/shell)
 	  (set-buffer tb)
 	  (setq default-directory dd)
 	  (setq cmd (read-from-minibuffer

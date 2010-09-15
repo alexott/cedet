@@ -53,6 +53,6 @@ fi
 
 files=$*
 
-exec $emacs -batch -l "${loadpath}/semanticdb-mk.el" $files
+exec $emacs -batch -l "${loadpath}/semantic/db-mk.el" $files
 
 #end
