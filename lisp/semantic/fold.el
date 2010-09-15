@@ -4,7 +4,6 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic/fold.el,v 1.7 2010-04-09 02:00:05 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 

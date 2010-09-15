@@ -5,7 +5,6 @@
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Version: 1.0
 ;; Keywords: speedbar, rpm
-;; X-RCS: $Id: rpm.el,v 1.11 2005-09-30 20:25:46 zappo Exp $
 
 ;; This file is part of GNU Emacs.
 

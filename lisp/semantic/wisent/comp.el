@@ -8,7 +8,6 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 30 January 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic/wisent/comp.el,v 1.30 2010-04-09 02:08:59 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 

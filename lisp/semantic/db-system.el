@@ -4,7 +4,6 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semantic/db-system.el,v 1.15 2010-04-09 01:52:15 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 

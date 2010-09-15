@@ -5,7 +5,6 @@
 ;; Author: David Ponce <david@dponce.com>
 ;; Created: 2003-08-01 15:51:49+0200
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic/bovine/skeleton-by.el,v 1.2 2005-09-30 20:22:37 zappo Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;

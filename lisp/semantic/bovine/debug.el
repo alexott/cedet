@@ -3,7 +3,6 @@
 ;;; Copyright (C) 2003 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic/bovine/debug.el,v 1.5 2009-09-11 18:55:48 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 

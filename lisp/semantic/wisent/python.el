@@ -7,7 +7,6 @@
 ;; Maintainer: Richard Kim <ryk@dspwiz.com>
 ;; Created: June 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic/wisent/python.el,v 1.56 2010-03-26 22:18:06 xscript Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;

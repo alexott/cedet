@@ -6,7 +6,6 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 28 Oct 2004
 ;; Keywords: status
-;; X-RCS: $Id: fame.el,v 1.3 2005-09-30 20:07:29 zappo Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;

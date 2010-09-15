@@ -4,7 +4,6 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semantic/db-el.el,v 1.37 2010-03-26 22:18:05 xscript Exp $
 
 ;; This file is not part of GNU Emacs.
 

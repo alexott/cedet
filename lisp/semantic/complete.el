@@ -4,7 +4,6 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic/complete.el,v 1.71 2010-06-06 15:46:08 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 

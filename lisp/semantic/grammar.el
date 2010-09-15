@@ -6,7 +6,6 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 15 Aug 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic/grammar.el,v 1.80 2010-08-19 23:28:10 zappo Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;
@@ -551,7 +550,6 @@ Typically a DEFINE expression should look like this:
 ;; Author: " user-full-name " <" user-mail-address ">
 ;; Created: " date "
 ;; Keywords: syntax
-;; X-RCS: " vcid "
 
 ;; This file is not part of GNU Emacs.
 ;;

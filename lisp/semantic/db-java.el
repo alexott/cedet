@@ -5,7 +5,6 @@
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;;Joakim Verona joakim@verona.se
 ;; Keywords: tags
-;; X-RCS: $Id: semantic/db-java.el,v 1.7 2009-08-31 01:53:13 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 

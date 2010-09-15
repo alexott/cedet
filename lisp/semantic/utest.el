@@ -3,7 +3,6 @@
 ;;; Copyright (C) 2003, 2004, 2007, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic/utest.el,v 1.17 2010-04-18 21:44:04 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 

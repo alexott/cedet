@@ -6,7 +6,6 @@
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 26 Aug 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic/bovine/grammar.el,v 1.21 2009-01-10 00:16:26 zappo Exp $
 ;;
 ;; This file is not part of GNU Emacs.
 ;;

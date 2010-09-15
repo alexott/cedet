@@ -4,7 +4,6 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semantic/db-find.el,v 1.90 2010-08-05 03:02:31 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 

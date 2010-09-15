@@ -4,7 +4,6 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: navigation
-;; X-RCS: $Id: fsum.el,v 1.2 2005-09-30 20:25:43 zappo Exp $
 
 ;; This file is part of GNU Emacs.
 

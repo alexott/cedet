@@ -4,7 +4,6 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: codegeneration
-;; X-RCS: $Id: srecode.el,v 1.9 2010-04-18 21:49:28 zappo Exp $
 
 (eval-and-compile
   ;; Other package depend on this value at compile time via inversion.

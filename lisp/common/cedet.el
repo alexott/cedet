@@ -7,7 +7,6 @@
 ;; Maintainer: CEDET developers <http://sf.net/projects/cedet>
 ;; Created: 09 Dec 2002
 ;; Keywords: syntax
-;; X-RCS: $Id: cedet.el,v 1.42 2010-07-17 13:34:12 zappo Exp $
 
 ;; This file is not part of Emacs
 

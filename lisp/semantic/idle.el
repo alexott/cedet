@@ -4,7 +4,6 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
-;; X-RCS: $Id: semantic/idle.el,v 1.75 2010-05-21 23:05:13 scymtym Exp $
 
 ;; This file is not part of GNU Emacs.
 

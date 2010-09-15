@@ -3,7 +3,6 @@
 ;;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: cedet-ediff.el,v 1.4 2010-06-06 15:34:10 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 

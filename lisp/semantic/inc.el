@@ -3,7 +3,6 @@
 ;;; Copyright (C) 2000 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic/inc.el,v 1.2 2005-09-30 20:20:50 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 

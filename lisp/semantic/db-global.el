@@ -4,7 +4,6 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
-;; X-RCS: $Id: semantic/db-global.el,v 1.14 2010-07-25 00:01:04 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
