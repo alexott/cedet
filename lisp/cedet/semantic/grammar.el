@@ -602,8 +602,7 @@ The symbols in the list are local variables in
 
 (defun semantic-grammar-header ()
   "Return text of a generated standard header."
-  (let ((file (semantic-grammar-buffer-file
-               semantic--grammar-output-buffer))
+  (let ((file package-output)
         (gram (semantic-grammar-buffer-file))
         (date (format-time-string "%Y-%m-%d %T%z"))
         (vcid (concat "$" "Id" "$")) ;; Avoid expansion
@@ -622,9 +621,8 @@ The symbols in the list are local variables in
 
 (defun semantic-grammar-footer ()
   "Return text of a generated standard footer."
-  (let* ((file (semantic-grammar-buffer-file
-                semantic--grammar-output-buffer))
-         (libr (file-name-sans-extension file))
+  (let* ((file package-output)
+         (libr package)
 	 (out ""))
     (dolist (S semantic-grammar-footer-template)
       (cond ((stringp S)
@@ -816,9 +814,10 @@ Lisp code."
          ;; the grammar parsed tree in current buffer, that is before
          ;; switching to the output file.
          (package  (semantic-grammar-package))
-         (output   (concat package ".el"))
+         (package-output (concat package ".el"))
+         (file-output    (file-name-nondirectory package-output))
          (semantic--grammar-input-buffer  (current-buffer))
-         (semantic--grammar-output-buffer (find-file-noselect output))
+         (semantic--grammar-output-buffer (find-file-noselect file-output))
          (header   (semantic-grammar-header))
          (prologue (semantic-grammar-prologue))
          (epilogue (semantic-grammar-epilogue))
