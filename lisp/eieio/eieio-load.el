@@ -28,7 +28,7 @@
 
 ;;; EIEIO autoloads
 ;;
-(load "eieio-loaddefs" nil t)
+(load "eieio/loaddefs" nil t)
 
 (provide 'eieio-load)
 

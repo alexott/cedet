@@ -28,7 +28,7 @@
 
 ;;; Speedbar autoloads
 ;;
-(load "speedbar-loaddefs" nil t)
+(load "speedbar/loaddefs" nil t)
 
 (provide 'speedbar-load)
 

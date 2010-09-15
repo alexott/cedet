@@ -28,7 +28,7 @@
 
 ;;; COGRE autoloads
 ;;
-(load "cogre-loaddefs" nil t)
+(load "cogre/loaddefs" nil t)
 
 (provide 'cogre-load)
 

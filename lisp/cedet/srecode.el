@@ -48,7 +48,7 @@
 
 (require 'eieio)
 (require 'mode-local)
-(load "srecode-loaddefs" nil t)
+(load "srecode/loaddefs" nil t)
 
 ;;; Code:
 (defgroup srecode nil

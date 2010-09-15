@@ -35,7 +35,7 @@
 
 ;;; EDE autoloads
 ;;
-(load "ede-loaddefs" nil t)
+(load "ede/loaddefs" nil t)
 
 (provide 'ede/load)
 

@@ -29,7 +29,7 @@
 
 ;;; Contrib autoloads
 ;;
-(load "contrib-loaddefs" nil t)
+(load "contrib/loaddefs" nil t)
 
 (provide 'cedet-contrib-load)
 

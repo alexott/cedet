@@ -29,7 +29,7 @@
 
 ;;; Common autoloads
 ;;
-(load "cedet-loaddefs" nil t)
+(load "cedet/loaddefs" nil t)
 (require 'cedet-compat)
 
 (provide 'cedet-load)
