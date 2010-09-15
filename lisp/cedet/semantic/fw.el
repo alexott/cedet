@@ -310,10 +310,10 @@ will throw a warning when it encounters this symbol."
 
 ;;; Semantic autoloads
 ;;
-;; Load semantic-loaddefs after compatibility code, to allow to use it
+;; Load semantic/loaddefs after compatibility code, to allow to use it
 ;; in autoloads without infinite recursive load problems.
 (require 'eieio)
-(load "semantic-loaddefs" nil t)
+(load "semantic/loaddefs" nil t)
 
 ;;; Help debugging
 ;;
