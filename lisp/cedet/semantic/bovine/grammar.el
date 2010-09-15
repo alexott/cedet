@@ -210,7 +210,7 @@ have matching criteria.
 LAMBDA is a lambda expression which is evaled with the text of the
 type when it is found.  It is passed the list of all buffer text
 elements found since the last lambda expression.  It should return a
-semantic.element (see below.)
+semantic element (see below.)
 
 For consistency between languages, try to use common return values
 from your parser.  Please reference the chapter \"Writing Parsers\" in

@@ -983,7 +983,7 @@ See also the variable `semantic-grammar-file-regexp'."
         ;; Remove vc from find-file-hooks.  It causes bad stuff to
         ;; happen in Emacs 20.
         (find-file-hooks (delete 'vc-find-file-hook find-file-hooks)))
-    (message "Compiling Grammars from: %s" (locate-library "semantic-grammar"))
+    (message "Compiling Grammars from: %s" (locate-library "semantic/grammar"))
     (dolist (arg command-line-args-left)
       (unless (and arg (file-exists-p arg))
         (error "Argument %s is not a valid file name" arg))
@@ -1146,12 +1146,12 @@ END is the limit of the search."
 (defvar semantic-grammar-map
   (let ((km (make-sparse-keymap)))
 
-    (define-key km "|" 'semantic/grammar.electric-punctuation)
-    (define-key km ";" 'semantic/grammar.electric-punctuation)
-    (define-key km "%" 'semantic/grammar.electric-punctuation)
-    (define-key km "(" 'semantic/grammar.electric-punctuation)
-    (define-key km ")" 'semantic/grammar.electric-punctuation)
-    (define-key km ":" 'semantic/grammar.electric-punctuation)
+    (define-key km "|" 'semantic-grammar-electric-punctuation)
+    (define-key km ";" 'semantic-grammar-electric-punctuation)
+    (define-key km "%" 'semantic-grammar-electric-punctuation)
+    (define-key km "(" 'semantic-grammar-electric-punctuation)
+    (define-key km ")" 'semantic-grammar-electric-punctuation)
+    (define-key km ":" 'semantic-grammar-electric-punctuation)
 
     (define-key km "\t"       'semantic-grammar-indent)
     (define-key km "\M-\t"    'semantic-grammar-complete)
@@ -1277,7 +1277,7 @@ the change bounds to encompass the whole nonterminal tag."
          ;; simplifying our keywords significantly
          ((?_ . "w") (?- . "w"))))
   ;; Setup Semantic to parse grammar
-  (semantic/grammar.wy--install-parser)
+  (semantic-grammar-wy--install-parser)
   (setq semantic-lex-comment-regex ";;"
         semantic-lex-analyzer 'semantic-grammar-lexer
         semantic-type-relation-separator-character '(":")
@@ -1442,7 +1442,7 @@ Use the Lisp or grammar indenter depending on point location."
     (if (or (< orig first) (/= orig (point)))
         (goto-char first))))
 
-(defun semantic/grammar.electric-punctuation ()
+(defun semantic-grammar-electric-punctuation ()
   "Insert and reindent for the symbol just typed in."
   (interactive)
   (self-insert-command 1)
@@ -1631,7 +1631,7 @@ Select the buffer containing the tag's definition, and move point there."
     )
    ))
 
-(defun semantic/grammar.eldoc-get-macro-docstring (macro expander)
+(defun semantic-grammar-eldoc-get-macro-docstring (macro expander)
   "Return a one-line docstring for the given grammar MACRO.
 EXPANDER is the name of the function that expands MACRO."
   (if (and (eq expander (aref eldoc-last-data 0))
@@ -1684,7 +1684,7 @@ Otherwise return nil."
       (cond
        ;; Grammar macro
        ((and val (fboundp val))
-        (setq val (semantic/grammar.eldoc-get-macro-docstring elt val)))
+        (setq val (semantic-grammar-eldoc-get-macro-docstring elt val)))
        ;; Function
        ((and elt (fboundp elt))
         (setq val (eldoc-get-fnsym-args-string elt)))
