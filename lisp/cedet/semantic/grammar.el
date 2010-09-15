@@ -809,7 +809,7 @@ Lisp code."
   (interactive "P")
   (setq force (or force current-prefix-arg))
   (semantic-fetch-tags)
-  (let* (
+  (let* ((indent-tabs-mode nil)         ; do not use tabs
          ;; Values of the following local variables are obtained from
          ;; the grammar parsed tree in current buffer, that is before
          ;; switching to the output file.
