@@ -547,9 +547,9 @@ Typically a DEFINE expression should look like this:
 
 " copy "
 
-;; Author: " user-full-name " <" user-mail-address ">
-;; Created: " date "
-;; Keywords: syntax
+" author "
+" created "
+" keywords "
 
 ;; This file is not part of GNU Emacs.
 ;;
@@ -600,17 +600,34 @@ The symbols in the list are local variables in
                              t)
       (match-string 0))))
 
+(defun semantic-grammar-named-line (name)
+  "Return a grammar line describing NAME, or nil if not found."
+  (save-excursion
+    (goto-char (point-min))
+    (when (re-search-forward (format "^;;+[ \t]+%s: .*$" name)
+                             ;; Search only in the 15 top lines
+                             (save-excursion (forward-line 15) (point))
+                             t)
+      (match-string 0))))
+
 (defun semantic-grammar-header ()
   "Return text of a generated standard header."
   (let ((file package-output)
         (gram (semantic-grammar-buffer-file))
-        (date (format-time-string "%Y-%m-%d %T%z"))
         (vcid (concat "$" "Id" "$")) ;; Avoid expansion
         ;; Try to get the copyright from the input grammar, or
         ;; generate a new one if not found.
         (copy (or (semantic-grammar-copyright-line)
                   (concat (format-time-string ";; Copyright (C) %Y ")
                           user-full-name)))
+        (author (or (semantic-grammar-named-line "Author")
+                    (concat ";; Author: " user-full-name
+                            " <" user-mail-address ">")))
+        (created (or (semantic-grammar-named-line "Created")
+                     (concat ";; Created: "
+                             (format-time-string "%Y-%m-%d %T%z"))))
+        (keywords (or (semantic-grammar-named-line "Keywords")
+                      ";; Keywords: syntax"))
 	(out ""))
     (dolist (S semantic-grammar-header-template)
       (cond ((stringp S)
