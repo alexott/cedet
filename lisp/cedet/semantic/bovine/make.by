@@ -1,10 +1,10 @@
-;;; make.by -- BY notation for Makefiles.
+;;; semantic/bovine/make.by -- BY notation for Makefiles.
 ;;
 ;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2008 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;;
-;; make.bnf is free software; you can redistribute it and/or modify
+;; This program is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
 ;; the Free Software Foundation; either version 2, or (at your option)
 ;; any later version.
@@ -20,7 +20,7 @@
 ;; Boston, MA 02110-1301, USA.
 ;;
 
-%package make-by
+%package semantic/bovine/make-by
 
 %languagemode  makefile-mode
 %start         Makefile
@@ -164,4 +164,4 @@ some-whitespace : whitespace some-whitespace (nil)
 		| whitespace (nil)
 		;
 
-;;; make.by ends here
+;;; semantic/bovine/make.by ends here

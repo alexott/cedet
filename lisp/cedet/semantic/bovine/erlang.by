@@ -1,4 +1,4 @@
-;;; erlang.by -- LL grammar for Erlang language specification
+;;; semantic/bovine/erlang.by -- LL grammar for Erlang language specification
 ;;
 ;; Copyright (C) 2002, 2003 Vladimir G. Sekissov
 ;; Copyright (C) 2003 David Ponce
@@ -24,7 +24,7 @@
 ;; $Id: erlang.by,v 1.7 2005-09-30 20:21:53 zappo Exp $
 ;;
 
-%package erlang-by
+%package semantic/bovine/erlang-by
 
 %start         module-decl
 %languagemode  erlang-mode
@@ -1077,4 +1077,4 @@ full-stop
   : PERIOD
   ;
 
-;;; erlang.by ends here
+;;; semantic/bovine/erlang.by ends here
