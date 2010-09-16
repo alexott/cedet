@@ -24,7 +24,7 @@
 ;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
 
-%package gr-test
+%package gr-test-wy
 
 ;; By default, don't generate analyzer (no `syntax' property)
 %token <number> NUM

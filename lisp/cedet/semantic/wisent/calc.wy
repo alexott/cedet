@@ -34,7 +34,7 @@
 ;;; History:
 ;; 
 
-;;%package calc.wy
+%package semantic/wisent/calc-wy
 
 %token <number> NUM
 
@@ -92,7 +92,7 @@ exp:
 
 (defun wisent-calc-setup-parser ()
   "Setup buffer for parse."
-  (semantic/wisent/calc.wy--install-parser)
+  (semantic/wisent/calc-wy--install-parser)
   (setq semantic-number-expression
         (concat "\\([0-9]+\\([.][0-9]*\\)?\\([eE][-+]?[0-9]+\\)?"
                 "\\|[.][0-9]+\\([eE][-+]?[0-9]+\\)?\\)")

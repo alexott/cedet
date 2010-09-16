@@ -37,7 +37,7 @@
 ;; Settings
 ;; --------
 
-;;%package python.wy
+%package semantic/wisent/python-wy
 
 %languagemode python-mode
 

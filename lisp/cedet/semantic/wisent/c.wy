@@ -36,7 +36,7 @@
   (require 'semantic/ast)
   %}
 
-;;%package c.wy
+%package semantic/wisent/c-wy
 
 %languagemode  c-mode
 

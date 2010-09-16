@@ -1,4 +1,4 @@
-;;; wisent-dot.wy --- GraphViz DOT file parser
+;;; cogre/wisent-dot.wy --- GraphViz DOT file parser
 
 ;; Copyright (C) 2003, 2004, 2009 Eric M. Ludlam
 
@@ -27,6 +27,8 @@
 ;; Parser for GraphViz DOT language.
 ;; The language is declaritive and the whole thing is parsed.
 ;; The result could be used as a data structure representing a graph.
+
+%package cogre/wisent-dot-wy
 
 %languagemode  graphviz-dot-mode
 
@@ -180,14 +182,14 @@ It ignores whitespace, newlines and comments."
   semantic-lex-ignore-whitespace
   semantic-lex-ignore-newline
   semantic-lex-ignore-comments
-  wisent-dot-wy--<keyword>-keyword-analyzer
-  wisent-dot-wy--<symbol>-regexp-analyzer
-  wisent-dot-wy--<block>-block-analyzer
+  cogre/wisent-dot-wy--<keyword>-keyword-analyzer
+  cogre/wisent-dot-wy--<symbol>-regexp-analyzer
+  cogre/wisent-dot-wy--<block>-block-analyzer
   ;; ?? semantic-lex-close-paren
-  wisent-dot-wy--<number>-regexp-analyzer
-  wisent-dot-wy--<string>-sexp-analyzer
-  wisent-dot-wy--<punctuation>-string-analyzer
+  cogre/wisent-dot-wy--<number>-regexp-analyzer
+  cogre/wisent-dot-wy--<string>-sexp-analyzer
+  cogre/wisent-dot-wy--<punctuation>-string-analyzer
   semantic-lex-default-action
   )
 
-;;; wisent-dot.wy ends here
+;;; cogre/wisent-dot.wy ends here

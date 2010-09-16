@@ -37,7 +37,7 @@
 ;;; History:
 ;; 
 
-;;%package cim.wy
+%package semantic/wisent/cim-wy
 
 %token
 HACTIVATE HAFTER ;;/*HAND*/

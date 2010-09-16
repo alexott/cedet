@@ -35,7 +35,7 @@
 ;;; History:
 ;; 
 
-;;%package awk.wy
+%package semantic/wisent/awk-wy
 
 %token FUNC_CALL NAME REGEXP
 %token ERROR
