@@ -4,3 +4,4 @@ lisp/cedet/srecode/template-wy.el
 lisp/cedet/cogre/wisent-dot-wy.el
 semantic/doc/*.info
 *.elc
+loaddefs.el
