@@ -1,0 +1,2 @@
+* Should compatibility functions be maintained (cedet-compat)?
+** eieio: cedet-called-interactively-p
