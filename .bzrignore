@@ -5,3 +5,4 @@ lisp/cedet/cogre/wisent-dot-wy.el
 semantic/doc/*.info
 *.elc
 loaddefs.el
+doc/*.info
