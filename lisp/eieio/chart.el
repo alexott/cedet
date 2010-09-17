@@ -1,28 +1,26 @@
 ;;; chart.el --- Draw charts (bar charts, etc)
 
-;;; Copyright (C) 1996, 1998, 1999, 2001, 2004, 2005, 2007, 2008, 2009 Eric M. Ludlam
-;;
-;; Author: <zappo@gnu.org>
+;; Copyright (C) 1996, 1998, 1999, 2001, 2004, 2005, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam  <zappo@gnu.org>
 ;; Version: 0.2
-;; RCS: $Id: chart.el,v 1.20 2010-02-27 03:44:25 zappo Exp $
 ;; Keywords: OO, chart, graph
-;;                                                                          
-;; This program is free software; you can redistribute it and/or modify
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;;
-;; Please send bug reports, etc. to zappo@gnu.org
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -89,7 +87,7 @@ Colors will be the background color.")
 	   (display-graphic-p))
       '("dimple1" "scales" "dot" "cross_weave" "boxes" "dimple3"))
   "If pixmaps are allowed, display these background pixmaps.
-Useful if new Emacs is used on B&W display")
+Useful if new Emacs is used on B&W display.")
 
 (defcustom chart-face-use-pixmaps nil
   "*Non-nil to use fancy pixmaps in the background of chart face colors."
@@ -135,9 +133,8 @@ Useful if new Emacs is used on B&W display")
 
 (defun chart-new-buffer (obj)
   "Create a new buffer NAME in which the chart OBJ is displayed.
-Returns the newly created buffer"
-  (save-excursion
-    (set-buffer (get-buffer-create (format "*%s*" (oref obj title))))
+Returns the newly created buffer."
+  (with-current-buffer (get-buffer-create (format "*%s*" (oref obj title)))
     (chart-mode)
     (setq chart-local-object obj)
     (current-buffer)))
@@ -174,7 +171,7 @@ It is either `window-height', or a minimum of 20 chars."
    (sequences :initarg :sequences
 	      :initform nil)
    )
-  "Superclass for all charts to be displayed in an emacs buffer")
+  "Superclass for all charts to be displayed in an Emacs buffer.")
 
 (defmethod initialize-instance :AFTER ((obj chart) &rest fields)
   "Initialize the chart OBJ being created with FIELDS.
@@ -200,13 +197,13 @@ Make sure the width/height is correct."
   ((bounds :initarg :bounds
 	   :initform '(0.0 . 50.0))
    )
-  "Class used to display an axis defined by a range of values")
+  "Class used to display an axis defined by a range of values.")
 
 (defclass chart-axis-names (chart-axis)
   ((items :initarg :items
 	  :initform nil)
    )
-  "Class used to display an axis which represents different named items")
+  "Class used to display an axis which represents different named items.")
 
 (defclass chart-sequece ()
   ((data :initarg :data
@@ -214,16 +211,16 @@ Make sure the width/height is correct."
    (name :initarg :name
 	 :initform "Data")
    )
-  "Class used for all data in different charts")
+  "Class used for all data in different charts.")
 
 (defclass chart-bar (chart)
   ((direction :initarg :direction
 	      :initform vertical))
-  "Subclass for bar charts. (Vertical or horizontal)")
+  "Subclass for bar charts (vertical or horizontal).")
 
 (defmethod chart-draw ((c chart) &optional buff)
   "Start drawing a chart object C in optional BUFF.
-Erases current contents of buffer"
+Erases current contents of buffer."
   (save-excursion
     (if buff (set-buffer buff))
     (erase-buffer)
@@ -268,7 +265,7 @@ Argument C is the chart object."
   )
 
 (defmethod chart-axis-draw ((a chart-axis) &optional dir margin zone start end)
-  "Draw some axis for A in direction DIR at with MARGIN in boundry.
+  "Draw some axis for A in direction DIR with MARGIN in boundary.
 ZONE is a zone specification.
 START and END represent the boundary."
   (chart-draw-line dir (+ margin (if zone zone 0)) start end)
@@ -336,7 +333,7 @@ MARGIN, ZONE, START, and END specify restrictions in chart space."
 (defmethod chart-translate-namezone ((c chart) n)
   "Return a dot-pair representing a positional range for a name.
 The name in chart C of the Nth name resides.
-Automatically compensates for for direction."
+Automatically compensates for direction."
   (let* ((dir (oref c direction))
 	 (w (if (eq dir 'vertical) (oref c x-width) (oref c y-width)))
 	 (m (if (eq dir 'vertical) (oref c y-margin) (oref c x-margin)))
@@ -351,8 +348,8 @@ Automatically compensates for for direction."
 
 (defmethod chart-axis-draw ((a chart-axis-names) &optional dir margin zone start end)
   "Draw axis information based upon A range to be spread along the edge.
-Optional argument DIR the direction of the chart.
-Optional argument MARGIN , ZONE, START and END specify boundaries of the drawing."
+Optional argument DIR is the direction of the chart.
+Optional arguments MARGIN, ZONE, START and END specify boundaries of the drawing."
   (call-next-method)
   ;; We prefer about 5 spaces between each value
   (let* ((i 0)
@@ -477,7 +474,7 @@ or is created with the bounds of SEQ."
 
 (defmethod chart-sort ((c chart) pred)
   "Sort the data in chart C using predicate PRED.
-See `chart-sort-matchlist' for more details"
+See `chart-sort-matchlist' for more details."
   (let* ((sl (oref c sequences))
 	 (s1 (car sl))
 	 (s2 (car (cdr sl)))
@@ -498,9 +495,9 @@ See `chart-sort-matchlist' for more details"
   )
 
 (defun chart-sort-matchlist (namelst numlst pred)
-  "Sort NAMELST and NUMLST (both SEQUENCE objects) based on predicate PRED.
+  "Sort NAMELST and NUMLST (both sequence objects) based on predicate PRED.
 PRED should be the equivalent of '<, except it must expect two
-cons cells of the form (NAME . NUM).  See SORT for more details."
+cons cells of the form (NAME . NUM).  See `sort' for more details."
   ;; 1 - create 1 list of cons cells
   (let ((newlist nil)
 	(alst (oref namelst data))
@@ -527,9 +524,8 @@ cons cells of the form (NAME . NUM).  See SORT for more details."
 
 (defun chart-goto-xy (x y)
   "Move cursor to position X Y in buffer, and add spaces and CRs if needed."
-
   (let ((indent-tabs-mode nil)
-	(num (goto-line (1+ y))))
+	(num (progn (goto-char (point-min)) (forward-line y))))
     (if (and (= 0 num) (/= 0 (current-column))) (newline 1))
     (if (eobp) (newline num))
     (if (< x 0) (setq x 0))
@@ -541,7 +537,7 @@ cons cells of the form (NAME . NUM).  See SORT for more details."
 	  (remove-text-properties p (point) '(face))))))
 
 (defun chart-zap-chars (n)
-  "Zap up to N chars without deleteting EOLs."
+  "Zap up to N chars without deleting EOLs."
   (if (not (eobp))
       (if (< n (- (save-excursion (end-of-line) (point)) (point)))
 	  (delete-char n)
@@ -570,7 +566,7 @@ Optional argument FACE is the property we wish to place on this text."
 
 (defun chart-draw-line (dir zone start end)
   "Draw a line using line-drawing characters in direction DIR.
-Use column or row ZONE between START and END"
+Use column or row ZONE between START and END."
   (chart-display-label
    (make-string (- end start) (if (eq dir 'vertical) ?| ?\-))
    dir zone start end))
@@ -591,12 +587,12 @@ R1 and R2 are dotted pairs.  Colorize it with FACE."
 
 (defun chart-bar-quickie (dir title namelst nametitle numlst numtitle
 			      &optional max sort-pred)
-  "Wash over the complex eieio stuff and create a nice bar chart.
-Creat it going in direction DIR ['horizontal 'vertical] with TITLE
+  "Wash over the complex EIEIO stuff and create a nice bar chart.
+Create it going in direction DIR ['horizontal 'vertical] with TITLE
 using a name sequence NAMELST labeled NAMETITLE with values NUMLST
 labeled NUMTITLE.
 Optional arguments:
-Set the charts' max element display to MAX, and sort lists with
+Set the chart's max element display to MAX, and sort lists with
 SORT-PRED if desired."
   (let ((nc (make-instance chart-bar
 			   :title title
@@ -621,7 +617,6 @@ SORT-PRED if desired."
 
 ;;; Test code
 
-;;;###autoload
 (defun chart-test-it-all ()
   "Test out various charting features."
   (interactive)
@@ -633,7 +628,7 @@ SORT-PRED if desired."
 ;;; Sample utility function
 
 (defun chart-file-count (dir)
-  "Draw a chart displaying the number of different file extentions in DIR."
+  "Draw a chart displaying the number of different file extensions in DIR."
   (interactive "DDirectory: ")
   (if (not (string-match "/$" dir))
       (setq dir (concat dir "/")))
@@ -659,7 +654,7 @@ SORT-PRED if desired."
     ;; Lets create the chart!
     (chart-bar-quickie 'vertical "Files Extension Distribution"
 		       extlst "File Extensions"
-		       cntlst "# of occurances"
+		       cntlst "# of occurrences"
 		       10
 		       '(lambda (a b) (> (cdr a) (cdr b))))
     ))
@@ -755,9 +750,9 @@ SORT-PRED if desired."
 		(setcar cell (1+ (car cell))))
 	    (setq nmlst (cons nam nmlst)
 		  cntlst (cons 1 cntlst))))))
-    (chart-bar-quickie 'vertical "Username Occurance in RMAIL box"
+    (chart-bar-quickie 'vertical "Username Occurrence in RMAIL box"
 		       nmlst "User Names"
-		       cntlst "# of occurances"
+		       cntlst "# of occurrences"
 		       10
 		       '(lambda (a b) (> (cdr a) (cdr b))))
     ))

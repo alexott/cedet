@@ -1,28 +1,27 @@
 ;;; eieio-base.el --- Base classes for EIEIO.
 
-;;;
-;; Copyright (C) 2000, 2001, 2002, 2004, 2005, 2007, 2008, 2009 Eric M. Ludlam
-;;
-;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio-base.el,v 1.29 2009-10-10 15:10:00 davenar Exp $
+;;; Copyright (C) 2000, 2001, 2002, 2004, 2005, 2007, 2008, 2009, 2010
+;;; Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam  <zappo@gnu.org>
+;; Version: 0.2
 ;; Keywords: OO, lisp
-;;
-;; This program is free software; you can redistribute it and/or modify
+;; Package: eieio
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;;
-;; Please send bug reports, etc. to zappo@gnu.org
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -30,10 +29,10 @@
 ;; but are generally useless on their own.  To use any of these classes,
 ;; inherit from one or more of them.
 
+;;; Code:
+
 (require 'eieio)
 
-;;; Code:
-
 ;;; eieio-instance-inheritor
 ;;
 ;; Enable instance inheritance via the `clone' method.
@@ -44,7 +43,7 @@
 		    :type eieio-instance-inheritor-child
 		    :documentation
 		    "The parent of this instance.
-If a slot of this class is reference, and is unbound, then  the parent
+If a slot of this class is referenced, and is unbound, then the parent
 is checked for a value.")
    )
   "This special class can enable instance inheritance.
@@ -55,7 +54,7 @@ not been set, use values from the parent."
 
 (defmethod slot-unbound ((object eieio-instance-inheritor) class slot-name fn)
   "If a slot OBJECT in this CLASS is unbound, try to inherit, or throw a signal.
-SLOT-NAME, is the offending slot.  FN is the function signalling the error."
+SLOT-NAME is the offending slot.  FN is the function signalling the error."
   (if (slot-boundp object 'parent-instance)
       ;; It may not look like it, but this line recurses back into this
       ;; method if the parent instance's slot is unbound.
@@ -87,9 +86,9 @@ All slots are unbound, except those initialized with PARAMS."
 
 (defmethod eieio-instance-inheritor-slot-boundp ((object eieio-instance-inheritor)
 						slot)
-  "Non-nil if the instance inheritor OBJECT's SLOT is bound.
-See `slot-boundp' for for details on binding slots.
-The instance inheritor uses unbound slots as a way cascading cloned
+  "Return non-nil if the instance inheritor OBJECT's SLOT is bound.
+See `slot-boundp' for details on binding slots.
+The instance inheritor uses unbound slots as a way of cascading cloned
 slot values, so testing for a slot being bound requires extra steps
 for this kind of object."
   (if (slot-boundp object slot)
@@ -152,7 +151,7 @@ Returns the first match."
 	      "The only instance of this class that will be instantiated.
 Multiple calls to `make-instance' will return this object."))
   "This special class causes subclasses to be singletons.
-A singleton is a class which will only ever have one instace."
+A singleton is a class which will only ever have one instance."
   :abstract t)
 
 (defmethod constructor :STATIC ((class eieio-singleton) name &rest slots)
@@ -215,7 +214,7 @@ specified will not be saved."
 
 (defmethod eieio-persistent-save-interactive ((this eieio-persistent) prompt
 					      &optional name)
-  "Perpare to save THIS.  Use in an `interactive' statement.
+  "Prepare to save THIS.  Use in an `interactive' statement.
 Query user for file name with PROMPT if THIS does not yet specify
 a file.  Optional argument NAME specifies a default file name."
   (unless (slot-boundp this 'file)
@@ -232,8 +231,7 @@ a file.  Optional argument NAME specifies a default file name."
 	(buffstr nil))
     (unwind-protect
 	(progn
-	  (save-excursion
-	    (set-buffer (get-buffer-create " *tmp eieio read*"))
+	  (with-current-buffer (get-buffer-create " *tmp eieio read*")
 	    (insert-file-contents filename nil nil nil t)
 	    (goto-char (point-min))
 	    (setq buffstr (buffer-string)))
@@ -282,7 +280,7 @@ instance."
 		(setq buffer-file-coding-system cs))
 	      ;; Old way - write file.  Leaves message behind.
 	      ;;(write-file cfn nil)
-	      
+
 	      ;; New way - Avoid the vast quantities of error checking
 	      ;; just so I can get at the special flags that disable
 	      ;; displaying random messages.
@@ -312,9 +310,9 @@ access to it."
 
 (defmethod slot-missing ((obj eieio-named)
 			 slot-name operation &optional new-value)
-  "Called when a on-existant slot is accessed.
+  "Called when a non-existent slot is accessed.
 For variable `eieio-named', provide an imaginary `object-name' slot.
-Argument OBJ is the Named object.
+Argument OBJ is the named object.
 Argument SLOT-NAME is the slot that was attempted to be accessed.
 OPERATION is the type of access, such as `oref' or `oset'.
 NEW-VALUE is the value that was being set into SLOT if OPERATION were

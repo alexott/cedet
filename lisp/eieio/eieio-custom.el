@@ -1,32 +1,32 @@
 ;;; eieio-custom.el -- eieio object customization
 
-;;; Copyright (C) 1999, 2000, 2001, 2005, 2007, 2008, 2009 Eric M. Ludlam
-;;
-;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio-custom.el,v 1.28 2009-03-17 00:50:59 zappo Exp $
+;; Copyright (C) 1999, 2000, 2001, 2005, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <zappo@gnu.org>
+;; Version: 0.2
 ;; Keywords: OO, lisp
-;;                                                                          
-;; This program is free software; you can redistribute it and/or modify
+;; Package: eieio
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
-;;           
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;;
-;; Please send bug reports, etc. to zappo@gnu.org
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;;   This contains support customization of eieio objects.  Enabling
-;; your object to be customizable requires use of the slot attirbute
+;; your object to be customizable requires use of the slot attribute
 ;; `:custom'.
 
 (require 'eieio)
@@ -35,13 +35,12 @@
 (require 'custom)
 
 ;;; Compatibility
-;;
-(eval-and-compile
-  (if (featurep 'xemacs)
-      (defalias 'eieio-overlay-lists (lambda () (list (extent-list))))
-    (defalias 'eieio-overlay-lists 'overlay-lists)
-    )
-  )
+
+;; (eval-and-compile
+;;   (if (featurep 'xemacs)
+;;       (defalias 'eieio-overlay-lists (lambda () (list (extent-list))))
+;;     (defalias 'eieio-overlay-lists 'overlay-lists)))
+
 ;;; Code:
 (defclass eieio-widget-test-class nil
   ((a-string :initarg :a-string
@@ -92,7 +91,7 @@ of these.")
 (defvar eieio-cog nil
   "Buffer local variable in object customize buffers for the current group.")
 
- (defvar eieio-custom-ignore-eieio-co  nil
+ (defvar eieio-custom-ignore-eieio-co nil
    "When true, all customizable slots of the current object are updated.
 Updates occur regardless of the current customization group.")
 
@@ -110,14 +109,7 @@ Updates occur regardless of the current customization group.")
 
 (defun eieio-slot-value-create (widget)
   "Create the value of WIDGET."
-  (let ((chil nil)
-	)
-;    (setq chil (cons (widget-create-child-and-convert
-;		      widget 'visibility
-;		      :help-echo "Hide the value of this option."
-;		      :action 'eieio-custom-toggle-parent
-;		      t)
-;		     chil))
+  (let ((chil nil))
     (setq chil (cons
 		(widget-create-child-and-convert
 		 widget (widget-get widget :childtype)
@@ -236,7 +228,7 @@ Optional argument IGNORE is an extraneous parameter."
       (when (and (car fcust)
 		 (or (not master-group) (member master-group (car fgroup)))
 		 (slot-boundp obj (car slots)))
-	;; In this case, this slot has a custom type.  Create it's
+	;; In this case, this slot has a custom type.  Create its
 	;; children widgets.
 	(let ((type (eieio-filter-slot-type widget (car fcust)))
 	      (stuff nil))
@@ -329,9 +321,9 @@ Optional argument IGNORE is an extraneous parameter."
     obj))
 
 (defmethod eieio-done-customizing ((obj eieio-default-superclass))
-  "When a applying change to a widget, call this method.
-This method is called by the default widget-edit commands.  User made
-commands should also call this method when applying changes.
+  "When applying change to a widget, call this method.
+This method is called by the default widget-edit commands.
+User made commands should also call this method when applying changes.
 Argument OBJ is the object that has been customized."
   nil)
 
@@ -356,7 +348,7 @@ These groups are specified with the `:group' slot flag."
     (toggle-read-only -1)
     (kill-all-local-variables)
     (erase-buffer)
-    (let ((all (eieio-overlay-lists)))
+    (let ((all (overlay-lists)))
       ;; Delete all the overlays.
       (mapc 'delete-overlay (car all))
       (mapc 'delete-overlay (cdr all)))
@@ -383,7 +375,7 @@ These groups are specified with the `:group' slot flag."
 
 (defmethod eieio-custom-object-apply-reset ((obj eieio-default-superclass))
   "Insert an Apply and Reset button into the object editor.
-Argument OBJ os the object being customized."
+Argument OBJ is the object being customized."
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
 			   (widget-apply eieio-wo :value-get)
@@ -394,16 +386,16 @@ Argument OBJ os the object being customized."
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
 			   ;; I think the act of getting it sets
-			   ;; it's value through the get function.
+			   ;; its value through the get function.
 			   (message "Applying Changes...")
 			   (widget-apply eieio-wo :value-get)
 			   (eieio-done-customizing eieio-co)
-			   (message "Applying Changes...Done."))
+			   (message "Applying Changes...Done"))
 		 "Apply")
   (widget-insert "   ")
   (widget-create 'push-button
 		 :notify (lambda (&rest ignore)
-			   (message "Resetting.")
+			   (message "Resetting")
 			   (eieio-customize-object eieio-co eieio-cog))
 		 "Reset")
   (widget-insert "   ")
@@ -470,4 +462,4 @@ Return the symbol for the group, or nil"
 (provide 'eieio-custom)
 
 ;;; eieio-custom.el ends here
-;; 
+;;

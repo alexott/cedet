@@ -1,27 +1,27 @@
 ;;; eieio-opt.el -- eieio optional functions (debug, printing, speedbar)
 
-;;; Copyright (C) 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2008, 2009, 2010 Eric M. Ludlam
-;;
-;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio-opt.el,v 1.40 2010-04-09 02:11:42 zappo Exp $
+;; Copyright (C) 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2008,
+;;   2009, 2010  Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <zappo@gnu.org>
+;; Version: 0.2
 ;; Keywords: OO, lisp
-;;                                                                          
-;; This program is free software; you can redistribute it and/or modify
+;; Package: eieio
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
-;;           
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;;
-;; Please send bug reports, etc. to zappo@gnu.org
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -32,7 +32,6 @@
 (require 'eieio)
 
 ;;; Code:
-;;;###autoload
 (defun eieio-browse (&optional root-class)
   "Create an object browser window to show all objects.
 If optional ROOT-CLASS, then start with that, otherwise start with
@@ -45,15 +44,14 @@ variable `eieio-default-superclass'."
   (if (not root-class) (setq root-class 'eieio-default-superclass))
   (if (not (class-p root-class)) (signal 'wrong-type-argument (list 'class-p root-class)))
   (display-buffer (get-buffer-create "*EIEIO OBJECT BROWSE*") t)
-  (save-excursion
-    (set-buffer (get-buffer "*EIEIO OBJECT BROWSE*"))
+  (with-current-buffer (get-buffer "*EIEIO OBJECT BROWSE*")
     (erase-buffer)
     (goto-char 0)
     (eieio-browse-tree root-class "" "")
     ))
 
 (defun eieio-browse-tree (this-root prefix ch-prefix)
-  "Recursively, draws the children of the given class on the screen.
+  "Recursively draw the children of the given class on the screen.
 Argument THIS-ROOT is the local root of the tree.
 Argument PREFIX is the character prefix to use.
 Argument CH-PREFIX is another character prefix to display."
@@ -72,17 +70,17 @@ Argument CH-PREFIX is another character prefix to display."
     ))
 
 ;;; CLASS COMPLETION / DOCUMENTATION
-;;;###autoload
+
 (defalias 'describe-class 'eieio-describe-class)
-;;;###autoload
+
 (defun eieio-describe-class (class &optional headerfcn)
   "Describe a CLASS defined by a string or symbol.
-If CLASS is actually an object, then also display current values of that obect.
+If CLASS is actually an object, then also display current values of that object.
 Optional HEADERFCN should be called to insert a few bits of info first."
   (interactive (list (eieio-read-class "Class: ")))
   (with-output-to-temp-buffer (help-buffer) ;"*Help*"
     (help-setup-xref (list #'eieio-describe-class class headerfcn)
-		     (cedet-called-interactively-p))
+		     (cedet-called-interactively-p 'interactive))
 
     (when headerfcn (funcall headerfcn))
 
@@ -163,8 +161,7 @@ Optional HEADERFCN should be called to insert a few bits of info first."
 	    (terpri)
 	    (terpri))
 	  (setq methods (cdr methods))))))
-  (save-excursion
-    (set-buffer (help-buffer))
+  (with-current-buffer (help-buffer)
     (buffer-string)))
 
 (defun eieio-describe-class-slots (class)
@@ -241,7 +238,6 @@ Outputs to the standard output."
 	    prot (cdr prot)
 	    i (1+ i)))))
 
-;;;###autoload
 (defun eieio-describe-constructor (fcn)
   "Describe the constructor function FCN.
 Uses `eieio-describe-class' to describe the class being constructed."
@@ -263,7 +259,6 @@ Uses `eieio-describe-class' to describe the class being constructed."
 	 ))
   )
 
-;;;###autoload
 (defun eieio-build-class-alist (&optional class instantiable-only buildlist)
   "Return an alist of all currently active classes for completion purposes.
 Optional argument CLASS is the class to start with.
@@ -304,14 +299,11 @@ are not abstract."
 			   (or histvar 'eieio-read-class))))
 
 ;;; METHOD COMPLETION / DOC
-;;
-;;;###autoload
+
 (defalias 'describe-method 'eieio-describe-generic)
-;;;###autoload
 (defalias 'describe-generic 'eieio-describe-generic)
-;;;###autoload
 (defalias 'eieio-describe-method 'eieio-describe-generic)
-;;;###autoload
+
 (defun eieio-describe-generic (generic)
   "Describe the generic function GENERIC.
 Also extracts information about all methods specific to this generic."
@@ -320,7 +312,7 @@ Also extracts information about all methods specific to this generic."
       (signal 'wrong-type-argument '(generic-p generic)))
   (with-output-to-temp-buffer (help-buffer) ; "*Help*"
     (help-setup-xref (list #'eieio-describe-generic generic)
-		     (cedet-called-interactively-p))
+		     (cedet-called-interactively-p 'interactive))
 
     (prin1 generic)
     (princ " is a generic function")
@@ -383,8 +375,7 @@ Also extracts information about all methods specific to this generic."
 	    (terpri)
 	    (terpri)))
 	(setq i (1+ i)))))
-  (save-excursion
-    (set-buffer (help-buffer))
+  (with-current-buffer (help-buffer)
     (buffer-string)))
 
 (defun eieio-lambda-arglist (func)
@@ -396,7 +387,8 @@ Also extracts information about all methods specific to this generic."
 
 (defun eieio-all-generic-functions (&optional class)
   "Return a list of all generic functions.
-Optional CLASS argument returns only those functions that contain methods for CLASS."
+Optional CLASS argument returns only those functions that contain
+methods for CLASS."
   (let ((l nil) tree (cn (if class (symbol-name class) nil)))
     (mapatoms
      (lambda (symbol)
@@ -559,7 +551,7 @@ Optional argument HISTORYVAR is the variable to use as history."
 ;;; HELP AUGMENTATION
 ;;
 (defun eieio-help-mode-augmentation-maybee (&rest unused)
-  "For buffers thrown into help mode, augment for eieio.
+  "For buffers thrown into help mode, augment for EIEIO.
 Arguments UNUSED are not used."
   ;; Scan created buttons so far if we are in help mode.
   (when (eq major-mode 'help-mode)
@@ -607,13 +599,13 @@ Arguments UNUSED are not used."
 (eval-when-compile
   (condition-case nil
       (require 'speedbar)
-    (error (message "Error loading speedbar... ignored."))))
+    (error (message "Error loading speedbar... ignored"))))
 
 (defvar eieio-class-speedbar-key-map nil
   "Keymap used when working with a project in speedbar.")
 
 (defun eieio-class-speedbar-make-map ()
-  "Make a keymap for eieio under speedbar."
+  "Make a keymap for EIEIO under speedbar."
   (setq eieio-class-speedbar-key-map (speedbar-make-specialized-keymap))
 
   ;; General viewing stuff
@@ -644,8 +636,8 @@ Arguments UNUSED are not used."
 
 (defun eieio-class-speedbar (dir-or-object depth)
   "Create buttons in speedbar that represents the current project.
-DIR-OR-OBJECT is the object to expand, or nil, and DEPTH is the current
-expansion depth."
+DIR-OR-OBJECT is the object to expand, or nil, and DEPTH is the
+current expansion depth."
   (when (eq (point-min) (point-max))
     ;; This function is only called once, to start the whole deal.
     ;; Ceate, and expand the default object.

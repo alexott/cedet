@@ -1,16 +1,5 @@
-
-\input texinfo   @c -*-texinfo-*-
-@c
-@c $Id: eieio.texi,v 1.67 2010-08-19 23:27:15 zappo Exp $
-@c
-
-@c
-@c THIS MANUAL NEEDS WORK:
-@c
-@c See the comments at the end of this document.
-@c they need to be integrated into the text of this manual.
-@c
-@setfilename eieio.info
+\input texinfo
+@setfilename eieio
 @set TITLE Enhanced Implementation of Emacs Interpreted Objects
 @set AUTHOR Eric M. Ludlam
 @settitle @value{TITLE}
@@ -20,49 +9,33 @@
 @c *************************************************************************
 
 @copying
-This manual documents CEDET, a collection of other tools.
+This manual documents EIEIO, an object framework for Emacs Lisp.
 
-Copyright @copyright{} 2007, 2008, 2009, 2010 Eric M. Ludlam
+Copyright @copyright{} 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.1 or
-any later version published by the Free Software Foundation; with the
-Invariant Sections being list their titles, with the Front-Cover Texts
-being list, and with the Back-Cover Texts being list.  A copy of the
-license is included in the section entitled ``GNU Free Documentation
-License''.
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual,''
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License.''
+
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
 @end quotation
 @end copying
 
-@ifinfo
-@format
-START-INFO-DIR-ENTRY
-* eieio: (eieio).       Objects for Emacs
-END-INFO-DIR-ENTRY
-@end format
-@end ifinfo
-
-@iftex
-@finalout
-@end iftex
-
-@ifinfo
-This file documents EIEIO.
-@emph{@value{TITLE}}
-
-Copyright @copyright{} 2007 @value{AUTHOR}
-@end ifinfo
+@dircategory Emacs
+@direntry
+* eieio: (eieio).               Objects for Emacs.
+@end direntry
 
 @titlepage
-@sp 10
-@title @value{TITLE}
-@author by @value{AUTHOR}
-@vskip 0pt plus 1 fill
-Copyright @copyright{} 1995,1996,1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007 @value{AUTHOR}
-@page
-@vskip 0pt plus 1 fill
-@insertcopying
+@center @titlefont{@value{TITLE}}
+@sp 4
+@center by @value{AUTHOR}
 @end titlepage
 @page
 
@@ -70,19 +43,21 @@ Copyright @copyright{} 1995,1996,1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005,
 @i{EIEIO}
 @end macro
 
-@node Top
+@node Top, Quick Start, (dir), (dir)
 @comment  node-name,  next,  previous,  up
-@top @value{TITLE}
+@top EIEIO
 
-@eieio{} is a framework for writing object oriented applications in emacs
-Lisp, and is a result of my taking various object oriented classes at
-work and my attempt to understand some of it better by implementing it.
-The real reason I started @eieio{} is because someone in one of my classes
-said "I bet emacs can't do that!".  Well then, I just had to prove them
-wrong!
+@eieio{} (``Enhanced Implementation of Emacs Interpreted Objects'') is
+a CLOS (Common Lisp Object System) compatibility layer for Emacs Lisp.
+It provides a framework for writing object-oriented applications in
+Emacs.
+
+@ifnottex
+@insertcopying
+@end ifnottex
 
 @menu
-* Quick Start::           A Quick start for .
+* Quick Start::           Quick start for EIEIO.
 * Introduction::          Why use @eieio{}?  Basic overview, samples list.
 * Building Classes::      How to write new class structures.
 * Making New Objects::    How to construct new objects.
@@ -96,9 +71,9 @@ wrong!
 * Base Classes::          Additional classes you can inherit from.
 * Browsing::              Browsing your class lists.
 * Class Values::          Displaying information about a class or object.
-* Documentation::         Automatically creating texinfo documentation
+* Documentation::         Automatically creating texinfo documentation.
 * Default Superclass::    The root superclasses.
-* Signals::               When you make errors
+* Signals::               When you make errors.
 * Naming Conventions::    Name your objects in an Emacs friendly way.
 * CLOS compatibility::    What are the differences?
 * Wish List::             Things about EIEIO that could be improved.
@@ -112,7 +87,8 @@ wrong!
 use @eieio{} to create classes, methods for those classes, and
 instances of classes.
 
-To start, create a class:
+Here is a simple example of a class named @code{record}, containing
+three slots named @code{name}, @code{birthday}, and @code{phone}:
 
 @example
 (defclass record () ; No superclasses
@@ -132,28 +108,24 @@ To start, create a class:
   "A single record for tracking people I know.")
 @end example
 
-In this example, the class @code{record} is declared with three slots,
-which are @code{name}, @code{birthday}, and @code{phone}.
-
-You can create methods against your classes.  A simple method may look
-like this:
+Each class can have methods, which are defined like this:
 
 @example
 (defmethod call-record ((rec record) &optional scriptname)
   "Dial the phone for the record REC.
-Execute the program SCRIPTNAME as to dial the phone."
+Execute the program SCRIPTNAME to dial the phone."
   (message "Dialing the phone for %s"  (oref rec name))
   (shell-command (concat (or scriptname "dialphone.sh")
                          " "
                          (oref rec phone))))
 @end example
 
-In this example, the first argument to @code{call-record} is a list.
-The list is of the form (@var{varname} @var{classname}).
-
-@var{varname} is the name of the variable used for the first argument.
-@var{classname} is the name of the class that is expected as the first
-argument for this method.
+@noindent
+In this example, the first argument to @code{call-record} is a list,
+of the form (@var{varname} @var{classname}).  @var{varname} is the
+name of the variable used for the first argument; @var{classname} is
+the name of the class that is expected as the first argument for this
+method.
 
 @eieio{} dispatches methods based on the type of the first argument.
 You can have multiple methods with the same name for different classes
@@ -164,20 +136,20 @@ method matching the input type is then executed.
 Once the behavior of a class is defined, you can create a new
 object of type @code{record}.  Objects are created by calling the
 constructor.  The constructor is a function with the same name as your
-class which returns a new instance of that class. It might look like
-this:
+class which returns a new instance of that class.  Here is an example:
 
 @example
 (setq rec (record "Eric" :name "Eric" :birthday "June" :phone "555-5555"))
 @end example
 
+@noindent
 The first argument is the name given to this instance.  Each instance
-is given a name so different instances can be easily distinguished
-during debugging.
+is given a name, so different instances can be easily distinguished
+when debugging.
 
-It can be a bit repetitive to also have a :name slot.  A handy
-baseclass to use in this case is @code{eieio-named}.
-@ref{eieio-named}.
+It can be a bit repetitive to also have a :name slot.  To avoid doing
+this, it is sometimes handy to use the base class @code{eieio-named}.
+@xref{eieio-named}.
 
 Calling methods on an object is a lot like calling any function.  The
 first argument should be an object of a class which has had this
@@ -187,28 +159,28 @@ method defined for it.  In this example it would look like this:
 (call-record rec)
 @end example
 
+@noindent
 or
 
 @example
 (call-record rec "my-call-script")
 @end example
 
-In these examples, the method @code{call-record} is called.  @eieio{}
-examines the class of @code{rec} and method defined above will be
-called.  If @code{rec} is some other class, or a number, or other
-datatype, then it will signal
-@code{no-method-definition}. @ref{Signals}.
+In these examples, @eieio{} automatically examines the class of
+@code{rec}, and ensures that the method defined above is called.  If
+@code{rec} is some other class lacking a @code{call-record} method, or
+some other data type, Emacs signals a @code{no-method-definition}
+error.  @ref{Signals}.
 
 @node Introduction
 @comment  node-name,  next,  previous,  up
 @chapter Introduction
 
+Due to restrictions in the Emacs Lisp language, CLOS cannot be
+completely supported, and a few functions have been added in place of
+setf.
 
-  @eieio{} is a CLOS (Common Lisp Object System) compatibility layer.  Due
-to restrictions in the Emacs Lisp language, CLOS cannot be completely
-supported, and a few functions have been added in place of setf.
-
-@section What @eieio{} supports
+@eieio{} supports the following features:
 
 @enumerate
 @item
@@ -240,7 +212,7 @@ Public and private classifications for slots (extensions to CLOS)
 Customization support in a class (extension to CLOS)
 @end enumerate
 
-@section Issues using @eieio{}
+Here are some CLOS features that @eieio{} presently lacks:
 
 @table @asis
 @item Complete @code{defclass} tag support
@@ -270,24 +242,23 @@ This CLOS method tag is non-functional.
 @comment  node-name,  next,  previous,  up
 @chapter Building Classes
 
-A class is a definition for organizing data and methods together.  In
-@eieio{} a class has similar structure to that found in other OO
-languages.
+A @dfn{class} is a definition for organizing data and methods
+together.  An @eieio{} class has structures similar to the classes
+found in other object-oriented (OO) languages.
 
-Create a new class @code{defclass}.
+To create a new class, use the @code{defclass} macro:
 
-@defun defclass class-name superclass-list slot-list options-or-doc
+@defmac defclass class-name superclass-list slot-list &rest options-and-doc
 
-This function is specified by CLOS, and @eieio{} conforms in structure.
-
-Creates a new class called @var{class-name}.  In Emacs, the class is
-represented as a self-referential symbol with the name
-@var{class-name}.  The structure of the class is stored on the
-@var{class-name} symbol as a property.
+Create a new class named @var{class-name}.  The class is represented
+by a self-referential symbol with the name @var{class-name}.  @eieio{}
+stores the structure of the class as a symbol property of
+@var{class-name} (@pxref{Symbol Components,,,elisp,GNU Emacs Lisp
+Reference Manual}).
 
 The @var{class-name} symbol's variable documentation string is a
-modified version of the doc string found in @var{options-or-doc}.
-Each time a method is defined the symbol's documentation string is
+modified version of the doc string found in @var{options-and-doc}.
+Each time a method is defined, the symbol's documentation string is
 updated to include the methods documentation as well.
 
 The parent classes for @var{class-name} is @var{superclass-list}.
@@ -296,17 +267,19 @@ are the parents of the class being created.  Every slot that appears
 in each parent class is replicated in the new class.
 
 If two parents share the same slot name, the parent which appears in
-the @var{superclass-list} first sets the tags for that slot.  If a
-slot in the new class' slot list matches a parent, then some of the
-new specifications for the child class override that of the parent.
+the @var{superclass-list} first sets the tags for that slot.  If the
+new class has a slot with the same name as the parent, the new slot
+overrides the parent's slot.
 
 When overriding a slot, some slot attributes cannot be overriden
 because they break basic OO rules.  You cannot override @code{:type}
 or @code{:protection}.
+@end defmac
 
+@noindent
 Whenever defclass is used to create a new class, two predicates are
-created for it.  The predicate names are @code{@var{CLASS-NAME}-p} and
-@code{@var{CLASS-NAME}-child-p}
+created for it, named @code{@var{CLASS-NAME}-p} and
+@code{@var{CLASS-NAME}-child-p}:
 
 @defun CLASS-NAME-p object
 Return @code{t} if @var{OBJECT} is of the class @var{CLASS-NAME}.
@@ -317,19 +290,16 @@ Return @code{t} if @var{OBJECT} is of the class @var{CLASS-NAME},
 or is of a subclass of @var{CLASS-NAME}.
 @end defun
 
-@end defun
-
-
 @defvar eieio-error-unsupported-class-tags
-If Non-nil, then @code{defclass} will signal an error if a tag
-in a slot specifier is unsupported.
+If non-nil, @code{defclass} signals an error if a tag in a slot
+specifier is unsupported.
 
 This option is here to support programs written with older versions of
-@eieio{} when such errors were not produced.
+@eieio{}, which did not produce such errors.
 @end defvar
 
 @menu
-* Inheritance::         How to specify parents classes
+* Inheritance::         How to specify parents classes.
 * Slot Options::        How to specify features of a slot.
 * Class Options::       How to specify features for this class.
 @end menu
@@ -337,11 +307,10 @@ This option is here to support programs written with older versions of
 @node Inheritance
 @section Inheritance
 
-A basic feature of an object oriented language is inheritance.  In
-@eieio{}, a defined class specifies the super classes it inherites
-from with the second argument to defclass.
-
-For example, a parent class might be:
+@dfn{Inheritance} is a basic feature of an object-oriented language.
+In @eieio{}, a defined class specifies the super classes from which it
+inherits by using the second argument to @code{defclass}.  Here is an
+example:
 
 @example
 (defclass my-baseclass ()
@@ -350,8 +319,9 @@ For example, a parent class might be:
   "My Baseclass.")
 @end example
 
-To subclass from @code{my-baseclass}, you would specify it in the
-superclass list.
+@noindent
+To subclass from @code{my-baseclass}, we specify it in the superclass
+list:
 
 @example
 (defclass my-subclass (my-baseclass)
@@ -360,13 +330,13 @@ superclass list.
    "My subclass of my-baseclass")
 @end example
 
+@indent
 Instances of @code{my-subclass} will inherit @code{slot-A} and
 @code{slot-B}, in addition to having @code{specific-slot-A} from the
 declaration of @code{my-subclass}.
 
-@eieio{} also supports multiple inheritance.  If there was a second
-baseclass, or perhaps an interface style class, it could be declared
-like this:
+@eieio{} also supports multiple inheritance.  Suppose we define a
+second baseclass, perhaps an ``interface'' class, like this:
 
 @example
 (defclass my-interface ()
@@ -375,13 +345,14 @@ like this:
    :abstract t)
 @end example
 
+@noindent
 The interface class defines a special @code{interface-slot}, and also
 specifies itself as abstract.  Abstract classes cannot be
 instantiated.  It is not required to make interfaces abstract, but it
-is a good idea.
+is a good programming practice.
 
-To use a baseclass, and the interface, the subclass declaration would
-now look like this:
+We can now modify our definition of @code{my-subclass} to use this
+interface class, together with our original base class:
 
 @example
 (defclass my-subclass (my-baseclass my-interface)
@@ -390,10 +361,11 @@ now look like this:
    "My subclass of my-baseclass")
 @end example
 
-Now @code{my-subclass} has also has @code{interface-slot}.
+@noindent
+With this, @code{my-subclass} also has @code{interface-slot}.
 
 If @code{my-baseclass} and @code{my-interface} had slots with the same
-name, then the superclass showing up in the list first will define the
+name, then the superclass showing up in the list first defines the
 slot attributes.
 
 Inheritance in @eieio{} is more than just combining different slots.
@@ -411,8 +383,8 @@ another in @code{my-baseclass}, the implementation for
 @node Slot Options
 @section Slot Options
 
-@var{slot-list} is a list of elements where each element defines one slot.
-Each slot is a list of the form:
+The @var{slot-list} argument to @code{defclass} is a list of elements
+where each element defines one slot.  Each slot is a list of the form
 
 @example
   (SLOT-NAME :TAG1 ATTRIB-VALUE1
@@ -420,6 +392,7 @@ Each slot is a list of the form:
              :TAGN ATTRIB-VALUEN)
 @end example
 
+@noindent
 where @var{SLOT-NAME} is a symbol that will be used to refer to the
 slot.  @var{:TAG} is a symbol that describes a feature to be set
 on the slot.  @var{ATTRIB-VALUE} is a lisp expression that will be
@@ -429,9 +402,8 @@ Valid tags are:
 
 @table @code
 @item :initarg
-The @code{:initarg} specifier gives this slot a name that can be used
-in the argument list of the constructor to specify a value for the new
-instance being created.
+A symbol that can be used in the argument list of the constructor to
+specify a value for the new instance being created.
 
 A good symbol to use for initarg is one that starts with a colon @code{:}.
 
@@ -454,9 +426,9 @@ It is an error to reference an unbound slot, so if you need
 slots to always be in a bound state, you should always use an
 @code{:initform} specifier.
 
-Use @code{slot-boundp} to test if a slot is unbound @ref{Predicates}.
-Use @code{slot-makeunbound} to set a slot to being unbound after
-giving it a value @ref{Accessing Slots}.
+Use @code{slot-boundp} to test if a slot is unbound
+(@pxref{Predicates}).  Use @code{slot-makeunbound} to set a slot to
+being unbound after giving it a value (@pxref{Accessing Slots}).
 
 The value passed to initform is automatically quoted.  Thus,
 @example
@@ -470,7 +442,7 @@ A symbol that is a function like this:
 will set the initial value as that symbol.
 
 After a class has been created with @code{defclass}, you can change
-that default value with @code{oset-default}. @ref{Accessing Slots}.
+that default value with @code{oset-default}.  @ref{Accessing Slots}.
 
 @item :type
 An unquoted type specifier used to validate data set into this slot.
@@ -540,11 +512,11 @@ This options is specific to Emacs, and is not in the CLOS spec.
 
 @item :printer
 This routine takes a symbol which is a function name.  The function
-should accept one argument.  The a rgument is the value from the slot
+should accept one argument.  The argument is the value from the slot
 to be printed.  The function in @code{object-write} will write the
 slot value out to a printable form on @code{standard-output}.
 
-The output format MUST be  something that could in turn be interpreted
+The output format MUST be something that could in turn be interpreted
 with @code{read} such that the object can be brought back in from the
 output stream.  Thus, if you wanted to output a symbol, you would need
 to quote the symbol.  If you wanted to run a function on load, you
@@ -572,14 +544,16 @@ This options is specific to Emacs, and is not in the CLOS spec.
 
 @node Class Options
 @section Class Options
-A Class can have class options.  @eieio{} supports these class options.
+
+In the @var{options-and-doc} arguments to @code{defclass}, the
+following class options may be specified:
 
 @table @code
 @item :documentation
-Doc string to use for this class.
+A documentation string for this class.
 
-If an Emacs style documentation string is also provided, then this
-option is ignored.  An Emacs style documentation string is not
+If an Emacs-style documentation string is also provided, then this
+option is ignored.  An Emacs-style documentation string is not
 prefixed by the @code{:documentation} tag, and appears after the list
 of slots, and before the options.
 
@@ -622,10 +596,10 @@ This is the default.
 Search for methods in the class hierarchy in a depth first order.
 @item :c3
 Searches for methods in in a learnarized way that most closely matches
-what CLOS does when CLOS when a monotonic class structure is defined.
+what CLOS does when a monotonic class structure is defined.
 @end table
 
-For more on method invocation order, @ref{Method Invocation}.
+@xref{Method Invocation}, for more on method invocation order.
 
 @item :metaclass
 Unsupported CLOS option.  Enables the use of a different base class other
@@ -637,20 +611,22 @@ creating new objects.  As far as I can tell, this duplicates the
 function of @code{:initform}.
 @end table
 
-@xref{CLOS compatibility}, for more details on CLOS tags versus @eieio{}
-specific tags.
+@xref{CLOS compatibility}, for more details on CLOS tags versus
+@eieio{}-specific tags.
 
 @node Making New Objects
 @comment  node-name,  next,  previous,  up
 @chapter Making New Objects
 
-When simple class is defined, such as:
+Suppose we have a simple class is defined, such as:
+
 @example
 (defclass record ()
    ( ) "Doc String")
 @end example
 
-it is possible to create create objects of that class type.
+@noindent
+It is now possible to create objects of that class type.
 
 Calling @code{defclass} has defined two new functions.  One is the
 constructor @var{record}, and the other is the predicate,
@@ -679,7 +655,7 @@ Example of creating an object from a class:
 
 @end defun
 
-To create an object from a class symbol, use use @code{make-instance}.  
+To create an object from a class symbol, use @code{make-instance}.
 
 @defun make-instance class &rest initargs
 @anchor{make-instance}
@@ -697,7 +673,7 @@ for each slot.  For example:
   (make-instance @code{'foo} @code{:slot1} value1 @code{:slotN} valueN)
 @end example
 
-Compatability note:
+Compatibility note:
 
 If the first element of @var{initargs} is a string, it is used as the
 name of the class.
@@ -713,23 +689,23 @@ a string.
 @chapter Accessing Slots
 
 There are several ways to access slot values in an object.  The naming
-convention and argument order is similar to that found in Emacs Lisp for
-referencing vectors.  The basics for referencing, setting, and calling
-methods are all accounted for.
+and argument-order conventions are similar to those used for
+referencing vectors (@pxref{Vectors,,,elisp,GNU Emacs Lisp Reference
+Manual}).
 
-@defun oset object slot value
-This sets the value behind @var{slot} to @var{value} in @var{object}.
-@code{oset} returns @var{value}.
-@end defun
+@defmac oset object slot value
+This macro sets the value behind @var{slot} to @var{value} in
+@var{object}.  It returns @var{value}.
+@end defmac
 
-@defun oset-default class slot value
-This sets the @code{:initform} for @var{slot} in @var{class} to
-@var{value}.  This will allow a user to set both public and private
-defaults after the class has been constructed.
+@defmac oset-default class slot value
+This macro sets the @code{:initform} for @var{slot} in @var{class} to
+@var{value}.
 
-This function provides a way to to configure the default behavior of
-packages built with classes the same way @code{setq-default} is used
-for buffer-local variables.
+This allows the user to set both public and private defaults after the
+class has been constructed, and provides a way to configure the
+default behavior of packages built with classes (the same way
+@code{setq-default} does for buffer-local variables).
 
 For example, if a user wanted all @code{data-objects} (@pxref{Building
 Classes}) to inform a special object of his own devising when they
@@ -738,26 +714,25 @@ changed, this can be arranged by simply executing this bit of code:
 @example
 (oset-default data-object reference (list my-special-object))
 @end example
+@end defmac
 
-@end defun
-
-@defun oref obj slot
+@defmac oref obj slot
 @anchor{oref}
 Retrieve the value stored in @var{obj} in the slot named by @var{slot}.
 Slot is the name of the slot when created by @dfn{defclass} or the label
 created by the @code{:initarg} tag.
-@end defun
+@end defmac
 
-@defun oref-default obj slot
+@defmac oref-default obj slot
 @anchor{oref-default}
 Gets the default value of @var{obj} (maybe a class) for @var{slot}.
 The default value is the value installed in a class with the @code{:initform}
 tag.  @var{slot} can be the slot name, or the tag specified by the @code{:initarg}
 tag in the @dfn{defclass} call.
-@end defun
+@end defmac
 
-These next accessors are defined by CLOS to reference or modify slot
-values, and use the previously mentioned set/ref routines.
+The following accessors are defined by CLOS to reference or modify
+slot values, and use the previously mentioned set/ref routines.
 
 @defun slot-value object slot
 @anchor{slot-value}
@@ -815,7 +790,7 @@ slot.
 @end example
 
 Where each @var{var} is the local variable given to the associated
-@var{slot}.  A Slot specified without a variable name is given a
+@var{slot}.  A slot specified without a variable name is given a
 variable name of the same name as the slot.
 
 @example
@@ -850,130 +825,127 @@ with that name do.
 @node Generics
 @section Generics
 
-Every method created in @eieio{} will have one corresponding generic.
-In @eieio{} the generic provides symbol bound as a function, and the
-base documentation
+Each @eieio{} method has one corresponding generic.  This generic
+provides a function binding and the base documentation for the method
+symbol (@pxref{Symbol Components,,,elisp,GNU Emacs Lisp Reference
+Manual}).
 
-@defun defgeneric method arglist [doc-string]
+@defmac defgeneric method arglist [doc-string]
+This macro turns the (unquoted) symbol @var{method} into a function.
+@var{arglist} is the default list of arguments to use (not implemented
+yet).  @var{doc-string} is the documentation used for this symbol.
 
-@var{method} is the unquoted symbol to turn into a function.
-@var{arglist} is the default list of arguments to use (not implemented yet).
-@var{doc-string} is the documentation used for this symbol.
+A generic function acts as a placeholder for methods.  There is no
+need to call @code{defgeneric} yourself, as @code{defmethod} will call
+it if necessary.  Currently the argument list is unused.
 
-A generic function acts as a place holder for methods.  There is no need
-to call @code{defgeneric} yourself, as @code{defmethod} will call it if
-necessary.  Currently the argument list is unused.
+@code{defgeneric} signals an error if you attempt to turn an existing
+Emacs Lisp function into a generic function.
 
-@code{defgeneric} will prevent you from turning an existing Emacs Lisp
-function into a generic function.
+You can also create a generic method with @code{defmethod}
+(@pxref{Methods}).  When a method is created and there is no generic
+method in place with that name, then a new generic will be created,
+and the new method will use it.
+@end defmac
 
-You can also create a generic method with @code{defmethod}.  When a
-method is created and there is no generic method in place with that
-name, then a new generic will be created, and the new method will use
-it.
-@end defun
-
-In CLOS a generic call also be used to provide an argument list,
-and dispatch precedence for all the arguments.  In @eieio{},
-dispatching only occurs for the first argument, so the @var{arglist}
-is not used.
+In CLOS, a generic call also be used to provide an argument list and
+dispatch precedence for all the arguments.  In @eieio{}, dispatching
+only occurs for the first argument, so the @var{arglist} is not used.
 
 @node Methods
 @section Methods
 
-A method is a function which will be executed if the first argument
-passed to it matches the class the method was written for.  Multiple
-definitions for a single method name can exist, one for each class
-defined in @eieio{}.
+A method is a function that is executed if the first argument passed
+to it matches the method's class.  Different @eieio{} classes may
+share the same method names.
 
 Methods are created with the @code{defmethod} macro, which is similar
 to @code{defun}.
 
 @defmac defmethod method [:before | :primary | :after | :static ] arglist [doc-string] forms
 
-@var{method} is the name of the function to be created.
+@var{method} is the name of the function to create.
 
-@code{:before} and @code{:after} specify execution order, and
-represent when this form is to be called.  If neither of these symbols
-are present, then the default priority is, before @code{:after}, after
-@code{:before}, and is represented in CLOS as @code{:primary}.
+@code{:before} and @code{:after} specify execution order (i.e., when
+this form is called).  If neither of these symbols are present, the
+default priority is used (before @code{:after} and after
+@code{:before}); this default priority is represented in CLOS as
+@code{:primary}.
 
 @b{Note:} The @code{:BEFORE}, @code{:PRIMARY}, @code{:AFTER}, and
 @code{:STATIC} method tags were in all capital letters in previous
 versions of @eieio{}.
 
-@code{arglist} is the list of argument to this method.
+@var{arglist} is the list of arguments to this method.  The first
+argument in this list---and @emph{only} the first argument---may have
+a type specifier (see the example below).  If no type specifier is
+supplied, the method applies to any object.
 
 @var{doc-string} is the documentation attached to the implementation.
-All method doc-strings are concatenated into the generic method's
+All method doc-strings are incorporated into the generic method's
 function documentation.
 
 @var{forms} is the body of the function.
 
 @end defmac
 
-Only the @emph{first} argument may have a type specifier.
+@noindent
+In the following example, we create a method @code{mymethod} for the
+@code{classname} class:
+
 @example
 (defmethod mymethod ((obj classname) secondarg)
   "Doc string" )
 @end example
 
-In this example, @code{mymethod} has a first argument of @var{obj},
-and this method will only execute if @var{obj} is an @eieio{} class of
-type @code{classname}.
+@noindent
+This method only executes if the @var{obj} argument passed to it is an
+@eieio{} object of class @code{classname}.
 
-TODO - The @emph{generic} term below is not the same as a defgeneric
-generic.  The below generic means that there is no type specifier.
-FIX THIS DOC.
+A method with no type specifier is a @dfn{default method}.  If a given
+class has no implementation, then the default method is called when
+that method is used on a given object of that class.
 
-If no type specifier is supplied, then the method becomes a generic
-method, which will work for any object.
+Only one default method per execution specifier (@code{:before},
+@code{:primary}, or @code{:after}) is allowed.  If two
+@code{defmethod}s appear with @var{arglist}s lacking a type specifier,
+and having the same execution specifier, then the first implementation
+is replaced.
 
-A method with no type specifier is a @code{generic}.  If a given class has
-no implementation, then the generic will be called when that method is
-used on a given object of that class.
+When a method is called on an object, but there is no method specified
+for that object, but there is a method specified for object's parent
+class, the parent class' method is called.  If there is a method
+defined for both, only the child's method is called.  A child method
+may call a parent's method using @code{call-next-method}, described
+below.
 
-If two @code{defmethod}s appear with arglists that do not have a type
-specifier, then the first implementation will be replaced.  Only one
-generic per execution specifier such as @code{:before},
-@code{:primary}, or @code{:after}.
+If multiple methods and default methods are defined for the same
+method and class, they are executed in this order:
 
-When when a method is called on an object, but there is no method
-specified for that object, but there is a method specified for
-object's parent class, the parent class' method will be called.  If
-there is a method defined for both, only the child's method is called.
-For a child method to call a parent's method, use
-@code{call-next-method}.
-
-If multiple methods and generics are defined for the same method and
-class, they are executed in this order:
-
-@table @asis
+@enumerate
 @item method :before
-@item generic :before
+@item default :before
 @item method :primary
-@item generic :primary
+@item default :primary
 @item method :after
-@item generic :after
-@end table
+@item default :after
+@end enumerate
 
-If no methods exist, then the signal and error named
-@code{no-method-definition}. @ref{Signals}
-
-See the file @file{eieio-test.el} for an example testing these
-differently tagged methods.
+If no methods exist, Emacs signals a @code{no-method-definition}
+error.  @xref{Signals}.
 
 @defun call-next-method &rest replacement-args
 @anchor{call-next-method}
-Call the superclass method from a subclass method.
-The superclass method is specified in the current method list,
-and is called the next method.
+
+This function calls the superclass method from a subclass method.
+This is the ``next method'' specified in the current method list.
 
 If @var{replacement-args} is non-@code{nil}, then use them instead of
-@code{eieio-generic-call-arglst}.  The generic arg list are the
-arguments passed in at the top level.
+@code{eieio-generic-call-arglst}.  At the top level, the generic
+argument list is passed in.
 
-Use @dfn{next-method-p} to find out if there is a next method to call.
+Use @code{next-method-p} to find out if there is a next method to
+call.
 @end defun
 
 @defun next-method-p
@@ -983,13 +955,13 @@ Returns a list of lambda expressions which is the @code{next-method}
 order.
 @end defun
 
-In this implementation, not all features of CLOS exist.
+At present, @eieio{} does not implement all the features of CLOS:
 
 @enumerate
 @item
 There is currently no @code{:around} tag.
 @item
-CLOS allows multiple sets of type-cast arguments, where @eieio{} only
+CLOS allows multiple sets of type-cast arguments, but @eieio{} only
 allows the first argument to be cast.
 @end enumerate
 
@@ -997,8 +969,8 @@ allows the first argument to be cast.
 @section Static Methods
 
 Static methods do not depend on an object instance, but instead
-operate on an object's class.  Create a static method by using the
-@code{:static} key with @code{defmethod}.
+operate on an object's class.  You can create a static method by using
+the @code{:static} key with @code{defmethod}.
 
 Do not treat the first argument of a @code{:static} method as an
 object unless you test it first.  Use the functions
@@ -1010,7 +982,7 @@ method.
 
 @b{Note:} The @code{:static} keyword is unique to @eieio{}.
 
-TODO - Write some more about static methods here
+@c TODO - Write some more about static methods here
 
 @node Method Invocation
 @chapter Method Invocation
@@ -1083,7 +1055,7 @@ make a slot unbound.
 @defun class-name class
 Return a string of the form @samp{#<class myclassname>} which should look
 similar to other Lisp objects like buffers and processes.  Printing a
-class results only in a symbol.  
+class results only in a symbol.
 @end defun
 
 @defun class-option class option
@@ -1100,13 +1072,13 @@ Will fetch the documentation string for @code{eieio-default-superclass}.
 @defun class-constructor class
 Return a symbol used as a constructor for @var{class}.  The
 constructor is a function used to create new instances of
-@var{CLASS}. This function provides a way to make an object of a class
+@var{CLASS}.  This function provides a way to make an object of a class
 without knowing what it is.  This is not a part of CLOS.
 @end defun
 
 @defun object-name obj
 Return a string of the form @samp{#<object-class myobjname>} for @var{obj}.
-This should look like Lisp symbols from other parts of emacs such as
+This should look like Lisp symbols from other parts of Emacs such as
 buffers and processes, and is shorter and cleaner than printing the
 object's vector.  It is more useful to use @code{object-print} to get
 and object's print form, as this allows the object to add extra display
@@ -1179,13 +1151,13 @@ opposed to a regular Emacs Lisp function.
 @chapter Association Lists
 
 Lisp offers the concept of association lists, with primitives such as
-@code{assoc} used to access them.  @eieio{} provides a few such functions
-to help with using lists of objects easily.
+@code{assoc} used to access them.  The following functions can be used
+to manage association lists of @eieio{} objects:
 
 @defun object-assoc key slot list
 @anchor{object-assoc}
 Return an object if @var{key} is @dfn{equal} to SLOT's value of an object in @var{list}.
-@var{list} is a list of objects who's slots are searched.
+@var{list} is a list of objects whose slots are searched.
 Objects in @var{list} do not need to have a slot named @var{slot}, nor does
 @var{slot} need to be bound.  If these errors occur, those objects will
 be ignored.
@@ -1211,11 +1183,12 @@ all its subclasses.
 @comment node-name, next, previous, up
 @chapter Customizing Objects
 
-@eieio{} supports custom through two new widget types.  If a variable
-is declared as type @code{'object}, then full editing of slots via the
-widgets is made possible.  This should be used carefully, however,
-because objects modified are cloned, so if there are other references
-to these objects, they will no longer be linked together.
+@eieio{} supports the Custom facility through two new widget types.
+If a variable is declared as type @code{object}, then full editing of
+slots via the widgets is made possible.  This should be used
+carefully, however, because modified objects are cloned, so if there
+are other references to these objects, they will no longer be linked
+together.
 
 If you want in place editing of objects, use the following methods:
 
@@ -1292,9 +1265,14 @@ nil.
 @comment  node-name,  next,  previous,  up
 @chapter Base Classes
 
-Asside from @code{eieio-default-superclass}, @eieio{} comes with some
-additional classes that you can use.  By using multiple inheritance, it
-is possible to use several features at the same time.
+All defined classes, if created with no specified parent class,
+inherit from a special class called @code{eieio-default-superclass}.
+@xref{Default Superclass}.
+
+Often, it is more convenient to inherit from one of the other base
+classes provided by @eieio{}, which have useful pre-defined
+properties.  (Since @eieio{} supports multiple inheritance, you can
+even inherit from more than one of these classes at once.)
 
 @menu
 * eieio-instance-inheritor::    Enable value inheritance between instances.
@@ -1309,7 +1287,7 @@ is possible to use several features at the same time.
 @comment  node-name,  next,  previous,  up
 @section @code{eieio-instance-inheritor}
 
-This class is in package @file{eieio-base}.
+This class is defined in the package @file{eieio-base}.
 
 Instance inheritance is a mechanism whereby the value of a slot in
 object instance can reference the parent instance.  If the parent's slot
@@ -1333,12 +1311,12 @@ The @code{eieio-instance-inheritor} class works by causing cloned
 objects to have all slots unbound.  This class' @code{slot-unbound}
 method will cause references to unbound slots to be redirected to the
 parent instance.  If the parent slot is also unbound, then
-@code{slot-unbound} will signal an an error named @code{slot-unbound}.
+@code{slot-unbound} will signal an error named @code{slot-unbound}.
 
 @node eieio-instance-tracker
 @section @code{eieio-instance-tracker}
 
-This class is in package @file{eieio-base}.
+This class is defined in the package @file{eieio-base}.
 
 Sometimes it is useful to keep a master list of all instances of a given
 class.  The class @code{eieio-instance-tracker} performs this task.
@@ -1366,7 +1344,7 @@ This may let the garbage collector nab this instance.
 This convenience function lets you find instances.  @var{key} is the
 value to search for.  @var{slot} is the slot to compare @var{KEY}
 against.  The function @code{equal} is used for comparison.
-The paramter @var{list-symbol} is the variable symbol which contains the
+The parameter @var{list-symbol} is the variable symbol which contains the
 list of objects to be searched.
 @end deffn
 
@@ -1374,7 +1352,7 @@ list of objects to be searched.
 @comment  node-name,  next,  previous,  up
 @section @code{eieio-singleton}
 
-This class is in package @file{eieio-base}.
+This class is defined in the package @file{eieio-base}.
 
 @deftp {Class} eieio-singleton
 Inheriting from the singleton class will guarantee that there will
@@ -1386,7 +1364,7 @@ only ever be one instance of this class.  Multiple calls to
 @comment  node-name,  next,  previous,  up
 @section @code{eieio-persistent}
 
-This class is in package @file{eieio-base}.
+This class is defined in the package @file{eieio-base}.
 
 If you want an object, or set of objects to be persistent, meaning the
 slot values are important to keep saved between sessions, then you will
@@ -1435,7 +1413,7 @@ previously written with @code{eieio-persistent-save}.
 @comment  node-name,  next,  previous,  up
 @section @code{eieio-named}
 
-This class is in package @file{eieio-base}.
+This class is defined in the package @file{eieio-base}.
 
 @deftp {Class} eieio-named
 Object with a name.
@@ -1450,7 +1428,7 @@ access to it.
 This class is in package @file{eieio-speedbar}.
 
 If a series of class instances map to a tree structure, it is possible
-to cause your classes to be displayable in Speedbar. @xref{Top,,,speedbar}.
+to cause your classes to be displayable in Speedbar.  @xref{Top,,,speedbar}.
 Inheriting from these classes will enable a speedbar major display mode
 with a minimum of effort.
 
@@ -1467,12 +1445,12 @@ slots, and do not take up space in your instances.
 @end deftp
 
 @deftp {Class} eieio-speedbar-directory-button buttontype buttonface
-This class inherits from @code{eieio-speedbar} and initializes 
+This class inherits from @code{eieio-speedbar} and initializes
 @var{buttontype} and @var{buttonface} to appear as directory level lines.
 @end deftp
 
 @deftp {Class} eieio-speedbar-file-button buttontype buttonface
-This class inherits from @code{eieio-speedbar} and initializes 
+This class inherits from @code{eieio-speedbar} and initializes
 @var{buttontype} and @var{buttonface} to appear as file level lines.
 @end deftp
 
@@ -1535,20 +1513,20 @@ speedbar.
 
 Read the Extending chapter in the speedbar manual for more information
 on how speedbar modes work
-@xref{Extending,,,speedbar}. 
+@xref{Extending,,,speedbar}.
 @end deffn
 
 @node Browsing
 @comment  node-name,  next,  previous,  up
 @chapter Browsing class trees
 
-To browse all the currently loaded classes in emacs, simply run the
-@eieio{} browser.  @kbd{M-x eieio-browse}.  This browses all the way from
-the default super-duper class eieio-default-superclass, and lists all
-children in an indented tree structure.
+The command @kbd{M-x eieio-browse} displays a buffer listing all the
+currently loaded classes in Emacs.  The classes are listed in an
+indented tree structure, starting from @code{eieio-default-superclass}
+(@pxref{Default Superclass}).
 
-To browse only from a specific class, pass it in as an alternate
-parameter.
+With a prefix argument, this command prompts for a class name; it then
+lists only that class and its subclasses.
 
 Here is a sample tree from our current example:
 
@@ -1558,8 +1536,6 @@ eieio-default-superclass
        +--data-object-symbol
 @end example
 
-Note that we start with eieio-default-superclass.  @xref{Default Superclass}.
-
 Note: new classes are consed into the inheritance lists, so the tree
 comes out upside-down.
 
@@ -1568,7 +1544,7 @@ comes out upside-down.
 @chapter Class Values
 
 Details about any class or object can be retrieved using the function
-@code{eieio-describe-class} function.  Interactively, type in the name of
+@code{eieio-describe-class}.  Interactively, type in the name of
 a class.  In a program, pass it a string with the name of a class, a
 class symbol, or an object.  The resulting buffer will display all slot
 names.
@@ -1623,7 +1599,7 @@ definitions have been loaded in this Emacs session.
 @comment  node-name,  next,  previous,  up
 @chapter Default Superclass
 
-All defined classes, if created with no specified parent class) will
+All defined classes, if created with no specified parent class, will
 inherit from a special class stored in
 @code{eieio-default-superclass}.  This superclass is quite simple, but
 with it, certain default methods or attributes can be added to all
@@ -1684,7 +1660,7 @@ This is called from the default @code{constructor}.
 @node Basic Methods
 @section Basic Methods
 
-Additional useful methods defined on the base sublcass are:
+Additional useful methods defined on the base subclass are:
 
 @defun clone obj &rest params
 @anchor{clone}
@@ -1715,11 +1691,11 @@ to prepend a space.
 
 (defmethod object-print ((this data-object) &optional strings)
   "Return a string with a summary of the data object as part of the name."
-  (apply 'call-next-method this 
+  (apply 'call-next-method this
          (cons (format " value: %s" (render this)) strings)))
 @end example
 
-here is what some output could look like:
+Here is what some output could look like:
 @example
 (object-print test-object)
    => #<data-object test-object value: 3>
@@ -1743,7 +1719,7 @@ By implementing one of these methods for a class, you can change the
 behavior that occurs during one of these error cases, or even ignore
 the error by providing some behavior.
 
-@defun slot-missing ab &rest foo
+@defun slot-missing object slot-name operation &optional new-value
 @anchor{slot-missing}
 Method invoked when an attempt to access a slot in @var{object} fails.
 @var{slot-name} is the name of the failed slot, @var{operation} is the type of access
@@ -1790,7 +1766,7 @@ value becomes the return value of the original method call.
 @anchor{no-next-method}
 Called from @dfn{call-next-method} when no additional methods are available.
 @var{object} is othe object being called on @dfn{call-next-method}.
-@var{args} are the  arguments it is called by.
+@var{args} are the arguments it is called by.
 This method signals @dfn{no-next-method} by default.  Override this
 method to not throw an error, and its return value becomes the
 return value of @dfn{call-next-method}.
@@ -1845,15 +1821,11 @@ This signal is called when an attempt to reference @var{slot} in
 @comment  node-name,  next,  previous,  up
 @chapter Naming Conventions
 
-The Emacs Lisp programming manual has a great chapter programming
-conventions that help keep each Emacs package working nicely with the
-entire system.  @ref{(elisp)Standards} An @eieio{} based program needs to
-follow these conventions, while simultaneously taking advantage of the
-Object Oriented features.
-
-Here is how the Emacs Lisp naming conventions
-(@pxref{(elisp)Standards}) apply to EIEIO:
-
+@xref{Tips,,Tips and Conventions,elisp,GNU Emacs Lisp Reference
+Manual}, for a description of Emacs Lisp programming conventions.
+These conventions help ensure that Emacs packages work nicely one
+another, so an @eieio{}-based program should follow them.  Here are
+some conventions that apply specifically to @eieio{}-based programs:
 
 @itemize
 
@@ -1878,12 +1850,6 @@ must ``require'' that library with the @code{require} command.
 @comment  node-name,  next,  previous,  up
 @chapter CLOS compatibility
 
-As you read this, it is important to know that I have just recently
-learned some of the CLOS syntax, but have never used it myself outside
-of the @eieio{} framework.  I'm primarily and Emacs Lisp hacker who wrote
-@eieio{} to help myself learn some of the mechanics of Object Oriented
-programming.
-
 Currently, the following functions should behave almost as expected from
 CLOS.
 
@@ -1905,7 +1871,7 @@ instead pre-builds a method that gets the slot's value.
 
 @item :type
 Specifier uses the @code{typep} function from the @file{cl}
-package.  @xref{(cl)Type Predicates}. It therefore has the same issues as
+package.  @xref{(cl)Type Predicates}.  It therefore has the same issues as
 that package.  Extensions include the ability to provide object names.
 @end table
 
@@ -1925,7 +1891,7 @@ except @code{:around}.
 Calls defgeneric, and accepts most of the expected arguments.  Only
 the first argument to the created method may have a type specifier.
 To type cast against a class, the class must exist before defmethod is
-called. In addition, the @code{:around} tag is not supported.
+called.  In addition, the @code{:around} tag is not supported.
 
 @item call-next-method
 Inside a method, calls the next available method up the inheritance tree
@@ -1953,10 +1919,10 @@ In @eieio{} tags are in lower case, not mixed case.
 @chapter Wish List
 
 @eieio{} is an incomplete implementation of CLOS.  Finding ways to
-improve the compatability would help make CLOS style programs run
+improve the compatibility would help make CLOS style programs run
 better in Emacs.
 
-Some important compatability features that would be good to add are:
+Some important compatibility features that would be good to add are:
 
 @enumerate
 @item
@@ -1971,7 +1937,7 @@ Improve integration with the @file{cl} package.
 @end enumerate
 
 There are also improvements to be made to allow @eieio{} to operate
-better in the Emacs environment.  
+better in the Emacs environment.
 
 @enumerate
 @item

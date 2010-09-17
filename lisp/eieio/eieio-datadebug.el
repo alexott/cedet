@@ -1,23 +1,25 @@
 ;;; eieio-datadebug.el --- EIEIO extensions to the data debugger.
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
-;; Author: Eric M. Ludlam <eric@siege-engine.com>
+;; Author: Eric M. Ludlam <zappo@gnu.org>
+;; Keywords: OO, lisp
+;; Package: eieio
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -29,35 +31,28 @@
 
 ;;; Code:
 
-;;;###autoload
 (defun data-debug-insert-object-slots (object prefix)
   "Insert all the slots of OBJECT.
 PREFIX specifies what to insert at the start of each line."
-  (let ((attrprefix (concat (make-string (length prefix) ? ) "] "))
-	)
-    (data-debug/eieio-insert-slots object attrprefix)
-    )
-  )
+  (let ((attrprefix (concat (make-string (length prefix) ? ) "] ")))
+    (data-debug/eieio-insert-slots object attrprefix)))
 
 (defun data-debug-insert-object-slots-from-point (point)
   "Insert the object slots found at the object button at POINT."
   (let ((object (get-text-property point 'ddebug))
 	(indent (get-text-property point 'ddebug-indent))
-	start
-	)
+	start)
     (end-of-line)
     (setq start (point))
     (forward-char 1)
     (data-debug-insert-object-slots object
 				    (concat (make-string indent ? )
 					    "~ "))
-    (goto-char start)
-    ))
+    (goto-char start)))
 
-;;;###autoload
 (defun data-debug-insert-object-button (object prefix prebuttontext)
   "Insert a button representing OBJECT.
-PREFIX is the text that preceeds the button.
+PREFIX is the text that precedes the button.
 PREBUTTONTEXT is some text between PREFIX and the object button."
   (let ((start (point))
 	(end nil)
@@ -78,9 +73,7 @@ PREBUTTONTEXT is some text between PREFIX and the object button."
     (put-text-property start end 'help-echo tip)
     (put-text-property start end 'ddebug-function
 		       'data-debug-insert-object-slots-from-point)
-    (insert "\n")
-    )
-  )
+    (insert "\n")))
 
 ;;; METHODS
 ;;
@@ -106,7 +99,7 @@ PREBUTTONTEXT is some text between PREFIX and the object button."
 	    (let ((i (class-slot-initarg cl (car publa)))
 		  (v (eieio-oref obj (car publa))))
 	      (data-debug-insert-thing
-	       v prefix (concat 
+	       v prefix (concat
 			 (if i (symbol-name i)
 			   (symbol-name (car publa)))
 			 " ")))
@@ -119,8 +112,11 @@ PREBUTTONTEXT is some text between PREFIX and the object button."
 		     " ")
 	     'font-lock-keyword-face))
 	  )
-	(setq publa (cdr publa) publd (cdr publd)))
-      )))
+	(setq publa (cdr publa) publd (cdr publd))))))
+
+;;; Augment the Data debug thing display list.
+(data-debug-add-specialized-thing (lambda (thing) (object-p thing))
+				  #'data-debug-insert-object-button)
 
 ;;; Augment the Data debug thing display list.
 (data-debug-add-specialized-thing (lambda (thing) (object-p thing))
@@ -130,9 +126,8 @@ PREBUTTONTEXT is some text between PREFIX and the object button."
 ;;
 ;; A generic function to run DDEBUG on an object and popup a new buffer.
 ;;
-;;;###autoload
 (defmethod data-debug-show ((obj eieio-default-superclass))
-  "Run ddebug against any EIEIO object OBJ"
+  "Run ddebug against any EIEIO object OBJ."
   (data-debug-new-buffer (format "*%s DDEBUG*" (object-name obj)))
   (data-debug-insert-object-slots obj "]"))
 
@@ -149,11 +144,8 @@ PREBUTTONTEXT is some text between PREFIX and the object button."
 	 (buf (data-debug-new-buffer "*Method Invocation*"))
 	 (data2 (mapcar (lambda (sym)
 			  (symbol-function (car sym)))
-			  data))
-	 )
-    
+			  data)))
     (data-debug-insert-thing data2 ">" "")))
-
 
 (provide 'eieio-datadebug)
 
