@@ -108,7 +108,10 @@ Optional argument IN-BUFFER indicates that the returned tag should be in an acti
 	      (aDB (car ans))
 	      )
 	 (when (and (not (semantic-tag-prototype-p aT))
-		    (semantic-tag-similar-p tag aT :prototype-flag :parent))
+		    (semantic-tag-similar-p tag aT
+					    :prototype-flag
+					    :parent
+					    :typemodifiers))
 	   (when in-buffer (save-excursion (semantic-go-to-tag aT aDB)))
 	   (push aT impl))))
      allhits)
@@ -128,7 +131,10 @@ Optional argument IN-BUFFER indicates that the returned tag should be in an acti
 	      (aDB (car ans))
 	      )
 	 (when (and (semantic-tag-prototype-p aT)
-		    (semantic-tag-similar-p tag aT :prototype-flag :parent))
+		    (semantic-tag-similar-p tag aT
+					    :prototype-flag
+					    :parent
+					    :typemodifiers))
 	   (when in-buffer (save-excursion (semantic-go-to-tag aT aDB)))
 	   (push aT proto))))
      allhits)
