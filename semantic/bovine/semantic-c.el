@@ -1868,6 +1868,23 @@ For types with a :parent, create faux namespaces to put TAG into."
 	  txt)
       (semantic-idle-summary-current-symbol-info-default))))
 
+(define-mode-local-override semantic--tag-similar-names-p c-mode (tag1 tag2 blankok)
+  "Compare the names of TAG1 and TAG2.
+If BLANKOK is false, then the names must exactly match.
+If BLANKOK is true, then always return t, as for C, the names don't matter
+for arguments compared."
+  (if blankok t (semantic--tag-similar-names-p-default tag1 tag2 nil)))
+
+(define-mode-local-override semantic--tag-attribute-similar-p c-mode
+  (attr value1 value2 ignorable-attributes)
+  "For c-mode, allow function :arguments to ignore the :name attributes."
+  (cond ((eq attr :arguments)
+	 (semantic--tag-attribute-similar-p-default attr value1 value2
+						    (cons :name ignorable-attributes)))
+	(t
+	 (semantic--tag-attribute-similar-p-default attr value1 value2
+						    ignorable-attributes))))
+
 (defvar-mode-local c-mode semantic-orphaned-member-metaparent-type "struct"
   "When lost members are found in the class hierarchy generator, use a struct.")
 
@@ -1899,6 +1916,12 @@ For types with a :parent, create faux namespaces to put TAG into."
 
 (defvar-mode-local c-mode senator-step-at-tag-classes '(function variable)
   "Tag classes where senator will stop at the end.")
+
+(defvar-mode-local c-mode semantic-tag-similar-ignorable-attributes
+  '(:prototype-flag :parent :typemodifiers)
+  "Tag attributes to ignore during similarity tests.
+:parent is here because some tags might specify a parent, while others are
+actually in their parent which is not accessible.")
 
 ;;;###autoload
 (defun semantic-default-c-setup ()
