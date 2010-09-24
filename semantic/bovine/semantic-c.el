@@ -297,7 +297,7 @@ Moves completely over balanced #if blocks."
 	;; - available in Emacs/CVS as of AUG 2009
 	(c-forward-conditional 1))
        ((looking-at "^\\s-*#\\s-*elif")
-	;; We need to let the preprocessor analize this one.
+	;; We need to let the preprocessor analyze this one.
 	(beginning-of-line)
 	(setq done t)
 	)
@@ -466,6 +466,7 @@ evaluate the #if expression and enables us to make decisions on which
 code to parse."
   ;; Enable our advice, and use hideif to parse.
   (let* ((semantic-c-takeover-hideif t)
+	 (hif-ifx-regexp (concat hif-cpp-prefix "\\(elif\\|if\\(n?def\\)?\\)[ \t]+"))
 	 (parsedtokelist
 	  (condition-case nil
 	      ;; This is imperfect, so always assume on error.
