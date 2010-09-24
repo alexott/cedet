@@ -50,12 +50,12 @@ to this variable NAME."
         (setq elt   (car elts)
               elts  (cdr elts)
               clone (semantic-tag-clone tag (car elt))
-	      value (car (cdr elt))
+              value (car (cdr elt))
               start (if elts  (car (cddr elt)) (semantic-tag-start tag))
               end   (if xpand (cdr (cddr elt)) (semantic-tag-end   tag))
               xpand (cons clone xpand))
-	;; Set the definition of the cloned tag
-	(semantic-tag-put-attribute clone :default-value value)
+        ;; Set the definition of the cloned tag
+        (semantic-tag-put-attribute clone :default-value value)
         ;; Set the bounds of the cloned tag with those of the name
         ;; element.
         (semantic-tag-set-bounds clone start end))
@@ -99,6 +99,10 @@ This function overrides `get-local-variables'."
 (add-hook 'javascript-mode-hook 'wisent-javascript-setup-parser)
 ;;;###autoload
 (add-hook 'ecmascript-mode-hook 'wisent-javascript-setup-parser)
+;;;###autoload
+(add-hook 'js-mode-hook 'wisent-javascript-setup-parser)
+;;;###autoload
+(add-hook 'js2-mode-hook 'wisent-javascript-setup-parser)
 
 (provide 'wisent-javascript-jv)
 
