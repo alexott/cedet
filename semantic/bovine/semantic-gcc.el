@@ -1,6 +1,6 @@
 ;;; semantic-gcc.el --- gcc querying special code for the C parser
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; X-RCS: $Id: semantic-gcc.el,v 1.19 2010-03-15 13:40:55 xscript Exp $
@@ -152,13 +152,14 @@ It should also include other symbols GCC was compiled with.")
          (prefix (cdr (assoc '--prefix fields)))
          ;; gcc output supplied paths
          (c-include-path (semantic-gcc-get-include-paths "c"))
-         (c++-include-path (semantic-gcc-get-include-paths "c++")))
+         (c++-include-path (semantic-gcc-get-include-paths "c++"))
+	 (gcc-exe (locate-file "gcc" exec-path exec-suffixes 'executable))
+	 )
     ;; Remember so we don't have to call GCC twice.
     (setq semantic-gcc-setup-data fields)
-    (unless c-include-path
+    (when (and (not c-include-path) gcc-exe)
       ;; Fallback to guesses
       (let* ( ;; gcc include dirs
-             (gcc-exe (locate-file "gcc" exec-path exec-suffixes 'executable))
              (gcc-root (expand-file-name ".." (file-name-directory gcc-exe)))
              (gcc-include (expand-file-name "include" gcc-root))
              (gcc-include-c++ (expand-file-name "c++" gcc-include))
