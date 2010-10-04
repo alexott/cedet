@@ -1875,6 +1875,26 @@ If BLANKOK is true, then always return t, as for C, the names don't matter
 for arguments compared."
   (if blankok t (semantic--tag-similar-names-p-default tag1 tag2 nil)))
 
+(define-mode-local-override semantic--tag-similar-types-p c-mode (tag1 tag2)
+  "For c-mode, if only one of the types is fully qualfied, we
+split its name and compare the last element."
+  ;; First, we see if the default method fails
+  (if (semantic--tag-similar-types-p-default tag1 tag2)
+      t
+    (let ((t1 (semantic-tag-type tag1))
+	  (t2 (semantic-tag-type tag2)))
+      (unless (stringp t1)
+	(setq t1 (semantic-analyze-split-name (semantic-tag-name t1))))
+      (unless (stringp t2)
+	(setq t2 (semantic-analyze-split-name (semantic-tag-name t2))))
+      (cond
+       ((and (listp t1) (stringp t2))
+	(string= (car (last t1)) t2))
+       ((and (stringp t1) (listp t2))
+	(string= t1 (car (last t2))))
+       (t
+	nil)))))
+
 (define-mode-local-override semantic--tag-attribute-similar-p c-mode
   (attr value1 value2 ignorable-attributes)
   "For c-mode, allow function :arguments to ignore the :name attributes."
