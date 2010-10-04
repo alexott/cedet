@@ -65,6 +65,17 @@ have values, they must still match."
     (or (and blankok (or (null n1) (null n2) (string= n1 "") (string= n2 "")))
 	(string= n1 n2))))
 
+(define-overloadable-function semantic--tag-similar-types-p (tag1 tag2)
+  "Compare the types of TAG1 and TAG2.
+This functions can be overriden, for example to compare a fully
+qualified with an unqualified type.")
+
+(defun semantic--tag-similar-types-p-default (tag1 tag2)
+  "Compare the types of TAG1 and TAG2.
+This functions can be overriden, for example to compare a fully
+qualified with an unqualified type."
+  (semantic-tag-of-type-p tag1 (semantic-tag-type tag2)))
+
 (define-overloadable-function semantic--tag-attribute-similar-p (attr value1 value2 ignorable-attributes)
   "Test to see if attribute ATTR is similar for VALUE1 and VALUE2.
 IGNORABLE-ATTRIBUTES is described in `semantic-tag-similar-p'.
@@ -128,8 +139,8 @@ IGNORABLE-ATTRIBUTES are tag attributes that can be ignored.
 See `semantic-tag-similar-p' for details."
   (let* ((ignore (append ignorable-attributes semantic-tag-similar-ignorable-attributes))
 	 (A1 (and (semantic--tag-similar-names-p tag1 tag2 (memq :name ignore))
-		  (semantic-tag-of-class-p tag1 (semantic-tag-class tag2))
-		  (semantic-tag-of-type-p tag1 (semantic-tag-type tag2))))
+		  (semantic--tag-similar-types-p tag1 tag2)
+		  (semantic-tag-of-class-p tag1 (semantic-tag-class tag2))))
 	 (attr1 (semantic-tag-attributes tag1))
 	 (attr2 (semantic-tag-attributes tag2))
 	 (A2 t)
