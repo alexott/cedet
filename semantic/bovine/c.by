@@ -102,6 +102,8 @@
 %put VIRTUAL summary "Method Modifier: virtual <type> <name>(...) ..."
 %token MUTABLE "mutable"
 %put MUTABLE summary "Member Declaration Modifier: mutable <type> <name> ..."
+%token EXPLICIT "explicit"
+%put EXPLICIT summary "Forbids implicit type conversion: explicit <constructor>"
 
 %token STRUCT "struct"
 %put STRUCT summary "Structure Type Declaration: struct [name] { ... };"
