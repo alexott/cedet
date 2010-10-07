@@ -50,6 +50,7 @@
     "tests/testsppcomplete.c"
     "tests/testvarnames.c"
     "tests/testjavacomp.java"
+    "tests/testf90.f90"
     )
   "List of files with analyzer completion test points.")
 
