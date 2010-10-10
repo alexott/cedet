@@ -24,27 +24,27 @@ program main
   type(aType) :: theType
 
   ! completion of subroutines
-  call external//-1-
-  // #1# ( "externalPolySub" "externalSub" )
-  call my//-2-
-  // #2# ( "myModSub" "mySub" )
+  call external!-1-
+  !#1# ( "externalPolySub" "externalSub" )
+  call my!-2-
+  !#2# ( "myModSub" "mySub" )
 
   ! type-aware completion of functions
-  bar = m//-3-
-  // #3# ( "myFunc" "myModFunc" )
+  bar = m!-3-
+  !#3# ( "myFunc" "myModFunc" )
 
   ! completion of variables
-  eineVar = foo//-4-
-  // #4# ( "foo1" "foo2" "foo4" "foo5" "foo6" "foo7" "foo8" "fooOldStyleDecl" )
+  eineVar = foo!-4-
+  !#4# ( "foo1" "foo2" "foo4" "foo5" "foo6" "foo7" "foo8" "fooOldStyleDecl" )
 
-  bar = foo//-5-
-  // #5# ( "foo3" "foopi" )
-  (setq honk (semantic-get-local-variables))
+  bar = foo!-5-
+  !#5# ( "foo3" "foopi" )
+
   ! completion of type members
-  theType%//-6-
-  //#6# ( "one" "two" "three" "four" "five" )
-  honk = theType%//-7-
-  //#7# ( "four" "three" )
+  theType%!-6-
+  !#6# ( "one" "two" "three" "four" "five" )
+  honk = theType%!-7-
+  !#7# ( "four" "three" )
 
 contains
 
@@ -60,8 +60,8 @@ contains
     real :: eee
     double precision myFunc
     
-    myFunc = ddd*e//-8-
-    //#8# ( "eee" "eineVar" )
+    myFunc = ddd*e!-8-
+    !#8# ( "eee" "eineVar" )
   end function myFunc
   
   integer function anotherFunc(fff)

@@ -25,9 +25,10 @@
 ;; Use marked-up files in the test directory and run the analyzer
 ;; on them.  Make sure the answers are correct.
 ;;
-;; Each file has cursor keys in them of the form:
+;; Each file has cursor keys in them of the form of special comments:
 ;;   // -#- ("ans1" "ans2" )
-;; where # is 1, 2, 3, etc, and some sort of answer list.
+;; where # is 1, 2, 3, etc, and some sort of answer list (you have to
+;; replace '//' with the `comment-start' for the used language).
 
 ;;; Code:
 (require 'cedet-utests)
@@ -182,8 +183,10 @@ If the error occurs w/ a C or C++ file, rethrow the error."
 	 )
     ;; Keep looking for test points until we run out.
     (while (save-excursion
-	     (setq regex-p (concat "//\\s-*-" (number-to-string idx) "-" )
-		   regex-a (concat "//\\s-*#" (number-to-string idx) "#" ))
+	     (setq regex-p (concat comment-start-skip "\\s-*-"
+				   (number-to-string idx) "-" )
+		   regex-a (concat comment-start-skip "\\s-*#"
+				   (number-to-string idx) "#" ))
 	     (goto-char (point-min))
 	     (save-match-data
 	       (when (re-search-forward regex-p nil t)
@@ -257,7 +260,8 @@ If the error occurs w/ a C or C++ file, rethrow the error."
 	 )
     ;; Keep looking for test points until we run out.
     (while (save-excursion
-	     (setq regex-p (concat "//\\s-*\\^" (number-to-string idx) "^" )
+	     (setq regex-p (concat comment-start-skip
+				   "\\s-*\\^" (number-to-string idx) "^" )
 		   )
 	     (goto-char (point-min))
 	     (save-match-data
@@ -378,7 +382,8 @@ If the error occurs w/ a C or C++ file, rethrow the error."
 	 )
     ;; Keep looking for test points until we run out.
     (while (save-excursion
-	     (setq regex-p (concat "//\\s-*\\%" (number-to-string idx) "%" )
+	     (setq regex-p (concat comment-start-skip "\\s-*\\%"
+				   (number-to-string idx) "%" )
 		   )
 	     (goto-char (point-min))
 	     (save-match-data
@@ -476,9 +481,9 @@ If the error occurs w/ a C or C++ file, rethrow the error."
 	 )
     ;; Keep looking for test points until we run out.
     (while (save-excursion
-	     (setq regex-p (concat "//\\s-*@"
+	     (setq regex-p (concat comment-start-skip "\\s-*@"
 				   (number-to-string idx)
-				   "@\\s-+\\(\\w+\\)" ))
+				   "@\\s-+\\(?1:\\w+\\)" ))
 	     (goto-char (point-min))
 	     (save-match-data
 	       (when (re-search-forward regex-p nil t)
