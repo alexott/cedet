@@ -483,11 +483,12 @@ If the error occurs w/ a C or C++ file, rethrow the error."
     (while (save-excursion
 	     (setq regex-p (concat comment-start-skip "\\s-*@"
 				   (number-to-string idx)
-				   "@\\s-+\\(?1:\\w+\\)" ))
+				   "@\\s-+\\w+" ))
 	     (goto-char (point-min))
 	     (save-match-data
 	       (when (re-search-forward regex-p nil t)
-		 (goto-char (match-beginning 1))
+		 (goto-char (match-end 0))
+		 (skip-syntax-backward "w")
 		 (setq desired (read (buffer-substring (point) (point-at-eol))))
 		 (setq start (match-beginning 0))
 		 (goto-char start)
