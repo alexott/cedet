@@ -38,7 +38,7 @@
 
 (require 'working)
 (require 'assoc)
-(require 'semantic-tag)
+(require 'semantic-tag-ls)
 (require 'semantic-lex)
 (require 'inversion)
 
