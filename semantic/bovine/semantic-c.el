@@ -1876,24 +1876,33 @@ for arguments compared."
   (if blankok t (semantic--tag-similar-names-p-default tag1 tag2 nil)))
 
 (define-mode-local-override semantic--tag-similar-types-p c-mode (tag1 tag2)
-  "For c-mode, if only one of the types is fully qualfied, we
-split its name and compare the last element."
+  "For c-mode, deal with TAG1 and TAG2 being used in different namespaces.
+In this case, one type will be shorter than the other.  Instead
+of fully resolving all namespaces currently in scope for both
+types, we simply compare as many elements as the shorter type
+provides."
   ;; First, we see if the default method fails
   (if (semantic--tag-similar-types-p-default tag1 tag2)
       t
-    (let ((t1 (semantic-tag-type tag1))
-	  (t2 (semantic-tag-type tag2)))
-      (unless (stringp t1)
-	(setq t1 (semantic-analyze-split-name (semantic-tag-name t1))))
-      (unless (stringp t2)
-	(setq t2 (semantic-analyze-split-name (semantic-tag-name t2))))
+    (let* ((names
+	    (mapcar
+	    (lambda (tag)
+	      (let ((type (semantic-tag-type tag)))
+		(unless (stringp type)
+		  (setq type (semantic-tag-name type)))
+		(setq type (semantic-analyze-split-name type))
+		(when (stringp type)
+		  (setq type (list type)))
+		type))
+	    (list tag1 tag2)))
+	   (len1 (length (car names)))
+	   (len2 (length (cadr names))))
       (cond
-       ((and (listp t1) (stringp t2))
-	(string= (car (last t1)) t2))
-       ((and (stringp t1) (listp t2))
-	(string= t1 (car (last t2))))
-       (t
-	nil)))))
+       ((<= len1 len2)
+	(equal (nthcdr len1 (cadr names)) (car names)))
+       ((< len2 len1)
+	(equal (nthcdr len2 (car names)) (cadr names)))))))
+
 
 (define-mode-local-override semantic--tag-attribute-similar-p c-mode
   (attr value1 value2 ignorable-attributes)
