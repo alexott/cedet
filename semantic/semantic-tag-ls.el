@@ -92,7 +92,8 @@ to do the default equality tests if ATTR is not special for that mode.")
   "For ATTR, VALUE1, VALUE2 and IGNORABLE-ATTRIBUTES, test for similarness."
   (cond
    ;; Tag sublists require special testing.
-   ((and (listp value1) (semantic-tag-p (car value1)))
+   ((and (listp value1) (semantic-tag-p (car value1))
+	 (listp value2) (semantic-tag-p (car value2)))
     (let ((ans t)
 	  (taglist1 value1)
 	  (taglist2 value2))
