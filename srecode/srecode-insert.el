@@ -926,7 +926,7 @@ Finds the template with this macro function part and stores it in
 this template instance."
   (let ((templatenamepart (oref sti :secondname)))
     ;; If there was no template name, throw an error.
-    (unless template-name
+    (unless templatenamepart
       (srecode-insert-report-error
        dictionary
        "Include macro `%s' needs a template name"
