@@ -1,2 +1,10 @@
 * Should compatibility functions be maintained (cedet-compat)?
 ** eieio: cedet-called-interactively-p
+* Speedbar documentation has been stripped out of many details
+** speedbar-stealthy-function-list
+** speedbar-dynamic-tags-function-list
+** Detailed description on how to create new contents (speedbar.el now contains
+   a brief summary)
+* speedbar-sort-tags is described as obsolete, but widely used
+* speedbar-require-version : commented out
+* speedbar-sort-tags : obsolete

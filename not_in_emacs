@@ -2,3 +2,12 @@ lisp/eieio/eieio-doc.el
 lisp/eieio/eieio-xml.el
 lisp/eieio/linemark.el
 lisp/eieio/lmcompile.el
+lisp/speedbar/bigclock.el
+lisp/speedbar/rpm.el
+lisp/speedbar/sb-ant.el
+lisp/speedbar/sb-gud.el
+lisp/speedbar/sb-html.el
+lisp/speedbar/sb-info.el
+lisp/speedbar/sb-rmail.el
+lisp/speedbar/sb-texinfo.el
+lisp/speedbar/sb-w3.el

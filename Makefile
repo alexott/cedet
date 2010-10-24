@@ -29,7 +29,7 @@ RMFLAGS=-f
 MAKEINFO=makeinfo
 
 ## Which packages to compile, test, etc.
-PACKAGES=eieio
+PACKAGES=eieio speedbar
 
 ###### Internal part of the Makefile ###########################################
 
@@ -65,7 +65,7 @@ $(1)_LISP=$(shell $(FIND) $(lispdir)/$(1)/ -name \*.el)
 $(1)_CODE=$$(patsubst %.el,%.elc,$$($(1)_LISP))
 $(1)_TEXINFO=$(shell $(FIND) $(docdir) -name $(1).texi -or -path $(1)/*.texi)
 $(1)_INFO=$$(patsubst %.texi,%.info,$$($(1)_TEXINFO))
-$(1)_TEST_LISP=$(shell $(FIND) $(testdir)/$(1)/ -name \*.el)
+$(1)_TEST_LISP=$(shell test ! -d $(testdir)/$(1)/ || $(FIND) $(testdir)/$(1)/ -name \*.el)
 $(1)_TEST_CODE=$$(patsubst %.el,%.elc,$$($(1)_TEST_LISP))
 
 compile-$(1): $$($(1)_CODE)

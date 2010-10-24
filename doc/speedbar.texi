@@ -1,59 +1,29 @@
 \input texinfo   @c -*-texinfo-*-
-@c
-@c $Id: speedbar.texi,v 1.20 2010-05-30 02:39:28 emacsman Exp $
-@c
-
-@c This file is part of GNU Emacs
-
-@c GNU Emacs is free software; you can redistribute it and/or modify it
-@c under the terms of the GNU General Public License as published by the
-@c Free Software Foundation; either version 2 of the License, or (at
-@c your option) any later version.
-
-@c GNU Emacs is distributed in the hope that it will be useful, but
-@c WITHOUT ANY WARRANTY; without even the implied warranty of
-@c MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-@c General Public License for more details.
-
-@c You should have received a copy of the GNU General Public License
-@c along with GNU Emacs; see the file COPYING.  If not, write to the
-@c Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-@c Boston, MA 02110-1301, USA.
-
-@setfilename speedbar.info
+@setfilename ../../info/speedbar
 @settitle Speedbar: File/Tag summarizing utility
+@syncodeindex fn cp
 
-@dircategory Emacs
-@direntry
-* Speedbar: (speedbar).        File/Tag summarizing utility.
-@end direntry
-@ifnottex
-Copyright @copyright{} 1999, 2000, 2001, 2002, 2003, 2005 Free Software Foundation, Inc.
+@copying
+Copyright @copyright{} 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
-under the terms of the GNU Free Documentation License, Version 1.2 or
-any later version published by the Free Software Foundation; with the
-Invariant Sections being ``The GNU Manifesto'', ``Distribution'' and
-``GNU GENERAL PUBLIC LICENSE'', with the Front-Cover texts being ``A GNU
-Manual'', and with the Back-Cover Texts as in (a) below.  A copy of the
-license is included in the section entitled ``GNU Free Documentation
-License'' in the Emacs manual.
+under the terms of the GNU Free Documentation License, Version 1.3 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with the Front-Cover texts being ``A GNU Manual'',
+and with the Back-Cover Texts as in (a) below.  A copy of the license
+is included in the section entitled ``GNU Free Documentation License''.
 
-(a) The FSF's Back-Cover Text is: ``You have freedom to copy and modify
-this GNU Manual, like GNU software.  Copies published by the Free
-Software Foundation raise funds for GNU development.''
-
-This document is part of a collection distributed under the GNU Free
-Documentation License.  If you want to distribute this document
-separately from the collection, you can do so by adding a copy of the
-license to the document, as described in section 6 of the license.
+(a) The FSF's Back-Cover Text is: ``You have the freedom to copy and
+modify this GNU manual.  Buying copies from the FSF supports it in
+developing GNU and promoting software freedom.''
 @end quotation
-@end ifnottex
+@end copying
 
 @dircategory Emacs
 @direntry
-* Speedbar: (speedbar). File/Tag summarizing utility.
+* Speedbar: (speedbar).         File/Tag summarizing utility.
 @end direntry
 
 @titlepage
@@ -67,7 +37,7 @@ license to the document, as described in section 6 of the license.
 @insertcopying
 @end titlepage
 
-@syncodeindex fn cp
+@contents
 
 @node Top, , , (dir)Top
 @comment  node-name,  next,  previous,  up
@@ -98,6 +68,10 @@ button.  Expanding refers to clicking on an expansion button to display
 an expanded summary of the entry the expansion button is
 on.  @xref{Basic Navigation}.
 
+@ifnottex
+@insertcopying 
+@end ifnottex
+
 @menu
 * Introduction::     Basics of speedbar.
 * Basic Navigation:: Basics of speedbar common between all modes.
@@ -114,13 +88,13 @@ on.  @xref{Basic Navigation}.
 @chapter Introduction
 @cindex introduction
 
-To start using speedbar use the command @kbd{M-x speedbar RET} or select
-it from the Tools menu in versions of Emacs with speedbar installed by
-default.  This command will open a new frame to summarize the local
-files.  On X Window systems or on MS-Windows, speedbar's frame is twenty
-characters wide, and will mimic the height of the frame from which it
-was started.  It positions itself to the left or right of the frame you
-started it from.
+To start using speedbar use the command @kbd{M-x speedbar RET} or
+select it from the @samp{Options->Show/Hide} sub-menu.  This command
+will open a new frame to summarize the local files.  On X Window
+systems or on MS-Windows, speedbar's frame is twenty characters wide,
+and will mimic the height of the frame from which it was started.  It
+positions itself to the left or right of the frame you started it
+from.
 
 To use speedbar effectively, it is important to understand its
 relationship with the frame you started it from.  This frame is the
@@ -189,7 +163,7 @@ Move to the next or previous item in a restricted fashion.  If a list is
 open, the cursor will skip over it.  If the cursor is in an open list,
 it will not leave it.
 @item C-M-n
-@itemx C-M-n
+@itemx C-M-p
 Move forwards and backwards across extended groups.  This lets you
 quickly skip over all files, directories, or other common sub-items at
 the same current depth.
@@ -510,14 +484,10 @@ In speedbar, a hidden file is a file which isn't very interesting and
 might prove distracting to the user.  Any uninteresting files are
 removed from the File display.  There are two levels of uninterest in
 speedbar.  The first level of uninterest are files which have no
-expansion method, or way of extracting tags.  You can define which
-files are interesting with
-@code{speedbar-supported-extension-expressions}.  The second level is
-any file that matches the same pattern used for completion in
+expansion method, or way of extracting tags.  The second level is any
+file that matches the same pattern used for completion in
 @code{find-file}.  This is derived from the variable
-@code{completion-ignored-extensions}.  This filter will override the
-supported extensions, so if you add something to be supported, and
-it doesn't appear, check for this.
+@code{completion-ignored-extensions}.
 
 You can toggle the display of uninteresting files from the toggle menu
 item @samp{Show All Files}.  This will display all level one hidden files.
@@ -616,9 +586,10 @@ will follow the general rules of their major counterparts in terms of
 key bindings and visuals, but will have specialized behaviors.
 
 @menu
-* RMAIL::  Managing folders in speedbar
-* Info::   Browsing topics in speedbar
-* GDB::    Managing the current stack trace in speedbar
+* RMAIL::  Managing folders.
+* Info::   Browsing topics.
+* GDB::    Watching expressions or managing the current
+            stack trace.
 @end menu
 
 @node RMAIL, Info, Minor Modes, Minor Modes
@@ -664,7 +635,15 @@ a @samp{[+]}, indicating that there are no sub-topics.
 @cindex gdb
 @cindex gud
 
-If you are debugging an application with GDB in Emacs, speedbar can show
+You can debug an application with GDB in Emacs using graphical mode or
+text command mode (@pxref{GDB Graphical Interface,,, emacs, The
+extensible self-documenting text editor}).
+
+If you are using graphical mode you can see how selected variables
+change each time your program stops (@pxref{Watch Expressions,,,
+emacs, The extensible self-documenting text editor}).
+
+If you are using text command mode, speedbar can show
 you the current stack when the current buffer is the @file{*gdb*}
 buffer.  Usually, it will just report that there is no stack, but when
 the application is stopped, the current stack will be shown.
@@ -672,10 +651,6 @@ the application is stopped, the current stack will be shown.
 You can click on any stack element and gdb will move to that stack
 level.  You can then check variables local to that level at the GDB
 prompt.
-
-This mode has the unfortunate side-effect of breaking GDB's repeat
-feature when you hit @kbd{RET} since your previous command is overridden
-with a stack fetching command.
 
 @node Customizing, Extending, Minor Modes, Top
 @comment  node-name,  next,  previous,  up
@@ -1122,29 +1097,6 @@ Your custom function might look like this:
 Once you have done all this, speedbar will show an entry in the
 @samp{Displays} menu declaring that your extension is available.
 
-If your major mode is running slowly, you may need to add a set of
-stealthy update functions.
-
-@defvar speedbar-stealthy-function-list
-@anchor{speedbar-stealthy-function-list}
-List of functions to periodically call stealthily.
-Each function must return @code{nil} if interrupted, or @code{t} if completed.
-Stealthy functions which have a single operation should always return
-@code{t}.  Functions which take a long time should maintain a state (where
-they are in their speedbar related calculations) and permit
-interruption.  See @dfn{speedbar-check-vc} as a good example.
-@end defvar
-
-Stealthy functions are currently used in files mode.  The first
-activity is to display the main list with minimal decorations though
-the buttons function.  Once that is done, additional work can be done
-decorating different lines after the fact.
-
-For files mode, VC status and read-only markers can calculated after
-the first display is up.  Because the process of calculating that
-information can be slow, these functions are interruptable, and will
-continue processing at a later time out.
-
 @node Tagging Extensions, Creating a display, Major Display Modes, Extending
 @section Tagging Extensions
 
@@ -1153,17 +1105,8 @@ To do this, you need two basic functions, one function to fetch the
 tags from a buffer, the other to insert them below the filename.
 
 @defun my-fetch-dynamic-tags file
-Parse @var{file} for a list of tags.  Return the list, or @code{t} if
-there was an error.  @var{file} is not necessarily available as an
-buffer when your function is called.  Be sure to load it if it is needed
-with code like this:
-
-@example
-(save-excursion
-  (set-buffer (find-file-noselect file))
-  ...
-  )
-@end example
+Parse @var{file} for a list of tags.  Return the list, or @code{t} if there was
+an error.
 @end defun
 
 The non-error return value can be anything, as long as it can be
@@ -1177,7 +1120,8 @@ display information required.
 
 @cindex @code{speedbar-create-tag-hierarchy}
 It is often useful to use @code{speedbar-create-tag-hierarchy} on your
-tag list @ref{Creating a display}.
+token list.  See that function's documentation for details on what it
+requires.
 
 @cindex @code{speedbar-dynamic-tags-function-list}
 Once these two functions are written, modify the variable
@@ -1186,25 +1130,12 @@ beginning, like this:
 
 @example
 (add-to-list 'speedbar-dynamic-tags-function-list
-             '(my-fetch-dynamic-tags  . my-insert-tag-list))
+             '(my-fetch-dynamic-tags . my-insert-tag-list))
 @end example
 
-@defvar speedbar-dynamic-tags-function-list
-@anchor{speedbar-dynamic-tags-function-list}
-A list of functions which will return and insert a list of tags.
-Each element is of the form ( @var{fetch} .  @var{insert} ) where @var{fetch}
-is a function which takes one parameter (the file to tag) and returns a
-list of tags.  The tag list can be of any form as long as the
-corresponding insert method can handle it.  If it returns @code{t}, then an
-error occurred, and the next fetch routine is tried.
-@var{insert} is a function which takes an INDENTation level, and a @var{list} of
-tags to insert.  It will then create the speedbar buttons.
-@end defvar
-
-If your parser is only good for a few types of files (ie, just texinfo
-files), make sure that it is either a buffer local modification (set
-only in texi files), or that the tag generator returns @code{t} for
-unsupported buffers.
+If your parser is only good for a few types of files, make sure that it
+is either a buffer local modification, or that the tag generator returns
+@code{t} for non valid buffers.
 
 @node Creating a display, , Tagging Extensions, Extending
 @section Creating a display
@@ -1231,19 +1162,6 @@ depth which indicates how far down the tree it is.  This information is
 stored in invisible text at the beginning of each line, and is used by
 the navigation commands.
 
-@menu
-* Creating Buttons::
-* Generic Tag Lists::
-* Expand Buttons::
-@end menu
-
-@node Creating Buttons, Generic Tag Lists, , Creating a display
-@subsection Creating Speedbar Buttons
-
-While it is certainly possible to insert your own text and add
-decorations to it, it is preferable to use the speedbar button
-creation API instead.
-
 @defun speedbar-insert-button text face mouse function &optional token prevline
 This function inserts one button into the current location.
 @var{text} is the text to insert.  @var{face} is the face in which it
@@ -1257,26 +1175,16 @@ appear directly after the last button which was created instead of on
 the next line.
 @end defun
 
-This routine creates a single button in the display, such as a [+]
-button, or the text that goes after it.  It is designed to be called
-iteratively with indicators on when to add carriage returns between
-buttons.
-
-To insert a more traditional speedbar line that includes an expansion
-button followed by clickable text, it is preferable to create a
-tag-line.  Tag lines should be used to represent typical data a user
-will interact with.
-
 @defun speedbar-make-tag-line exp-button-type exp-button-char exp-button-function exp-button-data tag-button tag-button-function tag-button-data tag-button-face depth
 
 Create a tag line with @var{exp-button-type} for the small expansion
 button.  This is the button that expands or contracts a node (if
 applicable), and @var{exp-button-char} the character in it (@samp{+},
-@samp{-}, @samp{?},
-etc).  @var{exp-button-function} is the function to call if it's clicked
-on.  Button types are @code{'bracket}, @code{'angle}, @code{'curly},
-@code{'expandtag}, @code{'statictag}, or nil.  @var{exp-button-data} is
-extra data attached to the text forming the expansion button.
+@samp{-}, @samp{?}, etc).  @var{exp-button-function} is the function
+to call if it's clicked on.  Button types are @code{bracket},
+@code{angle}, @code{curly}, @code{expandtag}, @code{statictag}, and
+@code{nil}.  @var{exp-button-data} is extra data attached to the text
+forming the expansion button.
 
 Next, @var{tag-button} is the text of the tag.
 @var{tag-button-function} is the function to call if clicked on, and
@@ -1289,23 +1197,6 @@ Lastly, @var{depth} shows the depth of expansion.
 This function assumes that the cursor is in the speedbar window at the
 position to insert a new item, and that the new item will end with a CR.
 @end defun
-
-Major display modes that use this function will have a consistant look
-and feel and reliable image use.
-
-@node Generic Tag Lists, Expand Buttons, Creating Buttons, Creating a display
-@subsection Generic Tag Lists
-
-For data stored in a hierarchical list, it is likely possible to
-have the entire data structure inserted with the speedbar generic list
-methods.
-
-These insertion functions assume that the data represents 'tags', or
-data extracted from inside a file, and they are marked with tag
-markers.
-
-Tags stored in this format can then be manipulated by the tag
-hierarchy methods described earlier in this manual.
 
 @defun speedbar-insert-generic-list level list expand-fun find-fun
 
@@ -1335,142 +1226,20 @@ obvious is @code{speedbar-tag-hierarchy-method}.
 @defvar speedbar-generic-list-group-expand-button-type
 This is the button type used for groups of tags, whether expanded
 or added in via a hierarchy method.  Two good values are
-@code{'curly} and @code{'expandtag}.  Curly is the default button, and
-@code{'expandtag} is useful if the groups also has a position.
+@code{curly} and @code{expandtag}.  Curly is the default button, and
+@code{expandtag} is useful if the groups also has a position.
 @end defvar
 
 @defvar speedbar-generic-list-tag-button-type
 This is the button type used for a single tag.
-Two good values are @code{nil} and @code{'statictag}.
-@code{nil} is the default, and @code{'statictag} has the same width as
-@code{'expandtag}.
+Two good values are @code{nil} and @code{statictag}.
+@code{nil} is the default, and @code{statictag} has the same width as
+@code{expandtag}.
 @end defvar
 
 @end defun
 
-@node Expand Buttons, , Generic Tag Lists, Creating a display
-@subsection Expand Buttons
 
-Once you have made some buttons, you need to hitch them up to
-do something once clicked on.  This is set up with
-@code{speedbar-make-tag-line} which takes two functions.  One is for
-the expand button, and the other for the tag.
-
-The function for the tag can be anything, but the expand button has
-certain expectations.  When that button is has a @code{+} in it, that
-indicates that there is ``more'' inside.  A @code{-} indicates that a
-section can be closed.
-
-The expand function takes the same signature as all speedbar button
-functions, such as:
-
-@example
-(defun MY-expand-function (text token indent)
-   "Display more information about MY thing.
-..."
-@end example
-
-This function should then use the @var{text} parameter to determine
-what to do.  For example:
-
-@example
-  (cond ((string-match "+" text)        ;we have to expand this file
-         ;; Expand stuff here
-         )
-        ((string-match "-" text)        ;we have to contract this node
-         ;; Contract stuff here
-         ))
-@end example
-
-When expanding or contracting, you will need to change the
-@code{+} or @code{-} into the opposite symbol.  You can do that with
-
-@defun speedbar-change-expand-button-char char
-@anchor{speedbar-change-expand-button-char}
-Change the expansion button character to @var{char} for the current line.
-@end defun
-
-Our sample would then look like this:
-
-@example
-  (cond ((string-match "+" text)        ;we have to expand this file
-         ;; Expand stuff here
-         (speedbar-change-expand-button-char ?-)
-         )
-        ((string-match "-" text)        ;we have to contract this node
-         ;; Contract stuff here
-         (speedbar-change-expand-button-char ?+)
-         ))
-@end example
-
-To expand text, the speedbar buffer needs to be writable.  The initial
-button insertion function runs while the buffer is writable, but an
-expand function will need to change that.  The best way is to use
-@code{speedbar-with-writable}.
-
-@defun speedbar-with-writable &rest forms
-@anchor{speedbar-with-writable}
-Allow the speedbar buffer to be writable and evaluate @var{forms}.
-@end defun
-
-Once the buffer is writable, then you can insert more information
-using any mechanism you like.  Remember that the cursor will be on the
-expand button just clicked though.  As such, the code might look like
-this:
-
-@example
-  (cond ((string-match "+" text)        ;we have to expand this file
-         ;; Expand stuff here
-         (speedbar-change-expand-button-char ?-)
-         (speedbar-with-writable
-           (save-excursion
-             (end-of-line) (forward-char 1)
-             ;; Insert goodies here.
-           ))         
-         )
-@end example
-
-Contracting a node is a bit easier.  You can just use this built in
-function to do the work:
-
-@defun speedbar-delete-subblock indent
-@anchor{speedbar-delete-subblock}
-Delete text from point to indentation level @var{indent} or greater.
-Handles end-of-sublist smartly.
-
-Remember that @var{indent} is also available as passed into
-@code{MY-expand-function}.
-@end defun
-
-The end result would then look like this:
-
-@example
-  (cond ((string-match "+" text)        ;we have to expand this file
-         ;; Expand stuff here
-         (speedbar-change-expand-button-char ?-)
-         (speedbar-with-writable
-           (save-excursion
-             (end-of-line) (forward-char 1)
-             ;; Insert goodies here.
-           ))         
-         )
-        ((string-match "-" text)        ;we have to contract this node
-         ;; Contract stuff here
-         (speedbar-change-expand-button-char ?+)
-         (speedbar-delete-subblock indent))
-         ))
-@end example
-
-Expand buttons, unlike other speedbar operations can cause new data to
-appear in speedbar which would be useful to force onto the screen.
-You can then recenter using this function:
-
-@defun speedbar-center-buffer-smartly
-@anchor{speedbar-center-buffer-smartly}
-Recenter a speedbar buffer so the current indentation level is all visible.
-This assumes that the cursor is on a file, or tag of a file which the user is
-interested in.
-@end defun
 
 @node Index, , Extending, Top
 @comment  node-name,  next,  previous,  up
@@ -1480,7 +1249,3 @@ interested in.
 @bye
 @c  LocalWords:  speedbar's xref slowbar kbd subsubsection
 @c  LocalWords:  keybindings
-
-@ignore
-   arch-tag: e1fc85f0-1eeb-489f-a8d4-a2bfe711fa02
-@end ignore
