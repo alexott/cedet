@@ -1,6 +1,6 @@
 ;;; wisent-python.el --- Semantic support for Python
 ;;
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 ;; Copyright (C) 2002, 2004, 2006 Richard Kim
 ;;
 ;; Author: Richard Kim <ryk@dspwiz.com>
@@ -288,6 +288,12 @@ To be implemented for Python!  For now just return nil."
   python-mode semantic-python-dependency-system-include-path
   nil
   "The system include path used by Python language.")
+
+;; Adapted from the semantic Java support by Andrey Torba
+(define-mode-local-override semantic-tag-include-filename python-mode (tag)
+  "Return a suitable path for (some) Python imports."
+  (let ((name (semantic-tag-name tag)))
+    (concat (mapconcat 'identity (split-string name "\\.") "/") ".py")))
 
 ;;; Enable Semantic in `python-mode'.
 ;;
