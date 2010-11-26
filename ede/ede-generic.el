@@ -104,6 +104,13 @@
 		  :group (default build)
 		  :documentation
 		  "Command used for debugging this project.")
+   (run-command :initarg :run-command
+		:initform nil
+		:type (or null string)
+		:custom string
+		:group (default build)
+		:documentation
+		"Command used to run something related to this project.")
    ;; C target customixations
    (c-include-path :initarg :c-include-path
 		   :initform nil
@@ -320,6 +327,44 @@ If one doesn't exist, create a new one for this directory."
   (let* ((proj (ede-target-parent this))
 	(config (ede-generic-get-configuration proj)))
     (oref config c-include-path)))
+
+;;; Commands
+;;
+(defmethod project-compile-project ((proj ede-generic-project) &optional command)
+  "Compile the entire current project PROJ.
+Argument COMMAND is the command to use when compiling."
+  (let* ((config (ede-generic-get-configuration proj))
+	 (comp (oref config :build-command)))
+    (compile comp)))
+
+(defmethod project-compile-target ((obj ede-generic-target) &optional command)
+  "Compile the current target OBJ.
+Argument COMMAND is the command to use for compiling the target."
+  (project-compile-project (ede-current-project) command))
+
+(defmethod project-debug-target ((target ede-generic-target))
+  "Run the current project derived from TARGET in a debugger."
+  (let* ((proj (ede-target-parent target))
+	 (config (ede-generic-get-configuration proj))
+	 (debug (oref config :debug-command))
+	 (cmd (read-from-minibuffer
+	       "Debug Command: "
+	       debug))
+	 (cmdsplit (split-string cmd " " t))
+	 ;; @TODO - this depends on the user always typing in something good
+	 ;;  like "gdb" or "dbx" which also exists as a useful Emacs command.
+	 ;;  Is there a better way?
+	 (cmdsym (intern-soft (car cmdsplit))))
+    (call-interactively cmdsym t)))
+
+(defmethod project-run-target ((target ede-generic-target))
+  "Run the current project derived from TARGET."
+  (require 'ede-shell)
+  (let* ((proj (ede-target-parent target))
+	 (config (ede-generic-get-configuration proj))
+	 (run (concat "./" (oref config :run-command)))
+	 (cmd (read-from-minibuffer "Run (like this): " run)))
+    (ede-shell-run-something target cmd)))
 
 ;;; Customization
 ;;
