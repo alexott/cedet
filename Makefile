@@ -49,13 +49,13 @@ $(foreach pkg,$(PACKAGES),(add-to-list 'load-path \"$(lispdir)/$(pkg)/\"))
 
 all: compile doc
 
-compile: $(patsubst %,compile-%,$(PACKAGES))
+compile: compile-common $(patsubst %,compile-%,$(PACKAGES))
 
 doc: $(patsubst %,doc-%,$(PACKAGES))
 
 test: $(patsubst %,test-%,$(PACKAGES))
 
-clean: $(patsubst %,clean-%,$(PACKAGES))
+clean: clean-common $(patsubst %,clean-%,$(PACKAGES))
 
 
 ### Dynamic rules
@@ -79,6 +79,7 @@ clean-$(1):
 	$(RM) $(RMFLAGS) $$($(1)_INFO)
 endef
 
+$(eval $(call PACKAGE_template,common))
 $(foreach pkg,$(PACKAGES),$(eval $(call PACKAGE_template,$(pkg))))
 
 
