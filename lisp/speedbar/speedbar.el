@@ -1,7 +1,8 @@
 ;;; speedbar --- quick access to files and tags in a frame
 
 ;; Copyright (C) 1996, 1997, 1998, 1999, 2000, 2001, 2002, 2003, 2004,
-;;   2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+;;   2005, 2006, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: file, tags, tools
@@ -1141,9 +1142,9 @@ in the selected file.
     (setq font-lock-keywords nil) ;; no font-locking please
     (setq truncate-lines t)
     (make-local-variable 'frame-title-format)
-    (setq frame-title-format (concat "Speedbar " speedbar-version))
-    (setq case-fold-search nil)
-    (toggle-read-only 1)
+    (setq frame-title-format (concat "Speedbar " speedbar-version)
+	  case-fold-search nil
+	  buffer-read-only t)
     (speedbar-set-mode-line-format)
     ;; Add in our dframe hooks.
     (if speedbar-track-mouse-flag
@@ -1484,7 +1485,7 @@ File style information is displayed with `speedbar-item-info'."
     (if (looking-at "\\s-*[[<({].[]>)}] ") (goto-char (match-end 0)))
     ;; Get the text
     (speedbar-message "Text: %s" (buffer-substring-no-properties
-				  (point) (progn (end-of-line) (point))))))
+				  (point) (line-end-position)))))
 
 (defun speedbar-item-info ()
   "Display info in the minibuffer about the button the mouse is over.
@@ -1510,8 +1511,7 @@ instead of reading it from the speedbar buffer."
 Return nil if not applicable."
   (save-excursion
     (beginning-of-line)
-    (if (re-search-forward " [-+=]?> \\([^\n]+\\)"
-			   (save-excursion(end-of-line)(point)) t)
+    (if (re-search-forward " [-+=]?> \\([^\n]+\\)" (line-end-position) t)
        (let* ((tag (match-string 1))
 	      (attr (speedbar-line-token))
 	      (item nil)
@@ -1529,8 +1529,7 @@ Return nil if not applicable."
 	    (looking-at "\\([0-9]+\\):")
 	    (setq item (file-name-nondirectory (speedbar-line-directory)))
 	    (speedbar-message "Tag: %s  in %s" tag item)))
-      (if (re-search-forward "{[+-]} \\([^\n]+\\)$"
-			     (save-excursion(end-of-line)(point)) t)
+      (if (re-search-forward "{[+-]} \\([^\n]+\\)$" (line-end-position) t)
 	  (speedbar-message "Group of tags \"%s\"" (match-string 1))
 	(if (re-search-forward " [+-]?[()|@] \\([^\n]+\\)$" nil t)
 	    (let* ((detailtext (match-string 1))
@@ -2074,8 +2073,7 @@ position to insert a new item, and that the new item will end with a CR."
   "Change the expansion button character to CHAR for the current line."
   (save-excursion
     (beginning-of-line)
-    (if (re-search-forward ":\\s-*.\\([-+?]\\)" (save-excursion (end-of-line)
-								(point)) t)
+    (if (re-search-forward ":\\s-*.\\([-+?]\\)" (line-end-position) t)
 	(speedbar-with-writable
 	  (goto-char (match-end 1))
 	  (insert-char char 1 t)
@@ -2869,9 +2867,7 @@ indicator, then do not add a space."
   (speedbar-with-writable
     (save-excursion
       (if (and replace-this
-	       (re-search-forward replace-this (save-excursion (end-of-line)
-							       (point))
-				  t))
+	       (re-search-forward replace-this (line-end-position) t))
 	  (delete-region (match-beginning 0) (match-end 0))))
     (end-of-line)
     (if (not (string= " " indicator-string))
@@ -2969,9 +2965,7 @@ the file being checked."
 	 (fn (buffer-substring-no-properties
 	      ;; Skip-chars: thanks ptype@dra.hmg.gb
 	      (point) (progn
-			(skip-chars-forward "^ "
-					    (save-excursion (end-of-line)
-							    (point)))
+			(skip-chars-forward "^ " (line-end-position))
 			(point))))
 	 (fulln (concat f fn)))
     (if (<= 2 speedbar-verbosity-level)
@@ -3043,9 +3037,7 @@ the file being checked."
 	 (fn (buffer-substring-no-properties
 	      ;; Skip-chars: thanks ptype@dra.hmg.gb
 	      (point) (progn
-			(skip-chars-forward "^ "
-					    (save-excursion (end-of-line)
-							    (point)))
+			(skip-chars-forward "^ " (line-end-position))
 			(point))))
 	 (fulln (concat f fn)))
     (if (<= 2 speedbar-verbosity-level)
@@ -3274,7 +3266,7 @@ directory with these items."
 	;; If this fails, then it is a non-standard click, and as such,
 	;; perfectly allowed.
 	(if (re-search-forward "[]>?}] [^ ]"
-			       (save-excursion (end-of-line) (point))
+			       (line-end-position)
 			       t)
 	    (progn
 	      (forward-char -1)
@@ -3292,7 +3284,7 @@ With universal argument ARG, flush cached data."
     (condition-case nil
 	(progn
 	  (re-search-forward ":\\s-*.\\+. "
-			     (save-excursion (end-of-line) (point)))
+			     (line-end-position))
 	  (forward-char -2)
 	  (speedbar-do-function-pointer))
       (error (speedbar-position-cursor-on-line)))))
@@ -3309,7 +3301,7 @@ With universal argument ARG, flush cached data."
   (condition-case nil
       (progn
 	(re-search-forward ":\\s-*.-. "
-			   (save-excursion (end-of-line) (point)))
+			   (line-end-position))
 	(forward-char -2)
 	(speedbar-do-function-pointer))
     (error (speedbar-position-cursor-on-line))))
@@ -3321,7 +3313,7 @@ With universal argument ARG, flush cached data."
   (condition-case nil
       (progn
 	(re-search-forward ":\\s-*.[-+]. "
-			   (save-excursion (end-of-line) (point)))
+			   (line-end-position))
 	(forward-char -2)
 	(speedbar-do-function-pointer))
     (error (speedbar-position-cursor-on-line))))
@@ -3789,17 +3781,12 @@ The line should contain output from etags.  Parse the output using the
 regular expression EXPR."
   (let* ((sym (if (stringp expr)
 		  (if (save-excursion
-			(re-search-forward expr (save-excursion
-						  (end-of-line)
-						  (point)) t))
+			(re-search-forward expr (line-end-position) t))
 		      (buffer-substring-no-properties (match-beginning 1)
 						      (match-end 1)))
 		(funcall expr)))
 	 (pos (let ((j (re-search-forward "[\C-?\C-a]\\([0-9]+\\),\\([0-9]+\\)"
-					  (save-excursion
-					    (end-of-line)
-					    (point))
-					  t)))
+					  (line-end-position) t)))
 		(if (and j sym)
 		    (1+ (string-to-number (buffer-substring-no-properties
 					(match-beginning 2)
@@ -3812,7 +3799,7 @@ regular expression EXPR."
 (defun speedbar-parse-c-or-c++tag ()
   "Parse a C or C++ tag, which tends to be a little complex."
   (save-excursion
-    (let ((bound (save-excursion (end-of-line) (point))))
+    (let ((bound (line-end-position)))
       (cond ((re-search-forward "\C-?\\([^\C-a]+\\)\C-a" bound t)
 	     (buffer-substring-no-properties (match-beginning 1)
 					     (match-end 1)))
@@ -3828,7 +3815,7 @@ regular expression EXPR."
 (defun speedbar-parse-tex-string ()
   "Parse a Tex string.  Only find data which is relevant."
   (save-excursion
-    (let ((bound (save-excursion (end-of-line) (point))))
+    (let ((bound (line-end-position)))
       (cond ((re-search-forward "\\(\\(sub\\)*section\\|chapter\\|cite\\)\\s-*{[^\C-?}]*}?" bound t)
 	     (buffer-substring-no-properties (match-beginning 0)
 					     (match-end 0)))
@@ -3973,9 +3960,7 @@ Optional argument DEPTH specifies the current depth of the back search."
 	(let* ((bn (speedbar-line-text))
 	       (buffer (if bn (get-buffer bn))))
 	  (if buffer
-	      (if (save-excursion
-		    (end-of-line)
-		    (eq start (point)))
+	      (if (eq start (line-end-position))
 		  (or (with-current-buffer buffer default-directory)
 		      "")
 		(buffer-file-name buffer))))))))
@@ -4007,14 +3992,10 @@ TEXT is the buffer's name, TOKEN and INDENT are unused."
     (beginning-of-line)
     ;; If this fails, then it is a non-standard click, and as such,
     ;; perfectly allowed
-    (if (re-search-forward "[]>?}] [^ ]"
-			   (save-excursion (end-of-line) (point))
-			   t)
+    (if (re-search-forward "[]>?}] [^ ]" (line-end-position) t)
 	(let ((text (progn
 		      (forward-char -1)
-		      (buffer-substring (point) (save-excursion
-						  (end-of-line)
-						  (point))))))
+		      (buffer-substring (point) (line-end-position)))))
 	  (if (get-buffer text)
 	      (progn
 		(set-buffer text)
@@ -4041,14 +4022,11 @@ When available, use `pulse' package."
   "Highlight the current line, unhighlighting a previously jumped to line."
   (speedbar-unhighlight-one-tag-line)
   (setq speedbar-highlight-one-tag-line
-	(speedbar-make-overlay (save-excursion (beginning-of-line) (point))
-			       (save-excursion (end-of-line)
-					       (forward-char 1)
-					       (point))))
+	(speedbar-make-overlay (line-beginning-position)
+			       (1+ (line-end-position))))
   (speedbar-overlay-put speedbar-highlight-one-tag-line 'face
 			'speedbar-highlight-face)
-  (add-hook 'pre-command-hook 'speedbar-unhighlight-one-tag-line)
-  )
+  (add-hook 'pre-command-hook 'speedbar-unhighlight-one-tag-line))
 
 (defun speedbar-unhighlight-one-tag-line ()
   "Unhighlight the currently highlighted line."
