@@ -5,7 +5,7 @@
 ;;   2005, 2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; Version: 0.2
+;; Version: 1.3
 ;; Keywords: OO, lisp
 
 ;; This file is part of GNU Emacs.
@@ -84,7 +84,7 @@
   "*This hook is executed, then cleared each time `defclass' is called.")
 
 (defvar eieio-error-unsupported-class-tags nil
-  "*Non-nil to throw an error if an encountered tag us unsupported.
+  "Non-nil to throw an error if an encountered tag is unsupported.
 This may prevent classes from CLOS applications from being used with EIEIO
 since EIEIO does not support all CLOS tags.")
 
@@ -182,6 +182,13 @@ Stored outright without modifications or stripping.")
 	(t key) ;; already generic.. maybe.
 	))
 
+(defsubst eieio-specialized-key-to-generic-key (key)
+  "Convert a specialized KEY into a generic method key."
+  (cond ((eq key method-static) 0) ;; don't convert
+	((< key method-num-lists) (+ key 3)) ;; The conversion
+	(t key) ;; already generic.. maybe.
+	))
+
 ;; How to specialty compile stuff.
 (autoload 'byte-compile-file-form-defmethod "eieio-comp"
   "This function is used to byte compile methods in a nice way.")
@@ -255,8 +262,7 @@ Methods with only primary implementations are executed in an optimized way."
        ))
 
 (defmacro class-option-assoc (list option)
-  "Return from LIST the found OPTION.
-Return nil if it doesn't exist."
+  "Return from LIST the found OPTION, or nil if it doesn't exist."
   `(car-safe (cdr (memq ,option ,list))))
 
 (defmacro class-option (class option)
@@ -1790,6 +1796,116 @@ method invocation orders of the involved classes."
        (eieio-class-precedence-c3 class))))
   )
 
+(defun eieio-c3-candidate (class remaining-inputs)
+  "Returns CLASS if it can go in the result now, otherwise nil"
+  ;; Ensure CLASS is not in any position but the first in any of the
+  ;; element lists of REMAINING-INPUTS.
+  (and (not (let ((found nil))
+	      (while (and remaining-inputs (not found))
+		(setq found (member class (cdr (car remaining-inputs)))
+		      remaining-inputs (cdr remaining-inputs)))
+	      found))
+       class))
+
+(defun eieio-c3-merge-lists (reversed-partial-result remaining-inputs)
+  "Merge REVERSED-PARTIAL-RESULT REMAINING-INPUTS in a consistent order, if possible.
+If a consistent order does not exist, signal an error."
+  (if (let ((tail remaining-inputs)
+	    (found nil))
+	(while (and tail (not found))
+	  (setq found (car tail) tail (cdr tail)))
+	(not found))
+      ;; If all remaining inputs are empty lists, we are done.
+      (nreverse reversed-partial-result)
+    ;; Otherwise, we try to find the next element of the result. This
+    ;; is achieved by considering the first element of each
+    ;; (non-empty) input list and accepting a candidate if it is
+    ;; consistent with the rests of the input lists.
+    (let* ((found nil)
+	   (tail remaining-inputs)
+	   (next (progn
+		   (while (and tail (not found))
+		     (setq found (and (car tail)
+				      (eieio-c3-candidate (caar tail)
+							  remaining-inputs))
+			   tail (cdr tail)))
+		   found)))
+      (if next
+	  ;; The graph is consistent so far, add NEXT to result and
+	  ;; merge input lists, dropping NEXT from their heads where
+	  ;; applicable.
+	  (eieio-c3-merge-lists
+	   (cons next reversed-partial-result)
+	   (mapcar (lambda (l) (if (eq (first l) next) (rest l) l))
+		   remaining-inputs))
+	;; The graph is inconsistent, give up
+	(signal 'inconsistent-class-hierarchy (list remaining-inputs))))))
+
+(defun eieio-class-precedence-dfs (class)
+  "Return all parents of CLASS in depth-first order."
+  (let* ((parents (class-parents-fast class))
+	 (classes (copy-sequence
+		   (apply #'append
+			  (list class)
+			  (or
+			   (mapcar
+			    (lambda (parent)
+			      (cons parent
+				    (eieio-class-precedence-dfs parent)))
+			    parents)
+			   '((eieio-default-superclass))))))
+	 (tail classes))
+    ;; Remove duplicates.
+    (while tail
+      (setcdr tail (delq (car tail) (cdr tail)))
+      (setq tail (cdr tail)))
+    classes))
+
+(defun eieio-class-precedence-bfs (class)
+  "Return all parents of CLASS in breadth-first order."
+  (let ((result)
+	(queue (or (class-parents-fast class)
+		   '(eieio-default-superclass))))
+    (while queue
+      (let ((head (pop queue)))
+	(unless (member head result)
+	  (push head result)
+	  (unless (eq head 'eieio-default-superclass)
+	    (setq queue (append queue (or (class-parents-fast head)
+					  '(eieio-default-superclass))))))))
+    (cons class (nreverse result)))
+  )
+
+(defun eieio-class-precedence-c3 (class)
+  "Return all parents of CLASS in c3 order."
+  (let ((parents (class-parents-fast class)))
+    (eieio-c3-merge-lists
+     (list class)
+     (append
+      (or
+       (mapcar
+	(lambda (x)
+	  (eieio-class-precedence-c3 x))
+	parents)
+       '((eieio-default-superclass)))
+      (list parents))))
+  )
+
+(defun class-precedence-list (class)
+  "Return (transitively closed) list of parents of CLASS.
+The order, in which the parents are returned depends on the
+method invocation orders of the involved classes."
+  (if (or (null class) (eq class 'eieio-default-superclass))
+      nil
+    (case (class-method-invocation-order class)
+      (:depth-first
+       (eieio-class-precedence-dfs class))
+      (:breadth-first
+       (eieio-class-precedence-bfs class))
+      (:c3
+       (eieio-class-precedence-c3 class))))
+  )
+
 ;; Official CLOS functions.
 (defalias 'class-direct-superclasses 'class-parents)
 (defalias 'class-direct-subclasses 'class-children)
@@ -1827,7 +1943,8 @@ method invocation orders of the involved classes."
 	    p (cdr p)))
     (if child t)))
 
-(defun object-slots (obj) "Return list of slots available in OBJ."
+(defun object-slots (obj)
+  "Return list of slots available in OBJ."
   (if (not (eieio-object-p obj)) (signal 'wrong-type-argument (list 'eieio-object-p obj)))
   (aref (class-v (object-class-fast obj)) class-public-a))
 
@@ -2536,6 +2653,11 @@ This is usually a symbol that starts with `:'."
 (intern "unbound-slot")
 (put 'unbound-slot 'error-conditions '(unbound-slot error nil))
 (put 'unbound-slot 'error-message "Unbound slot")
+
+(intern "inconsistent-class-hierarchy")
+(put 'inconsistent-class-hierarchy 'error-conditions
+     '(inconsistent-class-hierarchy error nil))
+(put 'inconsistent-class-hierarchy 'error-message "Inconsistent class hierarchy")
 
 (intern "inconsistent-class-hierarchy")
 (put 'inconsistent-class-hierarchy 'error-conditions
