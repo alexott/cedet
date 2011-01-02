@@ -124,6 +124,7 @@
 %token <punctuation> COMMA 	","
 %token <punctuation> ASSIGN 	"="
 %token <punctuation> BACKQUOTE	"`"
+%token <punctuation> AT         "@"
 
 
 ;; -----------------
