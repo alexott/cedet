@@ -1,5 +1,6 @@
 ;;; wisent-python.el --- Semantic support for Python
 ;;
+;; Copyright (C) 2010, 2011 Jan Moringen
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 ;; Copyright (C) 2002, 2004, 2006 Richard Kim
 ;;
