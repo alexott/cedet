@@ -43,8 +43,29 @@
 
 (require 'rx)
 
+;; Try to load python support, but fail silently since it is only used
+;; for optional functionality
+(require 'python nil t)
+
 (require 'semantic-wisent)
 (require 'wisent-python-wy)
+
+
+;;; Customization
+;;
+
+(defun semantic-python-get-system-include-path ()
+  "Evaluate some Python code that determines the system include
+path."
+  (let ((output (python-send-receive
+		 "import sys; print '_emacs_out ' + '\\0'.join(sys.path)")))
+    (split-string output "[\0\n]" t)))
+
+(defcustom-mode-local-semantic-dependency-system-include-path
+  python-mode semantic-python-dependency-system-include-path
+  (when (featurep 'python)
+    (semantic-python-get-system-include-path))
+  "The system include path used by Python language.")
 
 
 ;;; Lexical analysis
@@ -383,11 +404,6 @@ what remains in the `wisent-python-indent-stack'."
   "Get the local variables based on point's context.
 To be implemented for Python!  For now just return nil."
   nil)
-
-(defcustom-mode-local-semantic-dependency-system-include-path
-  python-mode semantic-python-dependency-system-include-path
-  nil
-  "The system include path used by Python language.")
 
 ;; Adapted from the semantic Java support by Andrey Torba
 (define-mode-local-override semantic-tag-include-filename python-mode (tag)
