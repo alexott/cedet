@@ -493,6 +493,12 @@ SELF or the instance name \"self\" if SELF is nil."
 	  (rx (seq string-start "\"\"\"" (0+ anything) "\"\"\"" string-end))
 	  name))))
 
+(defun semantic-python-extract-docstring (tag)
+  "Return the Python documentation string contained in TAG."
+  ;; Strip leading and trailing """
+  (let ((name (semantic-tag-name tag)))
+    (substring name 3 -3)))
+
 
 ;;; Test
 ;;
