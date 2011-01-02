@@ -460,14 +460,14 @@ To be implemented for Python!  For now just return nil."
   "Return non-nil if the name of TAG is a special identifier of
 the form __NAME__. "
   (string-match-p
-   (rx (seq string-start "__" (1+ any) "__" string-end))
+   (rx (seq string-start "__" (1+ (syntax symbol)) "__" string-end))
    (semantic-tag-name tag)))
 
 (defun semantic-python-private-p (tag)
   "Return non-nil if the name of TAG follows the convention _NAME
 for private names."
   (string-match-p 
-   (rx (seq string-start "_" (0+ any) string-end))
+   (rx (seq string-start "_" (0+ (syntax symbol)) string-end))
    (semantic-tag-name tag)))
 
 (defun semantic-python-instance-variable-p (tag &optional self)
