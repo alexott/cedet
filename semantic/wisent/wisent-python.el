@@ -264,9 +264,105 @@ elsewhere on a line outside a string literal."
   semantic-lex-ignore-comments
   ;; Signal error on unhandled syntax.
   semantic-lex-default-action)
+
+
+;;; Parsing
+;;
+
+(defun wisent-python-reconstitute-function-tag (tag suite)
+  "Move a docstring from TAG's members into its :documentation
+attribute. Set attributes for constructors, special, private and
+static methods."
+  ;; Analyze first statement to see whether it is a documentation
+  ;; string.
+  (let ((first-statement (car suite)))
+    (when (semantic-python-docstring-p first-statement)
+      (semantic-tag-put-attribute
+       tag :documentation
+       (semantic-python-extract-docstring first-statement))))
+
+  ;; TODO HACK: we try to identify methods using the following
+  ;; heuristic:
+  ;; + at least one argument
+  ;; + first argument is self
+  (when (and (> (length (semantic-tag-function-arguments tag)) 0)
+	     (string= (semantic-tag-name
+		       (first (semantic-tag-function-arguments tag)))
+		      "self"))
+    (semantic-tag-put-attribute tag :parent "dummy"))
+
+  ;; Identify constructors, special and private functions
+  (cond
+   ;; TODO only valid when the function resides inside a class
+   ((string= (semantic-tag-name tag) "__init__")
+    (semantic-tag-put-attribute tag :constructor-flag t)
+    (semantic-tag-put-attribute tag :suite            suite))
+
+   ((semantic-python-special-p tag)
+    (semantic-tag-put-attribute tag :special-flag t))
+
+   ((semantic-python-private-p tag)
+    (semantic-tag-put-attribute tag :protection "private")))
+
+  ;; If there is a staticmethod decorator, add a static typemodifier
+  ;; for the function.
+  (when (semantic-find-tags-by-name
+	 "staticmethod"
+	 (semantic-tag-get-attribute tag :decorators))
+    (semantic-tag-put-attribute
+     tag :typemodifiers
+     (cons "static"
+	   (semantic-tag-get-attribute tag :typemodifiers))))
+
+  ;; TODO 
+  ;; + check for decorators classmethod
+  ;; + check for operators
+  tag)
+
+(defun wisent-python-reconstitute-class-tag (tag)
+  "Move a docstring from TAG's members into its :documentation
+attribute."
+  ;; The first member of TAG may be a documentation string. If that is
+  ;; the case, remove of it from the members list and stick its
+  ;; content into the :documentation attribute.
+  (let ((first-member (car (semantic-tag-type-members tag))))
+    (when (semantic-python-docstring-p first-member)
+      (semantic-tag-put-attribute
+       tag :members
+       (cdr (semantic-tag-type-members tag)))
+      (semantic-tag-put-attribute
+       tag :documentation
+       (semantic-python-extract-docstring first-member))))
+
+  ;; Try to find the constructor, determine the name of the instance
+  ;; parameter, find assignments to instance variables and add
+  ;; corresponding variable tags to the list of members.
+  (dolist (member (remove-if-not
+		   #'semantic-tag-function-constructor-p
+		   (semantic-tag-type-members tag)))
+    (let ((self (semantic-tag-name
+		 (car (semantic-tag-function-arguments member)))))
+      (dolist (statement (remove-if-not
+			  (lambda (s)
+			    (semantic-python-instance-variable-p s self))
+			  (semantic-tag-get-attribute member :suite)))
+	(let ((variable (semantic-tag-clone
+			 statement
+			 (substring (semantic-tag-name statement) 5)))
+	      (members  (semantic-tag-get-attribute tag :members)))
+
+	  (when (semantic-python-private-p variable)
+	    (semantic-tag-put-attribute variable :protection "private"))
+
+	  (setcdr (last members) (list variable))))))
+
+  ;; TODO remove the :suite attribute
+  tag)
+
 
 ;;; Overridden Semantic API.
 ;;
+
 (define-mode-local-override semantic-lex python-mode
   (start end &optional depth length)
   "Lexically analyze Python code in current buffer.
