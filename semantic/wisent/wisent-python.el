@@ -116,8 +116,8 @@ line ends at the end of the buffer, leave the point there."
 
 (defun wisent-python-forward-line-skip-indented ()
   "Move point to the next logical line, skipping indented lines.
-That is the next line whose indentation is less than or equal to the
-identation of the current line."
+That is the next line whose indentation is less than or equal to
+the indentation of the current line."
   (let ((indent (current-indentation)))
     (while (progn (wisent-python-forward-line)
                   (and (not (eobp))
