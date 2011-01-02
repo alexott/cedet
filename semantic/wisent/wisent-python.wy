@@ -258,6 +258,10 @@
 %put     WHILE summary
 "Start a 'while' loop"
 
+%keyword WITH        "with"
+%put     WITH summary
+"Start statement with an associated context object"
+
 %keyword YIELD	     "yield"
 %put     YIELD summary
 "Create a generator function"
@@ -600,6 +604,7 @@ compound_stmt
   | while_stmt
   | for_stmt
   | try_stmt
+  | with_stmt
   | funcdef
   | class_declaration
   ;
@@ -707,13 +712,46 @@ zero_one_or_two_test
   ;
 
 ;;;============================================================================
+;;@@ with_stmt
+;;;============================================================================
+
+;; with_stmt: 'with' test [ with_var ] ':' suite
+with_stmt
+  : WITH test COLON suite
+    (CODE-TAG $1 nil)
+  | WITH test with_var COLON suite
+    (CODE-TAG $1 nil) ;; TODO capture variable
+  ;
+
+with_var
+  : AS expr
+    () ;; TODO capture
+  ;
+
+;;;============================================================================
 ;;;@@ funcdef
 ;;;============================================================================
 
-;; funcdef: 'def' NAME parameters ':' suite
+decorator
+  : AT dotted_name varargslist_opt NEWLINE
+    (FUNCTION-TAG $2 "decorator" $3)
+  ;
+
+decorators
+  : decorator
+    (list $1)
+  | decorator decorators
+    (cons $1 $2)
+  ;
+
+;; funcdef: [decorators] 'def' NAME parameters ':' suite
 funcdef
   : DEF NAME function_parameter_list COLON suite
-    (FUNCTION-TAG $2 nil $3)
+    (wisent-python-reconstitute-function-tag
+     (FUNCTION-TAG $2 nil $3) $5)
+  | decorators DEF NAME function_parameter_list COLON suite
+    (wisent-python-reconstitute-function-tag
+     (FUNCTION-TAG $3 nil $4 :decorators $1) $6)
   ;
 
 function_parameter_list
