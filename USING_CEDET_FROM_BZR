@@ -237,6 +237,28 @@
     bzr pull
     #+END_SRC
 
+**** Changing repository permissions and reorganizing directories
+
+     When publishing a task branch, SourceForge is configured to give write
+     permissions (commit) only to the user puslishing the branch.
+
+     Once published, if you want othe users to be able to commit into it, you
+     must login into SF and change the filesystem permissions for the directory
+     holding the selected task branch:
+
+     #+BEGIN_SRC sh
+     ssh -t USERNAME,cedet@shell.sourceforge.net create
+     chmod -R g+w /home/scm_bzr/c/ce/cedet/code/TASKNAME/
+     #+END_SRC
+
+     Similarly, you can change the name of a branch and move it around with
+     simple file movement commands:
+
+     #+BEGIN_SRC sh
+     ssh -t USERNAME,cedet@shell.sourceforge.net create
+     mv /home/scm_bzr/c/ce/cedet/code/TASKNAME/ /home/scm_bzr/c/ce/cedet/code/NEW_TASKNAME/
+     #+END_SRC
+
 *** Sending a bundle for review
 
     Instead of publishing your branch, you can submit your changes for review
