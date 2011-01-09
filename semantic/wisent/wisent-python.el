@@ -459,14 +459,14 @@ To be implemented for Python!  For now just return nil."
 (defun semantic-python-special-p (tag)
   "Return non-nil if the name of TAG is a special identifier of
 the form __NAME__. "
-  (string-match-p
+  (string-match
    (rx (seq string-start "__" (1+ (syntax symbol)) "__" string-end))
    (semantic-tag-name tag)))
 
 (defun semantic-python-private-p (tag)
   "Return non-nil if the name of TAG follows the convention _NAME
 for private names."
-  (string-match-p 
+  (string-match
    (rx (seq string-start "_" (0+ (syntax symbol)) string-end))
    (semantic-tag-name tag)))
 
@@ -475,11 +475,11 @@ for private names."
 SELF or the instance name \"self\" if SELF is nil."
   (when (semantic-tag-of-class-p tag 'variable)
     (let ((name (semantic-tag-name tag)))
-      (when (string-match-p
+      (when (string-match
 	     (rx-to-string
 	      `(seq string-start ,(or self "self") "."))
 	     name)
-	(not (string-match-p "\\." (substring name 5)))))))
+	(not (string-match "\\." (substring name 5)))))))
 
 (defun semantic-python-docstring-p (tag)
   "Return non-nil, when TAG is a Python documentation string."
@@ -489,7 +489,7 @@ SELF or the instance name \"self\" if SELF is nil."
   (let ((class (semantic-tag-class tag))
 	(name  (semantic-tag-name  tag)))
     (and (eq class 'code)
-	 (string-match-p
+	 (string-match
 	  (rx (seq string-start "\"\"\"" (0+ anything) "\"\"\"" string-end))
 	  name))))
 
