@@ -788,10 +788,11 @@ function_parameter
 ;; classdef: 'class' NAME ['(' testlist ')'] ':' suite
 class_declaration
   : CLASS NAME paren_class_list_opt COLON suite
-    (TYPE-TAG $2 $1             ;; Name "class"
-              $5                ;; Members
-              (cons $3 nil)     ;; (SUPERCLASSES . INTERFACES)
-              )
+    (wisent-python-reconstitute-class-tag
+     (TYPE-TAG $2 $1             ;; Name "class"
+               $5                ;; Members
+               (cons $3 nil)     ;; (SUPERCLASSES . INTERFACES)
+               ))
   ;
 
 ;; ['(' testlist ')']
