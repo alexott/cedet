@@ -407,7 +407,7 @@ r, s, t = 1, 2, '3'
     ("if"      code     nil nil nil)
     ("x"       variable nil nil nil)
     ("y"       variable nil nil nil)
-    ("r, s, t" variable nil nil nil) ;; TODO should be multiple variable tags
+    ("r, s, t" code nil nil nil) ;; TODO should be multiple variable tags
     )
   "List of expected tag names for Python.")
 
