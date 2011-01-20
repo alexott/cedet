@@ -97,8 +97,9 @@ that is called but rarely.  Argument FORM is the body of the method."
 	 )
     (let ((name (format "%s::%s" (or class "#<generic>") meth)))
       (if byte-compile-verbose
-	  ;; #### filename used free
-	  (message "Compiling %s... (%s)" (or filename "") name))
+	  (let ((fname (when (boundp 'filename)
+			 filename)))
+	  (message "Compiling %s... (%s)" (or fname "") name)))
       (setq byte-compile-current-form name) ; for warnings
       )
     ;; Flush any pending output

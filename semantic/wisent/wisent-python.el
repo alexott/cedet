@@ -73,7 +73,7 @@ path."
 ;;
 
 ;; Python strings are delimited by either single quotes or double
-;; quotes, e.g., "I'm a string" and 'I too am s string'.
+;; quotes, e.g., "I'm a string" and 'I too am a string'.
 ;; In addition a string can have either a 'r' and/or 'u' prefix.
 ;; The 'r' prefix means raw, i.e., normal backslash substitutions are
 ;; to be suppressed.  For example, r"01\n34" is a string with six
