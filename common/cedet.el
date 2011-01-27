@@ -81,7 +81,7 @@
   (require 'cl)
   )
 
-(defconst cedet-version "1.0"
+(defconst cedet-version "1.1beta"
   "Current version of CEDET.")
 
 (defconst cedet-emacs-min-version "21.1"
@@ -93,13 +93,13 @@
   `(
     ;;PACKAGE   MIN-VERSION      INSTALLDIR  DOCDIR
     (cedet         ,cedet-version "common"   "common" 	   )
-    (eieio         "1.3"           nil       "eieio"       )
-    (semantic      "2.0"           nil       "semantic/doc")
-    (srecode       "1.0"           nil       "srecode"     ) 
-    (ede           "1.0"           nil       "ede"    	   )    
-    (speedbar      "1.0.3"         nil       "speedbar"    )
-    (cogre         "1.0"           nil       "cogre"  	   )
-    (cedet-contrib "1.0"           "contrib" nil           )
+    (eieio         "1.4beta"           nil       "eieio"       )
+    (semantic      "2.1beta"           nil       "semantic/doc")
+    (srecode       "1.1beta"           nil       "srecode"     ) 
+    (ede           "1.1beta"           nil       "ede"    	   )    
+    (speedbar      "1.0.4"         nil       "speedbar"    )
+    (cogre         "1.1beta"           nil       "cogre"  	   )
+    (cedet-contrib "1.1beta"           "contrib" nil           )
     )
   "Table of CEDET packages to install.")
 

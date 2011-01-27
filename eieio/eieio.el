@@ -8,7 +8,7 @@
 ;; RCS: $Id: eieio.el,v 1.197 2010-06-18 00:07:25 zappo Exp $
 ;; Keywords: OO, lisp
 
-(defvar eieio-version "1.3"
+(defvar eieio-version "1.4beta"
   "Current version of EIEIO.")
 
 ;;

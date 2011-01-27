@@ -24,7 +24,7 @@ projects_LISP=project-am.el ede-simple.el ede-cpp-root.el ede-emacs.el ede-linux
 aux-lisp_LISP=autoconf-edit.el autoconf-compat.el makefile-edit.el
 ede_info_TEXINFOS=ede.texi ede-projects.texi ede-targets.texi ede-sourcecode.texi ede-compilers.texi
 MAKEINFO=makeinfo
-VERSION=1.0
+VERSION=1.1beta
 DISTDIR=$(top)EDE-$(VERSION)
 
 

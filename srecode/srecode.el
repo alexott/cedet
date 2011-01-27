@@ -9,7 +9,7 @@
 (eval-and-compile
   ;; Other package depend on this value at compile time via inversion.
 
-  (defvar srecode-version "1.0"
+  (defvar srecode-version "1.1beta"
     "Current version of the Semantic Recoder.")
 
   )
