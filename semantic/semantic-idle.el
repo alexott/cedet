@@ -606,11 +606,11 @@ FORMS will be called during idle time after the current buffer's
 semantic tag information has been updated.
 This routine creates the following functions and variables:"
   (let ((global (intern (concat "global-" (symbol-name name) "-mode")))
-	(mode 	(intern (concat (symbol-name name) "-mode")))
-	(hook 	(intern (concat (symbol-name name) "-mode-hook")))
-	(map  	(intern (concat (symbol-name name) "-mode-map")))
-	(setup 	(intern (concat (symbol-name name) "-mode-setup")))
-	(func 	(intern (concat (symbol-name name) "-idle-function"))))
+	(mode	(intern (concat (symbol-name name) "-mode")))
+	(hook	(intern (concat (symbol-name name) "-mode-hook")))
+	(map	(intern (concat (symbol-name name) "-mode-map")))
+	(setup	(intern (concat (symbol-name name) "-mode-setup")))
+	(func	(intern (concat (symbol-name name) "-idle-function"))))
 
     `(eval-and-compile
        (defun ,global (&optional arg)
@@ -1160,7 +1160,7 @@ be called."
   ;;     :active   t
   ;;     :style    'toggle
   ;;     :selected '(let ((tag (semantic-current-tag)))
-  ;; 		   (and tag (semantic-tag-folded-p tag)))
+  ;;		   (and tag (semantic-tag-folded-p tag)))
   ;;     :help     "Fold the current tag to one line"))
     "---"
     (senator-menu-item
@@ -1195,17 +1195,19 @@ be called."
     ;; Format TAG-LIST and put the formatted string into the header
     ;; line.
     (setq header-line-format
-	  (concat
-	   semantic-idle-breadcrumbs-header-line-prefix
-	   (if tag-list
-	       (semantic-idle-breadcrumbs--format-tag-list
-		tag-list
-		(- width
-		   (length semantic-idle-breadcrumbs-header-line-prefix)))
-	     (propertize
-	      "<not on tags>"
-	      'face
-	      'font-lock-comment-face)))))
+	  (replace-regexp-in-string ;; Since % is interpreted in the
+	   "\\(%\\)" "%\\1"         ;; mode/header line format, we
+	   (concat                  ;; have to escape all occurrences.
+	    semantic-idle-breadcrumbs-header-line-prefix
+	    (if tag-list
+		(semantic-idle-breadcrumbs--format-tag-list
+		 tag-list
+		 (- width
+		    (length semantic-idle-breadcrumbs-header-line-prefix)))
+	      (propertize
+	       "<not on tags>"
+	       'face
+	       'font-lock-comment-face))))))
 
   ;; Update the header line.
   (force-mode-line-update))
@@ -1219,7 +1221,9 @@ TODO THIS FUNCTION DOES NOT WORK YET."
   (let ((width (- (nth 2 (window-edges))
 		  (nth 0 (window-edges)))))
     (setq mode-line-format
-	  (semantic-idle-breadcrumbs--format-tag-list tag-list width)))
+	  (replace-regexp-in-string ;; see comment in
+	   "\\(%\\)" "%\\1"         ;; `semantic-idle-breadcrumbs--display-in-header-line'
+	   (semantic-idle-breadcrumbs--format-tag-list tag-list width))))
 
   (force-mode-line-update))
 
