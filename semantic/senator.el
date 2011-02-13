@@ -2621,8 +2621,10 @@ used by add log.")
                            senator-add-log-tags))
             (progn
               (setq name
-                    (semantic-format-tag-canonical-name
-                     tag (semantic-current-tag-parent)))
+		    (replace-regexp-in-string
+		     "\\(?:(\\|)\\)" ""
+		     (semantic-format-tag-canonical-name
+		      tag (semantic-current-tag-parent))))
               (setq ad-return-value name))
           ad-do-it))
     ad-do-it))
