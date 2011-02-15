@@ -376,6 +376,9 @@ namespacesubparts
  ;; PUBLIC or PRIVATE bits.  Ignore them for now.
   | template
   | using
+ ;; Includes inside namespaces
+  | spp-include
+    (TAG $1 'include :inside-ns t)
   | ;;EMPTY
   ;
 
