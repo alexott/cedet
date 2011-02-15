@@ -1408,6 +1408,21 @@ Override function for `semantic-tag-protection'."
 	    'public
 	  nil))))
 
+(define-mode-local-override semantic-find-tags-included c-mode
+  (&optional table)
+  "Find all tags in TABLE that are of the 'include class.
+TABLE is a tag table.  See `semantic-something-to-tag-table'.
+For C++, we also have to search namespaces for include tags."
+  (let ((tags (semantic-find-tags-by-class 'include table))
+	(namespaces (semantic-find-tags-by-type "namespace" table)))
+    (dolist (cur namespaces)
+      (setq tags
+	    (append tags
+		    (semantic-find-tags-by-class
+		     'include
+		     (semantic-tag-get-attribute cur :members)))))
+    tags))
+
 (define-mode-local-override semantic-tag-components c-mode (tag)
   "Return components for TAG."
   (if (and (eq (semantic-tag-class tag) 'type)
@@ -1830,6 +1845,57 @@ For types with a :parent, create faux namespaces to put TAG into."
 	  newtag)
       ;; Else, return tag unmodified.
       tag)))
+
+(define-mode-local-override semanticdb-find-table-for-include c-mode
+  (includetag &optional table)
+  "For a single INCLUDETAG found in TABLE, find a `semanticdb-table' object
+INCLUDETAG is a semantic TAG of class 'include.
+TABLE is a semanticdb table that identifies where INCLUDETAG came from.
+TABLE is optional if INCLUDETAG has an overlay of :filename attribute.
+
+For C++, we also have to check if the include is inside a
+namespace, since this means all tags inside this include will
+have to be wrapped in that namespace."
+  (let ((inctable (semanticdb-find-table-for-include-default includetag table))
+	(inside-ns (semantic-tag-get-attribute includetag :inside-ns))
+	tags newtags namespaces prefix parenttable newtable)
+    (if (or (null inside-ns)
+	    (not (slot-boundp inctable 'tags)))
+	inctable
+      (when (and (eq inside-ns t)
+		 ;; Get the table which has this include.
+		 (setq parenttable
+		       (semanticdb-find-table-for-include-default
+			(semantic-tag-new-include
+			 (semantic--tag-get-property includetag :filename) nil)))
+		 table)
+	;; Find the namespace where this include is located.
+	(setq namespaces
+	      (semantic-find-tags-by-type "namespace" parenttable))
+	(when (and namespaces
+		   (slot-boundp inctable 'tags))
+	  (dolist (cur namespaces)
+	    (when (semantic-find-tags-by-name
+		   (semantic-tag-name includetag)
+		   (semantic-tag-get-attribute cur :members))
+	      (setq inside-ns (semantic-tag-name cur))
+	      ;; Cache the namespace value.
+	      (semantic-tag-put-attribute includetag :inside-ns inside-ns)))))
+      (unless (semantic-find-tags-by-name
+	       inside-ns
+	       (semantic-find-tags-by-type "namespace" inctable))
+	(setq tags (oref inctable tags))
+	;; Wrap tags inside namespace tag
+	(setq newtags
+	      (list (semantic-tag-new-type inside-ns "namespace" tags nil)))
+	;; Create new semantic-table for the wrapped tags, since we don't want
+	;; the namespace to actually be a part of the header file.
+	(setq newtable (semanticdb-table "include with context"))
+	(oset newtable tags newtags)
+	(oset newtable parent-db (oref inctable parent-db))
+	(oset newtable file (oref inctable file)))
+      newtable)))
+
 
 (define-mode-local-override semantic-get-local-variables c++-mode ()
   "Do what `semantic-get-local-variables' does, plus add `this' if needed."
