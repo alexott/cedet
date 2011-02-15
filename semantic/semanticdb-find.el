@@ -1355,7 +1355,12 @@ Returns a table of all matching tags."
   "In TABLE, find all occurrences of tags of CLASS.
 Optional argument TAGS is a list of tags to search.
 Returns a table of all matching tags."
-  (semantic-find-tags-by-class class (or tags (semanticdb-get-tags table))))
+  ;; Delegate 'include' to the overridable
+  ;; `semantic-find-tags-included', which by default will just call
+  ;; `semantic-find-tags-by-class'.
+  (if (eq class 'include)
+      (semantic-find-tags-included (or tags (semanticdb-get-tags table)))
+    (semantic-find-tags-by-class class (or tags (semanticdb-get-tags table)))))
 
 (defmethod semanticdb-find-tags-external-children-of-type-method ((table semanticdb-abstract-table) parent &optional tags)
    "In TABLE, find all occurrences of tags whose parent is the PARENT type.
