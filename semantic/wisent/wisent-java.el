@@ -1,6 +1,6 @@
 ;;; wisent-java.el --- Java LALR parser for Emacs
 
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2011 Eric M. Ludlam
 ;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006 David Ponce
 
 ;; Author: David Ponce <david@dponce.com>
@@ -81,11 +81,20 @@ names in scope."
              (package  . "Package")))
    ;; navigation inside 'type children
    senator-step-at-tag-classes '(function variable)
+   ;; Remove 'recursive from the default semanticdb find throttle
+   ;; since java imports never recurse.
+   semanticdb-find-default-throttle
+   (remq 'recursive (default-value 'semanticdb-find-default-throttle))
    )
   ;; Setup javadoc stuff
   (semantic-java-doc-setup))
 
 (add-hook 'java-mode-hook 'wisent-java-default-setup)
+
+;;;###autoload
+(eval-after-load "semanticdb"
+  '(require 'semanticdb-javap)
+  )
 
 ;;; Overridden Semantic API.
 ;;
