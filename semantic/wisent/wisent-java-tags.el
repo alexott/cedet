@@ -1,6 +1,6 @@
 ;;; wisent-java-tags.el --- Java LALR parser for Emacs
 
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2011 Eric M. Ludlam
 ;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006 David Ponce
 
 ;; Author: David Ponce <david@dponce.com>
@@ -82,6 +82,22 @@ This function override `get-local-variables'."
                       vars))))
     vars))
 
+;;;
+;;; Analyzer and type cache support
+;;;
+(define-mode-local-override semantic-analyze-split-name java-mode (name)
+  "Split up tag names on colon . boundaries."
+  (let ((ans (split-string name "\\.")))
+    (if (= (length ans) 1)
+	name
+      (delete "" ans))))
+
+(define-mode-local-override semantic-analyze-unsplit-name java-mode (namelist)
+  "Assemble the list of names NAMELIST into a namespace name."
+  (mapconcat 'identity namelist "."))
+
+
+
 ;;;;
 ;;;; Semantic integration of the Java LALR parser
 ;;;;
@@ -118,6 +134,10 @@ Use the alternate LALR(1) parser."
              (package  . "Package")))
    ;; navigation inside 'type children
    senator-step-at-tag-classes '(function variable)
+   ;; Remove 'recursive from the default semanticdb find throttle
+   ;; since java imports never recurse.
+   semanticdb-find-default-throttle
+   (remq 'recursive (default-value 'semanticdb-find-default-throttle))
    )
   ;; Setup javadoc stuff
   (semantic-java-doc-setup))
