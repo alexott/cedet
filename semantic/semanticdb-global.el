@@ -1,6 +1,6 @@
 ;;; semanticdb-global.el --- Semantic database extensions for GLOBAL
 
-;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2008, 2009, 2010, 2011 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
@@ -70,6 +70,8 @@ in a GNU Global supported hierarchy."
 (defclass semanticdb-project-database-global
   ;; @todo - convert to one DB per directory.
   (semanticdb-project-database eieio-instance-tracker)
+
+  ;; @todo - use instance tracker symbol.
   ()
   "Database representing a GNU Global tags file.")
 
