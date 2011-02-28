@@ -1,7 +1,7 @@
 ;;; wisent-java-tags.wy -- Semantic LALR grammar for Java
 ;;
+;; Copyright (C) 2007,2011 Eric Ludlam
 ;; Copyright (C) 2002, 2007 David Ponce
-;; Copyright (C) 2007 Eric Ludlam
 ;;
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
@@ -448,7 +448,7 @@ class_member_declaration
 ;;; Type Declaration token
 ;; ("NAME" type "TYPE" ( PART-LIST ) ( PARENTS ) EXTRA-SPEC "DOCSTRING")
 interface_declaration
-  : modifiers_opt INTERFACE IDENTIFIER extends_interfaces_opt interface_body
+  : modifiers_opt INTERFACE qualified_name extends_interfaces_opt interface_body
     (TYPE-TAG $3 $2 $5 (if $4 (cons nil $4)) :typemodifiers $1)
   ;
 
