@@ -1,6 +1,6 @@
 ;;; semanticdb.el --- Semantic tag database manager
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
@@ -76,6 +76,11 @@ same major mode as the current buffer.")
 	 :accessor semanticdb-get-tags
 	 :printer semantic-tag-write-list-slot-value
 	 :documentation "The tags belonging to this table.")
+   (db-refs :initform nil
+	    :documentation
+	    "List of `semanticdb-table' objects refering to this one.
+These aren't saved, but are instead recalculated after load.
+See the file semanticdb-ref.el for how this slot is used.")
    (index :type semanticdb-abstract-search-index
 	  :documentation "The search index.
 Used by semanticdb-find to store additional information about
@@ -197,8 +202,7 @@ If one doesn't exist, create it."
 ;; a semanticdb-table associated with a file.
 ;;
 (defclass semanticdb-search-results-table (semanticdb-abstract-table)
-  (
-   )
+  ()
   "Table used for search results when there is no file or table association.
 Examples include search results from external sources such as from
 Emacs' own symbol table, or from external libraries.")
@@ -221,11 +225,6 @@ it is in Emacs.")
    (dirty :initform nil
 	  :documentation
 	  "Non nil if this table needs to be `Saved'.")
-   (db-refs :initform nil
-	    :documentation
-	    "List of `semanticdb-table' objects refering to this one.
-These aren't saved, but are instead recalculated after load.
-See the file semanticdb-ref.el for how this slot is used.")
    (pointmax :initarg :pointmax
 	     :initform nil
 	     :documentation "Size of buffer when written to disk.
