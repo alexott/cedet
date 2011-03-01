@@ -126,6 +126,10 @@ All directories with filesshould have at least one target.")
    )
   "EDE Android Project target for .xml files.")
 
+(defclass ede-android-target-misc (ede-target)
+  ()
+  "EDE Android Project target for misc files.")
+
 
 ;;;###autoload
 (defclass ede-android-project (ede-project eieio-instance-tracker)
@@ -420,8 +424,7 @@ WHERE is something like menu or layout, and what is the name of the resource."
 (defun ede-android-visit-resource ()
   "Visit the resource being referenced by R under point."
   (interactive)
-  (let* ((C (semantic-analyze-current-context))
-	 (p (oref C :prefix)))
+  (let* ((p (semantic-ctxt-current-symbol)))
     (unless (string= (car p) "R")
       (error "Point is not on an XML based resource referred to by R"))
     (setq p (cdr p))
