@@ -983,7 +983,7 @@ now.
 	    (setq mods (cons "extern" (cons "\"C\"" mods)))
 	    (semantic-tag-put-attribute (car mb) :typemodifiers mods))
 	  (setq mb (cdr mb)))
-	(setq return-list ret)))
+	(setq return-list (nreverse ret))))
 
     ;; Function or variables that have a :type that is some complex
     ;; thing, extract it, and replace it with a reference.
