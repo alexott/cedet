@@ -321,7 +321,7 @@ For Android projects, look to the SDK android.jar."
   "Compile the Android project with ant.
 Argument COMMAND is the command to use when compiling."
   (let ((default-directory (ede-project-root-directory proj)))
-    (compile (concat "ant " (oref proj configuration-default)))))
+    (compile (concat "ant clean " (oref proj configuration-default)))))
   
 (defmethod project-compile-target ((proj ede-android-target-java) &optional command)
   "Compile the current Android java target with ant on the project.
