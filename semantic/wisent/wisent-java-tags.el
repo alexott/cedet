@@ -68,6 +68,7 @@ Parse the current context for `field_declaration' nonterminals to
 collect tags, such as local variables or prototypes.
 This function override `get-local-variables'."
   (let ((vars nil)
+	(ct (semantic-current-tag))
         ;; We want nothing to do with funny syntaxing while doing this.
         (semantic-unmatched-syntax-hook nil))
     (while (not (semantic-up-context (point) 'function))
@@ -80,6 +81,13 @@ This function override `get-local-variables'."
                        'field_declaration
                        0 t)
                       vars))))
+    ;; Add 'this' if in a fcn
+    (when (semantic-tag-of-class-p ct 'function)
+      ;; Append a new tag THIS into our space.
+      (setq vars (cons (semantic-tag-new-variable 
+			"this" (semantic-tag-name (semantic-current-tag-parent))
+			nil)
+		       vars)))
     vars))
 
 ;;;
