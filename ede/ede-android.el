@@ -49,7 +49,7 @@ Return (NAME VERSION PACKAGE)."
       (insert-file-contents "AndroidManifest.xml" nil)
       (goto-char (point-min))
       (let (version package name)
-	(re-search-forward "^\\s-*package *= *\"\\([^\"\n]+\\)\"")
+	(re-search-forward "\\s-*package *= *\"\\([^\"\n]+\\)\"")
 	(setq package (match-string 1))
 	(condition-case nil
 	    (progn
