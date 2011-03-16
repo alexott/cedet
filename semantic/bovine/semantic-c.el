@@ -102,6 +102,8 @@ NOTE: In process of obsoleting this."
   '( ("__THROW" . "")
      ("__const" . "const")
      ("__restrict" . "")
+     ("__attribute_malloc__" . "")
+     ("__wur" . "")
      ("__declspec" . ((spp-arg-list ("foo") 1 . 2)))
      ("__attribute__" . ((spp-arg-list ("foo") 1 . 2)))
      )
