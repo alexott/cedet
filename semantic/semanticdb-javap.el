@@ -102,6 +102,9 @@ represent jar files."
       ;; Get a list of paths together
       (dolist (P (append edepaths edeclasspath))
 	(cond
+	 ;; Somtimes a null gets in.  Ignore it.
+	 ((null P)
+	  nil)
 	 ;; A directory can be returned as a string.  Should we make a
 	 ;; special dir for this???  @TODO
 	 ((file-directory-p P)
