@@ -109,6 +109,8 @@ names in scope."
   java-mode ()
   "Get local variable declarations from the current context."
   (let (result
+	(ct (semantic-current-tag))
+	(this nil)
         ;; Ignore funny syntax while doing this.
         semantic-unmatched-syntax-hook)
     (while (not (semantic-up-context (point) 'function))
@@ -121,7 +123,12 @@ names in scope."
                'block_statement
                nil t)
               result)))
-    (apply 'append result)))
+    ;; While in a function, we need to add "this" as a variable.
+    ;; If we have a function parent, then that implies we can
+    (when (semantic-tag-of-class-p ct 'function)
+      ;; Append a new tag THIS into our space.
+      (setq this (list (semantic-tag-new-variable "this" (semantic-tag-function-parent ct) nil))))
+    (apply 'append (cons this result))))
 
 (provide 'wisent-java)
 
