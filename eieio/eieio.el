@@ -1207,7 +1207,7 @@ IMPL is the symbol holding the method implementation."
   (let ((byte-compile-free-references nil)
 	(byte-compile-warnings nil)
 	)
-    (byte-compile-lambda
+    (byte-compile
      `(lambda (&rest local-args)
 	,doc-string
 	;; This is a cool cheat.  Usually we need to look up in the
