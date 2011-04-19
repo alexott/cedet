@@ -47,7 +47,7 @@
 
 (require 'inversion)
 
-(defvar semantic-clang-binary "/Users/gast/clang/bin/clang"
+(defvar semantic-clang-binary "/usr/bin/clang"
   "Binary for clang.")
 
 (defvar semantic-clang-arguments '("")
@@ -126,9 +126,12 @@ First group is the completion, second group the definition."
       (write-region txt nil tempfile nil 'nodisplay)
       (with-temp-buffer
 	(when (zerop
-	       (call-process semantic-clang-binary nil t nil
-			     "-cc1" "-fsyntax-only" "-code-completion-at"
-			     (concat tempfile complete-pos) tempfile))
+	       (apply 'call-process
+		      semantic-clang-binary nil t nil
+		       "-cc1" "-fsyntax-only" "-code-completion-at"
+		       (concat tempfile complete-pos)
+		       tempfile
+		       semantic-clang-arguments))
 	  (goto-char (point-min))
 	  (while (re-search-forward
 		  (semantic-clang-completion-regexp ctext) nil t)
@@ -146,7 +149,7 @@ First group is the completion, second group the definition."
 
 (defun semantic-clang-identify (str)
   "Identify output STR from clang.
-Will return a list (class [type [args]]) with
+Will return a list (class [type [args]]) with 
 class: either 'function, 'variable or 'type
 type: (Return)-type of function/variable
 args: Function arguments"
