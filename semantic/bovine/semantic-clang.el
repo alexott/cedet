@@ -212,7 +212,7 @@ con/destructors (according to PREFIX) and operators."
 					   (semantic-tag-name tag)))
 			;; filter out constructors (this has to do for now)
 			(or (null tagtype)
-			    (null (car-safe prefix))
+			    (<= (length prefix) 1)
 			    (not (string= (semantic-tag-name (semantic-tag-type (car prefix)))
 					  tagname))))
 	       tag)))
