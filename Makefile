@@ -1,4 +1,4 @@
-# Copyright (C) 2010 by Lluís Vilanova
+# Copyright (C) 2010, 2011 by Lluís Vilanova
 #
 # Maintainer: CEDET developers <http://sf.net/projects/cedet>
 # Created: 16 Sep 2010
@@ -29,7 +29,7 @@ RMFLAGS=-f
 MAKEINFO=makeinfo
 
 ## Which packages to compile, test, etc.
-PACKAGES=eieio speedbar
+PACKAGES=eieio speedbar cedet
 
 ###### Internal part of the Makefile ###########################################
 

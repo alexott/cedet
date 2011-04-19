@@ -1,29 +1,27 @@
 ;;; mode-local.el --- Support for mode local facilities
 ;;
-;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
-;; Copyright (C) 2004, 2005 David Ponce
+;; Copyright (C) 2004, 2005, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
 ;;
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 27 Apr 2004
 ;; Keywords: syntax
-;;
-;; This file is not part of GNU Emacs.
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
-;;
-;; This software is distributed in the hope that it will be useful,
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
-;;
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -48,43 +46,8 @@
 ;; Add macro for defining the '-default' functionality.
 
 ;;; Code:
+
 (eval-when-compile (require 'cl))
-
-;;; Compatibility
-;;
-(defun mode-local-define-derived-mode-needed-p ()
-  "Return non-nil if mode local has to fix `define-derived-mode'.
-That is, if `define-derived-mode' does not set `derived-mode-parent'."
-  (let ((body (cdr (macroexpand '(define-derived-mode c p ""))))
-        (bad t))
-    (while (and body bad)
-      (if (equal (car body) '(put 'c 'derived-mode-parent 'p))
-          (setq bad nil)
-        (setq body (cdr body))))
-    bad))
-
-(when (mode-local-define-derived-mode-needed-p)
-  ;; Workaround a bug in some (XEmacs) versions of
-  ;; `define-derived-mode' that don't set the `derived-mode-parent'
-  ;; property, and break mode-local.
-  (defadvice define-derived-mode
-    (after mode-local-define-derived-mode activate)
-    "Fix missing `derived-mode-parent' property on child."
-    (unless (eq 'fundamental-mode (ad-get-arg 1))
-      (let ((form (cdr ad-return-value)))
-        (setq ad-return-value nil)
-        (while form
-          (and (eq 'defun (car-safe (car form)))
-               (eq (ad-get-arg 0) (car (cdr-safe (car form))))
-               (push `(or (get ',(ad-get-arg 0) 'derived-mode-parent)
-                          (put ',(ad-get-arg 0) 'derived-mode-parent
-                               ',(ad-get-arg 1)))
-                     ad-return-value))
-          (push (car form) ad-return-value)
-          (setq form (cdr form)))
-        (setq ad-return-value `(progn ,@(nreverse ad-return-value)))
-        )))
-  )
 
 ;;; Misc utilities
 ;;
@@ -116,7 +79,7 @@ Return nil if MODE has no parent."
   (let ((modes nil))
     (while mode
       (setq modes (cons mode modes)
-	    mode  (get-mode-local-parent mode)))
+            mode  (get-mode-local-parent mode)))
     modes))
 
 (defun mode-local-map-mode-buffers (function modes)
@@ -126,12 +89,12 @@ FUNCTION does not have arguments."
   (or (listp modes) (setq modes (list modes)))
   (mode-local-map-file-buffers
    function #'(lambda ()
-		(let ((mm (mode-local-equivalent-mode-p major-mode))
-		      (ans nil))
-		  (while (and (not ans) mm)
-		    (setq ans (memq (car mm) modes)
-			  mm (cdr mm)) )
-		  ans))))
+                (let ((mm (mode-local-equivalent-mode-p major-mode))
+                      (ans nil))
+                  (while (and (not ans) mm)
+                    (setq ans (memq (car mm) modes)
+                          mm (cdr mm)) )
+                  ans))))
 
 ;;; Hook machinery
 ;;
@@ -331,36 +294,35 @@ Elements are (SYMBOL . PREVIOUS-VALUE), describing one variable."
   ;; do not do this if we are inside set-auto-mode as we may be in
   ;; an initialization race condition.
   (if (or  (and (featurep 'emacs) (boundp 'keep-mode-if-same))
-	   (and (featurep 'xemacs) (boundp 'just-from-file-name)))
+           (and (featurep 'xemacs) (boundp 'just-from-file-name)))
       ;; We are inside set-auto-mode, as this is an argument that is
       ;; vaguely unique.
 
       ;; This will make sure that when everything is over, this will get
       ;; called and we won't be under set-auto-mode anymore.
       (mode-local-on-major-mode-change)
-
     ;; Do the normal thing.
     (let (modes table old-locals)
       (unless mode
-	(set (make-local-variable 'mode-local--init-mode) major-mode)
-	(setq mode major-mode))
+        (set (make-local-variable 'mode-local--init-mode) major-mode)
+        (setq mode major-mode))
       ;; Get MODE's parents & MODE in the right order.
       (while mode
-	(setq modes (cons mode modes)
-	      mode  (get-mode-local-parent mode)))
+        (setq modes (cons mode modes)
+              mode  (get-mode-local-parent mode)))
       ;; Activate mode bindings following parent modes order.
       (dolist (mode modes)
-	(when (setq table (get mode 'mode-local-symbol-table))
-	  (mapatoms
-	   #'(lambda (var)
-	       (when (get var 'mode-variable-flag)
-		 (let ((v (intern (symbol-name var))))
-		   ;; Save the current buffer-local value of the
-		   ;; mode-local variable.
-		   (and (local-variable-p v (current-buffer))
-			(push (cons v (symbol-value v)) old-locals))
-		   (set (make-local-variable v) (symbol-value var)))))
-	   table)))
+        (when (setq table (get mode 'mode-local-symbol-table))
+          (mapatoms
+           #'(lambda (var)
+               (when (get var 'mode-variable-flag)
+                 (let ((v (intern (symbol-name var))))
+                   ;; Save the current buffer-local value of the
+                   ;; mode-local variable.
+                   (and (local-variable-p v (current-buffer))
+                        (push (cons v (symbol-value v)) old-locals))
+                   (set (make-local-variable v) (symbol-value var)))))
+           table)))
       old-locals)))
 
 (defun deactivate-mode-local-bindings (&optional mode)
@@ -390,12 +352,12 @@ This is like `with-mode-local', except that MODE's value is used.
 To use the symbol MODE (quoted), use `with-mode-local'."
    (let ((old-mode  (make-symbol "mode"))
          (old-locals (make-symbol "old-locals"))
-	 (new-mode (make-symbol "new-mode"))
+         (new-mode (make-symbol "new-mode"))
          (local (make-symbol "local")))
      `(let ((,old-mode mode-local-active-mode)
             (,old-locals nil)
-	    (,new-mode ,mode)
-	    )
+            (,new-mode ,mode)
+            )
         (unwind-protect
             (progn
               (deactivate-mode-local-bindings ,old-mode)
@@ -483,7 +445,7 @@ DOCSTRING is optional."
 
 ;;; Function overloading
 ;;
-(defun make-obsolete-overload (old new &optional when)
+(defun make-obsolete-overload (old new when)
   "Mark OLD overload as obsoleted by NEW overload.
 WHEN is a string describing the first release where it was made obsolete."
   (put old 'overload-obsoleted-by new)
@@ -610,11 +572,11 @@ BODY is the implementation of this function."
   (let ((newname (intern (format "%s-%s" name mode))))
     `(progn
        (eval-and-compile
-	 (defun ,newname ,args
-	   ,(format "%s\n\nOverride %s in `%s' buffers."
-		    docstring name mode)
-	   ;; The body for this implementation
-	   ,@body)
+         (defun ,newname ,args
+           ,(format "%s\n\nOverride %s in `%s' buffers."
+                    docstring name mode)
+           ;; The body for this implementation
+           ,@body)
          ;; For find-func to locate the definition of NEWNAME.
          (put ',newname 'definition-name ',name))
        (mode-local-bind '((,name . ,newname))
@@ -623,8 +585,6 @@ BODY is the implementation of this function."
     ))
 
 ;;; Read/Query Support
-;;
-;;;###autoload
 (defun mode-local-read-function (prompt &optional initial hist default)
   "Interactively read in the name of a mode-local function.
 PROMPT, INITIAL, HIST, and DEFAULT are the same as for `completing-read'."
@@ -651,28 +611,16 @@ PROMPT, INITIAL, HIST, and DEFAULT are the same as for `completing-read'."
 SYMBOL is a function that can be overridden."
   (with-current-buffer "*Help*"
     (pop-to-buffer (current-buffer))
-    (unwind-protect
-	(progn
-	  (toggle-read-only -1)
-          (goto-char (point-min))
-          (unless (re-search-forward "^$" nil t)
-            (goto-char (point-max))
-            (beginning-of-line)
-            (forward-line -1))
-          (insert (overload-docstring-extension symbol) "\n")
-	  ;; NOTE TO SELF:
-	  ;; LIST ALL LOADED OVERRIDES FOR SYMBOL HERE
-	  )
-      (toggle-read-only 1))))
-
-;; Help for Overload functions.  Need to advise help.
-(defadvice describe-function (around mode-local-help activate)
-  "Display the full documentation of FUNCTION (a symbol).
-Returns the documentation as a string, also."
-  (prog1
-      ad-do-it
-    (if (function-overload-p (ad-get-arg 0))
-	(mode-local-augment-function-help (ad-get-arg 0)))))
+    (goto-char (point-min))
+    (unless (re-search-forward "^$" nil t)
+      (goto-char (point-max))
+      (beginning-of-line)
+      (forward-line -1))
+    (let ((inhibit-read-only t))
+      (insert (overload-docstring-extension symbol) "\n")
+      ;; NOTE TO SELF:
+      ;; LIST ALL LOADED OVERRIDES FOR SYMBOL HERE
+      )))
 
 ;; Help for mode-local bindings.
 (defun mode-local-print-binding (symbol)
@@ -791,79 +739,23 @@ invoked interactively."
     (mode-local-describe-bindings-1 mode (cedet-called-interactively-p 'any))))
 
 
-;;; Font-lock support
-;;
-(defconst mode-local-font-lock-keywords
-  (eval-when-compile
-    (let* (
-           ;; Variable declarations
-           (kv (regexp-opt
-                '(
-                  "defconst-mode-local"
-                  "defvar-mode-local"
-                  ) t))
-           ;; Function declarations
-           (kf (regexp-opt
-                '(
-                  "define-mode-local-override"
-                  "define-child-mode"
-                  "define-overload"
-                  "define-overloadable-function"
-                  ;;"make-obsolete-overload"
-                  "with-mode-local"
-                  ) t))
-           ;; Regexp depths
-           (kv-depth (regexp-opt-depth kv))
-           (kf-depth (regexp-opt-depth kf))
-           )
-      `((,(concat
-           ;; Declarative things
-           "(\\(" kv "\\|" kf "\\)"
-           ;; Whitespaces & names
-           "\\>[ \t]*\\(\\sw+\\)?[ \t]*\\(\\sw+\\)?"
-           )
-         (1 font-lock-keyword-face)
-         (,(+ 1 kv-depth kf-depth 1)
-          (cond ((match-beginning 2)
-                 font-lock-type-face)
-                ((match-beginning ,(+ 1 kv-depth 1))
-                 font-lock-function-name-face)
-                )
-          nil t)
-         (,(+ 1 kv-depth kf-depth 1 1)
-          (cond ((match-beginning 2)
-                 font-lock-variable-name-face)
-                )
-          nil t)))
-      ))
-  "Highlighted keywords.")
+;; ;;; find-func support (Emacs 21.4, or perhaps 22.1)
+;; ;;
+;; (condition-case nil
+;;     ;; Try to get find-func so we can modify it.
+;;     (require 'find-func)
+;;   (error nil))
 
-
-;;; find-func support (Emacs 21.4, or perhaps 22.1)
-;;
-(condition-case nil
-    ;; Try to get find-func so we can modify it.
-    (require 'find-func)
-  (error nil))
-
-(when (boundp 'find-function-regexp)
-  (unless (string-match "ine-overload" find-function-regexp)
-    (if (string-match "(def\\\\(" find-function-regexp)
-	(let ((end (match-end 0))
-	      )
-	  (setq find-function-regexp
-		(concat (substring find-function-regexp 0 end)
-			"ine-overload\\|ine-mode-local-override\\|"
-			"ine-child-mode\\|"
-			(substring find-function-regexp end)))))
-    )
-  ;; The regexp for variables is a little more kind.
-  )
-
-;; TODO: Add XEmacs support
-(when (fboundp 'font-lock-add-keywords)
-  (font-lock-add-keywords 'emacs-lisp-mode
-                          mode-local-font-lock-keywords))
+;; (when (boundp 'find-function-regexp)
+;;   (unless (string-match "ine-overload" find-function-regexp)
+;;     (if (string-match "(def\\\\(" find-function-regexp)
+;;      (let ((end (match-end 0))
+;;            )
+;;        (setq find-function-regexp
+;;              (concat (substring find-function-regexp 0 end)
+;;                      "ine-overload\\|ine-mode-local-override\\|"
+;;                      "ine-child-mode\\|"
+;;                      (substring find-function-regexp end)))))))
 
 ;;; edebug support
 ;;

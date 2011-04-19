@@ -1,26 +1,26 @@
 ;;; semantic.el --- Semantic buffer evaluator.
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+;;   2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; Keywords: syntax
+;; Keywords: syntax tools
+;; Version: 2.0
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -29,17 +29,21 @@
 ;; The Semantic API provides an interface to a series of different parser
 ;; implementations.  Each parser outputs a parse tree in a similar format
 ;; designed to handle typical functional and object oriented languages.
+;;
+;; To enable Semantic, turn on `semantic-mode', a global minor mode
+;; (M-x semantic-mode RET, or "Source Code Parsers" from the Tools
+;; menu).  To enable it at startup, put (semantic-mode 1) in your init
+;; file.
 
-(eval-and-compile
-  ;; Other package depend on this value at compile time via inversion.
-  (defvar semantic-version "2.0"
-    "Current version of Semantic."))
-
-(require 'working)
-(require 'assoc)
+(require 'cedet)
 (require 'semantic/tag)
 (require 'semantic/lex)
-(require 'inversion)
+
+(defvar semantic-version "2.0"
+  "Current version of Semantic.")
+
+(declare-function inversion-test "inversion")
+(declare-function semanticdb-load-ebrowse-caches "semantic/db-ebrowse")
 
 (defun semantic-require-version (major minor &optional beta)
   "Non-nil if this version of Semantic does not satisfy a specific version.
@@ -53,6 +57,7 @@ excluded if a released version is required.
 It is assumed that if the current version is newer than that specified,
 everything passes.  Exceptions occur when known incompatibilities are
 introduced."
+  (require 'inversion)
   (inversion-test 'semantic
 		  (concat major "." minor
 			  (when beta (concat "beta" beta)))))
@@ -78,7 +83,7 @@ This variable is for internal use only, and its content depends on the
 external parser used.")
 (make-variable-buffer-local 'semantic--parse-table)
 (semantic-varalias-obsolete 'semantic-toplevel-bovine-table
-			    'semantic--parse-table)
+			    'semantic--parse-table "23.2")
 
 (defvar semantic-symbol->name-assoc-list
   '((type     . "Types")
@@ -130,7 +135,7 @@ cached values for some reason, chances are you can add a hook to
 `semantic-after-toplevel-cache-change-hook'.")
 (make-variable-buffer-local 'semantic--buffer-cache)
 (semantic-varalias-obsolete 'semantic-toplevel-bovine-cache
-			    'semantic--buffer-cache)
+			    'semantic--buffer-cache "23.2")
 
 (defvar semantic-unmatched-syntax-cache nil
   "A cached copy of unmatched syntax tokens.")
@@ -167,7 +172,7 @@ It is called before any request for tags is made via the function
 If any hook returns a nil value, the cached value is returned
 immediately, even if it is empty.")
 (semantic-varalias-obsolete 'semantic-before-toplevel-bovination-hook
-			    'semantic--before-fetch-tags-hook)
+			    'semantic--before-fetch-tags-hook "23.2")
 
 (defvar semantic-after-toplevel-bovinate-hook nil
   "Hooks run after a toplevel parse.
@@ -177,7 +182,7 @@ For language specific hooks, make sure you define this as a local hook.
 
 This hook should not be used any more.
 Use `semantic-after-toplevel-cache-change-hook' instead.")
-(make-obsolete-variable 'semantic-after-toplevel-bovinate-hook nil)
+(make-obsolete-variable 'semantic-after-toplevel-bovinate-hook nil "23.2")
 
 (defvar semantic-after-toplevel-cache-change-hook nil
   "Hooks run after the buffer tag list has changed.
@@ -205,6 +210,10 @@ during a flush when the cache is given a new value of nil.")
 (defvar semantic-parser-name "LL"
   "Optional name of the parser used to parse input stream.")
 (make-variable-buffer-local 'semantic-parser-name)
+
+(defvar semantic--completion-cache nil
+  "Internal variable used by `semantic-complete-symbol'.")
+(make-variable-buffer-local 'semantic--completion-cache)
 
 ;;; Parse tree state management API
 ;;
@@ -257,6 +266,31 @@ setup to use Semantic."
   :group 'semantic
   :type 'hook)
 
+(defcustom semantic-new-buffer-setup-functions
+  '((c-mode . semantic-default-c-setup)
+    (c++-mode . semantic-default-c-setup)
+    (html-mode . semantic-default-html-setup)
+    (java-mode . wisent-java-default-setup)
+    (js-mode . wisent-javascript-setup-parser)
+    (python-mode . wisent-python-default-setup)
+    (scheme-mode . semantic-default-scheme-setup)
+    (srecode-template-mode . srecode-template-setup-parser)
+    (makefile-automake-mode . semantic-default-make-setup)
+    (makefile-gmake-mode . semantic-default-make-setup)
+    (makefile-makepp-mode . semantic-default-make-setup)
+    (makefile-bsdmake-mode . semantic-default-make-setup)
+    (makefile-imake-mode . semantic-default-make-setup)
+    (makefile-mode . semantic-default-make-setup))
+  "Alist of functions to call to set up Semantic parsing in the buffer.
+Each element has the form (MODE . FN), where MODE is a value of
+`major-mode' for the buffer and FN is the corresponding function
+to call, with no arguments, to set up the parser.
+
+These functions are called by `semantic-new-buffer-fcn', before
+`semantic-inhibit-functions'."
+  :group 'semantic
+  :type '(alist :key-type symbol :value-type function))
+
 (defvar semantic-init-hook nil
   "Hook run when a buffer is initialized with a parsing table.")
 
@@ -271,11 +305,11 @@ This guarantees that the DB will go before other modes that require
 a parse of the buffer.")
 
 (semantic-varalias-obsolete 'semantic-init-hooks
-                          'semantic-init-hook)
+			    'semantic-init-hook "23.2")
 (semantic-varalias-obsolete 'semantic-init-mode-hooks
-                          'semantic-init-mode-hook)
+			    'semantic-init-mode-hook "23.2")
 (semantic-varalias-obsolete 'semantic-init-db-hooks
-                          'semantic-init-db-hook)
+			    'semantic-init-db-hook "23.2")
 
 (defvar semantic-new-buffer-fcn-was-run nil
   "Non-nil after `semantic-new-buffer-fcn' has been executed.")
@@ -296,6 +330,11 @@ That is, if it is dirty or if the current parse tree isn't up to date."
 If the major mode is ready for Semantic, and no
 `semantic-inhibit-functions' disabled it, the current buffer is setup
 to use Semantic, and `semantic-init-hook' is run."
+  ;; In upstream Semantic, the parser setup functions are called from
+  ;; mode hooks.  In the version bundled with Emacs, we do it here.
+  (let ((entry (assq major-mode semantic-new-buffer-setup-functions)))
+    (when entry
+      (funcall (cdr entry))))
   ;; Do stuff if semantic was activated by a mode hook in this buffer,
   ;; and not afterwards disabled.
   (when (and semantic--parse-table
@@ -319,13 +358,7 @@ to use Semantic, and `semantic-init-hook' is run."
     ;; Set up semantic modes
     (run-hooks 'semantic-init-hook)
     ;; Set up major-mode specific semantic modes
-    (run-hooks 'semantic-init-mode-hook)
-    ))
-
-(add-hook 'mode-local-init-hook 'semantic-new-buffer-fcn)
-
-;; Test the above hook.
-;;(add-hook 'semantic-init-hook (lambda () (message "init for semantic")))
+    (run-hooks 'semantic-init-mode-hook)))
 
 (defun semantic-fetch-tags-fast ()
   "For use in a hook.  When only a partial reparse is needed, reparse."
@@ -334,9 +367,6 @@ to use Semantic, and `semantic-init-hook' is run."
 	  (semantic-fetch-tags))
     (error nil))
   semantic--buffer-cache)
-
-(if (boundp 'eval-defun-hooks)
-    (add-hook 'eval-defun-hooks 'semantic-fetch-tags-fast))
 
 ;;; Parsing Commands
 ;;
@@ -347,7 +377,7 @@ to use Semantic, and `semantic-init-hook' is run."
   "When non-nil, activate the interactive parsing debugger.
 Do not set this yourself.  Call `semantic-debug'.")
 
-(defun semantic.elapsed-time (start end)
+(defun semantic-elapsed-time (start end)
   "Copied from elp.el.  Was `elp-elapsed-time'.
 Argument START and END bound the time being calculated."
   (+ (* (- (car end) (car start)) 65536.0)
@@ -415,7 +445,6 @@ Must return a list of semantic tags wich have been cooked
 with them.  When overloading this function, use `semantic--tag-expand'
 to cook raw tags.")
 
-;;;###autoload
 (defun semantic-parse-region-default
   (start end &optional nonterminal depth returnonerror)
   "Parse the area between START and END, and return any tags found.
@@ -498,19 +527,24 @@ is requested."
 
   (run-hook-with-args 'semantic-after-toplevel-cache-change-hook
 		      semantic--buffer-cache)
-  )
+
+  (setq semantic--completion-cache nil))
+
+(defvar semantic-bovinate-nonterminal-check-obarray)
 
 (defun semantic--set-buffer-cache (tagtable)
   "Set the toplevel tag cache to TAGTABLE."
   (setq semantic--buffer-cache tagtable
-        semantic-unmatched-syntax-cache-check nil
-	;; This is specific to the bovine parser.
-        semantic-bovinate-nonterminal-check-obarray nil)
+        semantic-unmatched-syntax-cache-check nil)
+  ;; This is specific to the bovine parser.
+  (set (make-local-variable 'semantic-bovinate-nonterminal-check-obarray)
+       nil)
   (semantic-parse-tree-set-up-to-date)
   (semantic-make-local-hook 'after-change-functions)
   (add-hook 'after-change-functions 'semantic-change-function nil t)
   (run-hook-with-args 'semantic-after-toplevel-cache-change-hook
 		      semantic--buffer-cache)
+  (setq semantic--completion-cache nil)
   ;; Refresh the display of unmatched syntax tokens if enabled
   (run-hook-with-args 'semantic-unmatched-syntax-hook
                       semantic-unmatched-syntax-cache)
@@ -523,7 +557,7 @@ is requested."
 'percent means we are doing a linear parse through the buffer.
 'dynamic means we are reparsing specific tags.")
 (semantic-varalias-obsolete 'semantic-bovination-working-type
-			    'semantic-working-type)
+			    'semantic-working-type "23.2")
 
 (defvar semantic-minimum-working-buffer-size (* 1024 5)
   "*The minimum size of a buffer before working messages are displayed.
@@ -533,10 +567,11 @@ Buffers larger than this will display the working progress bar.")
 (defsubst semantic-parser-working-message (&optional arg)
   "Return the message string displayed while parsing.
 If optional argument ARG is non-nil it is appended to the message
-string.  See also the function `working-status-forms'."
-  (if semantic-parser-name
-      (format "%s/%s" semantic-parser-name (or arg ""))
-    (format "%s" (or arg ""))))
+string."
+  (concat "Parsing"
+	  (if arg (format " %s" arg))
+	  (if semantic-parser-name (format " (%s)" semantic-parser-name))
+	  "..."))
 
 ;;; Application Parser Entry Points
 ;;
@@ -544,7 +579,6 @@ string.  See also the function `working-status-forms'."
 ;; `semantic-fetch-tags'.  This, in turn, uses other internal
 ;; API functions which plug-in parsers can take advantage of.
 
-;;;###autoload
 (defun semantic-fetch-tags ()
   "Fetch semantic tags from the current buffer.
 If the buffer cache is up to date, return that.
@@ -588,23 +622,21 @@ was marked unparseable, then do nothing, and return the cache."
         (semantic-clear-unmatched-syntax-cache)
         (run-hook-with-args ;; Let hooks know the updated tags
          'semantic-after-partial-cache-change-hook res))
-      )
+      (setq semantic--completion-cache nil))
 
 ;;;; Parse the whole system.
      ((semantic-parse-tree-needs-rebuild-p)
-      (let ((working-status-dynamic-type
-	     (if (< (point-max) semantic-minimum-working-buffer-size)
-		 nil
-	       working-status-dynamic-type))
-	    (working-status-percentage-type
-	     (if (< (point-max) semantic-minimum-working-buffer-size)
-		 nil
-	       working-status-percentage-type))
-	    )
-	(working-status-forms
-	    (semantic-parser-working-message (buffer-name)) "done"
-	  (setq res (semantic-parse-region (point-min) (point-max)))
-	  (working-status t)))
+      ;; Use Emacs' built-in progress-reporter
+      (let ((semantic--progress-reporter
+	     (and (>= (point-max) semantic-minimum-working-buffer-size)
+		  (eq semantic-working-type 'percent)
+		  (make-progress-reporter
+		   (semantic-parser-working-message (buffer-name))
+		   0 100))))
+	(setq res (semantic-parse-region (point-min) (point-max)))
+	(if semantic--progress-reporter
+	    (progress-reporter-done semantic--progress-reporter)))
+
       ;; Clear the caches when we see there were no errors.
       ;; But preserve the unmatched syntax cache and warnings!
       (let (semantic-unmatched-syntax-cache
@@ -620,7 +652,6 @@ was marked unparseable, then do nothing, and return the cache."
   ;; Always return the current parse tree.
   semantic--buffer-cache)
 
-;;;###autoload
 (defun semantic-refresh-tags-safe ()
   "Refresh the current buffer's tags safely.
 
@@ -663,19 +694,16 @@ Does nothing if the current buffer doesn't need reparsing."
       ;; Return if we are lexically safe
       lexically-safe))))
 
-;;;###autoload
 (defun semantic-bovinate-toplevel (&optional ignored)
   "Backward compatibility function."
   (semantic-fetch-tags))
-;;;###autoload
-(make-obsolete 'semantic-bovinate-toplevel 'semantic-fetch-tags)
+(make-obsolete 'semantic-bovinate-toplevel 'semantic-fetch-tags "23.2")
 
 ;; Another approach is to let Emacs call the parser on idle time, when
 ;; needed, use `semantic-fetch-available-tags' to only retrieve
 ;; available tags, and setup the `semantic-after-*-hook' hooks to
 ;; synchronize with new tags when they become available.
 
-;;;###autoload
 (defsubst semantic-fetch-available-tags ()
   "Fetch available semantic tags from the current buffer.
 That is, return tags currently in the cache without parsing the
@@ -737,11 +765,14 @@ This function returns semantic tags without overlays."
       ;; Designated to ignore.
       (setq stream (car nontermsym))
       (if stream
-          (if (eq semantic-working-type 'percent)
-              (working-status
-               (/ (* 100 (semantic-lex-token-start (car stream)))
-                  (point-max)))
-            (working-dynamic-status))))
+	  ;; Use Emacs' built-in progress reporter:
+	  (and (boundp 'semantic--progress-reporter)
+	       semantic--progress-reporter
+	       (eq semantic-working-type 'percent)
+	       (progress-reporter-update
+		semantic--progress-reporter
+		(/ (* 100 (semantic-lex-token-start (car stream)))
+		   (point-max))))))
     result))
 
 ;;; Parsing Warnings:
@@ -798,7 +829,7 @@ code blocks in methods.  If `bovine-inner-scope' can also support
 commands, use `semantic-bovinate-from-nonterminal-full'."
   (semantic-parse-region start end nonterm depth t))
 (make-obsolete 'semantic-bovinate-region-until-error
-               'semantic-parse-region)
+               'semantic-parse-region "23.2")
 
 (defsubst semantic-bovinate-from-nonterminal
   (start end nonterm &optional depth length)
@@ -826,12 +857,300 @@ When used in a `lambda' of a MATCH-LIST, there is no need to include
 a START and END part."
   (semantic-parse-region start end nonterm (or depth 1)))
 (make-obsolete 'semantic-bovinate-from-nonterminal-full
-               'semantic-parse-region)
+               'semantic-parse-region "23.2")
+
+;;; User interface
+
+(defun semantic-force-refresh ()
+  "Force a full refresh of the current buffer's tags.
+Throw away all the old tags, and recreate the tag database."
+  (interactive)
+  (semantic-clear-toplevel-cache)
+  (semantic-fetch-tags)
+  (message "Buffer reparsed."))
+
+(defvar semantic-mode-map
+  (let ((map (make-sparse-keymap)))
+    ;; Key bindings:
+    ;; (define-key km "f"    'senator-search-set-tag-class-filter)
+    ;; (define-key km "i"    'senator-isearch-toggle-semantic-mode)
+    (define-key map "\C-c,j" 'semantic-complete-jump-local)
+    (define-key map "\C-c,J" 'semantic-complete-jump)
+    (define-key map "\C-c,m" 'semantic-complete-jump-local-members)
+    (define-key map "\C-c,g" 'semantic-symref-symbol)
+    (define-key map "\C-c,G" 'semantic-symref)
+    (define-key map "\C-c,p" 'senator-previous-tag)
+    (define-key map "\C-c,n" 'senator-next-tag)
+    (define-key map "\C-c,u" 'senator-go-to-up-reference)
+    (define-key map "\C-c, " 'semantic-complete-analyze-inline)
+    (define-key map "\C-c,\C-w" 'senator-kill-tag)
+    (define-key map "\C-c,\M-w" 'senator-copy-tag)
+    (define-key map "\C-c,\C-y" 'senator-yank-tag)
+    (define-key map "\C-c,r" 'senator-copy-tag-to-register)
+    (define-key map "\C-c,," 'semantic-force-refresh)
+    (define-key map [?\C-c ?, up] 'senator-transpose-tags-up)
+    (define-key map [?\C-c ?, down] 'senator-transpose-tags-down)
+    (define-key map "\C-c,l" 'semantic-analyze-possible-completions)
+    ;; This hack avoids showing the CEDET menu twice if ede-minor-mode
+    ;; and Semantic are both enabled.  Is there a better way?
+    (define-key map [menu-bar cedet-menu]
+      (list 'menu-item "Development" cedet-menu-map
+	    :enable (quote (not (bound-and-true-p global-ede-mode)))))
+    ;; (define-key km "-"    'senator-fold-tag)
+    ;; (define-key km "+"    'senator-unfold-tag)
+    map))
+
+;; Activate the Semantic items in cedet-menu-map
+(let ((navigate-menu (make-sparse-keymap "Navigate Tags"))
+      (edit-menu (make-sparse-keymap "Edit Tags")))
+
+  ;; Edit Tags submenu:
+  (define-key edit-menu [semantic-analyze-possible-completions]
+    '(menu-item "List Completions" semantic-analyze-possible-completions
+		:help "Display a list of completions for the tag at point"))
+  (define-key edit-menu [semantic-complete-analyze-inline]
+    '(menu-item "Complete Tag Inline" semantic-complete-analyze-inline
+		:help "Display inline completion for the tag at point"))
+  (define-key edit-menu [semantic-completion-separator]
+    '("--"))
+  (define-key edit-menu [senator-transpose-tags-down]
+    '(menu-item "Transpose Tags Down" senator-transpose-tags-down
+		:active (semantic-current-tag)
+		:help "Transpose the current tag and the next tag"))
+  (define-key edit-menu [senator-transpose-tags-up]
+    '(menu-item "Transpose Tags Up" senator-transpose-tags-up
+		:active (semantic-current-tag)
+		:help "Transpose the current tag and the previous tag"))
+  (define-key edit-menu [semantic-edit-separator]
+    '("--"))
+  (define-key edit-menu [senator-yank-tag]
+    '(menu-item "Yank Tag" senator-yank-tag
+		:active (not (ring-empty-p senator-tag-ring))
+		:help "Yank the head of the tag ring into the buffer"))
+  (define-key edit-menu [senator-copy-tag-to-register]
+    '(menu-item "Copy Tag To Register" senator-copy-tag-to-register
+		:active (semantic-current-tag)
+		:help "Yank the head of the tag ring into the buffer"))
+  (define-key edit-menu [senator-copy-tag]
+    '(menu-item "Copy Tag" senator-copy-tag
+		:active (semantic-current-tag)
+		:help "Copy the current tag to the tag ring"))
+  (define-key edit-menu [senator-kill-tag]
+    '(menu-item "Kill Tag" senator-kill-tag
+		:active (semantic-current-tag)
+		:help "Kill the current tag, and copy it to the tag ring"))
+
+  ;; Navigate Tags submenu:
+  (define-key navigate-menu [senator-narrow-to-defun]
+    '(menu-item "Narrow to Tag" senator-narrow-to-defun
+		:active (semantic-current-tag)
+		:help "Narrow the buffer to the bounds of the current tag"))
+  (define-key navigate-menu [semantic-narrow-to-defun-separator]
+    '("--"))
+  (define-key navigate-menu [semantic-symref-symbol]
+    '(menu-item "Find Tag References..." semantic-symref-symbol
+		:help "Read a tag and list the references to it"))
+  (define-key navigate-menu [semantic-complete-jump]
+    '(menu-item "Find Tag Globally..." semantic-complete-jump
+		:help "Read a tag name and find it in the current project"))
+  (define-key navigate-menu [semantic-complete-jump-local-members]
+    '(menu-item "Find Local Members ..." semantic-complete-jump-local-members
+		:help "Read a tag name and find a local member with that name"))
+  (define-key navigate-menu [semantic-complete-jump-local]
+    '(menu-item "Find Tag in This Buffer..." semantic-complete-jump-local
+		:help "Read a tag name and find it in this buffer"))
+  (define-key navigate-menu [semantic-navigation-separator]
+    '("--"))
+  (define-key navigate-menu [senator-go-to-up-reference]
+    '(menu-item "Parent Tag" senator-go-to-up-reference
+		:help "Navigate up one reference by tag."))
+  (define-key navigate-menu [senator-next-tag]
+    '(menu-item "Next Tag" senator-next-tag
+		:help "Go to the next tag"))
+  (define-key navigate-menu [senator-previous-tag]
+    '(menu-item "Previous Tag" senator-previous-tag
+		:help "Go to the previous tag"))
+
+  ;; Top level menu items:
+  (define-key cedet-menu-map [semantic-force-refresh]
+    '(menu-item "Reparse Buffer" semantic-force-refresh
+		:help "Force a full reparse of the current buffer."
+		:visible semantic-mode))
+  (define-key cedet-menu-map [semantic-edit-menu]
+    `(menu-item "Edit Tags" ,edit-menu
+		:visible semantic-mode))
+  (define-key cedet-menu-map [navigate-menu]
+    `(menu-item "Navigate Tags" ,navigate-menu
+		:visible semantic-mode))
+  (define-key cedet-menu-map [semantic-options-separator]
+    '("--"))
+  (define-key cedet-menu-map [global-semantic-highlight-func-mode]
+    '(menu-item "Highlight Current Function" global-semantic-highlight-func-mode
+		:help "Highlight the tag at point"
+		:visible semantic-mode
+		:button (:toggle . global-semantic-highlight-func-mode)))
+  (define-key cedet-menu-map [global-semantic-decoration-mode]
+    '(menu-item "Decorate Tags" global-semantic-decoration-mode
+		:help "Decorate tags based on tag attributes"
+		:visible semantic-mode
+		:button (:toggle . (bound-and-true-p
+				    global-semantic-decoration-mode))))
+  (define-key cedet-menu-map [global-semantic-idle-completions-mode]
+    '(menu-item "Show Tag Completions" global-semantic-idle-completions-mode
+		:help "Show tag completions when idle"
+		:visible semantic-mode
+		:enable global-semantic-idle-scheduler-mode
+		:button (:toggle . global-semantic-idle-completions-mode)))
+  (define-key cedet-menu-map [global-semantic-idle-summary-mode]
+    '(menu-item "Show Tag Summaries" global-semantic-idle-summary-mode
+		:help "Show tag summaries when idle"
+		:visible semantic-mode
+		:enable global-semantic-idle-scheduler-mode
+		:button (:toggle . global-semantic-idle-summary-mode)))
+  (define-key cedet-menu-map [global-semantic-idle-scheduler-mode]
+    '(menu-item "Reparse When Idle" global-semantic-idle-scheduler-mode
+		:help "Keep a buffer's parse tree up to date when idle"
+		:visible semantic-mode
+		:button (:toggle . global-semantic-idle-scheduler-mode)))
+  (define-key cedet-menu-map [global-semanticdb-minor-mode]
+    '(menu-item "Semantic Database" global-semanticdb-minor-mode
+		:help "Store tag information in a database"
+		:visible semantic-mode
+		:button (:toggle . global-semanticdb-minor-mode))))
+
+;; The `semantic-mode' command, in conjuction with the
+;; `semantic-default-submodes' variable, toggles Semantic's various
+;; auxiliary minor modes.
+
+(defvar semantic-load-system-cache-loaded nil
+  "Non-nil when the Semantic system caches have been loaded.
+Prevent this load system from loading files in twice.")
+
+(defconst semantic-submode-list
+  '(global-semantic-highlight-func-mode
+    global-semantic-decoration-mode
+    global-semantic-stickyfunc-mode
+    global-semantic-idle-completions-mode
+    global-semantic-idle-scheduler-mode
+    global-semanticdb-minor-mode
+    global-semantic-idle-summary-mode
+    global-semantic-mru-bookmark-mode)
+  "List of auxiliary minor modes in the Semantic package.")
+
+;;;###autoload
+(defcustom semantic-default-submodes
+  '(global-semantic-idle-scheduler-mode global-semanticdb-minor-mode)
+  "List of auxiliary Semantic minor modes enabled by `semantic-mode'.
+The possible elements of this list include the following:
+
+ `global-semanticdb-minor-mode'        - Maintain tag database.
+ `global-semantic-idle-scheduler-mode' - Reparse buffer when idle.
+ `global-semantic-idle-summary-mode'   - Show summary of tag at point.
+ `global-semantic-idle-completions-mode' - Show completions when idle.
+ `global-semantic-decoration-mode'     - Additional tag decorations.
+ `global-semantic-highlight-func-mode' - Highlight the current tag.
+ `global-semantic-stickyfunc-mode'     - Show current fun in header line.
+ `global-semantic-mru-bookmark-mode'   - Provide `switch-to-buffer'-like
+                                         keybinding for tag names."
+  :group 'semantic
+  :type `(set ,@(mapcar (lambda (c) (list 'const c))
+			semantic-submode-list)))
+
+;;;###autoload
+(define-minor-mode semantic-mode
+  "Toggle Semantic mode.
+With ARG, turn Semantic mode on if ARG is positive, off otherwise.
+
+In Semantic mode, Emacs parses the buffers you visit for their
+semantic content.  This information is used by a variety of
+auxiliary minor modes, listed in `semantic-default-submodes';
+all the minor modes in this list are also enabled when you enable
+Semantic mode.
+
+\\{semantic-mode-map}"
+  :global t
+  :group 'semantic
+  (if semantic-mode
+      ;; Turn on Semantic mode
+      (progn
+	;; Enable all the global auxiliary minor modes in
+	;; `semantic-submode-list'.
+	(dolist (mode semantic-submode-list)
+	  (if (memq mode semantic-default-submodes)
+	      (funcall mode 1)))
+	(unless semantic-load-system-cache-loaded
+	  (setq semantic-load-system-cache-loaded t)
+	  (when (and (boundp 'semanticdb-default-system-save-directory)
+		     (stringp semanticdb-default-system-save-directory)
+		     (file-exists-p semanticdb-default-system-save-directory))
+	    (require 'semantic/db-ebrowse)
+	    (semanticdb-load-ebrowse-caches)))
+	(add-hook 'mode-local-init-hook 'semantic-new-buffer-fcn)
+	;; Add semantic-ia-complete-symbol to
+	;; completion-at-point-functions, so that it is run from
+	;; M-TAB.
+	(add-hook 'completion-at-point-functions
+		  'semantic-completion-at-point-function)
+	(if global-ede-mode
+	    (define-key cedet-menu-map [cedet-menu-separator] '("--")))
+	(dolist (b (buffer-list))
+	  (with-current-buffer b
+	    (semantic-new-buffer-fcn))))
+    ;; Disable all Semantic features.
+    (remove-hook 'mode-local-init-hook 'semantic-new-buffer-fcn)
+    (remove-hook 'completion-at-point-functions
+		 'semantic-completion-at-point-function)
+    (define-key cedet-menu-map [cedet-menu-separator] nil)
+    (define-key cedet-menu-map [semantic-options-separator] nil)
+    ;; FIXME: handle semanticdb-load-ebrowse-caches
+    (dolist (mode semantic-submode-list)
+      (if (and (boundp mode) (eval mode))
+	  (funcall mode -1)))))
+
+(defun semantic-completion-at-point-function ()
+  'semantic-ia-complete-symbol)
+
+;;; Autoload some functions that are not in semantic/loaddefs
+
+(autoload 'global-semantic-idle-completions-mode "semantic/idle"
+  "Toggle global use of `semantic-idle-completions-mode'.
+If ARG is positive, enable, if it is negative, disable.
+If ARG is nil, then toggle." t nil)
+
+(autoload 'semantic-idle-completions-mode "semantic/idle"
+  "Display a list of possible completions in a tooltip.
+
+This is a minor mode which performs actions during idle time.
+With prefix argument ARG, turn on if positive, otherwise off.  The
+minor mode can be turned on only if semantic feature is available and
+the current buffer was set up for parsing.  Return non-nil if the
+minor mode is enabled." t nil)
+
+(autoload 'global-semantic-idle-summary-mode "semantic/idle"
+  "Toggle global use of `semantic-idle-summary-mode'.
+If ARG is positive, enable, if it is negative, disable.
+If ARG is nil, then toggle." t nil)
+
+(autoload 'semantic-idle-summary-mode "semantic/idle"
+  "Display a tag summary of the lexical token under the cursor.
+Call `semantic-idle-summary-current-symbol-info' for getting the
+current tag to display information.
+
+This is a minor mode which performs actions during idle time.
+With prefix argument ARG, turn on if positive, otherwise off.  The
+minor mode can be turned on only if semantic feature is available and
+the current buffer was set up for parsing.  Return non-nil if the
+minor mode is enabled." t nil)
+
+(autoload 'srecode-template-setup-parser "srecode/srecode-template"
+  "Set up buffer for parsing SRecode template files." t nil)
 
 (provide 'semantic)
 
 ;; Semantic-util is a part of the semantic API.  Include it last
 ;; because it depends on semantic.
 (require 'semantic/util)
+
+;; (require 'semantic/load)
 
 ;;; semantic.el ends here

@@ -1,41 +1,41 @@
 ;;; cedet-cscope.el --- CScope support for CEDET
-;;
-;; Copyright (C) 2009, 2010 Eric M. Ludlam
-;;
-;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;;; Copyright (C) 2009, 2010 Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <zappo@gnu.org>
+;; Package: cedet
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Support using CScope for symbol lookups.
 
-(require 'inversion)
+;;; Code:
+
+(declare-function inversion-check-version "inversion")
 
 (defvar cedet-cscope-min-version "16.0"
   "Minimum version of CScope required.")
 
-;;;###autoload
 (defcustom cedet-cscope-command "cscope"
   "Command name for the CScope executable."
   :type 'string
   :group 'cedet)
 
-;;; Code:
-;;;###autoload
 (defun cedet-cscope-search (searchtext texttype type scope)
   "Perform a search with CScope, return the created buffer.
 SEARCHTEXT is text to find.
@@ -92,8 +92,6 @@ options -cR."
 	   flags)
     b))
 
-
-;;;###autoload
 (defun cedet-cscope-expand-filename (filename)
   "Expand the FILENAME with CScope.
 Return a fully qualified filename."
@@ -135,13 +133,13 @@ the error code."
 	      nil
 	    t))))))
 
-;;;###autoload
 (defun cedet-cscope-version-check (&optional noerror)
   "Check the version of the installed CScope command.
 If optional programatic argument NOERROR is non-nil, then
-instead of throwing an error if cscope isn't available, then
+instead of throwing an error if CScope isn't available, then
 return nil."
   (interactive)
+  (require 'inversion)
   (let ((b (condition-case nil
 	       (cedet-cscope-call (list "-V"))
 	     (error nil)))

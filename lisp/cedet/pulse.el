@@ -1,23 +1,24 @@
 ;;; pulse.el --- Pulsing Overlays
 
-;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
+;; Version: 1.0
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -26,11 +27,6 @@
 ;; This is a temporal decoration technique where something is to be
 ;; highlighted briefly.  This adds a gentle pulsing style to the text
 ;; decorated this way.
-;;
-;; Useful user functions:
-;;
-;; `pulse-enable-integration-advice' - Turn on advice to make various
-;;      Emacs commands pulse, such as `goto-line', or `find-tag'.
 ;;
 ;; The following are useful entry points:
 ;;
@@ -54,7 +50,6 @@
 ;;
 ;; Pulse is a part of CEDET.  http://cedet.sf.net
 
-
 (defun  pulse-available-p ()
   "Return non-nil if pulsing is available on the current frame."
   (condition-case nil
@@ -63,11 +58,14 @@
     (error nil)))
 
 (defcustom pulse-flag (pulse-available-p)
-  "*t means to pulse the overlay face for momentary highlighting.
+  "Whether to use pulsing for momentary highlighting.
 Pulsing involves a bright highlight that slowly shifts to the
 background color.
-Nil means to highlight with an unchanging color until a key is pressed.
-'never means to do no coloring at all.
+
+If the value is nil, highlight with an unchanging color until a
+key is pressed.
+If the value is `never', do no coloring at all.
+Any other value means to the default pulsing behavior.
 
 If `pulse-flag' is non-nil, but `pulse-available-p' is nil, then
 this flag is ignored."
@@ -90,28 +88,6 @@ this flag is ignored."
   "*Face used during a pulse for display.  *DO NOT CUSTOMIZE*
 Face used for temporary highlighting of tags for effect."
   :group 'pulse)
-
-;;; Compatibility
-;;
-(if (featurep 'xemacs)
-    (progn
-      (defalias 'pulse-overlay-live-p
-        (lambda (o)
-          (and (extent-live-p o)
-               (not (extent-detached-p o))
-               (bufferp (extent-buffer o)))))
-      (defalias 'pulse-overlay-put 'set-extent-property)
-      (defalias 'pulse-overlay-get 'extent-property)
-      (defalias 'pulse-overlay-delete 'delete-extent)
-      (defalias 'pulse-make-overlay 'make-extent)
-      )
-  ;; Regular Emacs
-  (defalias 'pulse-overlay-live-p 'overlay-buffer)
-  (defalias 'pulse-overlay-put 'overlay-put)
-  (defalias 'pulse-overlay-get 'overlay-get)
-  (defalias 'pulse-overlay-delete 'delete-overlay)
-  (defalias 'pulse-make-overlay 'make-overlay)
-  )
 
 ;;; Code:
 ;;
@@ -185,7 +161,6 @@ Return t if there is more drift to do, nil if completed."
 					    'pulse-highlight-start-face))
   (put 'pulse-highlight-face :iteration 0))
 
-;;;###autoload
 (defun pulse (&optional face)
   "Pulse the colors on our highlight face.
 If optional FACE is provide, reset the face to FACE color,
@@ -196,88 +171,35 @@ Be sure to call `pulse-reset-face' after calling pulse."
 	(pulse-reset-face face)
 	(while (and (pulse-lighten-highlight)
 		    (sit-for pulse-delay))
-	  nil))
-    ))
-
-;;;###autoload
-(defun pulse-test (&optional no-error)
-  "Test the lightening function for pulsing a line.
-When optional NO-ERROR Don't throw an error if we can't run tests."
-  (interactive)
-  (if (or (not pulse-flag) (not (pulse-available-p)))
-      (if no-error
-	  nil
-	(error (concat "Pulse test only works on versions of Emacs"
-		       " that support pulsing")))
-    ;; Run the tests
-    (when (cedet-called-interactively-p)
-      (message "<Press a key> Pulse one line.")
-      (read-char))
-    (pulse-momentary-highlight-one-line (point))
-    (when (cedet-called-interactively-p)
-      (message "<Press a key> Pulse a region.")
-      (read-char))
-    (pulse-momentary-highlight-region (point)
-				      (save-excursion
-					(condition-case nil
-					    (forward-char 30)
-					  (error nil))
-					(point)))
-    (when (cedet-called-interactively-p)
-      (message "<Press a key> Pulse line a specific color.")
-      (read-char))
-    (pulse-momentary-highlight-one-line (point) 'modeline)
-    (when (cedet-called-interactively-p)
-      (message "<Press a key> Pulse a pre-existing overlay.")
-      (read-char))
-    (let* ((start (point-at-bol))
-	   (end (save-excursion
-		  (end-of-line)
-		  (when (not (eobp))
-		    (forward-char 1))
-		  (point)))
-	   (o (pulse-make-overlay start end))
-	   )
-      (pulse-momentary-highlight-overlay o)
-      (if (pulse-overlay-live-p o)
-	  (pulse-overlay-delete o)
-	(error "Non-temporary overlay was deleted!"))
-      )
-    (when (cedet-called-interactively-p)
-      (message "Done!"))))
-
+	  nil))))
 
 ;;; Convenience Functions
 ;;
 (defvar pulse-momentary-overlay nil
   "The current pulsing overlay.")
 
-;;;###autoload
 (defun pulse-momentary-highlight-overlay (o &optional face)
   "Pulse the overlay O, unhighlighting before next command.
 Optional argument FACE specifies the fact to do the highlighting."
-  (pulse-overlay-put o 'original-face (pulse-overlay-get o 'face))
+  (overlay-put o 'original-face (overlay-get o 'face))
   (add-to-list 'pulse-momentary-overlay o)
   (if (eq pulse-flag 'never)
       nil
     (if (or (not pulse-flag) (not (pulse-available-p)))
 	;; Provide a face... clear on next command
 	(progn
-	  (pulse-overlay-put o 'face (or face 'pulse-highlight-start-face))
+	  (overlay-put o 'face (or face 'pulse-highlight-start-face))
 	  (add-hook 'pre-command-hook
-		    'pulse-momentary-unhighlight)
-	  )
+		    'pulse-momentary-unhighlight))
       ;; pulse it.
       (unwind-protect
 	  (progn
-	    (pulse-overlay-put o 'face 'pulse-highlight-face)
+	    (overlay-put o 'face 'pulse-highlight-face)
 	    ;; The pulse function puts FACE onto 'pulse-highlight-face.
 	    ;; Thus above we put our face on the overlay, but pulse
 	    ;; with a reference face needed for the color.
 	    (pulse face))
-	(pulse-momentary-unhighlight))
-      )
-    ))
+	(pulse-momentary-unhighlight)))))
 
 (defun pulse-momentary-unhighlight ()
   "Unhighlight a line recently highlighted."
@@ -287,10 +209,10 @@ Optional argument FACE specifies the fact to do the highlighting."
     ;; clear the starting face
     (mapc
      (lambda (ol)
-       (pulse-overlay-put ol 'face (pulse-overlay-get ol 'original-face))
-       (pulse-overlay-put ol 'original-face nil)
+       (overlay-put ol 'face (overlay-get ol 'original-face))
+       (overlay-put ol 'original-face nil)
        ;; Clear the overlay if it needs deleting.
-       (when (pulse-overlay-get ol 'pulse-delete) (pulse-overlay-delete ol)))
+       (when (overlay-get ol 'pulse-delete) (delete-overlay ol)))
      pulse-momentary-overlay)
 
     ;; Clear the variable.
@@ -300,10 +222,8 @@ Optional argument FACE specifies the fact to do the highlighting."
   (pulse-reset-face)
 
   ;; Remove this hook.
-  (remove-hook 'pre-command-hook 'pulse-momentary-unhighlight)
-  )
+  (remove-hook 'pre-command-hook 'pulse-momentary-unhighlight))
 
-;;;###autoload
 (defun pulse-momentary-highlight-one-line (point &optional face)
   "Highlight the line around POINT, unhighlighting before next command.
 Optional argument FACE specifies the face to do the highlighting."
@@ -313,98 +233,25 @@ Optional argument FACE specifies the face to do the highlighting."
 	       (when (not (eobp))
 		 (forward-char 1))
 	       (point))))
-    (pulse-momentary-highlight-region start end face)
-    ))
+    (pulse-momentary-highlight-region start end face)))
 
-;;;###autoload
 (defun pulse-momentary-highlight-region (start end &optional face)
   "Highlight between START and END, unhighlighting before next command.
 Optional argument FACE specifies the fact to do the highlighting."
-  (let ((o (pulse-make-overlay start end)))
+  (let ((o (make-overlay start end)))
     ;; Mark it for deletion
-    (pulse-overlay-put o 'pulse-delete t)
+    (overlay-put o 'pulse-delete t)
     (pulse-momentary-highlight-overlay o face)))
 
 ;;; Random integration with other tools
-;;
-(defvar pulse-command-advice-flag nil
-  "Non-nil means pulse advice is active.
-To active pulse advice, use `pulse-enable-integration-advice'.")
 
-;;;###autoload
-(defun pulse-toggle-integration-advice (arg)
-  "Toggle activation of advised functions that will now pulse.
-Wint no ARG, toggle the pulse advice.
-With a negative ARG, disable pulse advice.
-With a positive ARG, enable pulse advice.
-Currently advised functions include:
-  `goto-line'
-  `exchange-point-and-mark'
-  `find-tag'
-  `tags-search'
-  `tags-loop-continue'
-  `pop-tag-mark'
-  `imenu-default-goto-function'
-Pulsing via `pulse-line-hook-function' has also been added to
-the following hook:
-  `next-error-hook'"
-  (interactive "P")
-  (if (null arg)
-      (setq pulse-command-advice-flag (not pulse-command-advice-flag))
-    (if (< (prefix-numeric-value arg) 0)
-	(setq pulse-command-advice-flag nil)
-      (setq pulse-command-advice-flag t)
-      )
-    )
-  (if pulse-command-advice-flag
-      (message "Pulse advice enabled")
-    (message "Pulse advice disabled"))
-  )
+(defvar pulse-command-advice-flag nil)
 
-(defadvice goto-line (after pulse-advice activate)
-  "Cause the line that is `goto'd to pulse when the cursor gets there."
-  (when (and pulse-command-advice-flag (cedet-called-interactively-p))
-    (pulse-momentary-highlight-one-line (point))))
-
-(defadvice exchange-point-and-mark (after pulse-advice activate)
-  "Cause the line that is `goto'd to pulse when the cursor gets there."
-  (when (and pulse-command-advice-flag (cedet-called-interactively-p)
-	     (> (abs (- (point) (mark))) 400))
-    (pulse-momentary-highlight-one-line (point))))
-
-(defadvice find-tag (after pulse-advice activate)
-  "After going to a tag, pulse the line the cursor lands on."
-  (when (and pulse-command-advice-flag (cedet-called-interactively-p))
-    (pulse-momentary-highlight-one-line (point))))
-
-(defadvice tags-search (after pulse-advice activate)
-  "After going to a hit, pulse the line the cursor lands on."
-  (when (and pulse-command-advice-flag (cedet-called-interactively-p))
-    (pulse-momentary-highlight-one-line (point))))
-
-(defadvice tags-loop-continue (after pulse-advice activate)
-  "After going to a hit, pulse the line the cursor lands on."
-  (when (and pulse-command-advice-flag (cedet-called-interactively-p))
-    (pulse-momentary-highlight-one-line (point))))
-
-(defadvice pop-tag-mark (after pulse-advice activate)
-  "After going to a hit, pulse the line the cursor lands on."
-  (when (and pulse-command-advice-flag (cedet-called-interactively-p))
-    (pulse-momentary-highlight-one-line (point))))
-
-(defadvice imenu-default-goto-function (after pulse-advice activate)
-  "After going to a tag, pulse the line the cursor lands on."
-  (when pulse-command-advice-flag
-    (pulse-momentary-highlight-one-line (point))))
-
-;;;###autoload
 (defun pulse-line-hook-function ()
   "Function used in hooks to pulse the current line.
 Only pulses the line if `pulse-command-advice-flag' is non-nil."
   (when pulse-command-advice-flag
     (pulse-momentary-highlight-one-line (point))))
-
-(add-hook 'next-error-hook 'pulse-line-hook-function)
 
 (provide 'pulse)
 

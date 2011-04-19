@@ -1,5 +1,7 @@
+* The 'obsolete' directory contains files that were no longer referenced from
+  the original makefiles
 * Should compatibility functions be maintained (cedet-compat)?
-** eieio: cedet-called-interactively-p
+** cedet-called-interactively-p
 * Speedbar documentation has been stripped out of many details
 ** speedbar-stealthy-function-list
 ** speedbar-dynamic-tags-function-list
@@ -8,3 +10,9 @@
 * speedbar-sort-tags is described as obsolete, but widely used
 * speedbar-require-version : commented out
 * speedbar-sort-tags : obsolete
+* inversion-upgrade-package : commented out
+* listp/cedet/mode-local : removed and commented out lots of code
+* seggregated unit tests from lisp/cedet/cedet-files.el into tests/cedet-files-utests.el
+* seggregated unit tests from lisp/cedet/inversion.el into tests/inversion.el
+* seggregated unit tests from lisp/cedet/pulse.el into tests/pulse.el
+* removed integration advices in lisp/cedet/pulse.el

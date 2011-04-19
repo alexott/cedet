@@ -11,3 +11,11 @@ lisp/speedbar/sb-info.el
 lisp/speedbar/sb-rmail.el
 lisp/speedbar/sb-texinfo.el
 lisp/speedbar/sb-w3.el
+lisp/cedet/cedet-autogen.el
+lisp/cedet/cedet-compat.el
+lisp/cedet/cedet-edebug.el
+lisp/cedet/cedet-graphviz
+lisp/cedet/fame.el
+lisp/cedet/pprint.el
+lisp/cedet/working.el
+doc/cedet.texi
