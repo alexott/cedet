@@ -211,14 +211,24 @@ con/destructors (according to PREFIX) and operators."
 			;; filter out operators
 			(not (string-match "^operator[=[(+-%/!<>&|^]+"
 					   (semantic-tag-name tag)))
-			;; filter out constructors (this has to do for now)
 			(or (null tagtype)
 			    (<= (length prefix) 1)
 			    (not (semantic-tag-p (car prefix)))
-			    (not (string= (semantic-tag-name (semantic-tag-type (car prefix)))
+			    (not (string= (semantic-clang-get-typename-string (car prefix))
 					  tagname))))
 	       tag)))
 	 results)))
+
+(defun semantic-clang-get-typename-string (tag)
+  "Get typename from TAG as a string."
+  (let ((tagtype (semantic-tag-type tag)))
+    (cond
+     ((stringp tagtype)
+      tagtype)
+     ((semantic-tag-p tagtype)
+      (semantic-tag-name tagtype))
+     (t
+      ""))))
 
 (defun semantic-clang-version-string ()
   "Return version string from clang binary."
