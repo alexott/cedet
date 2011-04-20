@@ -113,16 +113,17 @@ First group is the completion, second group the definition."
 	 (fext (file-name-extension (buffer-file-name)))
 	 (dir (file-name-directory (buffer-file-name)))
 	 (tempfile (concat dir semantic-clang-temp-filename "." fext))
+	 (proj-args (semantic-clang-args-from-project))
 	 complete-pos results)
-    (when (consp bounds)
-      (save-excursion
-	(goto-char (car bounds))
-	(setq complete-pos
-	      (concat  ":" (number-to-string
-			    (1+ (count-lines (point-min) (point))))
-		       ":" (number-to-string (1+ (current-column)))))))
+    (save-excursion
+      (when (consp bounds)
+	(goto-char (car bounds)))
+      (setq complete-pos
+	    (concat  ":" (number-to-string
+			  (1+ (count-lines (point-min) (point))))
+		     ":" (number-to-string (1+ (current-column))))))
     (if (zerop (length fext))
-	(message "Buffer doesn't have proper file extensions; cannot call clang.")
+	(message "Buffer's file name doesn't have a proper extension; cannot call clang.")
       (write-region txt nil tempfile nil 'nodisplay)
       (with-temp-buffer
 	(when (zerop
@@ -131,7 +132,7 @@ First group is the completion, second group the definition."
 		       "-cc1" "-fsyntax-only" "-code-completion-at"
 		       (concat tempfile complete-pos)
 		       tempfile
-		       semantic-clang-arguments))
+		       (append proj-args semantic-clang-arguments)))
 	  (goto-char (point-min))
 	  (while (re-search-forward
 		  (semantic-clang-completion-regexp ctext) nil t)
@@ -213,6 +214,7 @@ con/destructors (according to PREFIX) and operators."
 			;; filter out constructors (this has to do for now)
 			(or (null tagtype)
 			    (<= (length prefix) 1)
+			    (not (semantic-tag-p (car prefix)))
 			    (not (string= (semantic-tag-name (semantic-tag-type (car prefix)))
 					  tagname))))
 	       tag)))
@@ -228,5 +230,41 @@ con/destructors (according to PREFIX) and operators."
     (when (null (re-search-forward "clang version \\([0-9.]+\\)" nil t))
       (error "Could not parse clang version string"))
     (match-string 1)))
+
+(defun semantic-clang-args-from-project ()
+  "Return list of additional arguments for the compiler from the project.
+If the current buffer is part of an EDE project, return a list of
+additional arguments for the compiler; currently, this deals with
+include directories (-I) and preprocessor symbols (-D)."
+  (let ((proj ede-object-root-project)
+	(tarproj ede-object))
+    (when proj
+      (cond
+       ;; For ede-cpp-root-project it's easy
+       ((ede-cpp-root-project-p proj)
+	(append
+	 (mapcar (lambda (inc) (concat "-I" inc))
+		 (append (oref proj include-path)
+			 (oref proj system-include-path)))
+	 (mapcar (lambda (spp) (concat "-D" (car spp)
+				       (when (> (length (cdr spp)) 1)
+					 (concat "=" (cdr spp)))))
+		 (oref proj spp-table))))
+       ;; For more general project types it's a bit more difficult.
+       ((ede-proj-project-p proj)
+	;; Get the local and configuration variables.
+	(let ((vars (mapcar 'cdr (oref proj variables))))
+	  (when (slot-boundp tarproj 'configuration-variables)
+	    (setq vars (append vars
+			       (mapcar 'cdr
+				       (cdr (oref tarproj configuration-variables))))))
+	  ;; Get includes and preprocessor symbols.
+	  (setq vars (apply 'append (mapcar 'split-string vars)))
+	  (delq nil
+		(mapcar (lambda (var)
+			  (when (string-match "^\\(-I\\|-D\\)" var)
+			    var))
+			vars))))))))
+
 
 (provide 'semantic-clang)
