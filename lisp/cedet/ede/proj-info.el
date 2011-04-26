@@ -1,25 +1,25 @@
-;;; ede/proj-info.el --- EDE Generic Project texinfo support
+;;; ede-proj-info.el --- EDE Generic Project texinfo support
 
-;;;  Copyright (C) 1998, 1999, 2000, 2001, 2004, 2007, 2008, 2009, 2010  Eric M. Ludlam
+;;; Copyright (C) 1998, 1999, 2000, 2001, 2004, 2007, 2008, 2009, 2010
+;;; Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede/proj-info.el,v 1.24 2010-06-12 00:35:23 zappo Exp $
 
-;; This software is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;

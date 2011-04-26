@@ -1,23 +1,23 @@
 ;;; ede/locate.el --- Locate support
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -55,10 +55,7 @@
 		   (require 'cedet-idutils)
 		   (require 'cedet-cscope))
 
-;; Older [X]Emacs don't have locate
-(condition-case nil
-    (require 'locate)
-  (error nil))
+(require 'locate)
 
 ;;; Code:
 (defcustom ede-locate-setup-options
@@ -167,7 +164,7 @@ that created this EDE locate object."
   nil
   )
 
-(defmethod ede-locate-create/update-root-database :STATIC 
+(defmethod ede-locate-create/update-root-database :STATIC
   ((loc ede-locate-base) root)
   "Create or update the database for the current project.
 You cannot create projects for the baseclass."
@@ -207,7 +204,6 @@ that created this EDE locate object."
     (with-current-buffer b
       (setq default-directory cd)
       (erase-buffer))
-    (require 'locate)
     (apply 'call-process locate-command
 	   nil b nil
 	   searchstr nil)
@@ -345,60 +341,11 @@ that created this EDE locate object."
   "Create or update the GNU Global database for the current project."
   (cedet-cscope-create/update-database root))
 
-;;; TESTS
-;;
-;; Some testing routines.
-(defun ede-locate-test-locate (file)
-  "Test EDE Locate on FILE using LOCATE type.
-The search is done with the current EDE root."
-  (interactive "sFile: ")
-  (let ((loc (ede-locate-locate
-	      "test"
-	      :root (ede-project-root-directory
-		     (ede-toplevel)))))
-    (data-debug-new-buffer "*EDE Locate ADEBUG*")
-    (ede-locate-file-in-project loc file)
-    (data-debug-insert-object-slots loc "]"))
-  )
-
-(defun ede-locate-test-global (file)
-  "Test EDE Locate on FILE using GNU Global type.
-The search is done with the current EDE root."
-  (interactive "sFile: ")
-  (let ((loc (ede-locate-global
-	      "test"
-	      :root (ede-project-root-directory
-		     (ede-toplevel)))))
-    (data-debug-new-buffer "*EDE Locate ADEBUG*")
-    (ede-locate-file-in-project loc file)
-    (data-debug-insert-object-slots loc "]"))
-  )
-
-(defun ede-locate-test-idutils (file)
-  "Test EDE Locate on FILE using ID Utils type.
-The search is done with the current EDE root."
-  (interactive "sFile: ")
-  (let ((loc (ede-locate-idutils
-	      "test"
-	      :root (ede-project-root-directory
-		     (ede-toplevel)))))
-    (data-debug-new-buffer "*EDE Locate ADEBUG*")
-    (ede-locate-file-in-project loc file)
-    (data-debug-insert-object-slots loc "]"))
-  )
-
-(defun ede-locate-test-cscope (file)
-  "Test EDE Locate on FILE using CScope type.
-The search is done with the current EDE root."
-  (interactive "sFile: ")
-  (let ((loc (ede-locate-cscope
-	      "test"
-	      :root (ede-project-root-directory
-		     (ede-toplevel)))))
-    (data-debug-new-buffer "*EDE Locate ADEBUG*")
-    (ede-locate-file-in-project loc file)
-    (data-debug-insert-object-slots loc "]"))
-  )
-
 (provide 'ede/locate)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/locate"
+;; End:
+
 ;;; ede/locate.el ends here

@@ -1,29 +1,29 @@
 ;;; ede/linux.el --- Special project for Linux
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Provide a special project type just for Linux, cause Linux is special.
 ;;
-;; Identifies an Linux project automatically.
+;; Identifies a Linux project automatically.
 ;; Speedy ede-expand-filename based on extension.
 ;; Pre-populates the preprocessor map from lisp.h
 ;;
@@ -33,6 +33,9 @@
 ;; * Add website
 
 (require 'ede)
+(declare-function semanticdb-file-table-object "semantic/db")
+(declare-function semanticdb-needs-refresh-p "semantic/db")
+(declare-function semanticdb-refresh-table "semantic/db")
 
 ;;; Code:
 (defvar ede-linux-project-list nil
@@ -86,7 +89,12 @@ DIR is the directory to search from."
 	  (kill-buffer buff)
 	  )))))
 
-;;;###autoload
+(defclass ede-linux-project (ede-project eieio-instance-tracker)
+  ((tracking-symbol :initform 'ede-linux-project-list)
+   )
+  "Project Type for the Linux source code."
+  :method-invocation-order :depth-first)
+
 (defun ede-linux-load (dir &optional rootproj)
   "Return an Linux Project object if there is a match.
 Return nil if there isn't one.
@@ -108,7 +116,7 @@ ROOTPROJ is nil, since there is only one project."
 (add-to-list 'ede-project-class-files
 	     (ede-project-autoload "linux"
 	      :name "LINUX ROOT"
-	      :file 'ede-linux
+	      :file 'ede/linux
 	      :proj-file "scripts/ver_linux"
 	      :proj-root 'ede-linux-project-root
 	      :load-type 'ede-linux-load
@@ -125,13 +133,6 @@ All directories need at least one target.")
   ()
   "EDE Linux Project target for Misc files.
 All directories need at least one target.")
-
-;;;###autoload
-(defclass ede-linux-project (ede-project eieio-instance-tracker)
-  ((tracking-symbol :initform 'ede-linux-project-list)
-   )
-  "Project Type for the Linux source code."
-  :method-invocation-order :depth-first)
 
 (defmethod initialize-instance ((this ede-linux-project)
 				&rest fields)
@@ -182,8 +183,8 @@ If one doesn't exist, create a new one for this directory."
 	 (ans (ede-linux-find-matching-target cls dir targets))
 	 )
     (when (not ans)
-      (setq ans (make-instance 
-		 cls 
+      (setq ans (make-instance
+		 cls
 		 :name (file-name-nondirectory
 			(directory-file-name dir))
 		 :path dir
@@ -197,6 +198,7 @@ If one doesn't exist, create a new one for this directory."
 (defmethod ede-preprocessor-map ((this ede-linux-target-c))
   "Get the pre-processor map for Linux C code.
 All files need the macros from lisp.h!"
+  (require 'semantic/db)
   (let* ((proj (ede-target-parent this))
 	 (root (ede-project-root proj))
 	 (versionfile (ede-expand-filename root "include/linux/version.h"))
@@ -236,6 +238,11 @@ Knows about how the Linux source tree is organized."
 	 )
     (or F (call-next-method))))
 
-
 (provide 'ede/linux)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/linux"
+;; End:
+
 ;;; ede/linux.el ends here

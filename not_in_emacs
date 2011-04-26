@@ -19,3 +19,6 @@ lisp/cedet/fame.el
 lisp/cedet/pprint.el
 lisp/cedet/working.el
 doc/cedet.texi
+lisp/cedet/ede/autoconf-compat.el
+lisp/cedet/ede/proj-skel.el
+etc/srecode/ede-autoconf.srt

@@ -1,23 +1,23 @@
 ;;; ede/emacs.el --- Special project for Emacs
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -33,6 +33,9 @@
 ;; * Add website
 
 (require 'ede)
+(declare-function semanticdb-file-table-object "semantic/db")
+(declare-function semanticdb-needs-refresh-p "semantic/db")
+(declare-function semanticdb-refresh-table "semantic/db")
 
 ;;; Code:
 (defvar ede-emacs-project-list nil
@@ -106,7 +109,12 @@ emacs_beta_version=\\([0-9]+\\)")
       ;; Return a tuple
       (cons emacs ver))))
 
-;;;###autoload
+(defclass ede-emacs-project (ede-project eieio-instance-tracker)
+  ((tracking-symbol :initform 'ede-emacs-project-list)
+   )
+  "Project Type for the Emacs source code."
+  :method-invocation-order :depth-first)
+
 (defun ede-emacs-load (dir &optional rootproj)
   "Return an Emacs Project object if there is a match.
 Return nil if there isn't one.
@@ -129,7 +137,7 @@ ROOTPROJ is nil, since there is only one project."
 (add-to-list 'ede-project-class-files
 	     (ede-project-autoload "emacs"
 	      :name "EMACS ROOT"
-	      :file 'ede-emacs
+	      :file 'ede/emacs
 	      :proj-file "src/emacs.c"
 	      :proj-root 'ede-emacs-project-root
 	      :load-type 'ede-emacs-load
@@ -151,13 +159,6 @@ All directories need at least one target.")
   ()
   "EDE Emacs Project target for Misc files.
 All directories need at least one target.")
-
-;;;###autoload
-(defclass ede-emacs-project (ede-project eieio-instance-tracker)
-  ((tracking-symbol :initform 'ede-emacs-project-list)
-   )
-  "Project Type for the Emacs source code."
-  :method-invocation-order :depth-first)
 
 (defmethod initialize-instance ((this ede-emacs-project)
 				&rest fields)
@@ -210,8 +211,8 @@ If one doesn't exist, create a new one for this directory."
 	 (ans (ede-emacs-find-matching-target cls dir targets))
 	 )
     (when (not ans)
-      (setq ans (make-instance 
-		 cls 
+      (setq ans (make-instance
+		 cls
 		 :name (file-name-nondirectory
 			(directory-file-name dir))
 		 :path dir
@@ -225,6 +226,7 @@ If one doesn't exist, create a new one for this directory."
 (defmethod ede-preprocessor-map ((this ede-emacs-target-c))
   "Get the pre-processor map for Emacs C code.
 All files need the macros from lisp.h!"
+  (require 'semantic/db)
   (let* ((proj (ede-target-parent this))
 	 (root (ede-project-root proj))
 	 (table (semanticdb-file-table-object
@@ -290,6 +292,11 @@ Knows about how the Emacs source tree is organized."
       (ede-emacs-find-in-directories name dir dirs))
     ))
 
-
 (provide 'ede/emacs)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/emacs"
+;; End:
+
 ;;; ede/emacs.el ends here

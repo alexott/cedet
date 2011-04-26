@@ -1,25 +1,25 @@
 ;;; ede/proj-obj.el --- EDE Generic Project Object code generation support
 
-;;;  Copyright (C) 1998, 1999, 2000, 2005, 2008, 2009, 2010  Eric M. Ludlam
+;;; Copyright (C) 1998, 1999, 2000, 2005, 2008, 2009, 2010
+;;; Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede/proj-obj.el,v 1.22 2010-07-24 13:54:53 zappo Exp $
 
-;; This software is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -28,9 +28,7 @@
 
 (eval-when-compile (require 'cl))
 (require 'ede/proj)
-;; (require 'ede/pmake)
-;; The above require is needed for ede-pmake-varname, but introduces
-;; a circular dependency.  Leave it be.
+(declare-function ede-pmake-varname "ede/pmake")
 
 (defvar ede-proj-objectcode-dodependencies nil
   "Flag specifies to do automatic dependencies.")
@@ -123,7 +121,7 @@ file.")
    :variables  '(("C_LINK" . "$(CC) $(CFLAGS) $(LDFLAGS) -L."))
    :commands '("$(C_LINK) -o $@ $^ $(LDDEPS)")
    :objectextention "")
-   "Linker for C sourcecode.")
+  "Linker for C sourcecode.")
 
 (defvar ede-source-c++
   (ede-sourcecode "ede-source-c++"
@@ -294,6 +292,7 @@ No garbage pattern since it creates C or C++ code.")
 (defmethod ede-proj-makefile-sourcevar
   ((this ede-proj-target-makefile-objectcode))
   "Return the variable name for THIS's sources."
+  (require 'ede/pmake)
   (concat (ede-pmake-varname this) "_SOURCES"))
 
 (defmethod ede-proj-makefile-dependency-files

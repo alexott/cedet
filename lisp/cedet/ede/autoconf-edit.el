@@ -1,43 +1,35 @@
-;;; autoconf-edit.el --- Keymap for autoconf
+;;; ede/autoconf-edit.el --- Keymap for autoconf
 
-;;  Copyright (C) 1998, 1999, 2000, 2009, 2010  Eric M. Ludlam
+;; Copyright (C) 1998, 1999, 2000, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project
-;; RCS: $Id: autoconf-edit.el,v 1.15 2010-07-24 13:55:40 zappo Exp $
 
-;; This software is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; 
+;;
 ;; Autoconf editing and modification support, and compatibility layer
 ;; for Emacses w/out autoconf mode built in.
 
 ;;; Code:
-(if (locate-library "autoconf")
-
-    (condition-case nil
-	(require 'autoconf)
-      (error (require 'autoconf-mode "autoconf")))
-
-  (require 'autoconf-compat)
-
-  ;; This part is not in autoconf.el
-  (add-to-list 'auto-mode-alist '("\\<configure\\.in$" . autoconf-mode))
-  )
+(require 'autoconf)
+(declare-function ede-srecode-setup "ede/srecode")
+(declare-function ede-srecode-insert "ede/srecode")
 
 (defun autoconf-new-program (rootdir program testfile)
   "Initialize a new configure.in in ROOTDIR for PROGRAM using TESTFILE.
@@ -46,6 +38,7 @@ PROGRAM is the program to be configured.
 TESTFILE is the file used with AC_INIT.
 configure the initial configure script using `autoconf-new-automake-string'"
   (interactive "DRoot Dir: \nsProgram: \nsTest File: ")
+  (require 'ede/srecode)
   (if (bufferp rootdir)
       (set-buffer rootdir)
     (let ((cf1 (expand-file-name "configure.in" rootdir))
@@ -175,23 +168,22 @@ items such as CHECK_HEADERS."
     (setq param (substring param 0  (match-beginning 0))))
   param)
 
-;;;###autoload
 (defun autoconf-parameters-for-macro (macro &optional ignore-bol ignore-case)
   "Retrieve the parameters to MACRO.
 Returns a list of the arguments passed into MACRO as strings."
   (let ((case-fold-search ignore-case))
-  (save-excursion
-    (when (autoconf-find-last-macro macro ignore-bol)
-      (forward-sexp 1)
-      (mapcar
-       #'autoconf-parameter-strip
-       (when (looking-at "(")
-	 (let* ((start (+ (point) 1))
-		(end (save-excursion
-		       (forward-sexp 1)
-		       (- (point) 1)))
-		(ans (buffer-substring-no-properties start end)))
-	   (split-string ans "," t))))))))
+    (save-excursion
+      (when (autoconf-find-last-macro macro ignore-bol)
+	(forward-sexp 1)
+	(mapcar
+	 #'autoconf-parameter-strip
+	 (when (looking-at "(")
+	   (let* ((start (+ (point) 1))
+		  (end (save-excursion
+			 (forward-sexp 1)
+			 (- (point) 1)))
+		  (ans (buffer-substring-no-properties start end)))
+	     (split-string ans "," t))))))))
 
 (defun autoconf-position-for-macro (macro)
   "Position the cursor where a new MACRO could be inserted.
@@ -216,7 +208,7 @@ the ordering list `autoconf-preferred-macro-order'."
       (progn
 	(insert "(" param ")")
 	(if (< (current-column) 3) (insert " dnl")))))
-    
+
 (defun autoconf-insert-new-macro (macro &optional param)
   "Add a call to MACRO in the current autoconf file.
 Deals with macro order.  See `autoconf-preferred-macro-order' and
@@ -390,9 +382,7 @@ INDEX starts at 1."
   (down-list 1)
   (re-search-forward ", ?" nil nil (1- index))
   (let ((end (save-excursion
-	       (re-search-forward ",\\|)" (save-excursion
-					    (end-of-line)
-					    (point)))
+	       (re-search-forward ",\\|)" (point-at-eol))
 	       (forward-char -1)
 	       (point))))
     (setq autoconf-deleted-text (buffer-substring (point) end))
@@ -424,6 +414,6 @@ to Makefiles, or other files using Autoconf substitution."
      (autoconf-delete-parameter 1)
      (autoconf-insert (mapconcat (lambda (a) a) outputlist " ")))))
 
-(provide 'autoconf-edit)
+(provide 'ede/autoconf-edit)
 
-;;; autoconf-edit.el ends here
+;;; ede/autoconf-edit.el ends here

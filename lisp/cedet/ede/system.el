@@ -1,25 +1,24 @@
-;;; ede/system.el --- EDE working with the system (VC, FTP, ETC)
+;;; ede-system.el --- EDE working with the system (VC, FTP, ETC)
 
-;;;  Copyright (C) 2001, 2002, 2003, 2009  Eric M. Ludlam
+;; Copyright (C) 2001, 2002, 2003, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make, vc
-;; RCS: $Id: ede/system.el,v 1.6 2009-10-16 18:33:59 zappo Exp $
 
-;; This software is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -32,7 +31,8 @@
 ;;; Code:
 
 ;;; Web/FTP site node.
-;;
+
+;;;###autoload
 (defun ede-web-browse-home ()
   "Browse the home page of the current project."
   (interactive)
@@ -45,7 +45,7 @@
     (browse-url home)
     ))
 
-
+;;;###autoload
 (defun ede-edit-web-page ()
   "Edit the web site for this project."
   (interactive)
@@ -62,8 +62,8 @@
       (if (not (file-exists-p endfile))
 	  (error "No project file found")))
     (find-file endfile)))
-	 
 
+;;;###autoload
 (defun ede-upload-distribution ()
   "Upload the current distribution to the correct location.
 Use /user@ftp.site.com: file names for FTP sites.
@@ -96,6 +96,7 @@ Download tramp, and use /r:machine: for names on remote sites w/out FTP access."
   (message "Done uploading files...")
   )
 
+;;;###autoload
 (defun ede-upload-html-documentation ()
   "Upload the current distributions documentation as HTML.
 Use /user@ftp.site.com: file names for FTP sites.
@@ -127,12 +128,19 @@ Download tramp, and use /r:machine: for names on remote sites w/out FTP access."
 ;;; Version Control
 ;;
 ;; Do a few nice things with Version control systems.
+
+;;;###autoload
 (defun ede-vc-project-directory ()
-  "Run `vc-directory' on the current project."
+  "Run `vc-dir' on the current project."
   (interactive)
   (let ((top (ede-toplevel-project-or-nil default-directory)))
-    (vc-directory top nil)))
+    (vc-dir top nil)))
 
 (provide 'ede/system)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/system"
+;; End:
 
 ;;; ede/system.el ends here

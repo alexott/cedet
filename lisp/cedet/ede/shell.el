@@ -1,23 +1,23 @@
 ;;; ede/shell.el --- A shell controlled by EDE.
 ;;
-;; Copyright (C) 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2009, 2010 Free Software Foundation, Inc.
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -31,7 +31,8 @@
 
 (require 'ede)
 
-;;;###autoload
+(declare-function comint-send-input "comint")
+
 (defmethod ede-shell-run-something ((target ede-target) command)
   "Create a shell to run stuff for TARGET.
 COMMAND is a text string representing the thing to be run."
@@ -53,9 +54,10 @@ COMMAND is a text string representing the thing to be run."
     ;; Run the command itself.
     (ede-shell-run-command command)
     ))
-  
+
 (defun ede-shell-run-command (command)
   "Run the COMMAND in the current shell-buffer."
+  (require 'comint)
   ;; go to end
   (goto-char (point-max))
   ;; Insert the stuff.
@@ -65,12 +67,16 @@ COMMAND is a text string representing the thing to be run."
   (comint-send-input)
   )
 
-;;;###autoload
 (defmethod ede-shell-buffer ((target ede-target))
   "Get the buffer for running shell commands for TARGET."
   (let ((name (ede-name target)))
     (get-buffer-create (format "*EDE Shell %s*" name))))
 
 (provide 'ede/shell)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/shell"
+;; End:
 
 ;;; ede/shell.el ends here

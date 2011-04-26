@@ -1,25 +1,24 @@
-;;; ede/proj-shared.el --- EDE Generic Project shared library support
+;;; ede-proj-shared.el --- EDE Generic Project shared library support
 
-;;;  Copyright (C) 1998, 1999, 2000, 2009, 2010  Eric M. Ludlam
+;;; Copyright (C) 1998, 1999, 2000, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede/proj-shared.el,v 1.16 2010-06-12 00:36:12 zappo Exp $
 
-;; This software is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -152,8 +151,8 @@ Use ldlibs to add addition libraries.")
 ;;; @TODO - C++ versions of the above.
 
 (when nil
-  		 
-	       
+
+
   (insert;; These C to O rules create dependencies
    "%.o: %.c\n"
    "\t@echo '$(COMPILE) -c $<'; \\\n"
@@ -204,6 +203,7 @@ We need to override -program which has an LDADD element."
   (if (eq (oref (ede-target-parent this) makefile-type) 'Makefile.am)
       (concat "lib" (oref this name) "_la_SOURCES")
     (call-next-method)))
+
 
 (provide 'ede/proj-shared)
 

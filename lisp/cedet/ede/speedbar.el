@@ -1,17 +1,17 @@
 ;;; ede/speedbar.el --- Speedbar viewing of EDE projects
 
-;;;  Copyright (C) 1998, 1999, 2000, 2001, 2003, 2005, 2007, 2008, 2009, 2010  Eric M. Ludlam
+;; Copyright (C) 1998, 1999, 2000, 2001, 2003, 2005, 2007, 2008,
+;;   2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make, tags
-;; RCS: $Id: ede/speedbar.el,v 1.36 2010-03-15 13:40:54 xscript Exp $
 
-;; This file is NOT part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; GNU Emacs is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
 ;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -19,9 +19,7 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -33,6 +31,7 @@
 (eval-when-compile (require 'cl))
 (require 'speedbar)
 (require 'eieio-speedbar)
+(require 'ede)
 
 ;;; Speedbar support mode
 ;;
@@ -177,10 +176,7 @@ Argument DIR is the directory from which to derive the list of objects."
     (beginning-of-line)
     (looking-at "^\\([0-9]+\\):")
     (let ((depth (string-to-number (match-string 1))))
-      (while (not (re-search-forward "[]] [^ ]"
-				     (save-excursion (end-of-line)
-						     (point))
-				     t))
+      (while (not (re-search-forward "[]] [^ ]" (point-at-eol) t))
 	(re-search-backward (format "^%d:" (1- depth)))
 	(setq depth (1- depth)))
       (speedbar-line-token))))
@@ -337,6 +333,7 @@ INDENT is the current indentation level."
     km)
   "Keymap spliced into the speedbar keymap.")
 
+;;;###autoload
 (defun ede-speedbar-file-setup ()
   "Setup some keybindings in the Speedbar File display."
   (setq speedbar-easymenu-definition-special
@@ -352,5 +349,10 @@ INDENT is the current indentation level."
     (speedbar-change-initial-expansion-list "files")))
 
 (provide 'ede/speedbar)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/speedbar"
+;; End:
 
 ;;; ede/speedbar.el ends here

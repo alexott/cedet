@@ -1,32 +1,33 @@
 ;;; ede/pconf.el --- configure.ac maintenance for EDE
 
-;;  Copyright (C) 1998, 1999, 2000, 2005, 2008, 2009, 2010  Eric M. Ludlam
+;;; Copyright (C) 1998, 1999, 2000, 2005, 2008, 2009, 2010
+;;; Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project
-;; RCS: $Id: ede/pconf.el,v 1.20 2010-03-16 02:54:40 zappo Exp $
 
-;; This software is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; 
+;;
 ;; Code generator for autoconf configure.ac, and support files.
 
 (require 'ede/proj)
-(require 'autoconf-edit)
+(require 'ede/autoconf-edit)
+(defvar compilation-in-progress)
 
 (defvar ede-pconf-create-file-query 'ask
   "Controls if queries are made while creating project files.
@@ -76,10 +77,10 @@ don't do it.  A value of nil means to just do it.")
       (autoconf-set-output
        (ede-map-all-subprojects
 	this
-	(lambda (sp) 
+	(lambda (sp)
 	  ;; NOTE: don't put in ./Makefile - configure complains.
-	  (let ((dir (file-name-as-directory 
-		      (directory-file-name 
+	  (let ((dir (file-name-as-directory
+		      (directory-file-name
 		       (ede-subproject-relative-path sp top-level-project-local)))))
 	    (when (string= dir "./") (setq dir ""))
 	    ;; Use concat, because expand-file-name removes the relativeness.
@@ -89,11 +90,11 @@ don't do it.  A value of nil means to just do it.")
     ;;
     (ede-proj-dist-makefile this)
     ;; Loop over all targets to clean and then add themselves in.
-    (ede-map-all-subprojects 
+    (ede-map-all-subprojects
      this
      (lambda (sp)
        (ede-map-targets sp 'ede-proj-flush-autoconf)))
-    (ede-map-all-subprojects 
+    (ede-map-all-subprojects
      this
      (lambda (sp)
        (ede-map-targets this 'ede-proj-tweak-autoconf)))
@@ -110,15 +111,15 @@ don't do it.  A value of nil means to just do it.")
     (mapc 'ede-proj-configure-create-missing targs)
     ;; Verify that we have a make system.
     (if (or (not (ede-expand-filename (ede-toplevel this) "Makefile"))
-            ;; Now is this one of our old Makefiles?
-            (with-current-buffer
+	    ;; Now is this one of our old Makefiles?
+	    (with-current-buffer
                 (find-file-noselect
                  (ede-expand-filename (ede-toplevel this)
                                       "Makefile" t) t)
-              (goto-char (point-min))
-              ;; Here is the unique piece for our makefiles.
-              (re-search-forward "For use with: make" nil t)))
-        (setq postcmd (concat postcmd "./configure;")))
+	      (goto-char (point-min))
+	      ;; Here is the unique piece for our makefiles.
+	      (re-search-forward "For use with: make" nil t)))
+	(setq postcmd (concat postcmd "./configure;")))
     (if (not (string= "" postcmd))
 	(progn
 	  (compile postcmd)
@@ -145,7 +146,7 @@ don't do it.  A value of nil means to just do it.")
 	      ;; that it gets flushed so we don't keep rebuilding
 	      ;; the autoconf system.
 	      (if b (kill-buffer b))))
-	  
+
 	  ))))
 
 (defmethod ede-proj-configure-recreate ((this ede-proj-project))

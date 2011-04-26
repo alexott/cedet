@@ -1,25 +1,25 @@
 ;;; ede/proj-comp.el --- EDE Generic Project compiler/rule driver
 
-;;;  Copyright (C) 1999, 2000, 2001, 2004, 2005, 2007, 2009, 2010  Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2004, 2005, 2007, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede/proj-comp.el,v 1.15 2010-03-25 15:07:50 xscript Exp $
 
-;; This software is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -46,7 +46,7 @@
 
 (eval-when-compile (require 'cl))
 (require 'ede)				;source object
-(require 'autoconf-edit)
+(require 'ede/autoconf-edit)
 
 ;;; Types:
 (defclass ede-compilation-program (eieio-instance-inheritor)
@@ -174,12 +174,12 @@ This is used when creating a Makefile to prevent duplicate variables and
 rules from being created.")
 
 (defmethod initialize-instance :AFTER ((this ede-compiler) &rest fields)
-  "Make sure that all ede compiler objects are cached in 
+  "Make sure that all ede compiler objects are cached in
 `ede-compiler-list'."
   (add-to-list 'ede-compiler-list this))
 
 (defmethod initialize-instance :AFTER ((this ede-linker) &rest fields)
-  "Make sure that all ede compiler objects are cached in 
+  "Make sure that all ede compiler objects are cached in
 `ede-linker-list'."
   (add-to-list 'ede-linker-list this))
 
@@ -225,7 +225,7 @@ This will prevent rules from creating duplicate variables or rules."
 	      (not (member sourcetype (oref (car compilers) sourcetype))))
     (setq compilers (cdr compilers)))
   (car-safe compilers))
-				  
+
 (defun ede-proj-find-linker (linkers sourcetype)
   "Return a compiler from the list LINKERS to be used with SOURCETYPE."
   (while (and linkers
@@ -233,7 +233,7 @@ This will prevent rules from creating duplicate variables or rules."
 	      (not (member sourcetype (oref (car linkers) sourcetype))))
     (setq linkers (cdr linkers)))
   (car-safe linkers))
-				  
+
 ;;; Methods:
 (defmethod ede-proj-tweak-autoconf ((this ede-compilation-program))
   "Tweak the configure file (current buffer) to accomodate THIS."
@@ -251,6 +251,18 @@ This will prevent rules from creating duplicate variables or rules."
   "Flush the configure file (current buffer) to accomodate THIS."
   nil)
 
+(defmacro proj-comp-insert-variable-once (varname &rest body)
+  "Add VARNAME into the current Makefile if it doesn't exist.
+Execute BODY in a location where a value can be placed."
+  `(let ((addcr t) (v ,varname))
+     (unless (re-search-backward (concat "^" v "\\s-*=") nil t)
+       (insert v "=")
+       ,@body
+       (if addcr (insert "\n"))
+       (goto-char (point-max)))
+     ))
+(put 'proj-comp-insert-variable-once 'lisp-indent-function 1)
+
 (defmethod ede-proj-makefile-insert-variables ((this ede-compilation-program))
   "Insert variables needed by the compiler THIS."
   (require 'ede/pmake)
@@ -258,7 +270,7 @@ This will prevent rules from creating duplicate variables or rules."
       (with-slots (variables) this
 	(mapcar
 	 (lambda (var)
-	   (ede-pmake-insert-variable-once (car var)
+	   (proj-comp-insert-variable-once (car var)
 	     (let ((cd (cdr var)))
 	       (if (listp cd)
 		   (mapc (lambda (c) (insert " " c)) cd)

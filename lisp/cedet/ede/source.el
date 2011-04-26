@@ -1,28 +1,27 @@
-;;; ede/source.el --- EDE source code object
+;; ede/source.el --- EDE source code object
 
-;;;  Copyright (C) 2000, 2008  Eric M. Ludlam
+;; Copyright (C) 2000, 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede/source.el,v 1.6 2010-03-15 13:40:54 xscript Exp $
 
-;; This software is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; 
+
 ;; Manage different types of source code.  A master list of source code types
 ;; will be maintained, and used to track target objects, what they accept,
 ;; and what compilers can be used.
@@ -74,7 +73,7 @@ that they are willing to use.")
 ;;; Methods
 ;;
 (defmethod initialize-instance :AFTER ((this ede-sourcecode) &rest fields)
-  "Make sure that all ede compiler objects are cached in 
+  "Make sure that all ede compiler objects are cached in
 `ede-compiler-list'."
   (let ((lst ede-sourcecode-list))
     ;; Find an object of the same name.
@@ -105,18 +104,24 @@ that they are willing to use.")
 
 (defmethod ede-want-any-source-files-p ((this ede-sourcecode) filenames)
   "Return non-nil if THIS will accept any source files in FILENAMES."
-  (ede-or (mapcar (lambda (c) (ede-want-file-source-p this c))
-		  filenames)))
+  (let (found)
+    (while (and (not found) filenames)
+      (setq found (ede-want-file-source-p this (pop filenames))))
+    found))
 
 (defmethod ede-want-any-auxiliary-files-p ((this ede-sourcecode) filenames)
   "Return non-nil if THIS will accept any aux files in FILENAMES."
-  (ede-or (mapcar (lambda (c) (ede-want-file-auxiliary-p this c))
-		  filenames)))
+  (let (found)
+    (while (and (not found) filenames)
+      (setq found (ede-want-file-auxiliary-p this (pop filenames))))
+    found))
 
 (defmethod ede-want-any-files-p ((this ede-sourcecode) filenames)
   "Return non-nil if THIS will accept any files in FILENAMES."
-  (ede-or (mapcar (lambda (c) (ede-want-file-p this c))
-		  filenames)))
+  (let (found)
+    (while (and (not found) filenames)
+      (setq found (ede-want-file-p this (pop filenames))))
+    found))
 
 (defmethod ede-buffer-header-file ((this ede-sourcecode) filename)
   "Return a list of file names of header files for THIS with FILENAME.

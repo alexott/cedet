@@ -1,23 +1,23 @@
 ;;; ede/base.el --- Baseclasses for EDE.
-;;
-;; Copyright (C) 2010 Eric M. Ludlam
-;;
-;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; Copyright (C) 2010  Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <zappo@gnu.org>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -27,15 +27,24 @@
 
 ;;; Code:
 (require 'eieio)
-(eval-when-compile
-  (require 'data-debug))
+(require 'eieio-speedbar)
+(require 'ede/auto)
+
+;; Defined in ede.el:
+(defvar ede-projects)
+(defvar ede-object)
+(defvar ede-object-root-project)
+
+(declare-function data-debug-new-buffer "data-debug")
+(declare-function data-debug-insert-object-slots "eieio-datadebug")
+(declare-function ede-parent-project "ede" (&optional obj))
+(declare-function ede-current-project "ede" (&optional dir))
 
 ;;; TARGET
 ;;
 ;; The TARGET is an entity in a project that knows about files
 ;; and features of those files.
 
-;;;###autoload
 (defclass ede-target (eieio-speedbar-directory-button)
   ((buttonface :initform speedbar-file-face) ;override for superclass
    (name :initarg :name
@@ -82,7 +91,7 @@ which files this object is interested in."
 	       :accessor ede-object-sourcecode)
    (keybindings :allocation :class
 		:initform (("D" . ede-debug-target))
-		:documentation 
+		:documentation
 "Keybindings specialized to this type of target."
 		:accessor ede-object-keybindings)
    (menu :allocation :class
@@ -95,7 +104,7 @@ which files this object is interested in."
 	 :accessor ede-object-menu)
    )
   "A target is a structure that describes a file set that produces something.
-Targets, as with 'Make', is an entity that will manage a file set 
+Targets, as with 'Make', is an entity that will manage a file set
 and knows how to compile or otherwise transform those files into some
 other desired outcome.")
 
@@ -148,7 +157,6 @@ and querying them will cause the actual project to get loaded.")
 ;; Projects can also affect how EDE works, by changing what appears in
 ;; the EDE menu, or how some keys are bound.
 ;;
-;;;###autoload
 (defclass ede-project (ede-project-placeholder)
   ((subproj :initform nil
 	    :type list
@@ -300,10 +308,10 @@ All specific project types must derive from this project."
 ;; The cache is a way to mark where all known projects live without
 ;; loading those projects into memory, or scanning for them each time
 ;; emacs starts.
-;; 
+;;
 (defcustom ede-project-placeholder-cache-file
-  (expand-file-name "~/.projects.ede")
-  "*File containing the list of projects EDE has viewed."
+  (locate-user-emacs-file "ede-projects.el" ".projects.ede")
+  "File containing the list of projects EDE has viewed."
   :group 'ede
   :type 'file)
 
@@ -415,7 +423,6 @@ Specifying PARENT is useful for sub-sub projects relative to the root project."
 ;; no need to in most situations because they are either a) simple, or
 ;; b) cosmetic.
 
-;;;###autoload
 (defmethod ede-name ((this ede-target))
   "Return the name of THIS target."
   (oref this name))
@@ -429,7 +436,6 @@ Specifying PARENT is useful for sub-sub projects relative to the root project."
 Do this by extracting the lowest directory name."
   (oref this name))
 
-;;;###autoload
 (defmethod ede-description ((this ede-project))
   "Return a description suitable for the minibuffer about THIS."
   (format "Project %s: %d subprojects, %d targets."
@@ -446,7 +452,7 @@ Do this by extracting the lowest directory name."
 ;; Targets and projects are often associated with other files, such as
 ;; header files, documentation files and the like.  Have strong
 ;; associations can make useful user commands to quickly navigate
-;; between the files base on their assocaitions.
+;; between the files based on their associations.
 ;;
 (defun ede-header-file ()
   "Return the header file for the current buffer.
@@ -473,7 +479,6 @@ Do a quick check to see if there is a Header tag in this buffer."
 		src (cdr src)))
 	found))))
 
-;;;###autoload
 (defun ede-documentation-files ()
   "Return the documentation files for the current buffer.
 Not all buffers need documentations, so return nil if no applicable.
@@ -526,7 +531,7 @@ files in the project."
 
 (defmethod ede-html-documentation ((this ede-project))
   "Return a list of HTML files provided by project THIS."
-  
+
   )
 
 ;;; Default "WANT" methods.
@@ -562,7 +567,6 @@ files in the project."
 
 ;;; Debugging.
 ;;
-;;;###autoload
 (defun ede-adebug-project ()
   "Run adebug against the current EDE project.
 Display the results as a debug list."
@@ -573,7 +577,6 @@ Display the results as a debug list."
     (data-debug-insert-object-slots (ede-current-project) "")
     ))
 
-;;;###autoload
 (defun ede-adebug-project-parent ()
   "Run adebug against the current EDE parent project.
 Display the results as a debug list."
@@ -584,7 +587,6 @@ Display the results as a debug list."
     (data-debug-insert-object-slots (ede-parent-project) "")
     ))
 
-;;;###autoload
 (defun ede-adebug-project-root ()
   "Run adebug against the current EDE parent project.
 Display the results as a debug list."
@@ -596,15 +598,39 @@ Display the results as a debug list."
     ))
 
 
+
+;;; TOPLEVEL PROJECT
+;;
+;; The toplevel project is a way to identify the EDE structure that belongs
+;; to the top of a project.
+
+(defun ede-toplevel (&optional subproj)
+  "Return the ede project which is the root of the current project.
+Optional argument SUBPROJ indicates a subproject to start from
+instead of the current project."
+  (or ede-object-root-project
+      (let* ((cp (or subproj (ede-current-project))))
+	(or (and cp (ede-project-root cp))
+	    (progn
+	      (while (ede-parent-project cp)
+		(setq cp (ede-parent-project cp)))
+	      cp)))))
+
+
 ;;; Hooks & Autoloads
 ;;
 ;;  These let us watch various activities, and respond appropriately.
 
-(add-hook 'edebug-setup-hook
-	  (lambda ()
-	    (def-edebug-spec ede-with-projectfile
-	      (form def-body))))
+;; (add-hook 'edebug-setup-hook
+;; 	  (lambda ()
+;; 	    (def-edebug-spec ede-with-projectfile
+;; 	      (form def-body))))
 
 (provide 'ede/base)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/base"
+;; End:
 
 ;;; ede/base.el ends here

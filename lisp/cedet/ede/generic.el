@@ -1,23 +1,23 @@
 ;;; ede/generic.el --- Base Support for generic build systems
-;;
-;; Copyright (C) 2010 Eric M. Ludlam
-;;
-;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; Copyright (C) 2010 Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -77,7 +77,9 @@
 ;; NOTE: It is not necessary to modify ede/generic.el to add any of
 ;; the above described support features.
 
+(require 'eieio-opt)
 (require 'ede)
+(require 'semantic/db)
 
 ;;; Code:
 ;;
@@ -117,7 +119,7 @@
 			 :custom (repeat (cons (string :tag "Macro")
 					       (string :tag "Value")))
 			 :group c
-			 :documentation 
+			 :documentation
 			 "Preprocessor Symbols for this project.")
    (c-preprocessor-files :initarg :c-preprocessor-files
 			 :initform nil
@@ -126,7 +128,6 @@
    )
   "User Configuration object for a generic project.")
 
-;;;###autoload
 (defun ede-generic-load (dir &optional rootproj)
   "Return a Generic Project object if there is a match.
 Return nil if there isn't one.
@@ -197,7 +198,7 @@ The class allocated value is replace by different sub classes.")
 	    ;; Load in the configuration
 	    (setq config (eieio-persistent-read fname))
 	  ;; Create a new one.
-	  (setq config (ede-generic-config 
+	  (setq config (ede-generic-config
 			"Configuration"
 			:file fname))
 	  ;; Set initial values based on project.
@@ -277,13 +278,13 @@ If one doesn't exist, create a new one for this directory."
 	  (when (and (not (string= extreg ""))
 		     (string-match (concat "^" extreg "$") ext))
 	    (setq cls classsym)))))
-    (when (not cls) (setq cls 'ede-generic-target-misc))    
+    (when (not cls) (setq cls 'ede-generic-target-misc))
     ;; find a pre-existing matching target
     (setq ans (ede-generic-find-matching-target cls dir targets))
     ;; Create a new instance if there wasn't one
     (when (not ans)
-      (setq ans (make-instance 
-		 cls 
+      (setq ans (make-instance
+		 cls
 		 :name (oref cls shortname)
 		 :path dir
 		 :source nil))
@@ -310,7 +311,7 @@ If one doesn't exist, create a new one for this directory."
 	  )))
     ;; The core table
     (setq filemap (append filemap (oref config :c-preprocessor-table)))
-    
+
     filemap
     ))
 
@@ -344,8 +345,7 @@ the new configuration."
      (ede-map-target-buffers
       target
       (lambda (b)
-	(save-excursion
-	  (set-buffer b)
+	(with-current-buffer b
 	  (ede-apply-target-options)))))))
 
 (defmethod ede-commit ((config ede-generic-config))
@@ -361,14 +361,14 @@ the new configuration."
   "Add a new EDE Autoload instance for identifying a generic project.
 INTERNAL-NAME is a long name that identifies thsi project type.
 EXTERNAL-NAME is a shorter human readable name to describe the project.
-PROJECTFILE is a file name that identifies a project of this type to EDE, such as 
+PROJECTFILE is a file name that identifies a project of this type to EDE, such as
 a Makefile, or SConstruct file.
 CLASS is the EIEIO class that is used to track this project.  It should subclass
 the class `ede-generic-project' project."
   (add-to-list 'ede-project-class-files
 	       (ede-project-autoload internal-name
 				     :name external-name
-				     :file 'ede-generic
+				     :file 'ede/generic
 				     :proj-file projectfile
 				     :load-type 'ede-generic-load
 				     :class-sym class
@@ -433,5 +433,10 @@ the class `ede-generic-project' project."
   )
 
 (provide 'ede/generic)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/generic"
+;; End:
 
 ;;; ede/generic.el ends here

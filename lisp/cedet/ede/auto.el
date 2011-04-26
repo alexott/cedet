@@ -1,23 +1,23 @@
-;;; ede/auto.el --- Autoload features for EDE.
-;;
-;; Copyright (C) 2010 Eric M. Ludlam
-;;
-;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;;; ede/auto.el --- Autoload features for EDE
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; Copyright (C) 2010  Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <zappo@gnu.org>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -28,7 +28,9 @@
 ;; handing over control to the usual EDE project system.
 
 ;;; Code:
-;;;###autoload
+
+(require 'eieio)
+
 (defclass ede-project-autoload ()
   ((name :initarg :name
 	 :documentation "Name of this project type")
@@ -64,23 +66,22 @@ type is required and the load function used.")
 (defvar ede-project-class-files
   (list
    (ede-project-autoload "edeproject-makefile"
-			 :name "Make" :file 'ede-proj
+			 :name "Make" :file 'ede/proj
 			 :proj-file "Project.ede"
 			 :load-type 'ede-proj-load
 			 :class-sym 'ede-proj-project)
    (ede-project-autoload "edeproject-automake"
-			 :name "Automake" :file 'ede-proj
+			 :name "Automake" :file 'ede/proj
 			 :proj-file "Project.ede"
 			 :initializers '(:makefile-type Makefile.am)
 			 :load-type 'ede-proj-load
 			 :class-sym 'ede-proj-project)
    (ede-project-autoload "automake"
-			 :name "automake" :file 'project-am
+			 :name "automake" :file 'ede/project-am
 			 :proj-file "Makefile.am"
 			 :load-type 'project-am-load
 			 :class-sym 'project-am-makefile
-			 :new-p nil)
-   )
+			 :new-p nil))
   "List of vectors defining how to determine what type of projects exist.")
 
 ;;; EDE project-autoload methods
@@ -103,7 +104,7 @@ the current buffer."
       (when rootfcn
 	(condition-case nil
 	    (funcall rootfcn file)
-	  (error 
+	  (error
 	   (funcall rootfcn)))
 	))))
 

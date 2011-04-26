@@ -1,23 +1,23 @@
 ;;; ede/custom.el --- customization of EDE projects.
-;;
-;; Copyright (C) 2010 Eric M. Ludlam
-;;
-;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; Copyright (C) 2010  Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <zappo@gnu.org>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -57,9 +57,8 @@
 (defalias 'customize-project 'ede-customize-project)
 
 ;;;###autoload
-(defun ede-customize-current-target()
-  "Edit fields of the current target through EIEIO & Custom.
-Optional argument OBJ is the target object to customize."
+(defun ede-customize-current-target ()
+  "Edit fields of the current target through EIEIO & Custom."
   (interactive)
   (require 'eieio-custom)
   (if (not (obj-of-class-p ede-object ede-target))
@@ -69,10 +68,9 @@ Optional argument OBJ is the target object to customize."
 ;;;###autoload
 (defalias 'customize-target 'ede-customize-current-target)
 
-;;;###autoload
 (defun ede-customize-target (obj)
   "Edit fields of the current target through EIEIO & Custom.
-Optional argument OBJ is the target object to customize."
+OBJ is the target object to customize."
   (require 'eieio-custom)
   (if (and obj (not (obj-of-class-p obj ede-target)))
       (error "No logical target to customize"))
@@ -208,4 +206,10 @@ Optional argument OBJ is the target object to customize."
   )
 
 (provide 'ede/custom)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/custom"
+;; End:
+
 ;;; ede/custom.el ends here

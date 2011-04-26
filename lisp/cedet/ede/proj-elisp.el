@@ -1,33 +1,35 @@
-;;; ede/proj-elisp.el --- EDE Generic Project Emacs Lisp support
+;;; ede-proj-elisp.el --- EDE Generic Project Emacs Lisp support
 
-;;;  Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010  Eric M. Ludlam
+;; Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007,
+;;   2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede/proj-elisp.el,v 1.42 2010-06-12 00:35:06 zappo Exp $
 
-;; This software is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
-;; Handle Emacs Lisp in and EDE Project file.
+;; Handle Emacs Lisp in an EDE Project file.
 
 (require 'ede/proj)
 (require 'ede/pmake)
 (require 'ede/pconf)
+
+(autoload 'semantic-ede-proj-target-grammar "semantic/ede-grammar")
 
 ;;; Code:
 (defclass ede-proj-target-elisp (ede-proj-target-makefile)
@@ -35,9 +37,7 @@
    (keybindings :initform nil)
    (phony :initform t)
    (sourcetype :initform '(ede-source-emacs))
-   (availablecompilers :initform '(ede-emacs-compiler 
-				   ede-xemacs-compiler
-				   ede-emacs-preload-compiler))
+   (availablecompilers :initform '(ede-emacs-compiler ede-xemacs-compiler))
    (aux-packages :initarg :aux-packages
 		 :initform nil
 		 :type list
@@ -46,16 +46,7 @@
 There should only be one toplevel package per auxiliary tool needed.
 These packages location is found, and added to the compile time
 load path."
-   )
-   (pre-load-packages :initarg :pre-load-packages
-		      :initform nil
-		      :type list
-		      :custom (repeat string)
-		      :documentation "Additional packages to pre-load.
-Each package name will be loaded with `require'.
-Each package's directory should also appear in :aux-packages via a package name.
-You must use the `ede-emacs-preload-compiler' if you provide values in this slot.")
-   )
+   ))
   "This target consists of a group of lisp files.
 A lisp target may be one general program with many separate lisp files in it.")
 
@@ -86,23 +77,6 @@ A lisp target may be one general program with many separate lisp files in it.")
    )
   "Compile Emacs Lisp programs.")
 
-(defvar ede-emacs-preload-compiler
-  (clone
-   ede-emacs-compiler "ede-emacs-preload-compiler"
-   :commands
-   '("@echo \"(add-to-list 'load-path nil)\" > $@-compile-script"
-     "for loadpath in . ${LOADPATH}; do \\"
-     "   echo \"(add-to-list 'load-path \\\"$$loadpath\\\")\" >> $@-compile-script; \\"
-     "done;"
-     "for preload in ${ELISPPRELOAD}; do \\"
-     "   echo \"(load \\\"$$preload\\\")\" >> $@-compile-script; \\"
-     "done;"
-     "@echo \"(setq debug-on-error t)\" >> $@-compile-script"
-     "\"$(EMACS)\" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^"
-     ))
-  "Compile Emacs Lisp programs with preload libraries.")
-	 
-
 (defvar ede-xemacs-compiler
   (clone ede-emacs-compiler "ede-xemacs-compiler"
 	 :name "xemacs"
@@ -114,7 +88,7 @@ A lisp target may be one general program with many separate lisp files in it.")
   "Return t if object THIS lays claim to the file in BUFFER.
 Lays claim to all .elc files that match .el files in this target."
   (if (string-match "\\.elc$" (buffer-file-name buffer))
-      (let ((fname 
+      (let ((fname
 	     (concat
 	      (file-name-sans-extension (buffer-file-name buffer))
 	      ".el")
@@ -127,7 +101,7 @@ Lays claim to all .elc files that match .el files in this target."
 
 ;;; Emacs Lisp Compiler
 ;;; Emacs Lisp Target
-(defun ede/proj.elisp-packages-to-loadpath (packages)
+(defun ede-proj-elisp-packages-to-loadpath (packages)
   "Convert a list of PACKAGES, to a list of load path."
   (let ((paths nil)
 	(ldir nil))
@@ -155,18 +129,13 @@ Bonus: Return a cons cell: (COMPILED . UPTODATE)."
 	 (utd 0))
     (mapc (lambda (src)
 	    (let* ((fsrc (expand-file-name src dir))
-		   (elc (concat (file-name-sans-extension fsrc) ".elc"))
-		   )
-	      (if (or (not (file-exists-p elc))
-		      (file-newer-than-file-p fsrc elc))
-		  (progn
-		    (setq comp (1+ comp))
-		    (byte-compile-file fsrc))
+		   (elc (concat (file-name-sans-extension fsrc) ".elc")))
+	      (if (eq (byte-recompile-file fsrc nil 0) t)
+                  (setq comp (1+ comp))
 		(setq utd (1+ utd)))))
 	    (oref obj source))
     (message "All Emacs Lisp sources are up to date in %s" (object-name obj))
-    (cons comp utd)
-    ))
+    (cons comp utd)))
 
 (defmethod ede-update-version-in-source ((this ede-proj-target-elisp) version)
   "In a Lisp file, updated a version string for THIS to VERSION.
@@ -178,7 +147,7 @@ is found, such as a `-version' variable, or the standard header."
 	    (match nil))
 	(while vs
 	  (with-current-buffer (find-file-noselect
-                            (ede-expand-filename this (car vs)))
+                                (ede-expand-filename this (car vs)))
 	    (goto-char (point-min))
 	    (let ((case-fold-search t))
 	      (if (re-search-forward "-version\\s-+\"\\([^\"]+\\)\"" nil t)
@@ -213,32 +182,15 @@ is found, such as a `-version' variable, or the standard header."
 	    (setq items (cdr items)))))
       ))
 
-(defun ede-proj-makefile-insert-preload-items (items)
-  "Insert a sequence of ITEMS into the Makefile ELISPPRELOAD variable."
-    (when items
-      (ede-pmake-insert-variable-shared "ELISPPRELOAD"
-	(let ((begin (save-excursion (re-search-backward "\\s-*="))))
-	  (while items
-	    (when (not (save-excursion
-			 (re-search-backward
-			  (concat "\\s-" (regexp-quote (car items)) "[ \n\t\\]")
-			  begin t)))
-	      (insert " " (car items)))
-	    (setq items (cdr items)))))
-      ))
-
 (defmethod ede-proj-makefile-insert-variables :AFTER ((this ede-proj-target-elisp))
   "Insert variables needed by target THIS."
   (let ((newitems (if (oref this aux-packages)
-		      (ede/proj.elisp-packages-to-loadpath
+		      (ede-proj-elisp-packages-to-loadpath
 		       (oref this aux-packages))))
-	(newpreload (oref this pre-load-packages))
 	)
-    (ede-proj-makefile-insert-loadpath-items newitems)
-    (when newpreload
-      (ede-proj-makefile-insert-preload-items newpreload))))
+    (ede-proj-makefile-insert-loadpath-items newitems)))
 
-(defun ede/proj.elisp-add-path (path)
+(defun ede-proj-elisp-add-path (path)
   "Add path PATH into the file if it isn't already there."
   (goto-char (point-min))
   (if (re-search-forward (concat "(cons \\\""
@@ -271,12 +223,12 @@ is found, such as a `-version' variable, or the standard header."
 	      (copy-file (concat ec ".tmp") ec)
 	      (delete-file (concat ec ".tmp"))))
 	(set-buffer (find-file-noselect ec t))
-	(ede/proj.elisp-add-path "..")
-	(let ((paths (ede/proj.elisp-packages-to-loadpath
+	(ede-proj-elisp-add-path "..")
+	(let ((paths (ede-proj-elisp-packages-to-loadpath
 		      (oref this aux-packages))))
 	  ;; Add in the current list of paths
 	  (while paths
-	    (ede/proj.elisp-add-path (car paths))
+	    (ede-proj-elisp-add-path (car paths))
 	    (setq paths (cdr paths))))
 	(save-buffer)) )))
 
@@ -293,10 +245,7 @@ is found, such as a `-version' variable, or the standard header."
 	    (let ((path (match-string 1)))
 	      (if (string= path "nil")
 		  nil
-		(delete-region (save-excursion (beginning-of-line) (point))
-			       (save-excursion (end-of-line)
-					       (forward-char 1)
-					       (point))))))))))
+		(delete-region (point-at-bol) (point-at-bol 2)))))))))
 
 ;;;
 ;; Autoload generators
@@ -431,6 +380,6 @@ Argument THIS is the target which needs to insert an info file."
   "Flush the configure file (current buffer) to accomodate THIS."
   nil)
 
-(provide 'ede/proj.elisp)
+(provide 'ede/proj-elisp)
 
 ;;; ede/proj-elisp.el ends here

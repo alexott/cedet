@@ -1,23 +1,23 @@
 ;;; ede/files.el --- Associate projects with files and directories.
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -31,9 +31,17 @@
 ;; A toplevel project is one where there is no active project above
 ;; it.  Finding the toplevel project involves going up a directory
 ;; till no ede-project-autoload structure matches.
-;; 
+;;
 
 (require 'ede)
+
+(declare-function ede-locate-file-in-hash "ede/locate")
+(declare-function ede-locate-add-file-to-hash "ede/locate")
+(declare-function ede-locate-file-in-project "ede/locate")
+(declare-function ede-locate-flush-hash "ede/locate")
+
+(defvar ede--disable-inode nil
+  "Set to 't' to simulate systems w/out inode support.")
 
 ;;; Code:
 ;;;###autoload
@@ -53,6 +61,7 @@ the current EDE project."
 (defun ede-flush-project-hash ()
   "Flush the file locate hash for the current project."
   (interactive)
+  (require 'ede/locate)
   (let* ((loc (ede-get-locator-object (ede-current-project))))
     (ede-locate-flush-hash loc)))
 
@@ -84,7 +93,7 @@ of the anchor file for the project."
   (if ede--disable-inode
       (let ((ans nil))
 	;; Try to find the right project w/out inodes.
-	(ede-map-subprojects 
+	(ede-map-subprojects
 	 proj
 	 (lambda (SP)
 	   (when (not ans)
@@ -95,7 +104,7 @@ of the anchor file for the project."
     ;; We can use inodes, so lets try it.
     (let ((ans nil)
 	  (inode (ede--inode-for-dir dir)))
-      (ede-map-subprojects 
+      (ede-map-subprojects
        proj
        (lambda (SP)
 	 (when (not ans)
@@ -125,9 +134,6 @@ of the anchor file for the project."
   (when (fboundp 'gethash)
     (gethash dir ede-inode-directory-hash)
     ))
-
-(defvar ede--disable-inode nil
-  "Set to 't' to simulate systems w/out inode support.")
 
 (defun ede--inode-for-dir (dir)
   "Return the inode for the directory DIR."
@@ -321,24 +327,6 @@ nil is returned if the current directory is not a part of a project."
 	    )
 	  (or ans toppath))))))
 
-;;; TOPLEVEL PROJECT
-;;
-;; The toplevel project is a way to identify the EDE structure that belongs
-;; to the top of a project.
-
-(defun ede-toplevel (&optional subproj)
-  "Return the ede project which is the root of the current project.
-Optional argument SUBPROJ indicates a subproject to start from
-instead of the current project."
-  (or ede-object-root-project
-      (let* ((cp (or subproj (ede-current-project)))
-	     )
-	(or (and cp (ede-project-root cp))
-	    (progn
-	      (while (ede-parent-project cp)
-		(setq cp (ede-parent-project cp)))
-	      cp)))))
-
 ;;; DIRECTORY CONVERSION STUFF
 ;;
 (defmethod ede-convert-path ((this ede-project) path)
@@ -392,7 +380,8 @@ by this project.
 Optional argument FORCE forces the default filename to be provided even if it
 doesn't exist.
 If FORCE equals 'newfile, then the cache is ignored and a new file in THIS
-is return."
+is returned."
+  (require 'ede/locate)
   (let* ((loc (ede-get-locator-object this))
 	 (ha (ede-locate-file-in-hash loc filename))
 	 (ans nil)
@@ -403,11 +392,11 @@ is return."
     ;; complex routines, such as smart completion asks this question
     ;; many times, so doing this speeds things up, especially on NFS
     ;; or other remote file systems.
-    
+
     ;; As such, special care is needed to use the hash, and also obey
     ;; the FORCE option, which is needed when trying to identify some
     ;; new file that needs to be created, such as a Makefile.
-    (cond 
+    (cond
      ;; We have a hash-table match, AND that match wasn't the 'nomatch
      ;; flag, we can return it.
      ((and ha (not (eq ha 'nomatch)))
@@ -456,6 +445,7 @@ doesn't exist."
 		    (ede-expand-filename-impl-via-subproj this filename)))
     ;; Use an external locate tool.
     (when (not found)
+      (require 'ede/locate)
       (setq found (car (ede-locate-file-in-project loc filename))))
     ;; Return it
     found))
@@ -505,4 +495,10 @@ Argument DIR is the directory to trim upwards."
       fnd)))
 
 (provide 'ede/files)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/files"
+;; End:
+
 ;;; ede/files.el ends here

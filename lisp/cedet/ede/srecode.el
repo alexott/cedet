@@ -1,23 +1,23 @@
 ;;; ede/srecode.el --- EDE utilities on top of SRecoder
 
-;; Copyright (C) 2008, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -26,32 +26,26 @@
 
 (require 'srecode)
 
+(declare-function srecode-create-dictionary "srecode/dictionary")
+(declare-function srecode-dictionary-set-value "srecode/dictionary")
+(declare-function srecode-load-tables-for-mode "srecode/find")
+(declare-function srecode-table "srecode/find")
+(declare-function srecode-template-get-table "srecode/find")
+(declare-function srecode-insert-fcn "srecode/insert")
+(declare-function srecode-resolve-arguments "srecode/insert")
+(declare-function srecode-map-update-map "srecode/map")
+
 ;;; Code:
-;;;###autoload
 (defun ede-srecode-setup ()
-  "Update various paths to get SRecode to identify our macros."
-  (let* ((lib (locate-library "ede.el" t))
-	 (ededir (file-name-directory lib))
-	 (tmpdir (file-name-as-directory
-		  (expand-file-name "templates" ededir))))
-    (when (not tmpdir)
-      (error "Unable to location EDE Templates directory"))
-
-    ;; Rig up the map.
-    (require 'srecode/map)
-    (add-to-list 'srecode-map-load-path tmpdir)
-    (srecode-map-update-map t)
-    
-    ;; We don't call this unless we need it.  Load in the templates.
-    (srecode-load-tables-for-mode 'makefile-mode)
-    (srecode-load-tables-for-mode 'makefile-mode 'ede)
-
-    (srecode-load-tables-for-mode 'autoconf-mode)
-    (srecode-load-tables-for-mode 'autoconf-mode 'ede)
-
-    ;; @todo - autoconf files.
-
-    ))
+  "Initialize Srecode for EDE."
+  (require 'srecode/map)
+  (require 'srecode/find)
+  (srecode-map-update-map t)
+  ;; We don't call this unless we need it.  Load in the templates.
+  (srecode-load-tables-for-mode 'makefile-mode)
+  (srecode-load-tables-for-mode 'makefile-mode 'ede)
+  (srecode-load-tables-for-mode 'autoconf-mode)
+  (srecode-load-tables-for-mode 'autoconf-mode 'ede))
 
 (defmacro ede-srecode-insert-with-dictionary (template &rest forms)
   "Insert TEMPLATE after executing FORMS with a dictionary.
@@ -76,13 +70,13 @@ updated in FORMS."
      (srecode-insert-fcn temp dict)
      ))
 
-;;;###autoload
 (defun ede-srecode-insert (template &rest dictionary-entries)
   "Insert at the current point TEMPLATE.
 TEMPLATE should specify a context by using a string format of:
   context:templatename
 Add DICTIONARY-ENTRIES into the dictionary before insertion.
 Note: Just like `srecode-insert', but templates found in 'ede app."
+  (require 'srecode/insert)
   (ede-srecode-insert-with-dictionary template
 
     ;; Add in optional dictionary entries.
@@ -96,4 +90,5 @@ Note: Just like `srecode-insert', but templates found in 'ede app."
     ))
 
 (provide 'ede/srecode)
+
 ;;; ede/srecode.el ends here

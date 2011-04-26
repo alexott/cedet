@@ -1,23 +1,23 @@
 ;;; ede/cpp-root.el --- A simple way to wrap a C++ project with a single root
 
-;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version $?GPL$, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -41,7 +41,7 @@
 ;; See the end of this file for an example.
 ;;
 ;;; EXAMPLE
-;; 
+;;
 ;; Add this to your .emacs file, modifying appropriate bits as needed.
 ;;
 ;; (ede-cpp-root-project "SOMENAME" :file "/dir/to/some/file")
@@ -62,7 +62,7 @@
 ;;     :spp-table '( ("MOOSE" . "")
 ;;                   ("CONST" . "const") )
 ;;     :spp-files '( "include/config.h" )
-;;     ) 
+;;     )
 ;;
 ;;  In this case each item in the include path list is searched.  If
 ;;  the directory starts with "/", then that expands to the project
@@ -85,7 +85,7 @@
 ;;  file name for a header in your project where most of your CPP
 ;;  macros reside.  Doing this can be easier than listing everything in
 ;;  the :spp-table option.  The files listed in :spp-files should not
-;;  start with a /, and are relative to something in :include-path.;;  
+;;  start with a /, and are relative to something in :include-path.;;
 ;;
 ;; If you want to override the file-finding tool with your own
 ;; function you can do this:
@@ -120,7 +120,7 @@
 ;;   "Return the root directory for `default-directory'"
 ;;   ;; You might be able to use `ede-cpp-root-project-root'.
 ;;   )
-;; 
+;;
 ;; (defun MY-LOAD (dir)
 ;;   "Load a project of type `cpp-root' for the directory DIR.
 ;; Return nil if there isn't one."
@@ -131,18 +131,18 @@
 ;; (add-to-list 'ede-project-class-files
 ;; 	     (ede-project-autoload "cpp-root"
 ;; 	      :name "CPP ROOT"
-;; 	      :file 'ede-cpp-root
+;; 	      :file 'ede/cpp-root
 ;; 	      :proj-file 'MY-FILE-FOR-DIR
 ;;            :proj-root 'MY-ROOT-FCN
 ;; 	      :load-type 'MY-LOAD
 ;; 	      :class-sym 'ede-cpp-root)
 ;; 	     t)
-;; 
+;;
 ;;; TODO
 ;;
 ;; Need a way to reconfigure a project, and have it affect all open buffers.
 ;; From Tobias Gerdin:
-;;   
+;;
 ;;   >>3) Is there any way to refresh a ede-cpp-root-project dynamically? I have
 ;;   >>some file open part of the project, fiddle with the include paths and would
 ;;   >>like the open buffer to notice this when I re-evaluate the
@@ -151,11 +151,17 @@
 ;;   > Another good idea.  The easy way is to "revert-buffer" as needed.  The
 ;;   > ede "project local variables" does this already, so it should be easy
 ;;   > to adapt something.
-;;   
+;;
 ;;   I actually tried reverting the buffer but Semantic did not seem to pick
 ;;   up the differences (the "include summary" reported the same include paths).
 
 (require 'ede)
+
+(defvar semantic-lex-spp-project-macro-symbol-obarray)
+(declare-function semantic-lex-make-spp-table "semantic/lex-spp")
+(declare-function semanticdb-file-table-object "semantic/db")
+(declare-function semanticdb-needs-refresh-p "semantic/db")
+(declare-function semanticdb-refresh-table "semantic/db")
 
 ;;; Code:
 
@@ -203,7 +209,6 @@ DIR is the directory to search from."
 ;; existing object for the discovered directory.  cpp-root always uses
 ;; the second case.
 
-;;;###autoload
 (defun ede-cpp-root-project-file-for-dir (&optional dir)
   "Return a full file name to the project file stored in DIR."
   (let ((proj (ede-cpp-root-file-existing dir)))
@@ -224,7 +229,6 @@ lookup in the main EDE logic.")
     (when projfile
       (file-name-directory projfile))))
 
-;;;###autoload
 (defun ede-cpp-root-load (dir &optional rootproj)
   "Return a CPP root object if you created one.
 Return nil if there isn't one.
@@ -237,7 +241,7 @@ ROOTPROJ is nil, since there is only one project."
 (add-to-list 'ede-project-class-files
 	     (ede-project-autoload "cpp-root"
 	      :name "CPP ROOT"
-	      :file 'ede-cpp-root
+	      :file 'ede/cpp-root
 	      :proj-file 'ede-cpp-root-project-file-for-dir
 	      :proj-root 'ede-cpp-root-project-root
 	      :load-type 'ede-cpp-root-load
@@ -267,7 +271,6 @@ ROOTPROJ is nil, since there is only one project."
   "EDE cpp-root project target.
 All directories need at least one target.")
 
-;;;###autoload
 (defclass ede-cpp-root-project (ede-project eieio-instance-tracker)
   ((tracking-symbol :initform 'ede-cpp-root-project-list)
    (include-path :initarg :include-path
@@ -476,7 +479,7 @@ This is for project include paths and spp source files."
   "Set variables local to PROJECT in BUFFER.
 Also set up the lexical preprocessor map."
   (call-next-method)
-  (when (and (featurep 'semantic-c) (featurep 'semantic-lex-spp))
+  (when (and (featurep 'semantic/bovine/c) (featurep 'semantic/lex-spp))
     (setq semantic-lex-spp-project-macro-symbol-obarray
 	  (semantic-lex-make-spp-table (oref project spp-table)))
     ))
@@ -484,9 +487,10 @@ Also set up the lexical preprocessor map."
 (defmethod ede-system-include-path ((this ede-cpp-root-project))
   "Get the system include path used by project THIS."
   (oref this system-include-path))
-  
+
 (defmethod ede-preprocessor-map ((this ede-cpp-root-project))
   "Get the pre-processor map for project THIS."
+  (require 'semantic/db)
   (let ((spp (oref this spp-table))
 	(root (ede-project-root this))
 	)
@@ -507,7 +511,7 @@ Also set up the lexical preprocessor map."
 (defmethod ede-system-include-path ((this ede-cpp-root-target))
   "Get the system include path used by project THIS."
   (ede-system-include-path (ede-target-parent this)))
-  
+
 (defmethod ede-preprocessor-map ((this ede-cpp-root-target))
   "Get the pre-processor map for project THIS."
   (ede-preprocessor-map  (ede-target-parent this)))
@@ -528,4 +532,10 @@ Note: This needs some work."
 				 attributes)))))
 
 (provide 'ede/cpp-root)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/cpp-root"
+;; End:
+
 ;;; ede/cpp-root.el ends here

@@ -1,28 +1,28 @@
-;; ede/pmake.el --- EDE Generic Project Makefile code generator.
+;;; ede-pmake.el --- EDE Generic Project Makefile code generator.
 
-;;;  Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010  Eric M. Ludlam
+;; Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007,
+;;   2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede/pmake.el,v 1.66 2010-03-15 13:40:54 xscript Exp $
 
-;; This software is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; 
+;;
 ;; Code generator for Makefiles.
 ;;
 ;; Here is how it should work:
@@ -49,10 +49,14 @@
 (require 'ede/proj-obj)
 (require 'ede/proj-comp)
 
+(declare-function ede-srecode-setup "ede/srecode")
+(declare-function ede-srecode-insert "ede/srecode")
+
 ;;; Code:
 (defmethod ede-proj-makefile-create ((this ede-proj-project) mfilename)
   "Create a Makefile for all Makefile targets in THIS.
 MFILENAME is the makefile to generate."
+  (require 'ede/srecode)
   (let ((mt nil)
 	(isdist (string= mfilename (ede-proj-dist-makefile this)))
 	(depth 0)
@@ -153,7 +157,7 @@ MFILENAME is the makefile to generate."
 					      (file-name-sans-extension
 					       f)) ".P"))
 				   df " "))))
-	  ;; 
+	  ;;
 	  ;; Insert ALL Rule
 	  ;;
 	  (insert "\n\nall:")
@@ -271,9 +275,8 @@ Execute BODY in a location where a value can be placed."
 (put 'ede-pmake-insert-variable-once 'lisp-indent-function 1)
 
 ;;; SOURCE VARIABLE NAME CONSTRUCTION
-;;
-;;;###autoload
-(defun ede-pmake-varname (obj)
+
+(defsubst ede-pmake-varname (obj)
   "Convert OBJ into a variable name name.
 Change .  to _ in the variable name."
   (let ((name (oref obj name)))
@@ -349,7 +352,7 @@ NOTE: Not yet in use!  This is part of an SRecode conversion of
 ;
 ;	   conf-table)
 ;
-     
+
      ;; @TODO - finish off this function, and replace the below fcn
 
 ;     ))
@@ -378,7 +381,7 @@ NOTE: Not yet in use!  This is part of an SRecode conversion of
 	  conf-table))
   (let* ((top "")
 	 (tmp this))
-    ;; Use relativistic paths for subdirs.
+    ;; Use relative paths for subdirs.
     (while (ede-parent-project tmp)
       (setq tmp (ede-parent-project tmp)
 	    top (concat "../" top)))
@@ -439,14 +442,12 @@ sources variable."
 	(name (ede-proj-makefile-target-name this))
 	(src (oref this source)))
     (ede-proj-makefile-insert-object-variables (car comp) name src)
-    (while comp
-      (ede-compiler-only-once (car comp)
-	(ede-proj-makefile-insert-variables (car comp)))
-      (setq comp (cdr comp)))
-    (while link
-      (ede-linker-only-once (car link)
-	(ede-proj-makefile-insert-variables (car link)))
-      (setq link (cdr link)))))
+    (dolist (obj comp)
+      (ede-compiler-only-once obj
+			      (ede-proj-makefile-insert-variables obj)))
+    (dolist (linker link)
+      (ede-linker-only-once linker
+			    (ede-proj-makefile-insert-variables linker)))))
 
 (defmethod ede-proj-makefile-insert-automake-pre-variables
   ((this ede-proj-target))
@@ -485,7 +486,7 @@ These are removed with make clean."
       (setq garb (append (oref (car src) garbagepattern) garb)
 	    src (cdr src)))
     garb))
-    
+
 
 ;;; RULES
 ;;
@@ -524,7 +525,7 @@ Argument THIS is the target that should insert stuff."
 
 (defmethod ede-proj-makefile-automake-insert-subdirs ((this ede-proj-project))
   "Insert a SUBDIRS variable for Automake."
-  (ede-pmake-insert-variable-once "SUBDIRS"
+  (proj-comp-insert-variable-once "SUBDIRS"
     (ede-map-subprojects
      this (lambda (sproj)
 	    (insert " " (ede-subproject-relative-path sproj))
@@ -532,8 +533,7 @@ Argument THIS is the target that should insert stuff."
 
 (defmethod ede-proj-makefile-automake-insert-extradist ((this ede-proj-project))
   "Insert the EXTRADIST variable entries needed for Automake and EDE."
-  (ede-pmake-insert-variable-once "EXTRA_DIST"
-    (insert "Project.ede")))
+  (proj-comp-insert-variable-once "EXTRA_DIST" (insert "Project.ede")))
 
 (defmethod ede-proj-makefile-insert-dist-rules ((this ede-proj-project))
   "Insert distribution rules for THIS in a Makefile, such as CLEAN and DIST."
@@ -565,10 +565,7 @@ Argument THIS is the target that should insert stuff."
 	    (cond ((eq (cdr sv) 'share)
 		   ;; This variable may be shared between multiple targets.
 		   (if (re-search-backward (concat "\\$(" (car sv) ")")
-					   (save-excursion
-					     (beginning-of-line)
-					     (point))
-					   t)
+					   (point-at-bol) t)
 		       ;; If its already in the dist target, then skip it.
 		       nil
 		     (setq sv (car sv))))
@@ -647,7 +644,7 @@ Some compilers only use the first element in the dependencies, others
 have a list of intermediates (object files), and others don't care.
 This allows customization of how these elements appear."
   (let* ((c (ede-proj-compilers this))
-	 (io (ede-or (mapcar 'ede-compiler-intermediate-objects-p c)))
+	 (io (eval (cons 'or (mapcar 'ede-compiler-intermediate-objects-p c))))
 	 (out nil))
     (if io
 	(progn

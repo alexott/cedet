@@ -1,25 +1,25 @@
 ;;; ede/proj.el --- EDE Generic Project file driver
 
-;;;  Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2007, 2008, 2009, 2010  Eric M. Ludlam
+;; Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: ede/proj.el,v 1.72 2010-06-06 14:22:32 zappo Exp $
 
-;; This software is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -29,9 +29,30 @@
 ;; rebuild.  The targets provided in ede-proj can be augmented with
 ;; additional target types inherited directly from `ede-proj-target'.
 
-(eval-and-compile '(require 'ede))
 (require 'ede/proj-comp)
 (require 'ede/make)
+
+(declare-function ede-proj-makefile-create "ede/pmake")
+(declare-function ede-proj-configure-synchronize "ede/pconf")
+
+(autoload 'ede-proj-target-aux "ede/proj-aux"
+  "Target class for a group of lisp files." nil nil)
+(autoload 'ede-proj-target-elisp "ede/proj-elisp"
+  "Target class for a group of lisp files." nil nil)
+(autoload 'ede-proj-target-elisp-autoloads "ede/proj-elisp"
+  "Target class for generating autoload files." nil nil)
+(autoload 'ede-proj-target-scheme "ede/proj-scheme"
+  "Target class for a group of lisp files." nil nil)
+(autoload 'ede-proj-target-makefile-miscelaneous "ede/proj-misc"
+  "Target class for a group of miscellaneous w/ a special makefile." nil nil)
+(autoload 'ede-proj-target-makefile-program "ede/proj-prog"
+  "Target class for building a program." nil nil)
+(autoload 'ede-proj-target-makefile-archive "ede/proj-archive"
+  "Target class for building an archive of object code." nil nil)
+(autoload 'ede-proj-target-makefile-shared-object "ede/proj-shared"
+  "Target class for building a shared object." nil nil)
+(autoload 'ede-proj-target-makefile-info "ede/proj-info"
+  "Target class for info files." nil nil)
 
 ;;; Class Definitions:
 (defclass ede-proj-target (ede-target)
@@ -138,25 +159,6 @@ commands where the variable would usually appear.")
 It is safe to leave this blank.")
    )
   "Abstract class for Makefile based targets.")
-
-(autoload 'ede-proj-target-aux "ede-proj-aux"
-  "Target class for a group of lisp files." nil nil)
-(autoload 'ede-proj-target-elisp "ede/proj.elisp"
-  "Target class for a group of lisp files." nil nil)
-(autoload 'ede-proj-target-elisp-autoloads "ede/proj.elisp"
-  "Target class for generating autoload files." nil nil)
-(autoload 'ede-proj-target-scheme "ede-proj-scheme"
-  "Target class for a group of lisp files." nil nil)
-(autoload 'ede-proj-target-makefile-miscelaneous "ede-proj-misc"
-  "Target class for a group of miscellaneous w/ a special makefile." nil nil)
-(autoload 'ede-proj-target-makefile-program "ede-proj-prog"
-  "Target class for building a program." nil nil)
-(autoload 'ede-proj-target-makefile-archive "ede-proj-archive"
-  "Target class for building an archive of object code." nil nil)
-(autoload 'ede-proj-target-makefile-shared-object "ede-proj-shared"
-  "Target class for building a shared object." nil nil)
-(autoload 'ede-proj-target-makefile-info "ede-proj-info"
-  "Target class for info files." nil nil)
 
 (defvar ede-proj-target-alist
   '(("program" . ede-proj-target-makefile-program)
@@ -333,7 +335,7 @@ Argument TARGET is the project we are completing customization on."
     (or (string= (file-name-nondirectory (oref this file)) f)
 	(string= (ede-proj-dist-makefile this) f)
 	(string-match "Makefile\\(\\.\\(in\\|am\\)\\)?$" f)
-	(string-match "config\\(ure\\.\\(in\\|ac\\)\\|\\.stutus\\)?$" f)
+	(string-match "config\\(ure\\.\\(in\\|ac\\)\\|\\.status\\)?$" f)
 	(string-match "config.h\\(\\.in\\)?" f)
 	(member f '("AUTHORS" "NEWS" "COPYING" "INSTALL" "README"))
 	)))
@@ -578,19 +580,13 @@ Converts all symbols into the objects to be used."
 	    ;; the first that has no source type requirement.
 	    (while (and avail (not (eieio-instance-inheritor-slot-boundp (car avail) 'sourcetype)))
 	      (setq avail (cdr avail)))
-	    (setq link (cdr avail)))
-	  ))
+	    (setq link (cdr avail)))))
       ;; Return the disovered linkers
       link)))
 
 
 ;;; Target type specific autogenerating gobbldegook.
 ;;
-(eval-when-compile
-  ;; This provides prevents recursive loading during a compile
-  (provide 'ede/proj)
-  (require 'ede-pmake "ede/pmake.el")
-  (require 'ede-pconf "ede/pconf.el"))
 
 (defun ede-proj-makefile-type (&optional proj)
   "Makefile type of the current project PROJ."
@@ -677,9 +673,6 @@ Optional argument FORCE will force items to be regenerated."
     (setq ede-projects (delq root ede-projects))
     (ede-load-project-file (ede-project-root-directory root))
     ))
-
-;;;###autoload
-(add-to-list 'auto-mode-alist '("Project\\.ede$" . emacs-lisp-mode))
 
 (provide 'ede/proj)
 

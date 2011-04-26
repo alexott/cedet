@@ -1,18 +1,18 @@
 ;;; project-am.el --- A project management scheme based on automake files.
 
-;;;  Copyright (C) 1998, 1999, 2000, 2003, 2005, 2007, 2008, 2009, 2010  Eric M. Ludlam
+;; Copyright (C) 1998, 1999, 2000, 2003, 2005, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Version: 0.0.3
 ;; Keywords: project, make
-;; RCS: $Id: project-am.el,v 1.57 2010-07-18 15:00:04 safanaj Exp $
 
-;; This file is NOT part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; GNU Emacs is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
 ;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -20,12 +20,10 @@
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; 
+;;
 ;; The GNU Automake tool is the first step towards having a really
 ;; good project management system.  It provides a simple and concise
 ;; look at what is actually in a project, and records it in a simple
@@ -36,28 +34,16 @@
 ;; information during edits, automatically updating the automake file
 ;; where appropriate.
 
-
-(eval-and-compile
-  ;; Compatibility for makefile mode.
-  (condition-case nil
-      (require 'makefile "make-mode")
-    (error (require 'make-mode "make-mode")))
-
-  ;; Requiring the .el files prevents incomplete builds.
-  (require 'eieio "eieio.el")
-  (require 'ede "ede.el"))
-
+(require 'make-mode)
+(require 'ede)
 (require 'ede/make)
-(require 'makefile-edit)
-(require 'autoconf-edit)
-(require 'semantic) ;; for semantic-find-tags-by-...
-;; (declare-function 'semantic-fetch-tags "semantic")
-;; (declare-function 'semantic-find-tags-by-class "semantic-find")
-;; (declare-function 'semantic-find-tags-by-name-regexp "semantic-find")
+(require 'ede/makefile-edit)
+(require 'semantic/find) ;; for semantic-find-tags-by-...
+(require 'ede/autoconf-edit)
 
-(eval-when-compile (require 'ede-speedbar "ede/speedbar.el"))
-(eval-when-compile (require 'compile)
-		   (require 'ede/shell))
+(declare-function autoconf-parameters-for-macro "ede/autoconf-edit")
+(declare-function ede-shell-run-something "ede/shell")
+(eval-when-compile (require 'compile))
 
 ;;; Code:
 (defgroup project-am nil
@@ -415,21 +401,22 @@ Argument COMMAND is the command to use for compiling the target."
 	  (funcall project-am-debug-target-function cmd))
       (kill-buffer tb))))
 
+(declare-function ede-shell-run-something "ede/shell")
+
 (defmethod project-run-target ((obj project-am-objectcode))
   "Run the current project target in comint buffer."
+  (require 'ede/shell)
   (let ((tb (get-buffer-create " *padt*"))
 	(dd (oref obj path))
 	(cmd nil))
     (unwind-protect
 	(progn
-	  (require 'ede/shell)
 	  (set-buffer tb)
 	  (setq default-directory dd)
 	  (setq cmd (read-from-minibuffer
 		     "Run (like this): "
 		     (concat (ede-target-name obj))))
-	  (ede-shell-run-something obj cmd)	  
-	  )
+	  (ede-shell-run-something obj cmd))
       (kill-buffer tb))))
 
 (defmethod project-make-dist ((this project-am-target))
@@ -500,7 +487,8 @@ It does not check for existing project objects.  Use `project-am-load'.
 Optional argument SUGGESTEDNAME will be the project name.
 This is used when subprojects are made in named subdirectories."
   (project-am-with-makefile-current path
-    (if (and ede-object (project-am-makefile-p ede-object)) ede-object
+    (if (and ede-object (project-am-makefile-p ede-object))
+	ede-object
       (let* ((pi (project-am-package-info path))
 	     (sfn (when suggestedname
 		    (project-am-last-dir suggestedname)))
@@ -645,9 +633,8 @@ Strip out duplicates, and recurse on variables."
 	   (cof (nth 3 pi))
 	   (osubproj (oref this subproj))
 	   ;; 1/30/10 - We need to append these two lists together,
-	   ;; then strip out duplicates.  Expanding this list (via 
-	   ;; references to other variables should also strip out
-	   ;; dups
+	   ;; then strip out duplicates.  Expanding this list (via
+	   ;; references to other variables should also strip out dups
 	   (csubproj (append
 		      (makefile-macro-file-list "DIST_SUBDIRS")
 		      (makefile-macro-file-list "SUBDIRS")))
@@ -728,7 +715,6 @@ Strip out duplicates, and recurse on variables."
   (oset this :source (makefile-macro-file-list (project-am-macro this)))
   (unless (oref this :source)
     (oset this :source (list (concat (file-name-sans-extension (oref this :name)) ".c")))))
-
 
 (defmethod project-rescan ((this project-am-texinfo))
   "Rescan object THIS."
@@ -970,9 +956,8 @@ Kill the Configure buffer if it was not already in a buffer."
     (cond
      ;; Try configure.in or configure.ac
      (conf-in
-      (require 'autoconf-edit)
       (project-am-with-config-current conf-in
-        (let ((aci (autoconf-parameters-for-macro "AC_INIT"))
+	(let ((aci (autoconf-parameters-for-macro "AC_INIT"))
 	      (aia (autoconf-parameters-for-macro "AM_INIT_AUTOMAKE"))
 	      (acf (autoconf-parameters-for-macro "AC_CONFIG_FILES"))
 	      (aco (autoconf-parameters-for-macro "AC_OUTPUT"))
@@ -1003,7 +988,7 @@ Kill the Configure buffer if it was not already in a buffer."
      ;; Else, try the script
      ((file-exists-p conf-sh)
       (project-am-with-config-current conf-sh
-        (setq name (project-am-extract-shell-variable "PACKAGE_NAME")
+	(setq name (project-am-extract-shell-variable "PACKAGE_NAME")
 	      ver (project-am-extract-shell-variable "PACKAGE_VERSION")
 	      )
 	))
@@ -1033,7 +1018,6 @@ per file or in .dir-locals.el or similar."
   (bound-and-true-p project-am-localvars-include-path))
 
 
+(provide 'ede/project-am)
 
-(provide 'project-am)
-
-;;; project-am.el ends here
+;;; ede/project-am.el ends here

@@ -1,5 +1,5 @@
 * The 'obsolete' directory contains files that were no longer referenced from
-  the original makefiles
+  the original Project.ede files
 * Should compatibility functions be maintained (cedet-compat)?
 ** cedet-called-interactively-p
 * Speedbar documentation has been stripped out of many details
@@ -11,8 +11,15 @@
 * speedbar-require-version : commented out
 * speedbar-sort-tags : obsolete
 * inversion-upgrade-package : commented out
-* listp/cedet/mode-local : removed and commented out lots of code
+* lisp/cedet/mode-local : removed and commented out lots of code
 * seggregated unit tests from lisp/cedet/cedet-files.el into tests/cedet-files-utests.el
 * seggregated unit tests from lisp/cedet/inversion.el into tests/inversion.el
 * seggregated unit tests from lisp/cedet/pulse.el into tests/pulse.el
 * removed integration advices in lisp/cedet/pulse.el
+* removed edebug-setup-hook entry in lisp/cedet/ede/base.el
+* cedet/ede unit tests are not loaded into the test infrastructure
+* ede documentation has been stripped out of many sections, but others were
+  added; someone should check if any useful information has fallen out:
+  substitute all old "@include" in ede.texi for the contents of the included
+  file, then diff with the new version
+* move cedet/ede/proj-skel.el into etc/ or similar
