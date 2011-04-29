@@ -23,3 +23,4 @@
   substitute all old "@include" in ede.texi for the contents of the included
   file, then diff with the new version
 * move cedet/ede/proj-skel.el into etc/ or similar
+* synchronize documentation for semantic (doc/semantic/)
