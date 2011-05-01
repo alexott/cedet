@@ -682,17 +682,23 @@ Arguments UNUSED are not used."
 	(goto-char (point-min))
 	(cond
 	 ((looking-at "\\(.+\\) is a generic function")
-	  (let ((name (match-string 1)))
+	  (let ((mname (match-string 1))
+		cname)
 	    (while (re-search-forward "^`\\(.+\\)'[^\0]+?Defined in `\\(.+\\)'" nil t)
-	      (help-xref-button 2 'eieio-method-def (match-string-no-properties 1)
-				name (match-string-no-properties 2)))))
+	      (setq cname (match-string-no-properties 1))
+	      (help-xref-button 2 'eieio-method-def cname
+				mname
+				(cadr (assoc (intern cname)
+					     (get (intern mname)
+						  'method-locations)))))))
 	 ((looking-at "\\(.+\\) is an object constructor function in `\\(.+\\)'")
-	  (help-xref-button 2 'eieio-class-def (match-string-no-properties 1)
-			    (match-string-no-properties 2)))
+	  (let ((cname (match-string-no-properties 1)))
+	    (help-xref-button 2 'eieio-class-def cname
+			      (get (intern cname) 'class-location))))
 	 ((looking-at "\\(.+\\) is a\\(n abstract\\)? class in `\\(.+\\)'")
-	  (help-xref-button 3 'eieio-class-def (match-string-no-properties 1)
-			    (match-string-no-properties 3))))
-	  
+	  (let ((cname (match-string-no-properties 1)))
+	    (help-xref-button 3 'eieio-class-def cname
+			      (get (intern cname) 'class-location)))))
 	))))
 
 ;;; SPEEDBAR SUPPORT
