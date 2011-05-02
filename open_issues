@@ -24,3 +24,6 @@
   file, then diff with the new version
 * move cedet/ede/proj-skel.el into etc/ or similar
 * synchronize documentation for semantic (doc/semantic/)
+* emacs: cedet/semantic/bovine/scm-by.el <=> cedet: cedet/semantic/bovine/scheme-by.el
+* emacs: cedet/semantic/wisent/javat-wy.el <=> cedet: cedet/semantic/wisent/java-tags-wy.el
+* emacs: cedet/semantic/wisent/js-wy.el => cedet: cedet/semantic/wisent/javascript-jv-wy.el
