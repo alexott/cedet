@@ -29,7 +29,7 @@ RMFLAGS=-f
 MAKEINFO=makeinfo
 
 ## Which packages to compile, test, etc.
-PACKAGES=eieio speedbar cedet cedet/ede
+PACKAGES=eieio speedbar cedet
 
 ###### Internal part of the Makefile ###########################################
 
@@ -41,7 +41,7 @@ testdir=$(CURDIR)/tests
 
 ### Helpers
 EEVAL=$(EMACS) $(EMACSFLAGS) --eval
-LISP_PATH=$(foreach pkg,eieio speedbar cedet,(add-to-list 'load-path \"$(lispdir)/$(pkg)/\"))
+LISP_PATH=$(foreach pkg,$(PACKAGES),(add-to-list 'load-path \"$(lispdir)/$(pkg)/\"))
 
 
 ### Top-level rules
@@ -60,9 +60,9 @@ clean: clean-common $(patsubst %,clean-%,$(PACKAGES))
 ### Dynamic rules
 
 define PACKAGE_template
-$(1)_LISP=$(shell $(FIND) $(lispdir)/$(1)/ $(2) -name \*.el)
+$(1)_LISP=$(shell $(FIND) $(lispdir)/$(1)/ -name \*.el)
 $(1)_CODE=$$(patsubst %.el,%.elc,$$($(1)_LISP))
-$(1)_TEXINFO=$(shell $(FIND) $(docdir) -name $(3).texi -or -path $(3)/*.texi)
+$(1)_TEXINFO=$(shell $(FIND) $(docdir) -name $(1).texi) $(shell test ! -d $(docdir)/$(1) || $(FIND) $(docdir)/$(1)/ -name *.texi)
 $(1)_INFO=$$(patsubst %.texi,%.info,$$($(1)_TEXINFO))
 $(1)_TEST_LISP=$(shell test ! -d $(testdir)/$(1)/ || $(FIND) $(testdir)/$(1)/ -name \*.el)
 $(1)_TEST_CODE=$$(patsubst %.el,%.elc,$$($(1)_TEST_LISP))
@@ -79,10 +79,7 @@ clean-$(1):
 endef
 
 $(eval $(call PACKAGE_template,common))
-$(eval $(call PACKAGE_template,eieio))
-$(eval $(call PACKAGE_template,speedbar))
-$(eval $(call PACKAGE_template,cedet,-maxdepth 1))
-$(eval $(call PACKAGE_template,cedet/ede,,ede))
+$(foreach pkg,$(PACKAGES),$(eval $(call PACKAGE_template,$(pkg))))
 
 
 ### Generic rules
@@ -90,5 +87,5 @@ $(eval $(call PACKAGE_template,cedet/ede,,ede))
 %.elc: %.el
 	$(EEVAL) "(progn $(LISP_PATH) (or (byte-compile-file \"$<\") (kill-emacs 1)))"
 
-%.info: %.texinfo
-	$(MAKEINFO) $<
+%.info: %.texi
+	$(MAKEINFO) $< -o $@
