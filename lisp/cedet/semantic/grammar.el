@@ -1,28 +1,25 @@
 ;;; semantic/grammar.el --- Major mode framework for Semantic grammars
-;;
-;; Copyright (C) 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 David Ponce
-;;
+
+;; Copyright (C) 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
+
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
-;; Created: 15 Aug 2002
-;; Keywords: syntax
-;;
-;; This file is not part of GNU Emacs.
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
-;;
-;; This software is distributed in the hope that it will be useful,
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
-;;
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -32,16 +29,22 @@
 ;;
 
 ;;; Code:
-(require 'semantic/wisent)
-(require 'font-lock)
-(require 'pp)
+
+(require 'semantic)
+(require 'semantic/ctxt)
+(require 'semantic/format)
+(require 'semantic/grammar-wy)
+(require 'semantic/idle)
+(declare-function semantic-momentary-highlight-tag "semantic/decorate")
+(declare-function semantic-analyze-context "semantic/analyze")
+(declare-function semantic-analyze-tags-of-class-list
+		  "semantic/analyze/complete")
 
 (eval-when-compile
-  (require 'semantic/senator)
+  (require 'eldoc)
   (require 'semantic/edit)
-  (require 'semantic/find)
-  (require 'semantic/format)
-  (require 'semantic/idle))
+  (require 'semantic/find))
+
 
 ;;;;
 ;;;; Set up lexer
@@ -139,10 +142,6 @@ ARGS are ASSOC's key value list."
 ;;;; API to access grammar tags
 ;;;;
 
-(defvar-mode-local semantic-grammar-mode
-  senator-add-log-tags '(nonterminal put token keyword)
-  "List of nonterminal tags used with add-log.")
-
 (define-mode-local-override semantic-tag-components
   semantic-grammar-mode (tag)
   "Return the children of tag TAG."
@@ -228,10 +227,7 @@ That is tag names plus names defined in tag attribute `:rest'."
               (skip-chars-backward "\r\n\t")
               ;; If a grammar footer is found, skip it.
               (re-search-backward "^;;;\\s-+\\S-+\\s-+ends here"
-                                  (save-excursion
-                                    (beginning-of-line)
-                                    (point))
-                                  t)
+                                  (point-at-bol) t)
               (skip-chars-backward "\r\n\t")
               (point)))
            "\n"))
@@ -550,26 +546,27 @@ Typically a DEFINE expression should look like this:
 " keywords "
 
 ;; This file is not part of GNU Emacs.
-;;
+
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
-;;
+;; published by the Free Software Foundation, either version 3 of
+;; the License, or (at your option) any later version.
+
 ;; This software is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
 ;; General Public License for more details.
 ;;
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; PLEASE DO NOT MANUALLY EDIT THIS FILE!  It is automatically
 ;; generated from the grammar file " gram ".
+
+;;; History:
+;;
 
 ;;; Code:
 ")
@@ -619,14 +616,14 @@ The symbols in the list are local variables in
                   (concat (format-time-string ";; Copyright (C) %Y ")
                           user-full-name)))
         (author (or (semantic-grammar-named-line "Author")
-                    (concat ";; Author: " user-full-name
-                            " <" user-mail-address ">")))
+                   (concat ";; Author: " user-full-name
+                           " <" user-mail-address ">")))
         (created (or (semantic-grammar-named-line "Created")
-                     (concat ";; Created: "
-                             (format-time-string "%Y-%m-%d %T%z"))))
+                    (concat ";; Created: "
+                            (format-time-string "%Y-%m-%d %T%z"))))
         (keywords (or (semantic-grammar-named-line "Keywords")
-                      ";; Keywords: syntax"))
-	(out ""))
+                     ";; Keywords: syntax"))
+        (out ""))
     (dolist (S semantic-grammar-header-template)
       (cond ((stringp S)
 	     (setq out (concat out S)))
@@ -848,9 +845,9 @@ Lisp code."
       (erase-buffer)
       (unless (eq major-mode 'emacs-lisp-mode)
         (emacs-lisp-mode))
-      
+
 ;;;; Header + Prologue
-      
+
       (insert header
               "\n;;; Prologue\n;;\n"
               prologue
@@ -858,32 +855,32 @@ Lisp code."
       ;; Evaluate the prologue now, because it might provide definition
       ;; of grammar macro expanders.
       (eval-region (point-min) (point))
-      
+
       (save-excursion
-        
+
 ;;;; Declarations
-        
+
         (insert "\n;;; Declarations\n;;\n")
-        
+
         ;; `eval-defun' is not necessary to reset `defconst' values.
         (semantic-grammar-insert-defconst
          (semantic-grammar-keywordtable)
          (with-current-buffer semantic--grammar-input-buffer
            (semantic-grammar-keyword-data))
          "Table of language keywords.")
-        
+
         (semantic-grammar-insert-defconst
          (semantic-grammar-tokentable)
          (with-current-buffer semantic--grammar-input-buffer
            (semantic-grammar-token-data))
          "Table of lexical tokens.")
-        
+
         (semantic-grammar-insert-defconst
          (semantic-grammar-parsetable)
          (with-current-buffer semantic--grammar-input-buffer
            (semantic-grammar-parser-data))
          "Parser table.")
-        
+
         (semantic-grammar-insert-defun
          (semantic-grammar-setupfunction)
          (with-current-buffer semantic--grammar-input-buffer
@@ -896,14 +893,14 @@ Lisp code."
         (semantic-grammar-insert-defanalyzers)
 
 ;;;; Epilogue & Footer
-        
+
         (insert "\n;;; Epilogue\n;;\n"
                 epilogue
                 footer
                 )
-        
+
         )
-      
+
       (save-buffer 16)
 
       ;; If running in batch mode, there is nothing more to do.
@@ -975,7 +972,6 @@ Return non-nil if there were no errors, nil if errors."
               (byte-compile-file packagename))
           t)))))
 
-;;;###autoload
 (defun semantic-grammar-batch-build-packages ()
   "Build Lisp packages from grammar files on the command line.
 That is, run `semantic-grammar-batch-build-one-package' for each file.
@@ -991,9 +987,9 @@ See also the variable `semantic-grammar-file-regexp'."
 `semantic-grammar-batch-build-packages' must be used with -batch"
              ))
   (let ((status 0)
-        ;; Remove vc from find-file-hooks.  It causes bad stuff to
+        ;; Remove vc from find-file-hook.  It causes bad stuff to
         ;; happen in Emacs 20.
-        (find-file-hooks (delete 'vc-find-file-hook find-file-hooks)))
+        (find-file-hook (delete 'vc-find-file-hook find-file-hook)))
     (message "Compiling Grammars from: %s" (locate-library "semantic/grammar"))
     (dolist (arg command-line-args-left)
       (unless (and arg (file-exists-p arg))
@@ -1135,8 +1131,8 @@ END is the limit of the search."
     ;; grammar mode!
     ("[\r\n\t ]+:\\sw+\\>"
      0 font-lock-builtin-face)
-    ;; Append the Semantic keywords
-    ,@semantic-fw-font-lock-keywords
+    ;; ;; Append the Semantic keywords
+    ;; ,@semantic-fw-font-lock-keywords
     )
   "Font Lock keywords used to highlight Semantic grammar buffers.")
 
@@ -1509,7 +1505,7 @@ Return the tag found or nil if not found."
   (car (semantic-find-tags-by-class
         'function
         (or (semantic-find-tags-by-name name (current-buffer))
-            (and (featurep 'semanticdb)
+            (and (featurep 'semantic/db)
                  semanticdb-current-database
                  (cdar (semanticdb-find-tags-by-name name nil t)))))))
 
@@ -1566,6 +1562,7 @@ Select the buffer containing the tag's definition, and move point there."
                    (format "%s-%s" library macro-name)))))
       (if tag
           (progn
+	    (require 'semantic/decorate)
             (pop-to-buffer (semantic-tag-buffer tag))
             (goto-char (semantic-tag-start tag))
             (semantic-momentary-highlight-tag tag))
@@ -1624,31 +1621,14 @@ Select the buffer containing the tag's definition, and move point there."
     )
   "Association of syntax elements, and the corresponding help.")
 
-(eval-when-compile
-  (require 'eldoc)
-  (require 'semantic/ctxt)
-  (cond
-   ((fboundp 'eldoc-function-argstring-from-docstring)
-    (defalias 'semantic-grammar-function-argstring-from-docstring
-      'eldoc-function-argstring-from-docstring)
-    )
-   ((fboundp 'help-split-fundoc)
-    (defsubst semantic-grammar-function-argstring-from-docstring (fun)
-      (help-split-fundoc (documentation fun t) fun))
-    )
-   (t
-    (defalias 'semantic-grammar-function-argstring-from-docstring
-      'ignore)
-    )
-   ))
-
 (defun semantic-grammar-eldoc-get-macro-docstring (macro expander)
   "Return a one-line docstring for the given grammar MACRO.
 EXPANDER is the name of the function that expands MACRO."
+  (require 'eldoc)
   (if (and (eq expander (aref eldoc-last-data 0))
            (eq 'function (aref eldoc-last-data 2)))
       (aref eldoc-last-data 1)
-    (let ((doc (semantic-grammar-function-argstring-from-docstring expander)))
+    (let ((doc (help-split-fundoc (documentation expander t) expander)))
       (cond
        (doc
         (setq doc (car doc))
@@ -1658,15 +1638,8 @@ EXPANDER is the name of the function that expands MACRO."
         (setq doc (eldoc-function-argstring expander))))
       (when doc
         (setq doc
-	      (condition-case nil
-		  (eldoc-docstring-format-sym-doc
-                   macro (format "==> %s %s" expander doc)
-		   'default)
-		;; Older emacsen w/out the third arg here.
-		(error
-		 (eldoc-docstring-format-sym-doc
-		  macro (format "==> %s %s" expander doc)))))
-		
+	      (eldoc-docstring-format-sym-doc
+	       macro (format "==> %s %s" expander doc) 'default))
         (eldoc-last-data-store expander doc 'function))
       doc)))
 
@@ -1685,6 +1658,7 @@ string for the variable.
 If a default description of the current context can be obtained,
 return it.
 Otherwise return nil."
+  (require 'eldoc)
   (let* ((elt (car (semantic-ctxt-current-symbol)))
          (val (and elt (cdr (assoc elt semantic-grammar-syntax-help)))))
     (when (and (not val) elt (semantic-grammar-in-lisp-p))
@@ -1848,13 +1822,11 @@ Optional argument COLOR determines if color is added to the text."
       desc)))
 
 ;;; Semantic Analysis
-;;
-(eval-when-compile
-  (require 'semantic/analyze))
 
 (define-mode-local-override semantic-analyze-current-context
   semantic-grammar-mode (point)
   "Provide a semantic analysis object describing a context in a grammar."
+  (require 'semantic/analyze)
   (if (semantic-grammar-in-lisp-p)
       (with-mode-local emacs-lisp-mode
 	(semantic-analyze-current-context point))
@@ -1891,6 +1863,7 @@ Optional argument COLOR determines if color is added to the text."
 (define-mode-local-override semantic-analyze-possible-completions
   semantic-grammar-mode (context)
   "Return a list of possible completions based on CONTEXT."
+  (require 'semantic/analyze/complete)
   (if (semantic-grammar-in-lisp-p)
       (with-mode-local emacs-lisp-mode
 	(semantic-analyze-possible-completions context))
