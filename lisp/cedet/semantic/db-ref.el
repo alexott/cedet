@@ -1,23 +1,23 @@
 ;;; semantic/db-ref.el --- Handle cross-db file references
 
-;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -36,7 +36,14 @@
 
 
 ;;; Code:
-;;;###autoload
+(require 'eieio)
+(require 'semantic)
+(require 'semantic/db)
+(require 'semantic/tag)
+
+;; For the semantic-find-tags-by-name-regexp macro.
+(eval-when-compile (require 'semantic/find))
+
 (defmethod semanticdb-add-reference ((dbt semanticdb-abstract-table)
 				     include-tag)
   "Add a reference for the database table DBT based on INCLUDE-TAG.
@@ -45,7 +52,7 @@ will be added to the database that INCLUDE-TAG refers to."
   ;; NOTE: I should add a check to make sure include-tag is in DB.
   ;;       but I'm too lazy.
   (let* ((semanticdb-find-default-throttle
-	       (if (featurep 'semanticdb-find)
+	       (if (featurep 'semantic/db-find)
 		   (remq 'unloaded semanticdb-find-default-throttle)
 		 nil))
 	 (refdbt (semanticdb-find-table-for-include include-tag dbt))
@@ -138,11 +145,15 @@ DBT, the second argument is DBT."
    (i-include :initarg :i-include))
   "Simple class to allow ADEBUG to show a nice list.")
 
+(declare-function data-debug-new-buffer "data-debug")
+(declare-function data-debug-insert-object-slots "eieio-datadebug")
+
 (defun semanticdb-ref-test (refresh)
   "Dump out the list of references for the current buffer.
 If REFRESH is non-nil, cause the current table to have its references
 refreshed before dumping the result."
   (interactive "p")
+  (require 'eieio-datadebug)
   ;; If we need to refresh... then do so.
   (when refresh
     (semanticdb-refresh-references semanticdb-current-table))
@@ -159,4 +170,5 @@ refreshed before dumping the result."
   )
 
 (provide 'semantic/db-ref)
+
 ;;; semantic/db-ref.el ends here

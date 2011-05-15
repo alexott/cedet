@@ -1,37 +1,38 @@
-;;; ede-ede-grammar.el --- EDE support for Semantic Grammar Files
+;;; semantic/ede-grammar.el --- EDE support for Semantic Grammar Files
 
-;;;  Copyright (C) 2003, 2004, 2007, 2008, 2009  Eric M. Ludlam
+;; Copyright (C) 2003, 2004, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
-;; RCS: $Id: semantic/ede-grammar.el,v 1.18 2010-03-15 13:40:54 xscript Exp $
 
-;; This software is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Handle .by or .wy files.
 
+(require 'semantic)
 (require 'ede/proj)
 (require 'ede/pmake)
 (require 'ede/pconf)
-(require 'ede/proj.elisp)
+(require 'ede/proj-elisp)
+(require 'semantic/grammar)
 
 ;;; Code:
-;;;###autoload
 (defclass semantic-ede-proj-target-grammar (ede-proj-target-makefile)
   ((menu :initform nil)
    (keybindings :initform nil)
@@ -112,8 +113,6 @@ parsing different languages.")
    )
   "Compile Emacs Lisp programs.")
 
-(require 'semantic/grammar)
-
 ;;; Target options.
 (defmethod ede-buffer-mine ((this semantic-ede-proj-target-grammar) buffer)
   "Return t if object THIS lays claim to the file in BUFFER.
@@ -135,11 +134,8 @@ Lays claim to all -by.el, and -wy.el files."
 	      (save-excursion
 		(semantic-grammar-create-package))
 	      (save-buffer)
-	      (let ((cf (concat (semantic-grammar-package) ".el")))
-		(if (or (not (file-exists-p cf))
-			(file-newer-than-file-p src cf))
-		    (byte-compile-file cf)))))
-	    (oref obj source)))
+              (byte-recompile-file (concat (semantic-grammar-package) ".el") nil 0)))
+	  (oref obj source)))
   (message "All Semantic Grammar sources are up to date in %s" (object-name obj)))
 
 ;;; Makefile generation functions
@@ -153,7 +149,7 @@ Lays claim to all -by.el, and -wy.el files."
 (defmethod ede-proj-makefile-insert-variables :AFTER ((this semantic-ede-proj-target-grammar))
   "Insert variables needed by target THIS."
   (ede-proj-makefile-insert-loadpath-items
-   (ede/proj.elisp-packages-to-loadpath
+   (ede-proj-elisp-packages-to-loadpath
     (list "eieio" "semantic" "inversion" "ede")))
   ;; eieio for object system needed in ede
   ;; semantic because it is
@@ -191,19 +187,12 @@ Argument THIS is the target that should insert stuff."
   (insert " $(" (ede-pmake-varname this) "_SEMANTIC_GRAMMAR_EL)")
   )
 
-;;;###autoload
-(autoload 'ede-proj-target-elisp "semantic-ede-proj-target-grammar"
-  "Target class for Emacs/Semantic grammar files." nil nil)
+;; (autoload 'ede-proj-target-elisp "ede/proj-elisp"
+;;   "Target class for Emacs/Semantic grammar files." nil nil)
 
 (ede-proj-register-target "semantic grammar"
 			  semantic-ede-proj-target-grammar)
 
 (provide 'semantic/ede-grammar)
-
-;;;###autoload
-(eval-after-load "ede-proj"
-    (quote
-     (require 'semantic/ede-grammar)
-     ))
 
 ;;; semantic/ede-grammar.el ends here

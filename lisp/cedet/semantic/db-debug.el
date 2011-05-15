@@ -1,34 +1,35 @@
-;;; semantic/db-debug.el --- Extra level debugging routines
+;;; semantic/db-debug.el --- Extra level debugging routines for Semantic
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Various routines for debugging SemanticDB issues, or viewing
 ;; semanticdb state.
 
+(require 'data-debug)
 (require 'semantic/db)
+(require 'semantic/format)
 
 ;;; Code:
 ;;
-;;;###autoload
 (defun semanticdb-dump-all-table-summary ()
   "Dump a list of all databases in Emacs memory."
   (interactive)
@@ -37,10 +38,8 @@
     (data-debug-new-buffer "*SEMANTICDB*")
     (data-debug-insert-stuff-list db "*")))
 
-;;;###autoload
 (defalias 'semanticdb-adebug-database-list 'semanticdb-dump-all-table-summary)
 
-;;;###autoload
 (defun semanticdb-adebug-current-database ()
   "Run ADEBUG on the current database."
   (interactive)
@@ -50,7 +49,6 @@
     (data-debug-new-buffer "*SEMANTICDB ADEBUG*")
     (data-debug-insert-stuff-list p "*")))
 
-;;;###autoload
 (defun semanticdb-adebug-current-table ()
   "Run ADEBUG on the current database."
   (interactive)
@@ -60,7 +58,6 @@
     (data-debug-insert-stuff-list p "*")))
 
 
-;;;###autoload
 (defun semanticdb-adebug-project-database-list ()
   "Run ADEBUG on the current database."
   (interactive)
@@ -74,7 +71,6 @@
 ;;; Sanity Checks
 ;;
 
-;;;###autoload
 (defun semanticdb-table-oob-sanity-check (cache)
   "Validate that CACHE tags do not have any overlays in them."
   (while cache
@@ -85,7 +81,6 @@
      (semantic-tag-components-with-overlays (car cache)))
     (setq cache (cdr cache))))
 
-;;;###autoload
 (defun semanticdb-table-sanity-check (&optional table)
   "Validate the current semanticdb TABLE."
   (interactive)
@@ -98,7 +93,6 @@
       ;; We can't use the usual semantic validity check, so hack our own.
       (semanticdb-table-oob-sanity-check (semanticdb-get-tags table)))))
 
-;;;###autoload
 (defun semanticdb-database-sanity-check ()
   "Validate the current semantic database."
   (interactive)
@@ -112,4 +106,5 @@
 
 
 (provide 'semantic/db-debug)
+
 ;;; semantic/db-debug.el ends here

@@ -1,26 +1,25 @@
 ;;; semantic/complete.el --- Routines for performing tag completion
 
-;;; Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -109,39 +108,22 @@
 ;; a buffer.
 
 (eval-when-compile (require 'cl))
-(require 'eieio)
-(require 'semantic/tag)
-(require 'semantic/find)
+(require 'semantic)
+(require 'eieio-opt)
 (require 'semantic/analyze)
-(require 'semantic/format)
 (require 'semantic/ctxt)
-;; Keep semanticdb optional.
-(eval-when-compile
-  (require 'semantic/db)
-  (require 'semantic/db-find))
+(require 'semantic/decorate)
+(require 'semantic/format)
 
 (eval-when-compile
-  (condition-case nil
-      ;; Tooltip not available in older emacsen.
-      (require 'tooltip)
-    (error nil))
-  )
+  ;; For the semantic-find-tags-for-completion macro.
+  (require 'semantic/find))
 
 ;;; Code:
-
-;;; Compatibility
-;;
-(if (fboundp 'minibuffer-contents)
-    (eval-and-compile (defalias 'semantic-minibuffer-contents 'minibuffer-contents))
-  (eval-and-compile (defalias 'semantic-minibuffer-contents 'buffer-string)))
-(if (fboundp 'delete-minibuffer-contents)
-    (eval-and-compile (defalias 'semantic-delete-minibuffer-contents 'delete-minibuffer-contents))
-  (eval-and-compile (defalias 'semantic-delete-minibuffer-contents 'erase-buffer)))
 
 (defvar semantic-complete-inline-overlay nil
   "The overlay currently active while completing inline.")
 
-;;;###autoload
 (defun semantic-completion-inline-active-p ()
   "Non-nil if inline completion is active."
   (when (and semantic-complete-inline-overlay
@@ -160,14 +142,14 @@ For inline completion, this is the text wrapped in the inline completion
 overlay."
   (if semantic-complete-inline-overlay
       (semantic-complete-inline-text)
-    (semantic-minibuffer-contents)))
+    (minibuffer-contents)))
 
 (defun semantic-completion-delete-text ()
   "Delete the text that is actively being completed.
 Presumably if you call this you will insert something new there."
   (if semantic-complete-inline-overlay
       (semantic-complete-inline-delete-text)
-    (semantic-delete-minibuffer-contents)))
+    (delete-minibuffer-contents)))
 
 (defun semantic-completion-message (fmt &rest args)
   "Display the string FMT formatted with ARGS at the end of the minibuffer."
@@ -206,7 +188,6 @@ Value should be a ... what?")
 Keeps STRINGS only in the history.")
 
 
-;;;###autoload
 (defun semantic-complete-read-tag-engine (collector displayor prompt
 						    default-tag initial-input
 						    history)
@@ -328,6 +309,12 @@ HISTORY is a symbol representing a variable to story the history in."
 ;; the focused tag is calculated... preferably once.
 (defvar semantic-complete-current-matched-tag nil
   "Variable used to pass the tags being matched to the prompt.")
+
+;; semantic-displayor-focus-abstract-child-p is part of the
+;; semantic-displayor-focus-abstract class, defined later in this
+;; file.
+(declare-function semantic-displayor-focus-abstract-child-p "semantic/complete"
+		  t t)
 
 (defun semantic-complete-current-match ()
   "Calculate a match from the current completion environment.
@@ -532,9 +519,9 @@ if INLINE, then completion is happening inline in a buffer."
 	  ;; when experimenting with the completion engine.  I don't
 	  ;; remember what the problem was though, and I wasn't sure why
 	  ;; the below two lines were there since they obviously added
-	  ;; some odd behavior.  -EML	  
-	  ;(and (not (eq na 'displayend))
-	  ;     (semantic-collector-current-exact-match collector))
+	  ;; some odd behavior.  -EML
+	  ;; (and (not (eq na 'displayend))
+	  ;;      (semantic-collector-current-exact-match collector))
 	  (semantic-collector-all-completions collector contents))
 	 contents)
 	;; Ask the displayor to display them.
@@ -569,7 +556,7 @@ if INLINE, then completion is happening inline in a buffer."
     (define-key km "\C-g" 'semantic-complete-inline-quit)
     (define-key km "?"
       (lambda () (interactive)
-        (describe-variable 'semantic-complete-inline-map)))
+	(describe-variable 'semantic-complete-inline-map)))
     km)
   "Keymap used while performing Semantic inline completion.")
 
@@ -728,7 +715,6 @@ a reasonable distance."
     ;; If something goes terribly wrong, clean up after ourselves.
     (error (semantic-complete-inline-exit))))
 
-;;;###autoload
 (defun semantic-complete-inline-force-display ()
   "Force the display of whatever the current completions are.
 DO NOT CALL THIS IF THE INLINE COMPLETION ENGINE IS NOT ACTIVE."
@@ -1211,9 +1197,13 @@ Uses semanticdb for searching all tags in the current project."
   ()
   "Completion engine for tags in a project.")
 
+(declare-function semanticdb-brute-deep-find-tags-for-completion
+		  "semantic/db-find")
+
 (defmethod semantic-collector-calculate-completions-raw
   ((obj semantic-collector-project-brutish) prefix completionlist)
   "Calculate the completions for prefix from completionlist."
+  (require 'semantic/db-find)
   (semanticdb-brute-deep-find-tags-for-completion prefix (oref obj path)))
 
 ;;; Current Datatype member search.
@@ -1809,7 +1799,6 @@ Use this to enable custom editing.")
   :type semantic-complete-inline-custom-type
   )
 
-;;;###autoload
 (defun semantic-complete-read-tag-buffer-deep (prompt &optional
 						      default-tag
 						      initial-input
@@ -1832,7 +1821,6 @@ HISTORY is a symbol representing a variable to store the history in."
    history)
   )
 
-;;;###autoload
 (defun semantic-complete-read-tag-local-members (prompt &optional
 							default-tag
 							initial-input
@@ -1855,7 +1843,6 @@ HISTORY is a symbol representing a variable to store the history in."
    history)
   )
 
-;;;###autoload
 (defun semantic-complete-read-tag-project (prompt &optional
 						  default-tag
 						  initial-input
@@ -1880,7 +1867,6 @@ HISTORY is a symbol representing a variable to store the history in."
    history)
   )
 
-;;;###autoload
 (defun semantic-complete-inline-tag-project ()
   "Complete a symbol name by name from within the current project.
 This is similar to `semantic-complete-read-tag-project', except
@@ -1928,7 +1914,6 @@ completion works."
 	   start end))
       )))
 
-;;;###autoload
 (defun semantic-complete-read-tag-analyzer (prompt &optional
 						   context
 						   history)
@@ -1961,7 +1946,6 @@ prompts.  these are calculated from the CONTEXT variable passed in."
      inp
      history)))
 
-;;;###autoload
 (defun semantic-complete-inline-analyzer (context)
   "Complete a symbol name by name based on the current context.
 This is similar to `semantic-complete-read-tag-analyze', except
@@ -2019,7 +2003,6 @@ completion works."
   :type semantic-complete-inline-custom-type
   )
 
-;;;###autoload
 (defun semantic-complete-inline-analyzer-idle (context)
   "Complete a symbol name by name based on the current context for idle time.
 CONTEXT is the semantic analyzer context to start with.
@@ -2037,29 +2020,18 @@ completion works."
     ))
 
 
-;;; ------------------------------------------------------------
-;;; Testing/Samples
-;;
-(defun semantic-complete-test ()
-  "Test completion mechanisms."
-  (interactive)
-  (message "%S"
-   (semantic-format-tag-prototype
-    (semantic-complete-read-tag-project "Jump to symbol: ")
-    )))
-
 ;;;###autoload
 (defun semantic-complete-jump-local ()
-  "Jump to a semantic symbol."
+  "Jump to a local semantic symbol."
   (interactive)
   (let ((tag (semantic-complete-read-tag-buffer-deep "Jump to symbol: ")))
     (when (semantic-tag-p tag)
       (push-mark)
       (goto-char (semantic-tag-start tag))
       (semantic-momentary-highlight-tag tag)
-      (working-message "%S: %s "
-                       (semantic-tag-class tag)
-                       (semantic-tag-name  tag)))))
+      (message "%S: %s "
+	       (semantic-tag-class tag)
+	       (semantic-tag-name  tag)))))
 
 ;;;###autoload
 (defun semantic-complete-jump ()
@@ -2071,9 +2043,9 @@ completion works."
       (semantic-go-to-tag tag)
       (switch-to-buffer (current-buffer))
       (semantic-momentary-highlight-tag tag)
-      (working-message "%S: %s "
-                       (semantic-tag-class tag)
-                       (semantic-tag-name  tag)))))
+      (message "%S: %s "
+	       (semantic-tag-class tag)
+	       (semantic-tag-name  tag)))))
 
 ;;;###autoload
 (defun semantic-complete-jump-local-members ()
@@ -2088,9 +2060,9 @@ completion works."
 	(push-mark)
 	(goto-char start)
 	(semantic-momentary-highlight-tag tag)
-	(working-message "%S: %s "
-			 (semantic-tag-class tag)
-			 (semantic-tag-name  tag))))))
+	(message "%S: %s "
+		 (semantic-tag-class tag)
+		 (semantic-tag-name  tag))))))
 
 ;;;###autoload
 (defun semantic-complete-analyze-and-replace ()
@@ -2180,26 +2152,11 @@ use `semantic-complete-analyze-inline' to complete."
       (error nil))
     ))
 
-;; @TODO - I can't  find where this fcn is used.  Delete?
-
-;;;;###autoload
-;(defun semantic-complete-inline-project ()
-;  "Perform inline completion for any symbol in the current project.
-;`semantic-analyze-possible-completions' is used to determine the
-;possible values.
-;The function returns immediately, leaving the buffer in a mode that
-;will perform the completion."
-;  (interactive)
-;  ;; Only do this if we are not already completing something.
-;  (if (not (semantic-completion-inline-active-p))
-;      (semantic-complete-inline-tag-project))
-;  ;; Report a message if things didn't startup.
-;  (if (and (interactive-p)
-;	   (not (semantic-completion-inline-active-p)))
-;      (message "Inline completion not needed."))
-;  )
-
-;; End
 (provide 'semantic/complete)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/complete"
+;; End:
 
 ;;; semantic/complete.el ends here

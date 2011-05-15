@@ -2,6 +2,7 @@
   the original Project.ede files
 * Should compatibility functions be maintained (cedet-compat)?
 ** cedet-called-interactively-p
+** cedet-split-string
 * Speedbar documentation has been stripped out of many details
 ** speedbar-stealthy-function-list
 ** speedbar-dynamic-tags-function-list
@@ -27,3 +28,9 @@
 * emacs: cedet/semantic/bovine/scm-by.el <=> cedet: cedet/semantic/bovine/scheme-by.el
 * emacs: cedet/semantic/wisent/javat-wy.el <=> cedet: cedet/semantic/wisent/java-tags-wy.el
 * emacs: cedet/semantic/wisent/js-wy.el => cedet: cedet/semantic/wisent/javascript-jv-wy.el
+* remove (or at least move out of lisp/) cedet build files:
+** lisp/cedet/semantic/ede-grammar.el
+** lisp/cedet/semantic/grammar.el
+* lisp/cedet/semantic/fw.el: deleted lots of compatibility code
+* lisp/cedet/semantic/senator.el: have a close look
+* lisp/cedet/semantic/grammar*: fix generation of meta-grammar

@@ -1,25 +1,24 @@
 ;;; semantic/tag-ls.el --- Language Specific override functions for tags
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2008 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2008,
+;;   2009, 2010  Free Software Foundation, Inc.
 
-;; X-CVS: $Id: semantic/tag-ls.el,v 1.16 2010-03-15 13:40:55 xscript Exp $
+;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -31,7 +30,7 @@
 ;; itself.  These are the functions that languages can use to derive
 ;; the information.
 
-(require 'semantic/tag)
+(require 'semantic)
 
 ;;; Code:
 
@@ -41,7 +40,6 @@
 ;; such as the `protection' of a symbol, or if it is abstract,
 ;; leaf, etc.  Learn about UML to catch onto the lingo.
 
-;;;###autoload
 (define-overloadable-function semantic-tag-calculate-parent (tag)
   "Attempt to calculate the parent of TAG.
 The default behavior (if not overriden with `tag-calculate-parent')
@@ -57,7 +55,6 @@ search locally, then semanticdb for that tag (when enabled.)")
 	(semantic-current-tag-parent))
       )))
 
-;;;###autoload
 (define-overloadable-function semantic-tag-protection (tag &optional parent)
   "Return protection information about TAG with optional PARENT.
 This function returns on of the following symbols:
@@ -78,7 +75,7 @@ is to return a symbol based on type modifiers."
   (:override))
 
 (make-obsolete-overload 'semantic-nonterminal-protection
-                        'semantic-tag-protection)
+                        'semantic-tag-protection "23.2")
 
 (defun semantic-tag-protection-default (tag &optional parent)
   "Return the protection of TAG as a child of PARENT default action.
@@ -101,7 +98,6 @@ See `semantic-tag-protection'."
       (setq mods (cdr mods)))
     prot))
 
-;;;###autoload
 (defun semantic-tag-protected-p (tag protection &optional parent)
   "Non-nil if TAG is is protected.
 PROTECTION is a symbol which can be returned by the method
@@ -131,7 +127,6 @@ For these PROTECTIONs, true is returned if TAG is:
 	       (not (eq tagpro 'public)))))
     ))
 
-;;;###autoload
 (define-overloadable-function semantic-tag-abstract-p (tag &optional parent)
   "Return non nil if TAG is abstract.
 Optional PARENT is the parent tag of TAG.
@@ -142,7 +137,7 @@ The default behavior (if not overridden with `tag-abstract-p'
 is to return true if `abstract' is in the type modifiers.")
 
 (make-obsolete-overload 'semantic-nonterminal-abstract
-                        'semantic-tag-abstract-p)
+                        'semantic-tag-abstract-p "23.2")
 
 (defun semantic-tag-abstract-p-default (tag &optional parent)
   "Return non-nil if TAG is abstract as a child of PARENT default action.
@@ -156,7 +151,6 @@ See `semantic-tag-abstract-p'."
       (setq mods (cdr mods)))
     abs))
 
-;;;###autoload
 (define-overloadable-function semantic-tag-leaf-p (tag &optional parent)
   "Return non nil if TAG is leaf.
 Optional PARENT is the parent tag of TAG.
@@ -166,7 +160,7 @@ The default behavior (if not overridden with `tag-leaf-p'
 is to return true if `leaf' is in the type modifiers.")
 
 (make-obsolete-overload 'semantic-nonterminal-leaf
-                        'semantic-tag-leaf-p)
+                        'semantic-tag-leaf-p "23.2")
 
 (defun semantic-tag-leaf-p-default (tag &optional parent)
   "Return non-nil if TAG is leaf as a child of PARENT default action.
@@ -181,7 +175,6 @@ See `semantic-tag-leaf-p'."
       (setq mods (cdr mods)))
     leaf))
 
-;;;###autoload
 (define-overloadable-function semantic-tag-static-p (tag &optional parent)
   "Return non nil if TAG is static.
 Optional PARENT is the parent tag of TAG.
@@ -227,7 +220,6 @@ something without an implementation."
 ;; code.  Instead some abbreviation is made, and the local environment
 ;; will contain the info needed to determine the full name.
 
-;;;###autoload
 (define-overloadable-function semantic-tag-full-name (tag &optional stream-or-buffer)
   "Return the fully qualified name of TAG in the package hierarchy.
 STREAM-OR-BUFFER can be anything convertable by `semantic-something-to-stream',
@@ -245,40 +237,18 @@ STREAM-OR-BUFFER with a tag stream value, or nil."
     (:override-with-args (tag stream))))
 
 (make-obsolete-overload 'semantic-nonterminal-full-name
-                        'semantic-tag-full-name)
+                        'semantic-tag-full-name "23.2")
 
 (defun semantic-tag-full-name-default (tag stream)
   "Default method for `semantic-tag-full-name'.
 Return the name of TAG found in the toplevel STREAM."
   (semantic-tag-name tag))
 
-;;; Compatibility aliases.
-;;
-(semantic-alias-obsolete 'semantic-nonterminal-protection
-			 'semantic-tag-protection)
-(semantic-alias-obsolete 'semantic-nonterminal-protection-default
-			 'semantic-tag-protection-default)
-(semantic-alias-obsolete 'semantic-nonterminal-abstract
-			 'semantic-tag-abstract-p)
-(semantic-alias-obsolete 'semantic-nonterminal-abstract-default
-			 'semantic-tag-abstract-p-default)
-(semantic-alias-obsolete 'semantic-nonterminal-leaf
-			 'semantic-tag-leaf-p)
-(semantic-alias-obsolete 'semantic-nonterminal-leaf-default
-			 'semantic-tag-leaf-p-default)
-(semantic-alias-obsolete 'semantic-nonterminal-static-default
-			 'semantic-tag-static-p-default)
-(semantic-alias-obsolete 'semantic-nonterminal-full-name
-			 'semantic-tag-full-name)
-(semantic-alias-obsolete 'semantic-nonterminal-full-name-default
-			 'semantic-tag-full-name-default)
-
-;; TEMPORARY within betas of CEDET 1.0
-(semantic-alias-obsolete 'semantic-tag-static 'semantic-tag-static-p)
-(semantic-alias-obsolete 'semantic-tag-leaf 'semantic-tag-leaf-p)
-(semantic-alias-obsolete 'semantic-tag-abstract 'semantic-tag-abstract-p)
-
-
 (provide 'semantic/tag-ls)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/tag-ls"
+;; End:
 
 ;;; semantic/tag-ls.el ends here

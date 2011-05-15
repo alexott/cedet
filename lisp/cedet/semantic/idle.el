@@ -1,26 +1,25 @@
-;; semantic/idle.el --- Schedule parsing tasks in idle time
+;;; idle.el --- Schedule parsing tasks in idle time
 
-;;; Copyright (C) 2003, 2004, 2005, 2006, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2003, 2004, 2005, 2006, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -38,13 +37,28 @@
 ;; automatically caches the created context, so it is shared amongst
 ;; all idle modes that will need it.
 
+(require 'semantic)
 (require 'semantic/ctxt)
-(require 'semantic/util-modes)
+(require 'semantic/format)
+(require 'semantic/tag)
 (require 'timer)
-(require 'semantic/senator) ;; For `senator-menu-item'
 
-;; @TODO - how to make this happen only if someone enables to summary mode?
-(require 'eldoc)
+;; For the semantic-find-tags-by-name macro.
+(eval-when-compile (require 'semantic/find))
+
+(defvar eldoc-last-message)
+(declare-function eldoc-message "eldoc")
+(declare-function semantic-analyze-interesting-tag "semantic/analyze")
+(declare-function semantic-analyze-unsplit-name "semantic/analyze/fcn")
+(declare-function semantic-complete-analyze-inline-idle "semantic/complete")
+(declare-function semanticdb-deep-find-tags-by-name "semantic/db-find")
+(declare-function semanticdb-save-all-db-idle "semantic/db")
+(declare-function semanticdb-typecache-refresh-for-buffer "semantic/db-typecache")
+(declare-function semantic-decorate-flush-pending-decorations
+		  "semantic/decorate/mode")
+(declare-function pulse-momentary-highlight-region "pulse")
+(declare-function pulse-momentary-highlight-overlay "pulse")
+(declare-function semantic-symref-hits-in-region "semantic/symref/filter")
 
 ;;; Code:
 
@@ -57,13 +71,13 @@
   "Timer used to schedule tasks in idle time that may take a while.")
 
 (defcustom semantic-idle-scheduler-verbose-flag nil
-  "*Non-nil means that the idle scheduler should provide debug messages.
+  "Non-nil means that the idle scheduler should provide debug messages.
 Use this setting to debug idle activities."
   :group 'semantic
   :type 'boolean)
 
-(defcustom semantic-idle-scheduler-idle-time 2
-  "*Time in seconds of idle before scheduling events.
+(defcustom semantic-idle-scheduler-idle-time 1
+  "Time in seconds of idle before scheduling events.
 This time should be short enough to ensure that idle-scheduler will be
 run as soon as Emacs is idle."
   :group 'semantic
@@ -76,7 +90,7 @@ run as soon as Emacs is idle."
            (semantic-idle-scheduler-setup-timers))))
 
 (defcustom semantic-idle-scheduler-work-idle-time 60
-  "*Time in seconds of idle before scheduling big work.
+  "Time in seconds of idle before scheduling big work.
 This time should be long enough that once any big work is started, it is
 unlikely the user would be ready to type again right away."
   :group 'semantic
@@ -115,23 +129,12 @@ unlikely the user would be ready to type again right away."
 ;; The minor mode portion of this code just sets up the minor mode
 ;; which does the initial scheduling of the idle timers.
 ;;
-;;;###autoload
-(defcustom global-semantic-idle-scheduler-mode nil
-  "*If non-nil, enable global use of idle-scheduler mode."
-  :group 'semantic
-  :group 'semantic-modes
-  :type 'boolean
-  :require 'semantic-idle
-  :initialize 'custom-initialize-default
-  :set (lambda (sym val)
-         (global-semantic-idle-scheduler-mode (if val 1 -1))))
 
 (defcustom semantic-idle-scheduler-mode-hook nil
-  "Hook run at the end of function `semantic-idle-scheduler-mode'."
+  "Hook run at the end of the function `semantic-idle-scheduler-mode'."
   :group 'semantic
   :type 'hook)
 
-;;;###autoload
 (defvar semantic-idle-scheduler-mode nil
   "Non-nil if idle-scheduler minor mode is enabled.
 Use the command `semantic-idle-scheduler-mode' to change this variable.")
@@ -149,29 +152,14 @@ all buffers regardless of their size."
 idle-scheduler is disabled when debugging or if the buffer size
 exceeds the `semantic-idle-scheduler-max-buffer-size' threshold."
   (and semantic-idle-scheduler-mode
-       (not semantic-debug-enabled)
+       (not (and (boundp 'semantic-debug-enabled)
+		 semantic-debug-enabled))
        (not semantic-lex-debug)
        (or (<= semantic-idle-scheduler-max-buffer-size 0)
 	   (< (buffer-size) semantic-idle-scheduler-max-buffer-size))))
 
-(defun semantic-idle-scheduler-mode-setup ()
-  "Setup option `semantic-idle-scheduler-mode'.
-The minor mode can be turned on only if semantic feature is available
-and the current buffer was set up for parsing.  When minor mode is
-enabled parse the current buffer if needed.  Return non-nil if the
-minor mode is enabled."
-  (if semantic-idle-scheduler-mode
-      (if (not (and (featurep 'semantic) (semantic-active-p)))
-          (progn
-            ;; Disable minor mode if semantic stuff not available
-            (setq semantic-idle-scheduler-mode nil)
-            (error "Buffer %s was not set up idle time scheduling"
-                   (buffer-name)))
-        (semantic-idle-scheduler-setup-timers)))
-  semantic-idle-scheduler-mode)
-
 ;;;###autoload
-(defun semantic-idle-scheduler-mode (&optional arg)
+(define-minor-mode semantic-idle-scheduler-mode
   "Minor mode to auto parse buffer following a change.
 When this mode is off, a buffer is only rescanned for tokens when
 some command requests the list of available tokens.  When idle-scheduler
@@ -182,32 +170,18 @@ With prefix argument ARG, turn on if positive, otherwise off.  The
 minor mode can be turned on only if semantic feature is available and
 the current buffer was set up for parsing.  Return non-nil if the
 minor mode is enabled."
-  (interactive
-   (list (or current-prefix-arg
-             (if semantic-idle-scheduler-mode 0 1))))
-  (setq semantic-idle-scheduler-mode
-        (if arg
-            (>
-             (prefix-numeric-value arg)
-             0)
-          (not semantic-idle-scheduler-mode)))
-  (semantic-idle-scheduler-mode-setup)
-  (run-hooks 'semantic-idle-scheduler-mode-hook)
-  (if (cedet-called-interactively-p 'interactive)
-      (message "idle-scheduler minor mode %sabled"
-               (if semantic-idle-scheduler-mode "en" "dis")))
-  (semantic-mode-line-update)
-  semantic-idle-scheduler-mode)
+  nil nil nil
+  (if semantic-idle-scheduler-mode
+      (if (not (and (featurep 'semantic) (semantic-active-p)))
+          (progn
+            ;; Disable minor mode if semantic stuff not available
+            (setq semantic-idle-scheduler-mode nil)
+            (error "Buffer %s was not set up idle time scheduling"
+                   (buffer-name)))
+        (semantic-idle-scheduler-setup-timers))))
 
 (semantic-add-minor-mode 'semantic-idle-scheduler-mode
-                         "ARP"
-                         nil)
-
-(semantic-alias-obsolete 'semantic-auto-parse-mode
-			 'semantic-idle-scheduler-mode)
-(semantic-alias-obsolete 'global-semantic-auto-parse-mode
-			 'global-semantic-idle-scheduler-mode)
-
+                         "ARP")
 
 ;;; SERVICES services
 ;;
@@ -220,12 +194,10 @@ buffer has had its tags made up to date.  These functions
 will not be called if there are errors parsing the
 current buffer.")
 
-;;;###autoload
 (defun semantic-idle-scheduler-add (function)
   "Schedule FUNCTION to occur during idle time."
   (add-to-list 'semantic-idle-scheduler-queue function))
 
-;;;###autoload
 (defun semantic-idle-scheduler-remove (function)
   "Unschedule FUNCTION to occur during idle time."
   (setq semantic-idle-scheduler-queue
@@ -237,7 +209,7 @@ current buffer.")
   "Core idle function that handles reparsing.
 And also manages services that depend on tag values."
   (when semantic-idle-scheduler-verbose-flag
-    (working-temp-message "IDLE: Core handler..."))
+    (message "IDLE: Core handler..."))
   (semantic-exit-on-input 'idle-timer
     (let* ((inhibit-quit nil)
            (buffers (delq (current-buffer)
@@ -283,11 +255,11 @@ And also manages services that depend on tag values."
 	  (save-excursion
 	    (semantic-throw-on-input 'idle-queue)
 	    (when semantic-idle-scheduler-verbose-flag
-	      (working-temp-message "IDLE: execture service %s..." service))
+	      (message "IDLE: execture service %s..." service))
 	    (semantic-safe (format "Idle Service Error %s: %%S" service)
 	      (funcall service))
 	    (when semantic-idle-scheduler-verbose-flag
-	      (working-temp-message "IDLE: execture service %s...done" service))
+	      (message "IDLE: execture service %s...done" service))
 	    )))
 	;;)
       ;; Finally loop over remaining buffers, trying to update them as
@@ -300,7 +272,7 @@ And also manages services that depend on tag values."
                  (semantic-idle-scheduler-refresh-tags)))))
       ))
   (when semantic-idle-scheduler-verbose-flag
-    (working-temp-message "IDLE: Core handler...done")))
+    (message "IDLE: Core handler...done")))
 
 (defun semantic-debug-idle-function ()
   "Run the Semantic idle function with debugging turned on."
@@ -355,8 +327,7 @@ Returns t if all processing succeeded."
 	  ;; summary information
 	  (semantic-safe "Idle Work Including Error: %S"
 	    ;; Get the include related path.
-	    (when (and (featurep 'semanticdb)
-		       (semanticdb-minor-mode-p))
+	    (when (and (featurep 'semantic/db) (semanticdb-minor-mode-p))
 	      (require 'semantic/db-find)
 	      (semanticdb-find-translate-path buffer nil)
 	      )
@@ -364,7 +335,7 @@ Returns t if all processing succeeded."
 
 	  ;; Pre-build the typecaches as needed.
 	  (semantic-safe "Idle Work Typecaching Error: %S"
-	    (when (featurep 'semanticdb-typecache)
+	    (when (featurep 'semantic/db-typecache)
 	      (semanticdb-typecache-refresh-for-buffer buffer))
 	    t)
 	  ))
@@ -406,8 +377,7 @@ Uses `semantic-idle-work-for-on-buffer' to do the work."
 		   ))
 	       )
 
-	     (when (and (featurep 'semanticdb)
-			(semanticdb-minor-mode-p))
+	     (when (and (featurep 'semantic/db) (semanticdb-minor-mode-p))
 	       ;; Save everything.
 	       (semanticdb-save-all-db-idle)
 
@@ -469,15 +439,6 @@ datasets."
 	    ))))
     ))
 
-(defun semantic-idle-pnf-test ()
-  "Test `semantic-idle-scheduler-work-parse-neighboring-files' and time it."
-  (interactive)
-  (let ((start (current-time))
-	(junk (semantic-idle-scheduler-work-parse-neighboring-files))
-	(end (current-time)))
-    (message "Work took %.2f seconds." (semantic.elapsed-time start end)))
-  )
-
 
 ;;; REPARSING
 ;;
@@ -485,32 +446,20 @@ datasets."
 ;; This part ALWAYS happens, and other services occur
 ;; afterwards.
 
-(defcustom semantic-idle-scheduler-no-working-message t
-  "*If non-nil, disable display of working messages during parse."
-  :group 'semantic
-  :type 'boolean)
-
-(defcustom semantic-idle-scheduler-working-in-modeline-flag nil
-  "*Non-nil means show working messages in the mode line.
-Typically, parsing will show messages in the minibuffer.
-This will move the parse message into the modeline."
-  :group 'semantic
-  :type 'boolean)
-
 (defvar semantic-before-idle-scheduler-reparse-hook nil
   "Hook run before option `semantic-idle-scheduler' begins parsing.
-If any hook throws an error, this variable is reset to nil.
+If any hook function throws an error, this variable is reset to nil.
 This hook is not protected from lexical errors.")
 
 (defvar semantic-after-idle-scheduler-reparse-hook nil
   "Hook run after option `semantic-idle-scheduler' has parsed.
-If any hook throws an error, this variable is reset to nil.
+If any hook function throws an error, this variable is reset to nil.
 This hook is not protected from lexical errors.")
 
 (semantic-varalias-obsolete 'semantic-before-idle-scheduler-reparse-hooks
-                          'semantic-before-idle-scheduler-reparse-hook)
+			    'semantic-before-idle-scheduler-reparse-hook "23.2")
 (semantic-varalias-obsolete 'semantic-after-idle-scheduler-reparse-hooks
-                          'semantic-after-idle-scheduler-reparse-hook)
+			    'semantic-after-idle-scheduler-reparse-hook "23.2")
 
 (defun semantic-idle-scheduler-refresh-tags ()
   "Refreshes the current buffer's tags.
@@ -538,18 +487,18 @@ Does nothing if the current buffer doesn't need reparsing."
        (t
 	;; If the buffer might need a reparse and it is safe to do so,
 	;; give it a try.
-	(let* ((semantic-working-type nil)
+	(let* (;(semantic-working-type nil)
 	       (inhibit-quit nil)
-	       (working-use-echo-area-p
-		(not semantic-idle-scheduler-working-in-modeline-flag))
-	       (working-status-dynamic-type
-		(if semantic-idle-scheduler-no-working-message
-		    nil
-		  working-status-dynamic-type))
-	       (working-status-percentage-type
-		(if semantic-idle-scheduler-no-working-message
-		    nil
-		  working-status-percentage-type))
+	       ;; (working-use-echo-area-p
+	       ;; 	(not semantic-idle-scheduler-working-in-modeline-flag))
+	       ;; (working-status-dynamic-type
+	       ;; 	(if semantic-idle-scheduler-no-working-message
+	       ;; 	    nil
+	       ;; 	  working-status-dynamic-type))
+	       ;; (working-status-percentage-type
+	       ;; 	(if semantic-idle-scheduler-no-working-message
+	       ;; 	    nil
+	       ;; 	  working-status-percentage-type))
 	       (lexically-safe t)
 	       )
 	  ;; Let people hook into this, but don't let them hose
@@ -562,7 +511,7 @@ Does nothing if the current buffer doesn't need reparsing."
 	      ;; Perform the parsing.
 	      (progn
 		(when semantic-idle-scheduler-verbose-flag
-		  (working-temp-message "IDLE: reparse %s..." (buffer-name)))
+		  (message "IDLE: reparse %s..." (buffer-name)))
 		(when (semantic-lex-catch-errors idle-scheduler
 			(save-excursion (semantic-fetch-tags))
 			nil)
@@ -574,7 +523,7 @@ Does nothing if the current buffer doesn't need reparsing."
 		  ;; no other idle services can get executed.
 		  (setq lexically-safe nil))
 		(when semantic-idle-scheduler-verbose-flag
-		  (working-temp-message "IDLE: reparse %s...done" (buffer-name))))
+		  (message "IDLE: reparse %s...done" (buffer-name))))
 	    ;; Let people hook into this, but don't let them hose
 	    ;; us over!
 	    (condition-case nil
@@ -585,6 +534,7 @@ Does nothing if the current buffer doesn't need reparsing."
 
     ;; After updating the tags, handle any pending decorations for this
     ;; buffer.
+    (require 'semantic/decorate/mode)
     (semantic-decorate-flush-pending-decorations (current-buffer))
     ))
 
@@ -608,31 +558,23 @@ This routine creates the following functions and variables:"
 	(mode 	(intern (concat (symbol-name name) "-mode")))
 	(hook 	(intern (concat (symbol-name name) "-mode-hook")))
 	(map  	(intern (concat (symbol-name name) "-mode-map")))
-	(setup 	(intern (concat (symbol-name name) "-mode-setup")))
 	(func 	(intern (concat (symbol-name name) "-idle-function"))))
 
     `(eval-and-compile
-       (defun ,global (&optional arg)
-	 ,(concat "Toggle `" (symbol-name mode) "'.
+       (define-minor-mode ,global
+	 ,(concat "Toggle " (symbol-name global) ".
 With ARG, turn the minor mode on if ARG is positive, off otherwise.
 
 When this minor mode is enabled, `" (symbol-name mode) "' is
 turned on in every Semantic-supported buffer.")
-	 (interactive "P")
-	 (setq ,global
-	       (semantic-toggle-minor-mode-globally
-		',mode arg)))
-
-       (defcustom ,global nil
-	 ,(concat "Non-nil if `" (symbol-name mode) "' is enabled.")
+         :global t
 	 :group 'semantic
 	 :group 'semantic-modes
-	 :type 'boolean
-	 :require 'semantic-idle
-	 :initialize 'custom-initialize-default
-	 :set (lambda (sym val)
-		(,global (if val 1 -1))))
+	 :require 'semantic/idle
+	 (semantic-toggle-minor-mode-globally
+	  ',mode (if ,global 1 -1)))
 
+       ;; FIXME: Get rid of this when define-minor-mode does it for us.
        (defcustom ,hook nil
 	 ,(concat "Hook run at the end of function `" (symbol-name mode) "'.")
 	 :group 'semantic
@@ -643,14 +585,9 @@ turned on in every Semantic-supported buffer.")
 	   km)
 	 ,(concat "Keymap for `" (symbol-name mode) "'."))
 
-       (defvar ,mode nil
-	 ,(concat "Non-nil if the minor mode `" (symbol-name mode) "' is enabled.
-Use the command `" (symbol-name mode) "' to change this variable."))
-       (make-variable-buffer-local ',mode)
-
-       (defun ,setup ()
-	 ,(concat "Set up `" (symbol-name mode) "'.
-Return non-nil if the minor mode is enabled.")
+       (define-minor-mode ,mode
+	 ,doc
+         :keymap ,map
 	 (if ,mode
 	     (if (not (and (featurep 'semantic) (semantic-active-p)))
 		 (progn
@@ -659,37 +596,12 @@ Return non-nil if the minor mode is enabled.")
 		   (error "Buffer %s was not set up for parsing"
 			  (buffer-name)))
 	       ;; Enable the mode mode
-	       (semantic-idle-scheduler-add #',func)
-	       )
+	       (semantic-idle-scheduler-add #',func))
 	   ;; Disable the mode mode
-	   (semantic-idle-scheduler-remove #',func)
-	   )
-	 ,mode)
-
-;;;###autoload
-       (defun ,mode (&optional arg)
-	 ,doc
-	 (interactive
-	  (list (or current-prefix-arg
-		    (if ,mode 0 1))))
-	 (setq ,mode
-	       (if arg
-		   (>
-		    (prefix-numeric-value arg)
-		    0)
-		 (not ,mode)))
-	 (,setup)
-	 (run-hooks ,hook)
-	 (if (cedet-called-interactively-p 'interactive)
-	     (message "%s %sabled"
-		      (symbol-name ',mode)
-		      (if ,mode "en" "dis")))
-	 (semantic-mode-line-update)
-	 ,mode)
+	   (semantic-idle-scheduler-remove #',func)))
 
        (semantic-add-minor-mode ',mode
-				""	; idle schedulers are quiet?
-				,map)
+				"")	; idle schedulers are quiet?
 
        (defun ,func ()
 	 ,(concat "Perform idle activity for the minor mode `"
@@ -720,7 +632,9 @@ Some useful functions are found in `semantic-format-tag-functions'."
   "Search for a semantic tag with name SYM in database tables.
 Return the tag found or nil if not found.
 If semanticdb is not in use, use the current buffer only."
-  (car (if (and (featurep 'semanticdb) semanticdb-current-database)
+  (car (if (and (featurep 'semantic/db)
+		semanticdb-current-database
+		(require 'semantic/db-find))
            (cdar (semanticdb-deep-find-tags-by-name sym))
          (semantic-deep-find-tags-by-name sym (current-buffer)))))
 
@@ -748,6 +662,7 @@ Use the semantic analyzer to find the symbol information."
 		      (semantic-analyze-current-context (point))
 		    (error nil))))
     (when analysis
+      (require 'semantic/analyze)
       (semantic-analyze-interesting-tag analysis))))
 
 (defun semantic-idle-summary-current-symbol-info-default ()
@@ -801,10 +716,16 @@ specific to a major mode.  For example, in jde mode:
 (define-overloadable-function semantic-idle-summary-current-symbol-info ()
   "Return a string message describing the current context.")
 
-(make-obsolete-overload 'semantic.eldoc-current-symbol-info
-                        'semantic-idle-summary-current-symbol-info)
+(make-obsolete-overload 'semantic-eldoc-current-symbol-info
+                        'semantic-idle-summary-current-symbol-info
+                        "23.2")
 
-(define-semantic-idle-service semantic-idle-summary
+(defcustom semantic-idle-summary-mode-hook nil
+  "Hook run at the end of `semantic-idle-summary'."
+  :group 'semantic
+  :type 'hook)
+
+(defun semantic-idle-summary-idle-function ()
   "Display a tag summary of the lexical token under the cursor.
 Call `semantic-idle-summary-current-symbol-info' for getting the
 current tag to display information."
@@ -831,10 +752,56 @@ current tag to display information."
 	;; Display it
         (eldoc-message str))))
 
-(semantic-alias-obsolete 'semantic-summary-mode
-			 'semantic-idle-summary-mode)
-(semantic-alias-obsolete 'global-semantic-summary-mode
-			 'global-semantic-idle-summary-mode)
+(define-minor-mode semantic-idle-summary-mode
+  "Toggle Semantic Idle Summary mode.
+With ARG, turn Semantic Idle Summary mode on if ARG is positive,
+off otherwise.
+
+When this minor mode is enabled, the echo area displays a summary
+of the lexical token at point whenever Emacs is idle."
+  :group 'semantic
+  :group 'semantic-modes
+  (if semantic-idle-summary-mode
+      ;; Enable the mode
+      (progn
+	(unless (and (featurep 'semantic) (semantic-active-p))
+	  ;; Disable minor mode if semantic stuff not available
+	  (setq semantic-idle-summary-mode nil)
+	  (error "Buffer %s was not set up for parsing"
+		 (buffer-name)))
+	(require 'eldoc)
+	(semantic-idle-scheduler-add 'semantic-idle-summary-idle-function)
+	(add-hook 'pre-command-hook 'semantic-idle-summary-refresh-echo-area t))
+    ;; Disable the mode
+    (semantic-idle-scheduler-remove 'semantic-idle-summary-idle-function)
+    (remove-hook 'pre-command-hook 'semantic-idle-summary-refresh-echo-area t)))
+
+(defun semantic-idle-summary-refresh-echo-area ()
+  (and semantic-idle-summary-mode
+       eldoc-last-message
+       (if (and (not executing-kbd-macro)
+		(not (and (boundp 'edebug-active) edebug-active))
+		(not cursor-in-echo-area)
+		(not (eq (selected-window) (minibuffer-window))))
+           (eldoc-message eldoc-last-message)
+         (setq eldoc-last-message nil))))
+
+(semantic-add-minor-mode 'semantic-idle-summary-mode "")
+
+(define-minor-mode global-semantic-idle-summary-mode
+  "Toggle Global Semantic Idle Summary mode.
+With ARG, turn Global Semantic Idle Summary mode on if ARG is
+positive, off otherwise.
+
+When this minor mode is enabled, `semantic-idle-summary-mode' is
+turned on in every Semantic-supported buffer."
+  :global t
+  :group 'semantic
+  :group 'semantic-modes
+  (semantic-toggle-minor-mode-globally
+   'semantic-idle-summary-mode
+   (if global-semantic-idle-summary-mode 1 -1)))
+
 
 ;;; Current symbol highlight
 ;;
@@ -843,12 +810,13 @@ current tag to display information."
 ;;
 ;; This is to mimic the Eclipse tool of a similar nature.
 (defvar semantic-idle-symbol-highlight-face 'region
-  "Face used for the highlighting local symbols.")
+  "Face used for highlighting local symbols.")
 
 (defun semantic-idle-symbol-maybe-highlight (tag)
-  "Perhaps add highlighting onto the symbol represented by TAG.
+  "Perhaps add highlighting to the symbol represented by TAG.
 TAG was found as the symbol under point.  If it happens to be
 visible, then highlight it."
+  (require 'pulse)
   (let* ((region (when (and (semantic-tag-p tag)
 			    (semantic-tag-with-position-p tag))
 		   (semantic-tag-overlay tag)))
@@ -896,11 +864,11 @@ visible, then highlight it."
 	       ))))
     nil))
 
-
 (define-semantic-idle-service semantic-idle-local-symbol-highlight
   "Highlight the tag and symbol references of the symbol under point.
 Call `semantic-analyze-current-context' to find the reference tag.
 Call `semantic-symref-hits-in-region' to identify local references."
+  (require 'pulse)
   (when (semantic-idle-summary-useful-context-p)
     (let* ((ctxt
 	    (semanticdb-without-unloaded-file-searches
@@ -918,6 +886,7 @@ Call `semantic-symref-hits-in-region' to identify local references."
 	  (error nil))
 	;; Identify all hits in this current tag.
 	(when (semantic-tag-p target)
+	  (require 'semantic/symref/filter)
 	  (semantic-symref-hits-in-region
 	   target (lambda (start end prefix)
 		    (when (/= start (car Hbounds))
@@ -931,16 +900,22 @@ Call `semantic-symref-hits-in-region' to identify local references."
 
 
 ;;;###autoload
-(defun global-semantic-idle-scheduler-mode (&optional arg)
+(define-minor-mode global-semantic-idle-scheduler-mode
   "Toggle global use of option `semantic-idle-scheduler-mode'.
 The idle scheduler will automatically reparse buffers in idle time,
 and then schedule other jobs setup with `semantic-idle-scheduler-add'.
-If ARG is positive, enable, if it is negative, disable.
-If ARG is nil, then toggle."
-  (interactive "P")
-  (setq global-semantic-idle-scheduler-mode
-        (semantic-toggle-minor-mode-globally
-         'semantic-idle-scheduler-mode arg)))
+If ARG is positive or nil, enable, if it is negative, disable."
+  :global t
+  :group 'semantic
+  :group 'semantic-modes
+  ;; When turning off, disable other idle modes.
+  (when (null global-semantic-idle-scheduler-mode)
+    (global-semantic-idle-summary-mode -1)
+    (global-semantic-idle-local-symbol-highlight-mode -1)
+    (global-semantic-idle-completions-mode -1))
+  (semantic-toggle-minor-mode-globally
+   'semantic-idle-scheduler-mode
+   (if global-semantic-idle-scheduler-mode 1 -1)))
 
 
 ;;; Completion Popup Mode
@@ -1001,7 +976,7 @@ completion.
 
 (defcustom semantic-idle-breadcrumbs-display-function
   #'semantic-idle-breadcrumbs--display-in-header-line
-  "Specify how to display the tag under point in idle time.
+  "Function to display the tag under point in idle time.
 This function should take a list of Semantic tags as its only
 argument. The tags are sorted according to their nesting order,
 starting with the outermost tag. The function should call
@@ -1017,7 +992,7 @@ the tag list into a string."
 
 (defcustom semantic-idle-breadcrumbs-format-tag-list-function
   #'semantic-idle-breadcrumbs--format-linear
-  "Specify how to format the list of tags containing point.
+  "Function to format the list of tags containing point.
 This function should take a list of Semantic tags and an optional
 maximum length of the produced string as its arguments. The
 maximum length is a hint and can be ignored. When the maximum
@@ -1062,6 +1037,9 @@ fringe."
   :group 'semantic
   :type  'string)
 
+(defvar semantic-idle-breadcrumbs-popup-menu nil
+  "Menu used when a tag displayed by `semantic-idle-breadcrumbs-mode' is clicked.")
+
 (defun semantic-idle-breadcrumbs--popup-menu (event)
   "Popup a menu that displays things to do to the clicked tag.
 Argument EVENT describes the event that caused this function to
@@ -1104,16 +1082,13 @@ be called."
     map)
   "Keymap for semantic idle breadcrumbs minor mode.")
 
-(defvar semantic-idle-breadcrumbs-popup-menu nil
-  "Menu used when a tag displayed by `semantic-idle-breadcrumbs-mode' is clicked.")
-
 (easy-menu-define
   semantic-idle-breadcrumbs-popup-menu
   semantic-idle-breadcrumbs-popup-map
   "Semantic Breadcrumbs Mode Menu"
   (list
    "Breadcrumb Tag"
-   (senator-menu-item
+   (semantic-menu-item
     (vector
      "Go to Tag"
      (semantic-idle-breadcrumbs--tag-function
@@ -1122,14 +1097,14 @@ be called."
      :help  "Jump to this tag"))
    ;; TODO these entries need minor changes (optional tag argument) in
    ;; senator-copy-tag etc
-  ;;  (senator-menu-item
+  ;;  (semantic-menu-item
   ;;   (vector
   ;;    "Copy Tag"
   ;;    (semantic-idle-breadcrumbs--tag-function
   ;;     senator-copy-tag)
   ;;    :active t
   ;;    :help   "Copy this tag"))
-  ;;   (senator-menu-item
+  ;;   (semantic-menu-item
   ;;    (vector
   ;;     "Kill Tag"
   ;;     (semantic-idle-breadcrumbs--tag-function
@@ -1137,21 +1112,21 @@ be called."
   ;;     :active t
   ;;     :help   "Kill tag text to the kill ring, and copy the tag to
   ;; the tag ring"))
-  ;;   (senator-menu-item
+  ;;   (semantic-menu-item
   ;;    (vector
   ;;     "Copy Tag to Register"
   ;;     (semantic-idle-breadcrumbs--tag-function
   ;;      senator-copy-tag-to-register)
   ;;     :active t
   ;;     :help   "Copy this tag"))
-  ;;   (senator-menu-item
+  ;;   (semantic-menu-item
   ;;    (vector
   ;;     "Narrow to Tag"
   ;;     (semantic-idle-breadcrumbs--tag-function
   ;;      senator-narrow-to-defun)
   ;;     :active t
   ;;     :help   "Narrow to the bounds of the current tag"))
-  ;;   (senator-menu-item
+  ;;   (semantic-menu-item
   ;;    (vector
   ;;     "Fold Tag"
   ;;     (semantic-idle-breadcrumbs--tag-function
@@ -1162,7 +1137,7 @@ be called."
   ;; 		   (and tag (semantic-tag-folded-p tag)))
   ;;     :help     "Fold the current tag to one line"))
     "---"
-    (senator-menu-item
+    (semantic-menu-item
      (vector
       "About this Header Line"
       (lambda ()
@@ -1245,6 +1220,7 @@ shortened at the beginning."
   (tag-list &optional max-length)
   "Format TAG-LIST as a linear list, starting with the outermost tag.
 MAX-LENGTH is not used."
+  (require 'semantic/analyze/fcn)
   (let* ((format-pieces   (mapcar
 			   #'semantic-idle-breadcrumbs--format-tag
 			   tag-list))
@@ -1331,6 +1307,12 @@ mouse-3: popup context menu"
      formatted)
     formatted))
 
+
 (provide 'semantic/idle)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/idle"
+;; End:
 
 ;;; semantic/idle.el ends here

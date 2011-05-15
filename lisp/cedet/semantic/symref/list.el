@@ -1,37 +1,38 @@
 ;;; semantic/symref/list.el --- Symref Output List UI.
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Provide a simple user facing API to finding symbol references.
 ;;
-;; This UI is the base of some refactoring tools.  For any
-;; refactor, the user will execute `semantic-symref' in a tag.  Once
-;; that data is collected, the output will be listed in a buffer.  In
-;; the output buffer, the user can then initiate different refactoring
-;; operations.
+;; This UI is the base of some refactoring tools.  For any refactor,
+;; the user will execture [FIXME what?] `semantic-symref' in a tag.
+;; Once that data is collected, the output will be listed in a buffer.
+;; In the output buffer, the user can then initiate different
+;; refactoring operations.
 ;;
 ;; NOTE: Need to add some refactoring tools.
 
 (require 'semantic/symref)
+(require 'semantic/complete)
 (require 'semantic/senator)
 (require 'pulse)
 
@@ -42,9 +43,9 @@
   "Find references to the current tag.
 This command uses the currently configured references tool within the
 current project to find references to the current tag.  The
-references are the organized by file and the name of the function
+references are organized by file and the name of the function
 they are used in.
-Display the references in`semantic-symref-results-mode'."
+Display the references in `semantic-symref-results-mode'."
   (interactive)
   (semantic-fetch-tags)
   (let ((ct (semantic-current-tag))
@@ -65,11 +66,11 @@ Display the references in`semantic-symref-results-mode'."
   "Find references to the symbol SYM.
 This command uses the currently configured references tool within the
 current project to find references to the input SYM.  The
-references are the organized by file and the name of the function
+references are organized by file and the name of the function
 they are used in.
-Display the references in`semantic-symref-results-mode'."
-  (interactive (list (car (senator-jump-interactive "Symrefs for: "
-						    nil nil nil))))
+Display the references in `semantic-symref-results-mode'."
+  (interactive (list (semantic-tag-name (semantic-complete-read-tag-buffer-deep
+					 "Symrefs for: "))))
   (semantic-fetch-tags)
   (let ((res nil)
 	)
@@ -86,8 +87,8 @@ current project to find references to the input SYM.  The
 references are the organized by file and the name of the function
 they are used in.
 Display the references in`semantic-symref-results-mode'."
-  (interactive (list (car (senator-jump-interactive "Symrefs for: "
-						    nil nil nil))))
+  (interactive (list (semantic-tag-name (semantic-complete-read-tag-buffer-deep
+					 "Symrefs for: "))))
   (semantic-fetch-tags)
   (let ((res nil)
 	)
@@ -133,32 +134,31 @@ Display the references in`semantic-symref-results-mode'."
     (define-key km "R" 'semantic-symref-list-rename-open-hits)
     (define-key km "(" 'semantic-symref-list-create-macro-on-open-hit)
     (define-key km "E" 'semantic-symref-list-call-macro-on-open-hits)
-    
     km)
   "Keymap used in `semantic-symref-results-mode'.")
 
 (defvar semantic-symref-list-menu-entries
   (list
    "Symref"
-   (senator-menu-item
+   (semantic-menu-item
     ["Toggle Line Open"
      semantic-symref-list-toggle-showing
      :active t
      :help "Toggle the current line open or closed."
      ])
-   (senator-menu-item
+   (semantic-menu-item
     ["Expand All Entries"
      semantic-symref-list-expand-all
      :active t
      :help "Expand every expandable entry."
      ])
-   (senator-menu-item
+   (semantic-menu-item
     ["Contract All Entries"
      semantic-symref-list-contract-all
      :active t
      :help "Close every expandable entry."
      ])
-   (senator-menu-item
+   (semantic-menu-item
     ["Rename Symbol in Open hits"
      semantic-symref-list-rename-open-hits
      :active t
@@ -166,7 +166,7 @@ Display the references in`semantic-symref-results-mode'."
      ])
    )
   "Menu entries for the Semantic Symref list mode.")
-   
+
 (defvar semantic-symref-list-menu nil
   "Menu keymap build from `semantic-symref-results-mode'.")
 
@@ -188,7 +188,6 @@ Display the references in`semantic-symref-results-mode'."
 (defvar semantic-symref-current-results nil
   "The current results in a results mode buffer.")
 
-;;;###autoload
 (defun semantic-symref-results-mode (results)
   "Major-mode for displaying Semantic Symbol Reference RESULTS.
 RESULTS is an object of class `semantic-symref-results'."
@@ -209,7 +208,7 @@ RESULTS is an object of class `semantic-symref-results'."
   )
 
 (defun semantic-symref-hide-buffer ()
-  "Hide buffer with sematinc-symref results."
+  "Hide buffer with semantic-symref results."
   (interactive)
   (bury-buffer))
 
@@ -222,49 +221,38 @@ Some useful functions are found in `semantic-format-tag-functions'."
 (defun semantic-symref-results-dump (results)
   "Dump the RESULTS into the current buffer."
   ;; Get ready for the insert.
-  (toggle-read-only -1)
-  (erase-buffer)
-
-  ;; Insert the contents.
-  (let ((lastfile nil)
-	)
-    (dolist (T (oref results :hit-tags))
-
-      (when (not (equal lastfile (semantic-tag-file-name T)))
-	(setq lastfile (semantic-tag-file-name T))
-	(insert-button lastfile
-		       'mouse-face 'custom-button-pressed-face
-		       'action 'semantic-symref-rb-goto-file
+  (let ((inhibit-read-only t))
+    (erase-buffer)
+    ;; Insert the contents.
+    (let ((lastfile nil))
+      (dolist (T (oref results :hit-tags))
+	(unless (equal lastfile (semantic-tag-file-name T))
+	  (setq lastfile (semantic-tag-file-name T))
+	  (insert-button lastfile
+			 'mouse-face 'custom-button-pressed-face
+			 'action 'semantic-symref-rb-goto-file
+			 'tag T)
+	  (insert "\n"))
+	(insert "  ")
+	(insert-button "[+]"
+		       'mouse-face 'highlight
+		       'face nil
+		       'action 'semantic-symref-rb-toggle-expand-tag
 		       'tag T
-		       )
-	(insert "\n"))
-
-      (insert "  ")
-      (insert-button "[+]"
-		     'mouse-face 'highlight
-		     'face nil
-		     'action 'semantic-symref-rb-toggle-expand-tag
-		     'tag T
-		     'state 'closed)
-      (insert " ")
-      (insert-button (funcall semantic-symref-results-summary-function
-			      T nil t)
-		     'mouse-face 'custom-button-pressed-face
-		     'face nil
-		     'action 'semantic-symref-rb-goto-tag
-		     'tag T)
-      (insert "\n")
-
-      ))
-
-  ;; Auto expand
-  (when semantic-symref-auto-expand-results
-    (semantic-symref-list-expand-all))
-
-  ;; Clean up the mess
-  (toggle-read-only 1)
-  (set-buffer-modified-p nil)
-  )
+		       'state 'closed)
+	(insert " ")
+	(insert-button (funcall semantic-symref-results-summary-function
+				T nil t)
+		       'mouse-face 'custom-button-pressed-face
+		       'face nil
+		       'action 'semantic-symref-rb-goto-tag
+		       'tag T)
+	(insert "\n")))
+    ;; Auto expand
+    (when semantic-symref-auto-expand-results
+      (semantic-symref-list-expand-all)))
+    ;; Clean up the mess
+  (set-buffer-modified-p nil))
 
 ;;; Commands for semantic-symref-results
 ;;
@@ -284,11 +272,9 @@ BUTTON is the button that was clicked."
 	 (buff (semantic-tag-buffer tag))
 	 (hits (semantic--tag-get-property tag :hit))
 	 (state (button-get button 'state))
-	 (text nil)
-	 )
+	 (text nil))
     (cond
      ((eq state 'closed)
-      (toggle-read-only -1)
       (with-current-buffer buff
 	(dolist (H hits)
 	  (goto-char (point-min))
@@ -296,48 +282,42 @@ BUTTON is the button that was clicked."
 	  (beginning-of-line)
 	  (back-to-indentation)
 	  (setq text (cons (buffer-substring (point) (point-at-eol)) text)))
-	(setq text (nreverse text))
-	)
+	(setq text (nreverse text)))
       (goto-char (button-start button))
       (forward-char 1)
-      (delete-char 1)
-      (insert "-")
-      (button-put button 'state 'open)
-      (save-excursion
-	(end-of-line)
-	(while text
-	(insert "\n")
-	  (insert "    ")
-	  (insert-button (car text)
-			 'mouse-face 'highlight
-			 'face nil
-			 'action 'semantic-symref-rb-goto-match
-			 'tag tag
-			 'line (car hits))
-	  (setq text (cdr text)
-		hits (cdr hits))))
-      (toggle-read-only 1)
-      )
+      (let ((inhibit-read-only t))
+	(delete-char 1)
+	(insert "-")
+	(button-put button 'state 'open)
+	(save-excursion
+	  (end-of-line)
+	  (while text
+	    (insert "\n")
+	    (insert "    ")
+	    (insert-button (car text)
+			   'mouse-face 'highlight
+			   'face nil
+			   'action 'semantic-symref-rb-goto-match
+			   'tag tag
+			   'line (car hits))
+	    (setq text (cdr text)
+		  hits (cdr hits))))))
      ((eq state 'open)
-      (toggle-read-only -1)
-      (button-put button 'state 'closed)
-      ;; Delete the various bits.
-      (goto-char (button-start button))
-      (forward-char 1)
-      (delete-char 1)
-      (insert "+")
-      (save-excursion
-	(end-of-line)
+      (let ((inhibit-read-only t))
+	(button-put button 'state 'closed)
+	;; Delete the various bits.
+	(goto-char (button-start button))
 	(forward-char 1)
-	(delete-region (point)
-		       (save-excursion
-			 (forward-char 1)
-			 (forward-line (length hits))
-			 (point))))
-      (toggle-read-only 1)
-      )
-     ))
-  )
+	(delete-char 1)
+	(insert "+")
+	(save-excursion
+	  (end-of-line)
+	  (forward-char 1)
+	  (delete-region (point)
+			 (save-excursion
+			   (forward-char 1)
+			   (forward-line (length hits))
+			   (point)))))))))
 
 (defun semantic-symref-rb-goto-file (&optional button)
   "Go to the file specified in the symref results buffer.
@@ -348,7 +328,7 @@ BUTTON is the button that was clicked."
 	 )
     (switch-to-buffer-other-window buff)
     (pulse-momentary-highlight-one-line (point))
-    (when (eq last-command-char ? ) (select-window win))
+    (when (eq last-command-event ?\s) (select-window win))
     ))
 
 
@@ -363,7 +343,7 @@ BUTTON is the button that was clicked."
     (switch-to-buffer-other-window buff)
     (semantic-go-to-tag tag)
     (pulse-momentary-highlight-one-line (point))
-    (when (eq last-command-char ? ) (select-window win))
+    (when (eq last-command-event ?\s) (select-window win))
     )
   )
 
@@ -377,9 +357,10 @@ BUTTON is the button that was clicked."
 	 (win (selected-window))
 	 )
     (switch-to-buffer-other-window buff)
-    (goto-line line)
+    (goto-char (point-min))
+    (forward-line (1- line))
     (pulse-momentary-highlight-one-line (point))
-    (when (eq last-command-char ? ) (select-window win))
+    (when (eq last-command-event ?\s) (select-window win))
     )
   )
 
@@ -452,7 +433,8 @@ cursor to the beginning of that symbol, then record a macro as if
       (error "Cannot create macro on a non-hit line"))
     ;; Go there, and do something useful.
     (switch-to-buffer-other-window (semantic-tag-buffer tag))
-    (goto-line line)
+    (goto-char (point-min))
+    (forward-line (1- line))
     (when (not (re-search-forward (regexp-quote oldsym) (point-at-eol) t))
       (error "Cannot find hit.  Cannot record macro"))
     (goto-char (match-beginning 0))
@@ -489,11 +471,9 @@ Closed items will be skipped."
 				  :created-by)
 			    :searchfor))))
   (let ((count (semantic-symref-list-map-open-hits
-		;; HACK: We know that the map-open-hits call also
-		;; sets the match data, so we can call replace match here.
 		(lambda () (replace-match newname nil t)))))
     (semantic-symref-list-update-open-hits)
-    (message "Renamed %d occurances." count)))
+    (message "Renamed %d occurrences." count)))
 
 ;;; REFACTORING UTILITIES
 ;;
@@ -502,7 +482,7 @@ Closed items will be skipped."
 (defun semantic-symref-list-map-open-hits (function)
   "For every open hit in the symref buffer, perform FUNCTION.
 The `match-data' will be set to a successful hit of the searched for symbol.
-Return the number of occurances FUNCTION was operated upon."
+Return the number of occurrences FUNCTION was operated upon."
 
   ;; First Pass in this function - a straight rename.
   ;; Second Pass - Allow context specification based on
@@ -521,9 +501,9 @@ Return the number of occurances FUNCTION was operated upon."
 	       (line (when ol (semantic-overlay-get ol 'line))))
 	  (when line
 	    ;; The "line" means we have an open hit.
-	    (save-excursion
-	      (set-buffer (semantic-tag-buffer tag))
-	      (goto-line line)
+	    (with-current-buffer (semantic-tag-buffer tag)
+	      (goto-char (point-min))
+	      (forward-line (1- line))
 	      (beginning-of-line)
 	      (while (re-search-forward (regexp-quote oldsym) (point-at-eol) t)
 		(setq count (1+ count))
@@ -549,4 +529,10 @@ Return the number of occurances FUNCTION was operated upon."
 	  (semantic-symref-list-toggle-showing))))))
 
 (provide 'semantic/symref/list)
+
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/symref/list"
+;; End:
+
 ;;; semantic/symref/list.el ends here

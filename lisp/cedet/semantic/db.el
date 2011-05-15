@@ -1,27 +1,26 @@
 ;;; semantic/db.el --- Semantic tag database manager
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
+;;   2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semanticdb is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;; 
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 ;;
 ;; Maintain a database of tags for a group of files and enable
@@ -30,20 +29,18 @@
 ;; By default, assume one database per directory.
 ;;
 
-(require 'inversion)
-(eval-and-compile
-  (inversion-require 'eieio "1.0"))
+;;; Code:
+
 (require 'eieio-base)
 (require 'semantic)
-(eval-when-compile
-  (require 'semantic/lex-spp))
+
+(declare-function semantic-lex-spp-save-table "semantic/lex-spp")
 
 ;;; Variables:
 (defgroup semanticdb nil
   "Parser Generator Persistent Database interface."
-  :group 'semantic
-  )
-;;; Code:
+  :group 'semantic)
+
 (defvar semanticdb-database-list nil
   "List of all active databases.")
 
@@ -59,6 +56,15 @@ mechanism.")
 This can be changed to try out new types of search indices.")
 (make-variable-buffer-local 'semanticdb-default-find=index-class)
 
+;;;###autoload
+(defvar semanticdb-current-database nil
+  "For a given buffer, this is the currently active database.")
+(make-variable-buffer-local 'semanticdb-current-database)
+
+;;;###autoload
+(defvar semanticdb-current-table nil
+  "For a given buffer, this is the currently active database table.")
+(make-variable-buffer-local 'semanticdb-current-table)
 
 ;;; ABSTRACT CLASSES
 ;;
@@ -444,8 +450,8 @@ See the file semantic/scope.el for an example."
   "Get a cache object on TABLE of class DESIRED-CLASS.
 This method will create one if none exists with no init arguments
 other than :table."
-  (assert (child-of-class-p desired-class 'semanticdb-abstract-cache)
-          (error "Invalid SemanticDB cache"))
+  (unless (child-of-class-p desired-class 'semanticdb-abstract-cache)
+    (error "Invalid SemanticDB cache"))
   (let ((cache (oref table cache))
 	(obj nil))
     (while (and (not obj) cache)
@@ -495,8 +501,8 @@ See the file semantic/scope.el for an example."
   "Get a cache object on DB of class DESIRED-CLASS.
 This method will create one if none exists with no init arguments
 other than :table."
-  (assert (child-of-class-p desired-class 'semanticdb-abstract-db-cache)
-          (error "Invalid SemanticDB cache"))
+  (unless (child-of-class-p desired-class 'semanticdb-abstract-cache)
+    (error "Invalid SemanticDB cache"))
   (let ((cache (oref db cache))
 	(obj nil))
     (while (and (not obj) cache)
@@ -543,13 +549,13 @@ This will call `semantic-fetch-tags' if that file is in memory."
     (semanticdb-set-buffer obj)
     (semantic-fetch-tags))
    ;;
-   ;; Not in a buffer.  Forcing a load.  
+   ;; Not in a buffer.  Forcing a load.
    (force
-    ;; Patch from Iain Nicol. -- 
-    ;; @TODO: I wonder if there is a way to recycle 
+    ;; Patch from Iain Nicol. --
+    ;; @TODO: I wonder if there is a way to recycle
     ;;        semanticdb-create-table-for-file-not-in-buffer
     (save-excursion
-      (let ((buff (semantic-find-file-noselect 
+      (let ((buff (semantic-find-file-noselect
 		   (semanticdb-full-filename obj))))
 	(set-buffer buff)
 	(semantic-fetch-tags)
@@ -599,7 +605,7 @@ The file associated with OBJ does not need to be in a buffer."
   ;; Assume it is now up to date.
   (oset table unmatched-syntax semantic-unmatched-syntax-cache)
   ;; The lexical table should be good too.
-  (when (featurep 'semantic-lex-spp)
+  (when (featurep 'semantic/lex-spp)
     (oset table lexical-table (semantic-lex-spp-save-table)))
   ;; this implies dirtyness
   (semanticdb-set-dirty table)
@@ -628,7 +634,7 @@ The file associated with OBJ does not need to be in a buffer."
   (semanticdb-set-dirty table)
 
   ;; The lexical table may be modified.
-  (when (featurep 'semantic-lex-spp)
+  (when (featurep 'semantic/lex-spp)
     (oset table lexical-table (semantic-lex-spp-save-table)))
 
   ;; Incremental parser doesn't mokey around with this.
@@ -709,7 +715,6 @@ Uses `semanticdb-persistent-path' to determine the return value."
 ;;
 ;; What is the current database, are two tables of an equivalent mode,
 ;; and what databases are a part of the same project.
-;;;###autoload
 (defun semanticdb-current-database ()
   "Return the currently active database."
   (or semanticdb-current-database
@@ -936,7 +941,7 @@ DONTLOAD does not affect the creation of new database objects."
 	  ;; would need fixing
 	  (setq fullfile (file-truename file))
 	  )
-	
+
 	;; If we have a table, but no fullfile, that's ok.  Lets get the filename
 	;; from the table which is pre-truenamed.
 	(when (and (not fullfile) tab)
@@ -1020,7 +1025,6 @@ function will read in the buffer, parse it, and kill the buffer."
 	    )))))
   )
 
-;;;###autoload
 (defun semanticdb-file-stream (file)
   "Return a list of tags belonging to FILE.
 If file has database tags available in the database, return them.
@@ -1030,5 +1034,10 @@ If file does not have tags available, then load the file, and create them."
       (semanticdb-get-tags table))))
 
 (provide 'semantic/db)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/db"
+;; End:
 
 ;;; semantic/db.el ends here

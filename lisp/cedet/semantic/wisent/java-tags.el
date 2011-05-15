@@ -1,46 +1,39 @@
 ;;; semantic/wisent/java-tags.el --- Java LALR parser for Emacs
 
-;; Copyright (C) 2009 Eric M. Ludlam
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006 David Ponce
+;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 15 Dec 2001
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 
 ;;; History:
-;; 
+;;
 
 ;;; Code:
 
 (require 'semantic/wisent)
-(require 'semantic/wisent/java-tags.wy)
-(require 'semantic/bovine/java)
-(eval-when-compile
-  (require 'semantic/util)
-  (require 'semantic/ctxt)
-  (require 'semantic/imenu)
-  (require 'semantic/senator))
+(require 'semantic/wisent/java-tags-wy)
+(require 'semantic/java)
 
 ;;;;
 ;;;; Simple parser error reporting function
@@ -92,7 +85,7 @@ This function override `get-local-variables'."
 (defun wisent-java-default-setup ()
   "Hook run to setup Semantic in `java-mode'.
 Use the alternate LALR(1) parser."
-  (semantic/wisent/java-tags.wy--install-parser)
+  (wisent-java-tags-wy--install-parser)
   (setq
    ;; Lexical analysis
    semantic-lex-number-expression semantic-java-number-regexp
@@ -121,9 +114,11 @@ Use the alternate LALR(1) parser."
   ;; Setup javadoc stuff
   (semantic-java-doc-setup))
 
-;;;###autoload
-(add-hook 'java-mode-hook 'wisent-java-default-setup)
-
 (provide 'semantic/wisent/java-tags)
+
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/wisent/java-tags"
+;; End:
 
 ;;; semantic/wisent/java-tags.el ends here

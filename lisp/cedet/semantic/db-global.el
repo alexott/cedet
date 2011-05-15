@@ -1,27 +1,26 @@
 ;;; semantic/db-global.el --- Semantic database extensions for GLOBAL
 
-;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semanticdb is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;;
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 ;;
 ;; Use GNU Global for by-name database searches.
@@ -29,6 +28,8 @@
 ;; This will work as an "omniscient" database for a given project.
 ;;
 
+(require 'cedet-global)
+(require 'semantic/db-find)
 (require 'semantic/symref/global)
 
 (eval-when-compile
@@ -36,7 +37,9 @@
   (require 'eieio)
   (require 'eieio-opt)
   )
+
 ;;; Code:
+
 ;;;###autoload
 (defun semanticdb-enable-gnu-global-databases (mode)
   "Enable the use of the GNU Global SemanticDB back end for all files of MODE.
@@ -63,7 +66,8 @@ in a GNU Global supported hierarchy."
   )
 
 (defun semanticdb-enable-gnu-global-hook ()
-  "Add support for GNU Global in the current buffer via `semantic-init-hook'."
+  "Add support for GNU Global in the current buffer via `semantic-init-hook'.
+MODE is the major mode to support."
   (semanticdb-enable-gnu-global-in-buffer t))
 
 (defclass semanticdb-project-database-global
@@ -209,39 +213,11 @@ Optional argument TAGS is a list of tags to search.
 Like `semanticdb-find-tags-for-completion-method' for global."
   (semanticdb-find-tags-for-completion-method table prefix tags))
 
-;;; TEST
-;;
-;; Here is a testing fcn to try out searches via the GNU Global database.
-(defvar semanticdb-test-gnu-global-startfile "~/src/global-5.7.3/global/global.c"
-  "File to use for testing.")
-
-(defun semanticdb-test-gnu-global (searchfor &optional standardfile)
-  "Test the GNU Global semanticdb.
-Argument SEARCHFOR is the text to search for.
-If optional arg STANDARDFILE is non nil, use a standard file w/ global enabled."
-  (interactive "sSearch For Tag: \nP")
-
-  (save-excursion
-    (when standardfile
-      (save-match-data
-	(set-buffer (find-file-noselect semanticdb-test-gnu-global-startfile))))
-
-    (condition-case err
-	(semanticdb-enable-gnu-global-in-buffer)
-      (error (if standardfile
-		 (error err)
-	       (save-match-data
-		 (set-buffer (find-file-noselect semanticdb-test-gnu-global-startfile)))
-	       (semanticdb-enable-gnu-global-in-buffer))))
-
-    (let* ((db (semanticdb-project-database-global "global"))
-	   (tab (semanticdb-file-table db (buffer-file-name)))
-	   (result (semanticdb-deep-find-tags-for-completion-method tab searchfor))
-	   )
-      (data-debug-new-buffer "*SemanticDB Gnu Global Result*")
-      (data-debug-insert-thing result "?" "")
-      )))
-
 (provide 'semantic/db-global)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/db-global"
+;; End:
 
 ;;; semantic/db-global.el ends here

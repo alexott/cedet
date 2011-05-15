@@ -1,46 +1,39 @@
 ;;; semantic/wisent/python.el --- Semantic support for Python
-;;
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
-;; Copyright (C) 2002, 2004, 2006 Richard Kim
-;;
-;; Author: Richard Kim <ryk@dspwiz.com>
-;; Maintainer: Richard Kim <ryk@dspwiz.com>
+
+;; Copyright (C) 2002, 2004, 2006, 2007, 2008, 2009, 2010
+;; Free Software Foundation, Inc.
+
+;; Author: Richard Kim  <emacs18@gmail.com>
+;; Maintainer: Richard Kim  <emacs18@gmail.com>
 ;; Created: June 2002
 ;; Keywords: syntax
-;;
-;; This file is not part of GNU Emacs.
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
-;;
-;; This software is distributed in the hope that it will be useful,
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
-;;
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
-;; This library contains Semantic support code for the Python
-;; programming language.  The LALR grammar used to parse Python
-;; sources is in the semantic/wisent/python.wy file.
-;;
-;; The official website for the Python language is at
-;; <http://python.org/>.
-;;
-;; An X/Emacs major mode for editing Python source code is available
-;; at <http://sourceforge.net/projects/python-mode/>.
-;;
+;; Parser support for Python.
+
 ;;; Code:
 
 (require 'semantic/wisent)
-(require 'semantic/wisent/python.wy)
+(require 'semantic/wisent/python-wy)
+(require 'semantic/dep)
+(require 'semantic/ctxt)
+
 
 ;;; Lexical analysis
 ;;
@@ -203,8 +196,7 @@ identation of the current line."
           (semantic-lex-token 'DEDENT last-pos (point))))
        ;; If pos did not change, then we must return nil so that
        ;; other lexical analyzers can be run.
-       (/= last-pos (point)))
-      )))
+       (/= last-pos (point))))))
   ;; All the work was done in the above analyzer matching condition.
   )
 
@@ -343,5 +335,10 @@ To be implemented for Python!  For now just return nil."
       (pop-to-buffer (current-buffer)))))
 
 (provide 'semantic/wisent/python)
+
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/wisent/python"
+;; End:
 
 ;;; semantic/wisent/python.el ends here

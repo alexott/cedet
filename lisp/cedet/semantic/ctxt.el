@@ -1,26 +1,25 @@
 ;;; semantic/ctxt.el --- Context calculations for Semantic tools.
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006,
+;;   2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -32,11 +31,8 @@
 ;; the current context is calculated.
 ;;
 (require 'semantic)
-(eval-when-compile (require 'semantic/db))
 
 ;;; Code:
-;;
-;;;###autoload
 (defvar semantic-command-separation-character
  ";"
   "String which indicates the end of a command.
@@ -53,6 +49,8 @@ Used for identifying arguments to functions.")
 ;;
 ;; These context are nested blocks of code, such as code in an
 ;; if clause
+(declare-function semantic-current-tag-of-class "semantic/find")
+
 (define-overloadable-function semantic-up-context (&optional point bounds-type)
   "Move point up one context from POINT.
 Return non-nil if there are no more context levels.
@@ -157,17 +155,12 @@ Return non-nil if there is no upper context."
   "Get the local variables based on POINT's context.
 Local variables are returned in Semantic tag format.
 This can be overriden with `get-local-variables'."
-  ;; The working status is to let the parser work properly
-  (working-status-forms
-      (semantic-parser-working-message "Local")
-      "done"
+  ;; Disable parsing messages
+  (let ((semantic--progress-reporter nil))
     (save-excursion
       (if point (goto-char point))
-      (let* ((semantic-working-type nil)
-             ;; Disable parsing messages
-             (working-status-dynamic-type nil)
-             (case-fold-search semantic-case-fold))
-        (:override-with-args ())))))
+      (let* ((case-fold-search semantic-case-fold))
+	(:override-with-args ())))))
 
 (defun semantic-get-local-variables-default ()
   "Get local values from a specific context.
@@ -578,6 +571,7 @@ Assume a functional typed language.  Uses very simple rules."
 	'(type)
 	))))
 
+;;;###autoload
 (define-overloadable-function semantic-ctxt-current-mode (&optional point)
   "Return the major mode active at POINT.
 POINT defaults to the value of point in current buffer.
@@ -618,5 +612,10 @@ means that the first symbol might be:
   nil)
 
 (provide 'semantic/ctxt)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/ctxt"
+;; End:
 
 ;;; semantic/ctxt.el ends here

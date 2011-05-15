@@ -1,26 +1,24 @@
-;;; semantic/util.el --- Utilities for use with semantic tag tables
+;;; semantic/chart.el --- Utilities for use with semantic tag tables
 
-;;; Copyright (C) 1999, 2000, 2001, 2003, 2005, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2003, 2005, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; Keywords: chart
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -30,10 +28,13 @@
 
 (require 'semantic)
 (require 'chart)
+(require 'semantic/db)
+(require 'semantic/tag)
+
+(eval-when-compile (require 'semantic/find))
 
 ;;; Code:
 
-;;;###autoload
 (defun semantic-chart-tags-by-class (&optional tagtable)
   "Create a bar chart representing the number of tags for a given tag class.
 Each bar represents how many toplevel tags in TAGTABLE
@@ -57,7 +58,6 @@ TAGTABLE is passed to `semantic-something-to-tag-table'."
 		       nums "Volume")
     ))
 
-;;;###autoload
 (defun semantic-chart-database-size (&optional tagtable)
   "Create a bar chart representing the size of each file in semanticdb.
 Each bar represents how many toplevel tags in TAGTABLE
@@ -103,7 +103,6 @@ TAGTABLE is passed to `semantic-something-to-tag-table'."
    (semantic-tag-end tok)
    (semantic-tag-start tok)))
 
-;;;###autoload
 (defun semantic-chart-tag-complexity
   (&optional class tagtable)
   "Create a bar chart representing the complexity of some tags.
@@ -144,10 +143,14 @@ items are charted.  TAGTABLE is passed to
 		       nums "Complexity (Lines of code)")
     ))
 
-;;;###autoload
+(declare-function semanticdb-get-typecache "semantic/db-typecache")
+(declare-function semantic-calculate-scope "semantic/scope")
+
 (defun semantic-chart-analyzer ()
   "Chart the extent of the context analysis."
   (interactive)
+  (require 'semantic/db-typecache)
+  (require 'semantic/scope)
   (let* ((p (semanticdb-find-translate-path nil nil))
 	 (plen (length p))
 	 (tab semanticdb-current-table)
@@ -165,8 +168,6 @@ items are charted.  TAGTABLE is passed to
 		       (list plen tclen fslen lvarlen)
 		       "Number of tags")
     ))
-
-
 
 (provide 'semantic/chart)
 

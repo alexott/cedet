@@ -1,30 +1,28 @@
 ;;; semantic/wisent/comp.el --- GNU Bison for Emacs - Grammar compiler
 
-;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2009, 2010 David Ponce
-;; Copyright (C) 1984, 1986, 1989, 1992, 1995, 2000, 2001
-;; Free Software Foundation, Inc. (Bison)
+;; Copyright (C) 1984, 1986, 1989, 1992, 1995, 2000, 2001, 2002, 2003,
+;;   2004, 2005, 2006, 2007, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 30 January 2002
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -44,7 +42,6 @@
 
 ;;; Code:
 (require 'semantic/wisent)
-(require 'working)
 
 ;;;; -------------------
 ;;;; Misc. useful things
@@ -164,12 +161,6 @@ If optional LEFT is non-nil insert spaces on left."
   (not (zerop (logand (aref x (/ i wisent-BITS-PER-WORD))
                       (lsh 1 (% i wisent-BITS-PER-WORD))))))
 
-(eval-when-compile
-  (or (fboundp 'noninteractive)
-      ;; Silence the Emacs byte compiler
-      (defun noninteractive nil))
-  )
-
 (defsubst wisent-noninteractive ()
   "Return non-nil if running without interactive terminal."
   (if (featurep 'xemacs)
@@ -188,11 +179,9 @@ If optional LEFT is non-nil insert spaces on left."
 (defvar wisent-new-log-flag nil
   "Non-nil means to start a new report.")
 
-;;;###autoload
 (defvar wisent-verbose-flag nil
   "*Non-nil means to report verbose information on generated parser.")
 
-;;;###autoload
 (defun wisent-toggle-verbose-flag ()
   "Toggle whether to report verbose information on generated parser."
   (interactive)
@@ -211,7 +200,7 @@ Its name is defined in constant `wisent-log-buffer-name'."
   `(with-current-buffer (wisent-log-buffer)
      (erase-buffer)))
 
-(eval-when-compile (defvar byte-compile-current-file))
+(defvar byte-compile-current-file)
 
 (defun wisent-source ()
   "Return the current source file name or nil."
@@ -1498,7 +1487,6 @@ their rule numbers."
 
 (defun wisent-generate-states ()
   "Compute the nondeterministic finite state machine from the grammar."
-  (working-dynamic-status "(compute nondeterministic finite state machine)")
   (wisent-allocate-storage)
   (wisent-initialize-closure nitems)
   (wisent-initialize-states)
@@ -2025,7 +2013,6 @@ terminated list of the I such as NUM is in R-ARG[I]."
 
 (defun wisent-lalr ()
   "Make the nondeterministic finite state machine deterministic."
-  (working-dynamic-status "(make finite state machine deterministic)")
   (setq tokensetsize (wisent-WORDSIZE ntokens))
   (wisent-set-state-table)
   (wisent-set-accessing-symbol)
@@ -2190,7 +2177,6 @@ tables so that there is no longer a conflict."
 
 (defun wisent-resolve-conflicts ()
   "Find and resolve conflicts."
-  (working-dynamic-status "(resolve conflicts)")
   (let (i)
     (setq conflicts    (make-vector nstates nil)
           shiftset     (make-vector tokensetsize 0)
@@ -2809,7 +2795,6 @@ that likes a token gets to handle it."
 (defun wisent-state-actions ()
   "Figure out the actions for every state.
 Return the action table."
-  (working-dynamic-status "(build state actions)")
   ;; Store the semantic action obarray in (unused) RCODE[0].
   (aset rcode 0 (make-vector 13 0))
   (let (i j action-table actrow action)
@@ -2845,7 +2830,6 @@ Return the action table."
   "Figure out what to do after reducing with each rule.
 Depending on the saved state from before the beginning of parsing the
 data that matched this rule.  Return the goto table."
-  (working-dynamic-status "(build goto actions)")
   (let (i j m n symbol state goto-table)
     (setq goto-table (make-vector nstates nil)
           i ntokens)
@@ -3233,7 +3217,6 @@ declared in TOKENS.
 
 NONTERMS is the list of non terminal definitions (see function
 `wisent-parse-nonterminals')."
-  (working-dynamic-status "(parse input grammar)")
   (or (and (consp grammar) (> (length grammar) 2))
       (error "Bad input grammar"))
 
@@ -3427,7 +3410,6 @@ NONTERMS is the list of non terminal definitions (see function
 ;;;; Compile input grammar
 ;;;; ---------------------
 
-;;;###autoload
 (defun wisent-compile-grammar (grammar &optional start-list)
   "Compile the LALR(1) GRAMMAR.
 
@@ -3471,18 +3453,15 @@ where:
   (if (wisent-automaton-p grammar)
       grammar ;; Grammar already compiled just return it
     (wisent-with-context compile-grammar
-      (let* ((working-status-dynamic-type 'working-text-display)
-             (gc-cons-threshold 1000000)
+      (let* ((gc-cons-threshold 1000000)
              automaton)
         (garbage-collect)
-        (working-status-forms "Compiling grammar" "done"
-          (setq wisent-new-log-flag t)
-          ;; Parse input grammar
-          (wisent-parse-grammar grammar start-list)
-          ;; Generate the LALR(1) automaton
-          (setq automaton (wisent-parser-automaton))
-          (working-dynamic-status t)
-          automaton)))))
+	(setq wisent-new-log-flag t)
+	;; Parse input grammar
+	(wisent-parse-grammar grammar start-list)
+	;; Generate the LALR(1) automaton
+	(setq automaton (wisent-parser-automaton))
+	automaton))))
 
 ;;;; --------------------------
 ;;;; Byte compile input grammar
@@ -3490,7 +3469,6 @@ where:
 
 (require 'bytecomp)
 
-;;;###autoload
 (defun wisent-byte-compile-grammar (form)
   "Byte compile the `wisent-compile-grammar' FORM.
 Automatically called by the Emacs Lisp byte compiler as a
@@ -3501,7 +3479,6 @@ Automatically called by the Emacs Lisp byte compiler as a
   ;; it can be byte-compiled.
   (byte-compile-form (wisent-automaton-lisp-form (eval form))))
 
-;;;###autoload
 (put 'wisent-compile-grammar 'byte-compile 'wisent-byte-compile-grammar)
 
 (defun wisent-automaton-lisp-form (automaton)

@@ -1,60 +1,33 @@
 ;;; semantic/db-mode.el --- Semanticdb Minor Mode
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Major mode for managing Semantic Databases automatically.
 
-(require 'semantic/db)
 ;;; Code:
-;;;###autoload
-(defvar semanticdb-current-database nil
-  "For a given buffer, this is the currently active database.")
-(make-variable-buffer-local 'semanticdb-current-database)
 
-;;;###autoload
-(defvar semanticdb-current-table nil
-  "For a given buffer, this is the currently active database table.")
-(make-variable-buffer-local 'semanticdb-current-table)
+(require 'semantic/db)
 
-;;;###autoload
-(defcustom semanticdb-global-mode nil
-  "*If non-nil enable the use of `semanticdb-minor-mode'."
-  :group 'semantic
-  :type 'boolean
-  :require 'semanticdb
-  :initialize 'custom-initialize-default
-  :set (lambda (sym val)
-         (global-semanticdb-minor-mode (if val 1 -1))
-         (custom-set-default sym val)))
-
-(defcustom semanticdb-mode-hook nil
-  "Hook run whenever `global-semanticdb-minor-mode' is run.
-Use `semanticdb-minor-mode-p' to determine if the mode has been turned
-on or off."
-  :group 'semanticdb
-  :type 'hook)
-
-(semantic-varalias-obsolete 'semanticdb-mode-hooks
-                          'semanticdb-mode-hook)
+(declare-function semantic-lex-spp-set-dynamic-table "semantic/lex-spp")
 
 ;;; Start/Stop database use
 ;;
@@ -79,32 +52,27 @@ on or off."
 	  (symbol-value (car (cdr (car semanticdb-hooks))))))
 
 ;;;###autoload
-(defun global-semanticdb-minor-mode (&optional arg)
-  "Toggle the use of `semanticdb-minor-mode'.
-If ARG is positive, enable, if it is negative, disable.
-If ARG is nil, then toggle."
-  (interactive "P")
-  (if (not arg)
-      (if (semanticdb-minor-mode-p)
-	  (setq arg -1)
-	(setq arg 1)))
-  (let ((fn 'add-hook)
-	(h semanticdb-hooks)
-	(changed nil))
-    (if (< arg 0)
-	(setq changed semanticdb-global-mode
-	      semanticdb-global-mode nil
-              fn 'remove-hook)
-      (setq changed (not semanticdb-global-mode)
-	    semanticdb-global-mode t))
-    ;(message "ARG = %d" arg)
-    (when changed
-      (while h
-	(funcall fn (car (cdr (car h))) (car (car h)))
-	(setq h (cdr h)))
-      ;; Call a hook
-      (run-hooks 'semanticdb-mode-hook))
-    ))
+(define-minor-mode global-semanticdb-minor-mode
+  "Toggle Semantic DB mode.
+With ARG, turn Semantic DB mode on if ARG is positive, off otherwise.
+
+In Semantic DB mode, Semantic parsers store results in a
+database, which can be saved for future Emacs sessions."
+  :global t
+  :group 'semantic
+  (if global-semanticdb-minor-mode
+      ;; Enable
+      (dolist (elt semanticdb-hooks)
+	(add-hook (cadr elt) (car elt)))
+    ;; Disable
+    (dolist (elt semanticdb-hooks)
+      (add-hook (cadr elt) (car elt)))))
+
+(defvaralias 'semanticdb-mode-hook 'global-semanticdb-minor-mode-hook)
+(defvaralias 'semanticdb-global-mode 'global-semanticdb-minor-mode)
+(semantic-varalias-obsolete 'semanticdb-mode-hooks
+			    'global-semanticdb-minor-mode-hook "23.2")
+
 
 (defun semanticdb-toggle-global-mode ()
   "Toggle use of the Semantic Database feature.
@@ -243,4 +211,10 @@ Argument NEW-TABLE is the new table of tags."
 
 
 (provide 'semantic/db-mode)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/db-mode"
+;; End:
+
 ;;; semantic/db-mode.el ends here

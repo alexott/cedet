@@ -1,35 +1,41 @@
 ;;; semantic/analyze/debug.el --- Debug the analyzer
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
-;; Author: Eric M. Ludlam <eric@siege-engine.com>
+;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Provide a top-order debugging tool for figuring out what's going on with
 ;; smart completion and analyzer mode.
 
+(require 'semantic)
 (require 'semantic/analyze)
+(require 'semantic/analyze/complete)
 (require 'semantic/db-typecache)
+
+;; For semantic-find-tags-by-class:
+(eval-when-compile (require 'semantic/find))
+
+(declare-function ede-get-locator-object "ede/files")
 
 ;;; Code:
 
-;;;###autoload
 (defun semantic-analyze-debug-assist ()
   "Debug semantic analysis at the current point."
   (interactive)
@@ -374,8 +380,11 @@ or implementing a version specific to ")
       (princ "\n"))
     (princ "\n")))
 
+(defvar semantic-dependency-system-include-path)
+
 (defun semantic-analyzer-debug-insert-include-summary (table)
   "Display a summary of includes for the semanticdb TABLE."
+  (require 'semantic/dep)
   (semantic-fetch-tags)
   (let ((inc (semantic-find-tags-by-class 'include table))
 	;;(path (semanticdb-find-test-translate-path-no-loading))
@@ -387,11 +396,12 @@ or implementing a version specific to ")
 	   semantic-dependency-system-include-path))
 	(edeobj
 	 (with-current-buffer (semanticdb-get-buffer table)
-	   ede-object))
+	   (and (boundp 'ede-object)
+		ede-object)))
 	(edeproj
 	 (with-current-buffer (semanticdb-get-buffer table)
-	   ede-object-project))
-	)
+	   (and (boundp 'ede-object-project)
+		ede-object-project))))
 
     (princ "\n\nInclude Path Summary:")
     (when edeobj
@@ -576,32 +586,27 @@ Look for key expressions, and add push-buttons near them."
     (set-marker orig-buffer (point) (current-buffer))
     ;; Get a buffer ready.
     (with-current-buffer "*Help*"
-      (toggle-read-only -1)
-      (goto-char (point-min))
-      (set (make-local-variable 'semantic-analyzer-debug-orig) orig-buffer)
-      ;; First, add do-in buttons to recommendations.
-      (while (re-search-forward "^\\s-*M-x \\(\\(\\w\\|\\s_\\)+\\) " nil t)
-	(let ((fcn (match-string 1)))
-	  (when (not (fboundp (intern-soft fcn)))
-	    (error "Help Err: Can't find %s" fcn))
-	  (end-of-line)
-	  (insert "   ")
-	  (insert-button "[ Do It ]"
-			 'mouse-face 'custom-button-pressed-face
-			 'do-fcn fcn
-			 'action `(lambda (arg)
-				    (let ((M semantic-analyzer-debug-orig))
-				      (set-buffer (marker-buffer M))
-				      (goto-char M))
-				    (call-interactively (quote ,(intern-soft fcn))))
-			 )
-	  ))
+      (let ((inhibit-read-only t))
+	(goto-char (point-min))
+	(set (make-local-variable 'semantic-analyzer-debug-orig) orig-buffer)
+	;; First, add do-in buttons to recommendations.
+	(while (re-search-forward "^\\s-*M-x \\(\\(\\w\\|\\s_\\)+\\) " nil t)
+	  (let ((fcn (match-string 1)))
+	    (when (not (fboundp (intern-soft fcn)))
+	      (error "Help Err: Can't find %s" fcn))
+	    (end-of-line)
+	    (insert "   ")
+	    (insert-button "[ Do It ]"
+			   'mouse-face 'custom-button-pressed-face
+			   'do-fcn fcn
+			   'action `(lambda (arg)
+				      (let ((M semantic-analyzer-debug-orig))
+					(set-buffer (marker-buffer M))
+					(goto-char M))
+				      (call-interactively (quote ,(intern-soft fcn))))))))
       ;; Do something else?
-
       ;; Clean up the mess
-      (toggle-read-only 1)
-      (set-buffer-modified-p nil)
-      )))
+      (set-buffer-modified-p nil))))
 
 (provide 'semantic/analyze/debug)
 

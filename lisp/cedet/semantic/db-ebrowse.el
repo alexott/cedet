@@ -1,27 +1,27 @@
 ;;; semantic/db-ebrowse.el --- Semanticdb backend using ebrowse.
 
-;;; Copyright (C) 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2005, 2006, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
 
-;; Author: Eric M. Ludlam <zappo@gnu.org>, Joakim Verona
+;; Authors: Eric M. Ludlam <zappo@gnu.org>
+;;	Joakim Verona
 ;; Keywords: tags
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semanticdb is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;;
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 ;;
 ;; This program was started by Eric Ludlam, and Joakim Verona finished
@@ -52,19 +52,17 @@
 ;;       Call it a second time to refresh the Emacs DB with the file.
 ;;
 
+(require 'ebrowse)
+(require 'semantic)
+(require 'semantic/db-file)
+
 (eval-when-compile
   ;; For generic function searching.
   (require 'eieio)
   (require 'eieio-opt)
-  )
-(require 'semantic/db-file)
+  (require 'semantic/find))
 
-(eval-and-compile
-  ;; Hopefully, this will allow semanticdb-ebrowse to compile under
-  ;; XEmacs, it just won't run if a user attempts to use it.
-  (condition-case nil
-      (require 'ebrowse)
-    (error nil)))
+(declare-function semantic-add-system-include "semantic/dep")
 
 ;;; Code:
 (defvar semanticdb-ebrowse-default-file-name "BROWSE"
@@ -113,6 +111,7 @@ This table is composited from the ebrowse *Globals* section.")
   "Semantic Database deriving tags using the EBROWSE tool.
 EBROWSE is a C/C++ parser for use with `ebrowse' Emacs program.")
 
+
 (defun semanticdb-ebrowse-C-file-p (file)
   "Is FILE a C or C++ file?"
   (or (string-match semanticdb-ebrowse-file-match file)
@@ -128,7 +127,6 @@ EBROWSE is a C/C++ parser for use with `ebrowse' Emacs program.")
 	       ))
 	   )))
 
-;;;###autoload
 (defun semanticdb-create-ebrowse-database (dir)
   "Create an EBROWSE database for directory DIR.
 The database file is stored in ~/.semanticdb, or whichever directory
@@ -180,7 +178,6 @@ is specified by `semanticdb-default-save-directory'."
       (load lfn nil t)
       )))
 
-;;;###autoload
 (defun semanticdb-load-ebrowse-caches ()
   "Load all semanticdb controlled EBROWSE caches."
   (interactive)
@@ -191,7 +188,6 @@ is specified by `semanticdb-default-save-directory'."
       (setq f (cdr f)))
     ))
 
-;;;###autoload
 (defun semanticdb-ebrowse-load-helper (directory)
   "Create the semanticdb database via ebrowse for directory.
 If DIRECTORY is found to be defunct, it won't load the DB, and will
@@ -293,6 +289,7 @@ For instance: /home/<username>/.semanticdb/!usr!include!BROWSE"
 If there is no database for DIRECTORY available, then
 {not implemented yet} create one.  Return nil if that is not possible."
   ;; MAKE SURE THAT THE FILE LOADED DOESN'T ALREADY EXIST.
+  (require 'semantic/dep)
   (let ((dbs semanticdb-database-list)
 	(found nil))
     (while (and (not found) dbs)
@@ -661,46 +658,6 @@ Return a list of tags."
     ;; but we can't use it.... yet.
     nil
     ))
-
-;;; TESTING
-;;
-;; This is a complex bit of stuff.  Here are some tests for the
-;; system.
-
-(defun semanticdb-ebrowse-run-tests ()
-  "Run some tests of the semanticdb-ebrowse system.
-All systems are different.  Ask questions along the way."
-  (interactive)
-  (let ((doload nil))
-    (when (y-or-n-p "Create a system database to test with? ")
-      (call-interactively 'semanticdb-create-ebrowse-database)
-      (setq doload t))
-    ;;  Should we load in caches
-    (when (if doload
-	      (y-or-n-p "New database created.  Reload system databases? ")
-	    (y-or-n-p "Load in all system databases? "))
-      (semanticdb-load-ebrowse-caches)))
-  ;; Ok, databases were creatd.  Lets try some searching.
-  (when (not (or (eq major-mode 'c-mode)
-		 (eq major-mode 'c++-mode)))
-    (error "Please make your default buffer be a C or C++ file, then
-run the test again..")
-    )
-
-  )
-
-(defun semanticdb-ebrowse-dump ()
-  "Find the first loaded ebrowse table, and dump out the contents."
-  (interactive)
-  (let ((db semanticdb-database-list)
-	(ab nil))
-    (while db
-      (when (semanticdb-project-database-ebrowse-p (car db))
-	(setq ab (data-debug-new-buffer "*EBROWSE Database*"))
-	(data-debug-insert-thing (car db) "*" "")
-	(setq db nil)
-	)
-      (setq db (cdr db)))))
 
 (provide 'semantic/db-ebrowse)
 

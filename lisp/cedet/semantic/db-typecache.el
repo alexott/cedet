@@ -1,23 +1,23 @@
 ;;; semantic/db-typecache.el --- Manage Datatypes
 
-;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -28,8 +28,18 @@
 ;;
 ;; It is likely this feature will only be needed for C/C++.
 
+(require 'semantic)
 (require 'semantic/db)
 (require 'semantic/db-find)
+(require 'semantic/analyze/fcn)
+
+;; For semantic-find-tags-by-* macros
+(eval-when-compile (require 'semantic/find))
+
+(declare-function data-debug-insert-thing "data-debug")
+(declare-function data-debug-new-buffer "data-debug")
+(declare-function semantic-sort-tags-by-name-then-type-increasing "semantic/sort")
+(declare-function semantic-scope-tag-clone-with-scope "semantic/scope")
 
 ;;; Code:
 
@@ -68,7 +78,6 @@ Said object must support `semantic-reset' methods.")
   (oset tc dependants nil)
   )
 
-;;;###autoload
 (defmethod semanticdb-typecache-notify-reset ((tc semanticdb-typecache))
   "Do a reset from a notify from a table we depend on."
   (oset tc includestream nil)
@@ -94,7 +103,6 @@ Said object must support `semantic-reset' methods.")
   ;; NO CODE HERE
   )
 
-;;;###autoload
 (defun semanticdb-typecache-add-dependant (dep)
   "Add into the local typecache a dependant DEP."
   (let* ((table semanticdb-current-table)
@@ -117,7 +125,6 @@ Debugging function."
 	(t -1)	))
 
 
-;;;###autoload
 (defmethod semanticdb-get-typecache ((table semanticdb-abstract-table))
   "Retrieve the typecache from the semanticdb TABLE.
 If there is no table, create one, and fill it in."
@@ -170,7 +177,6 @@ If there is no table, create one, and fill it in."
   "Synchronize a CACHE with some changed NEW-TAGS."
   )
 
-;;;###autoload
 (defmethod semanticdb-get-typecache ((db semanticdb-project-database))
   "Retrieve the typecache from the semantic database DB.
 If there is no table, create one, and fill it in."
@@ -219,7 +225,6 @@ The new tag will be a faux tag, used as a placeholder in a typecache."
     (semantic-tag-set-faux tag)
     tag))
 
-;;;###autoload
 (defun semanticdb-typecache-merge-streams (cache1 cache2)
   "Merge into CACHE1 and CACHE2 together.  The Caches will be merged in place."
   (if (or (and (not cache1) (not cache2))
@@ -234,6 +239,7 @@ The new tag will be a faux tag, used as a placeholder in a typecache."
 
     ;; Assume we always have datatypes, as this typecache isn't really
     ;; useful without a typed language.
+    (require 'semantic/sort)
     (let ((S (semantic-sort-tags-by-name-then-type-increasing
 	      ;; I used to use append, but it copied cache1 but not cache2.
 	      ;; Since sort was permuting cache2, I already had to make sure
@@ -397,7 +403,7 @@ TYPE is the datatype to find.
 PATH is the search path, which should be one table object.
 If FIND-FILE-MATCH is non-nil, then force the file belonging to the
 found tag to be loaded."
-  (if (not (and (featurep 'semanticdb) semanticdb-current-database))
+  (if (not (and (featurep 'semantic/db) semanticdb-current-database))
       nil ;; No DB, no search
     (save-excursion
       (semanticdb-typecache-find-method (or path semanticdb-current-table)
@@ -518,8 +524,10 @@ found tag to be loaded."
       (if (and lastans calculated-scope)
 
 	  ;; Put our discovered scope into the tag if we have a tag
-	  (semantic-scope-tag-clone-with-scope
-	   lastans (reverse (cdr calculated-scope)))
+	  (progn
+	    (require 'semantic/scope)
+	    (semantic-scope-tag-clone-with-scope
+	     lastans (reverse (cdr calculated-scope))))
 
 	;; Else, just return
 	lastans
@@ -551,7 +559,6 @@ If there isn't one, create it.
     (oset cache stream stream)
     cache))
 
-;;;###autoload
 (defun semanticdb-typecache-refresh-for-buffer (buffer)
   "Refresh the typecache for BUFFER."
   (with-current-buffer buffer
@@ -573,10 +580,10 @@ If there isn't one, create it.
       (oset P pointmax nil)
       (semantic-reset (semanticdb-get-typecache P)))))
 
-;;;###autoload
 (defun semanticdb-typecache-dump ()
   "Dump the typecache for the current buffer."
   (interactive)
+  (require 'data-debug)
   (let* ((start (current-time))
 	 (tc (semanticdb-typecache-refresh-for-buffer (current-buffer)))
 	 (end (current-time))
@@ -589,10 +596,10 @@ If there isn't one, create it.
 
     ))
 
-;;;###autoload
 (defun semanticdb-db-typecache-dump ()
   "Dump the typecache for the current buffer's database."
   (interactive)
+  (require 'data-debug)
   (let* ((tab semanticdb-current-table)
 	 (idx (semanticdb-get-table-index tab))
 	 (junk (oset idx type-cache nil)) ;; flush!
@@ -602,12 +609,17 @@ If there isn't one, create it.
 	 )
     (data-debug-new-buffer "*TypeCache ADEBUG*")
     (message "Calculating Cache took %.2f seconds."
-	     (semantic.elapsed-time start end))
+	     (semantic-elapsed-time start end))
 
     (data-debug-insert-thing tc "]" "")
 
     ))
 
-
 (provide 'semantic/db-typecache)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/db-typecache"
+;; End:
+
 ;;; semantic/db-typecache.el ends here

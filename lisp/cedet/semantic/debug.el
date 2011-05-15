@@ -1,26 +1,24 @@
 ;;; semantic/debug.el --- Language Debugger framework
 
-;;; Copyright (C) 2003, 2004, 2005, 2008 Eric M. Ludlam
+;; Copyright (C) 2003, 2004, 2005, 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; This is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;;
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 ;;
 ;; To provide better support for debugging parsers, this framework
@@ -40,8 +38,8 @@
 
 (eval-when-compile (require 'cl))
 (require 'semantic)
-(require 'inversion)
-(inversion-require 'eieio "0.18beta1")
+(require 'eieio)
+(eval-when-compile (require 'semantic/find))
 
 ;;; Code:
 
@@ -59,7 +57,6 @@ to one of the parser generators.")
 ;;;###autoload
 (make-variable-buffer-local 'semantic-debug-parser-class)
 
-;;;###autoload
 (defvar semantic-debug-enabled nil
   "Non-nil when debugging a parser.")
 
@@ -231,7 +228,6 @@ If RULE and MATCH indicies are specified, highlight those also."
 (defvar semantic-debug-user-command nil
   "The command the user is requesting.")
 
-;;;###autoload
 (defun semantic-debug-break (frame)
   "Stop parsing now at FRAME.
 FRAME is an object that represents the parser's view of the
@@ -320,23 +316,22 @@ Argument ONOFF is non-nil when we are entering debug mode.
 	  ;; Make the buffer read only
 	  (toggle-read-only 1)
 	  ;; Hooks
-	  (run-hooks 'semantic-debug-mode-hooks)
+	  (run-hooks 'semantic-debug-mode-hook)
 	  )
       ;; Restore old mode information
       (with-current-buffer
           (oref semantic-debug-current-interface parser-buffer)
-        (use-local-map
-         (oref semantic-debug-current-interface parser-local-map))
-        )
+	(use-local-map
+	 (oref semantic-debug-current-interface parser-local-map))
+	)
       (with-current-buffer
           (oref semantic-debug-current-interface source-buffer)
-        (use-local-map
-         (oref semantic-debug-current-interface source-local-map))
-        )
-      (run-hooks 'semantic-debug-exit-hooks)
+	(use-local-map
+	 (oref semantic-debug-current-interface source-local-map))
+	)
+      (run-hooks 'semantic-debug-exit-hook)
       )))
 
-;;;###autoload
 (defun semantic-debug ()
   "Parse the current buffer and run in debug mode."
   (interactive)
@@ -354,8 +349,8 @@ Argument ONOFF is non-nil when we are entering debug mode.
 	   (semantic-debug-interface
 	    "Debug Interface"
 	    :parser-buffer parserb
-        :parser-local-map (with-current-buffer parserb
-                            (current-local-map))
+	    :parser-local-map (with-current-buffer parserb
+				(current-local-map))
 	    :source-buffer (current-buffer)
 	    :source-local-map (current-local-map)
 	    )))
@@ -565,5 +560,10 @@ A frame is of the form:
 
 
 (provide 'semantic/debug)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/debug"
+;; End:
 
 ;;; semantic/debug.el ends here

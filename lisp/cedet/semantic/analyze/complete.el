@@ -1,23 +1,23 @@
 ;;; semantic/analyze/complete.el --- Smart Completions
 
-;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
-;; Author: Eric M. Ludlam <eric@siege-engine.com>
+;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -31,6 +31,9 @@
 ;; Code was moved here from semantic/analyze.el
 
 (require 'semantic/analyze)
+
+;; For semantic-find-* macros:
+(eval-when-compile (require 'semantic/find))
 
 ;;; Code:
 
@@ -46,25 +49,6 @@ Used as options when completing.")
   "Do nothing with TYPE."
   nil)
 
-;; Old impl of the above.  I'm not sure what the issue is
-;  (let ((ans
-;         (:override-with-args
-;             ((semantic-analyze-find-tag (semantic-tag-name type)))
-;           ;; Be default, we don't know.
-;           nil))
-;        (out nil))
-;    (dolist (elt ans)
-;      (cond
-;       ((stringp elt)
-;        (push (semantic-tag-new-variable
-;               elt (semantic-tag-name type) nil)
-;              out))
-;       ((semantic-tag-p elt)
-;        (push elt out))
-;       (t nil)))
-;    (nreverse out)))
-
-;;;###autoload
 (defun semantic-analyze-tags-of-class-list (tags classlist)
   "Return the tags in TAGS that are of classes in CLASSLIST."
   (let ((origc tags))
@@ -77,7 +61,6 @@ Used as options when completing.")
     tags))
 
 ;;; MAIN completion calculator
-;;
 ;;
 ;;;###autoload
 (define-overloadable-function semantic-analyze-possible-completions (context &rest flags)
@@ -112,7 +95,7 @@ in a buffer."
 		    (error "Nothing to complete")
 		  (:override))))
       ;; If interactive, display them.
-      (when (cedet-called-interactively-p)
+      (when (cedet-called-interactively-p 'any)
 	(with-output-to-temp-buffer "*Possible Completions*"
 	  (semantic-analyze-princ-sequence ans "" (current-buffer)))
 	(shrink-window-if-larger-than-buffer
@@ -287,5 +270,10 @@ FLAGS can be any number of:
     c))
 
 (provide 'semantic/analyze/complete)
+
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/analyze/complete"
+;; End:
 
 ;;; semantic/analyze/complete.el ends here

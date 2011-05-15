@@ -1,50 +1,41 @@
 ;;; semantic/html.el --- Semantic details for html files
 
-;;; Copyright (C) 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2004, 2005, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; This is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Parse HTML files and organize them in a nice way.
 ;; Pay attention to anchors, including them in the tag list.
 ;;
-;; Copied from the original semantic/texi.el.
+;; Copied from the original semantic-texi.el.
 ;;
 ;; ToDo: Find <script> tags, and parse the contents in other
 ;; parsers, such as javascript, php, shtml, or others.
 
+;;; Code:
+
 (require 'semantic)
 (require 'semantic/format)
-(condition-case nil
-    ;; This is not installed in all versions of Emacs.
-    (require 'sgml-mode) ;; html-mode is in here.
-  (error
-   (require 'psgml-mode) ;; XEmacs uses psgml, and html-mode is in here.
-   ))
+(require 'sgml-mode)
 
-;;; Code:
-(eval-when-compile
-  (require 'semantic/ctxt)
-  (require 'semantic/imenu)
-  (require 'semantic/senator))
+(defvar semantic-command-separation-character)
 
 (defvar semantic-html-super-regex
   "<\\(h[1-9]\\|title\\|script\\|body\\|a +href\\)\\>"
@@ -101,12 +92,17 @@ or
     ;; First search and snarf.
     (save-excursion
       (goto-char (point-min))
-      (working-status-forms (file-name-nondirectory buffer-file-name) "done"
+
+      (let ((semantic--progress-reporter
+	     (make-progress-reporter
+	      (format "Parsing %s..."
+		      (file-name-nondirectory buffer-file-name))
+	      (point-min) (point-max))))
 	(while (re-search-forward semantic-html-super-regex nil t)
 	  (setq pass1 (cons (match-beginning 0) pass1))
-	  (working-status)
-	  )
-	(working-status t)))
+	  (progress-reporter-update semantic--progress-reporter (point)))
+	(progress-reporter-done semantic--progress-reporter)))
+
     (setq pass1 (nreverse pass1))
     ;; Now, make some tags while creating a set of children.
     (car (semantic-html-recursive-combobulate-list pass1 0))
@@ -180,8 +176,8 @@ tag with greater section value than LEVEL is found."
 	  (goto-char (car oldl))
 	  (if (looking-at "<\\(\\w+\\)")
 	      (let* ((word (match-string 1))
-		     (levelmatch (assoc-ignore-case
-                                  word semantic-html-section-list))
+		     (levelmatch (assoc-string
+                                  word semantic-html-section-list t))
 		     text begin tmp
 		     )
 		(when (not levelmatch)
@@ -241,6 +237,7 @@ tag with greater section value than LEVEL is found."
 	semantic-command-separation-character ">"
 	semantic-type-relation-separator-character '(":")
 	semantic-symbol->name-assoc-list '((section . "Section")
+
 					   )
 	semantic-imenu-expandable-tag-classes '(section)
 	semantic-imenu-bucketize-file nil
@@ -255,12 +252,14 @@ tag with greater section value than LEVEL is found."
    t)
   )
 
-;;;###autoload
-(add-hook 'html-mode-hook 'semantic-default-html-setup)
-
 (define-child-mode html-helper-mode html-mode
   "`html-helper-mode' needs the same semantic support as `html-mode'.")
 
 (provide 'semantic/html)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/html"
+;; End:
 
 ;;; semantic/html.el ends here

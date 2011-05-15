@@ -1,42 +1,42 @@
 ;;; semantic/util.el --- Utilities for use with semantic tag tables
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007,
+;;; 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Semantic utility API for use with semantic tag tables.
 ;;
 
-(require 'assoc)
 (require 'semantic)
+
 (eval-when-compile
-  ;; Emacs 21
-  (condition-case nil
-      (require 'newcomment)
-    (error nil))
-  ;; Semanticdb calls
-  (require 'semantic/db)
-  )
+  (require 'semantic/db-find)
+  ;; For semantic-find-tags-by-class, semantic--find-tags-by-function,
+  ;; and semantic-brute-find-tag-standard:
+  (require 'semantic/find))
+
+(declare-function data-debug-insert-stuff-list "data-debug")
+(declare-function data-debug-insert-thing "data-debug")
+(declare-function semantic-ctxt-current-symbol-and-bounds "semantic/ctxt")
 
 ;;; Code:
 
@@ -70,7 +70,7 @@ If FILE is not loaded, and semanticdb is not available, find the file
 	(with-current-buffer (find-buffer-visiting file)
 	  (semantic-fetch-tags))
       ;; File not loaded
-      (if (and (fboundp 'semanticdb-minor-mode-p)
+      (if (and (require 'semantic/db-mode)
 	       (semanticdb-minor-mode-p))
 	  ;; semanticdb is around, use it.
 	  (semanticdb-file-stream file)
@@ -79,7 +79,7 @@ If FILE is not loaded, and semanticdb is not available, find the file
 	  (semantic-fetch-tags))))))
 
 (semantic-alias-obsolete 'semantic-file-token-stream
-			 'semantic-file-tag-table)
+			 'semantic-file-tag-table "23.2")
 
 (defun semantic-something-to-tag-table (something)
   "Convert SOMETHING into a semantic tag table.
@@ -110,14 +110,15 @@ buffer, or a filename.  If SOMETHING is nil return nil."
 	 (file-exists-p something))
     (semantic-file-tag-table something))
    ;; A Semanticdb table
-   ((and (featurep 'semanticdb)
+   ((and (featurep 'semantic/db)
 	 (semanticdb-minor-mode-p)
 	 (semanticdb-abstract-table-child-p something))
     (semanticdb-refresh-table something)
     (semanticdb-get-tags something))
    ;; Semanticdb find-results
-   ((and (featurep 'semanticdb)
+   ((and (featurep 'semantic/db)
 	 (semanticdb-minor-mode-p)
+	 (require 'semantic/db-find)
 	 (semanticdb-find-results-p something))
     (semanticdb-strip-find-results something))
    ;; NOTE: This commented out since if a search result returns
@@ -129,7 +130,7 @@ buffer, or a filename.  If SOMETHING is nil return nil."
    (t nil)))
 
 (semantic-alias-obsolete 'semantic-something-to-stream
-			 'semantic-something-to-tag-table)
+			 'semantic-something-to-tag-table "23.2")
 
 ;;; Completion APIs
 ;;
@@ -241,6 +242,7 @@ If TAG is not specified, use the tag at point."
 ;; Some hacks to help me test these functions
 (defun semantic-describe-buffer-var-helper (varsym buffer)
   "Display to standard out the value of VARSYM in BUFFER."
+  (require 'data-debug)
   (let ((value (with-current-buffer buffer
 		 (symbol-value varsym))))
     (cond
@@ -352,6 +354,81 @@ NOTFIRST indicates that this was not the first call in the recursive use."
 	(when (cedet-called-interactively-p 'any)
 	  (message "Remaining overlays: %S" o))))
   over)
+
+;;; Interactive commands (from Senator).
+
+;; The Senator library from upstream CEDET is not included in the
+;; built-in version of Emacs.  The plan is to fold it into the
+;; different parts of CEDET and Emacs, so that it works
+;; "transparently".  Here are some interactive commands based on
+;; Senator.
+
+;; Symbol completion
+
+(defun semantic-find-tag-for-completion (prefix)
+  "Find all tags with name starting with PREFIX.
+This uses `semanticdb' when available."
+  (let (result ctxt)
+    ;; Try the Semantic analyzer
+    (condition-case nil
+	(and (featurep 'semantic/analyze)
+	     (setq ctxt (semantic-analyze-current-context))
+	     (setq result (semantic-analyze-possible-completions ctxt)))
+      (error nil))
+    (or result
+	;; If the analyzer fails, then go into boring completion.
+	(if (and (featurep 'semantic/db)
+		 (semanticdb-minor-mode-p)
+		 (require 'semantic/db-find))
+	    (semanticdb-fast-strip-find-results
+	     (semanticdb-deep-find-tags-for-completion prefix))
+	  (semantic-deep-find-tags-for-completion prefix (current-buffer))))))
+
+(defun semantic-complete-symbol (&optional predicate)
+  "Complete the symbol under point, using Semantic facilities.
+When called from a program, optional arg PREDICATE is a predicate
+determining which symbols are considered."
+  (interactive)
+  (require 'semantic/ctxt)
+  (let* ((start (car (nth 2 (semantic-ctxt-current-symbol-and-bounds
+			     (point)))))
+	 (pattern (regexp-quote (buffer-substring start (point))))
+	 collection completion)
+    (when start
+      (if (and semantic--completion-cache
+	       (eq (nth 0 semantic--completion-cache) (current-buffer))
+	       (=  (nth 1 semantic--completion-cache) start)
+	       (save-excursion
+		 (goto-char start)
+		 (looking-at (nth 3 semantic--completion-cache))))
+	  ;; Use cached value.
+	  (setq collection (nthcdr 4 semantic--completion-cache))
+	;; Perform new query.
+	(setq collection (semantic-find-tag-for-completion pattern))
+	(setq semantic--completion-cache
+	      (append (list (current-buffer) start 0 pattern)
+		      collection))))
+    (if (null collection)
+	(let ((str (if pattern (format " for \"%s\"" pattern) "")))
+	  (if (window-minibuffer-p (selected-window))
+	      (minibuffer-message (format " [No completions%s]" str))
+	    (message "Can't find completion%s" str)))
+      (setq completion (try-completion pattern collection predicate))
+      (if (string= pattern completion)
+	  (let ((list (all-completions pattern collection predicate)))
+	    (setq list (sort list 'string<))
+	    (if (> (length list) 1)
+		(with-output-to-temp-buffer "*Completions*"
+		  (display-completion-list list pattern))
+	      ;; Bury any out-of-date completions buffer.
+	      (let ((win (get-buffer-window "*Completions*" 0)))
+		(if win (with-selected-window win (bury-buffer))))))
+	;; Exact match
+	(delete-region start (point))
+	(insert completion)
+	;; Bury any out-of-date completions buffer.
+	(let ((win (get-buffer-window "*Completions*" 0)))
+	  (if win (with-selected-window win (bury-buffer))))))))
 
 (provide 'semantic/util)
 

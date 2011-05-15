@@ -34,7 +34,7 @@
 ;;...and then further modified by Joakim Verona
 ;;and its more of an experiment than anything useful
 
-%package semantic/wisent/javascript-jv-wy
+%package semantic/wisent/javascript-wy
 ;; JAVE I prefere ecmascript-mode
 %languagemode ecmascript-mode javascript-mode
 
@@ -478,7 +478,7 @@ OptionalExpression : Expression
 ;;here something like:
 ;;(define-lex wisent-java-tags-lexer
 ;; should go
-(define-lex javascript-lexer-jv
+(define-lex javascript-lexer
 "javascript thingy"
 ;;std stuff
   semantic-lex-ignore-whitespace
@@ -486,18 +486,18 @@ OptionalExpression : Expression
   semantic-lex-ignore-comments
 
   ;;stuff generated from the wy file(one for each "type" declaration)
-  semantic/wisent/javascript-jv-wy--<number>-regexp-analyzer
-  semantic/wisent/javascript-jv-wy--<string>-sexp-analyzer
+  semantic/wisent/javascript-wy--<number>-regexp-analyzer
+  semantic/wisent/javascript-wy--<string>-sexp-analyzer
 
-  semantic/wisent/javascript-jv-wy--<keyword>-keyword-analyzer
+  semantic/wisent/javascript-wy--<keyword>-keyword-analyzer
 
-  semantic/wisent/javascript-jv-wy--<symbol>-regexp-analyzer
-  semantic/wisent/javascript-jv-wy--<punctuation>-string-analyzer
-  semantic/wisent/javascript-jv-wy--<block>-block-analyzer
+  semantic/wisent/javascript-wy--<symbol>-regexp-analyzer
+  semantic/wisent/javascript-wy--<punctuation>-string-analyzer
+  semantic/wisent/javascript-wy--<block>-block-analyzer
 
 
   ;;;;more std stuff
   semantic-lex-default-action
   )
 
-;;; semantic/wisent/javascript-jv.wy ends here
+;;; semantic/wisent/javascript.wy ends here

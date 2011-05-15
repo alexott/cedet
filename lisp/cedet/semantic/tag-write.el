@@ -1,23 +1,23 @@
 ;;; semantic/tag-write.el --- Write tags to a text stream
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -31,7 +31,7 @@
 ;; that they conform to good semantic tag hygiene.
 ;;
 
-(require 'semantic/tag)
+(require 'semantic)
 
 ;;; Code:
 (defun semantic-tag-write-one-tag (tag &optional indent)
@@ -95,7 +95,6 @@ INDENT is the amount of indentation to use for this tag."
   (princ ")")
   )
 
-;;;###autoload
 (defun semantic-tag-write-tag-list (tlist &optional indent dontaddnewline)
   "Write the tag list TLIST to the current stream.
 INDENT indicates the current indentation level.
@@ -169,20 +168,11 @@ The VALUE is a list of tags."
     (semantic-tag-write-tag-list value 10 t)
     ))
 
-;;; TESTING.
-
-(defun semantic-tag-write-test ()
-  "Test the semantic tag writer against the tag under point."
-  (interactive)
-  (with-output-to-temp-buffer "*Tag Write Test*"
-    (semantic-tag-write-one-tag (semantic-current-tag))))
-
-(defun semantic-tag-write-list-test ()
-  "Test the semantic tag writer against the tag under point."
-  (interactive)
-  (with-output-to-temp-buffer "*Tag Write Test*"
-    (semantic-tag-write-tag-list (semantic-fetch-tags))))
-
-
 (provide 'semantic/tag-write)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/tag-write"
+;; End:
+
 ;;; semantic/tag-write.el ends here

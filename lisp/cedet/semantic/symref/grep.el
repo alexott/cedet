@@ -1,23 +1,23 @@
 ;;; semantic/symref/grep.el --- Symref implementation using find/grep
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -28,14 +28,11 @@
 ;; can be used in small projects to find symbol references.
 
 (require 'semantic/symref)
-(condition-case nil
-    (require 'grep)
-  (error nil))
+(require 'grep)
 
 ;;; Code:
 
 ;;; GREP
-;;
 ;;;###autoload
 (defclass semantic-symref-tool-grep (semantic-symref-tool-baseclass)
   (
@@ -44,8 +41,6 @@
 This tool uses EDE to find he root of the project, then executes
 find-grep in the project.  The output is parsed for hits
 and those hits returned.")
-
-(eval-when-compile (require 'ede))
 
 (defvar semantic-symref-filepattern-alist
   '((c-mode "*.[ch]")
@@ -150,14 +145,14 @@ This shell should support pipe redirect syntax."
 	 (b (get-buffer-create "*Semantic SymRef*"))
 	 (ans nil)
 	 )
-    
+
     (with-current-buffer b
       (erase-buffer)
       (setq default-directory rootdir)
 
       (if (not (fboundp 'grep-compute-defaults))
 
-	  ;; find . -type f -print0 | xargs -0 -e grep -nH -e 
+	  ;; find . -type f -print0 | xargs -0 -e grep -nH -e
 	  ;; Note : I removed -e as it is not posix, nor necessary it seems.
 
 	  (let ((cmd (concat "find " default-directory " -type f " filepattern " -print0 "
@@ -186,4 +181,10 @@ Moves cursor to end of the match."
 	   ))))
 
 (provide 'semantic/symref/grep)
+
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/symref/grep"
+;; End:
+
 ;;; semantic/symref/grep.el ends here

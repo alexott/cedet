@@ -1,26 +1,25 @@
 ;;; semantic/ia.el --- Interactive Analysis functions
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+;;; 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -36,12 +35,15 @@
 ;; fast-jump.  For a virtual method, offer some of the possible
 ;; implementations in various sub-classes.
 
-(require 'semantic/senator)
 (require 'semantic/analyze)
+(require 'semantic/format)
 (require 'pulse)
 (eval-when-compile
   (require 'semantic/analyze)
-  (require 'semantic/analyze/refs))
+  (require 'semantic/analyze/refs)
+  (require 'semantic/find))
+
+(declare-function imenu--mouse-menu "imenu")
 
 ;;; Code:
 
@@ -86,7 +88,7 @@ Use `semantic-analyze-possible-completions' instead.")
 Return completions based on CONTEXT at POINT.
 You should not use this, nor the aliased version.
 Use `semantic-analyze-possible-completions' instead."
-    (semantic-analyze-possible-completions context))
+  (semantic-analyze-possible-completions context))
 
 ;;;###autoload
 (defun semantic-ia-complete-symbol (&optional pos)
@@ -94,102 +96,58 @@ Use `semantic-analyze-possible-completions' instead."
 If POS is nil, default to point.
 Completion options are calculated with `semantic-analyze-possible-completions'."
   (interactive "d")
-  (or pos (setq pos (point)))
-  ;; Calculating completions is a two step process.
-  ;;
-  ;; The first analyzer the current context, which finds tags
-  ;; for all the stuff that may be references by the code around
-  ;; POS.
-  ;;
-  ;; The second step derives completions from that context.
-  (let* ((a (semantic-analyze-current-context pos))
-	 (syms (semantic-analyze-possible-completions a))
-	 (pre (car (reverse (oref a prefix))))
-	 )
-    ;; If PRE was actually an already completed symbol, it doesn't
-    ;; come in as a string, but as a tag instead.
-    (if (semantic-tag-p pre)
-	;; We will try completions on it anyway.
-	(setq pre (semantic-tag-name pre)))
-    ;; Complete this symbol.
-    (if (null syms)
-	(progn
-	  ;(message "No smart completions found.  Trying senator-complete-symbol.")
+  (when (semantic-active-p)
+    (or pos (setq pos (point)))
+    ;; Calculating completions is a two step process.
+    ;;
+    ;; The first analyzer the current context, which finds tags for
+    ;; all the stuff that may be references by the code around POS.
+    ;;
+    ;; The second step derives completions from that context.
+    (let* ((a (semantic-analyze-current-context pos))
+	   (syms (semantic-analyze-possible-completions a))
+	   (pre (car (reverse (oref a prefix)))))
+      ;; If PRE was actually an already completed symbol, it doesn't
+      ;; come in as a string, but as a tag instead.
+      (if (semantic-tag-p pre)
+	  ;; We will try completions on it anyway.
+	  (setq pre (semantic-tag-name pre)))
+      ;; Complete this symbol.
+      (if (null syms)
 	  (if (semantic-analyze-context-p a)
 	      ;; This is a clever hack.  If we were unable to find any
 	      ;; smart completions, lets divert to how senator derives
 	      ;; completions.
 	      ;;
-	      ;; This is a way of making this fcn more useful since the
-	      ;; smart completion engine sometimes failes.
-	      (senator-complete-symbol)
-	      ))
-      ;; Use try completion to seek a common substring.
-      (let ((tc (try-completion (or pre "")  syms)))
-	(if (and (stringp tc) (not (string= tc (or pre ""))))
-	    (let ((tok (semantic-find-first-tag-by-name
-			tc syms)))
-	      ;; Delete what came before...
-	      (when (and (car (oref a bounds)) (cdr (oref a bounds)))
-		(delete-region (car (oref a bounds))
-			       (cdr (oref a bounds)))
-		(goto-char (car (oref a bounds))))
-	      ;; We have some new text.  Stick it in.
-	      (if tok
-		  (semantic-ia-insert-tag tok)
-		(insert tc)))
-	  ;; We don't have new text.  Show all completions.
-	  (when (cdr (oref a bounds))
-	    (goto-char (cdr (oref a bounds))))
-	  (with-output-to-temp-buffer "*Completions*"
-	    (display-completion-list
-	     (mapcar semantic-ia-completion-format-tag-function syms))
-	    ))))))
+	      ;; This is a way of making this fcn more useful since
+	      ;; the smart completion engine sometimes failes.
+	      (semantic-complete-symbol))
+	;; Use try completion to seek a common substring.
+	(let ((tc (try-completion (or pre "")  syms)))
+	  (if (and (stringp tc) (not (string= tc (or pre ""))))
+	      (let ((tok (semantic-find-first-tag-by-name
+			  tc syms)))
+		;; Delete what came before...
+		(when (and (car (oref a bounds)) (cdr (oref a bounds)))
+		  (delete-region (car (oref a bounds))
+				 (cdr (oref a bounds)))
+		  (goto-char (car (oref a bounds))))
+		;; We have some new text.  Stick it in.
+		(if tok
+		    (semantic-ia-insert-tag tok)
+		  (insert tc)))
+	    ;; We don't have new text.  Show all completions.
+	    (when (cdr (oref a bounds))
+	      (goto-char (cdr (oref a bounds))))
+	    (with-output-to-temp-buffer "*Completions*"
+	      (display-completion-list
+	       (mapcar semantic-ia-completion-format-tag-function syms)))))))))
 
 (defcustom semantic-ia-completion-menu-format-tag-function
   'semantic-uml-concise-prototype-nonterminal
   "*Function used to convert a tag to a string during completion."
   :group 'semantic
   :type semantic-format-tag-custom-list)
-
-;;;###autoload
-(defun semantic-ia-complete-symbol-menu (point)
-  "Complete the current symbol via a menu based at POINT.
-Completion options are calculated with `semantic-analyze-possible-completions'."
-  (interactive "d")
-  (require 'imenu)
-  (let* ((a (semantic-analyze-current-context point))
-	 (syms (semantic-analyze-possible-completions a))
-	 )
-    ;; Complete this symbol.
-    (if (not syms)
-	(progn
-	  (message "No smart completions found.  Trying Senator.")
-	  (when (semantic-analyze-context-p a)
-	    ;; This is a quick way of getting a nice completion list
-	    ;; in the menu if the regular context mechanism fails.
-	    (senator-completion-menu-popup)))
-
-      (let* ((menu
-	      (mapcar
-	       (lambda (tag)
-		 (cons
-		  (funcall semantic-ia-completion-menu-format-tag-function tag)
-		  (vector tag)))
-	       syms))
-	     (ans
-	      (imenu--mouse-menu
-	       ;; XEmacs needs that the menu has at least 2 items.  So,
-	       ;; include a nil item that will be ignored by imenu.
-	       (cons nil menu)
-	       (senator-completion-menu-point-as-event)
-	       "Completions")))
-	(when ans
-	  (if (not (semantic-tag-p ans))
-	      (setq ans (aref (cdr ans) 0)))
-	  (delete-region (car (oref a bounds)) (cdr (oref a bounds)))
-	  (semantic-ia-insert-tag ans))
-	))))
 
 ;;; Completions Tip
 ;;
@@ -253,9 +211,8 @@ Completion options are calculated with `semantic-analyze-possible-completions'."
   "Display a list of all variants for the symbol under POINT."
   (interactive "P")
   (let* ((ctxt (semantic-analyze-current-context point))
-	 (comp nil)
-	 )
-    
+	 (comp nil))
+
     ;; We really want to look at the function if we are on an
     ;; argument.  Are there some additional rules we care about for
     ;; changing the CTXT we look at?
@@ -327,6 +284,8 @@ This helper manages the mark, buffer switching, and pulsing."
   (pulse-momentary-highlight-one-line (point))
   )
 
+(declare-function semantic-decoration-include-visit "semantic/decorate/include")
+
 ;;;###autoload
 (defun semantic-ia-fast-jump (point)
   "Jump to the tag referred to by the code at POINT.
@@ -376,6 +335,7 @@ origin of the code at point."
 
      ((semantic-tag-of-class-p (semantic-current-tag) 'include)
       ;; Just borrow this cool fcn.
+      (require 'semantic/decorate/include)
       (semantic-decoration-include-visit)
       )
 
@@ -479,5 +439,10 @@ parts of the parent classes are displayed."
       )))
 
 (provide 'semantic/ia)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/ia"
+;; End:
 
 ;;; semantic/ia.el ends here

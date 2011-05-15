@@ -1,23 +1,23 @@
 ;;; semantic/symref/filter.el --- Filter symbol reference hits for accuracy.
-;;
-;; Copyright (C) 2009, 2010 Eric M. Ludlam
-;;
-;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; Copyright (C) 2009, 2010  Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -31,10 +31,16 @@
 ;; starting at a basic filter level that doesn't use symref, up to filters
 ;; across symref results.
 
-(eval-when-compile
-  (require 'srecode/fields))
-
 ;;; Code:
+
+(require 'semantic)
+(require 'semantic/analyze)
+(declare-function srecode-active-template-region "srecode/fields")
+(declare-function srecode-delete "srecode/fields")
+(declare-function srecode-field "srecode/fields")
+(declare-function srecode-template-inserted-region "srecode/fields")
+(declare-function srecode-overlaid-activate "srecode/fields")
+(declare-function semantic-idle-summary-useful-context-p "semantic/idle")
 
 ;;; FILTERS
 ;;
@@ -49,11 +55,10 @@ Return non-nil for a match."
    position))
 
 ;;; IN-BUFFER FILTERING
-;;
+
 ;; The following does filtering in-buffer only, and not against
 ;; a symref results object.
-;;
-;;;###autoload
+
 (defun semantic-symref-hits-in-region (target hookfcn start end)
   "Find all occurrences of the symbol TARGET that match TARGET the tag.
 For each match, call HOOKFCN.
@@ -62,6 +67,7 @@ HOOKFCN takes three arguments that match
   ( START END PREFIX )
 
 Search occurs in the current buffer between START and END."
+  (require 'semantic/idle)
   (save-excursion
     (goto-char start)
     (let* ((str (semantic-tag-name target))
@@ -79,29 +85,6 @@ Search occurs in the current buffer between START and END."
 		   (funcall hookfcn start end prefix)))))
 	   (point)))))))
 
-;;;###autoload
-(defun semantic-symref-test-count-hits-in-tag ()
-  "Lookup in the current tag the symbol under point.
-the count all the other references to the same symbol within the
-tag that contains point, and return that."
-  (interactive)
-  (let* ((ctxt (semantic-analyze-current-context))
-	 (target (car (reverse (oref ctxt prefix))))
-	 (tag (semantic-current-tag))
-	 (start (current-time))
-	 (Lcount 0))
-    (when (semantic-tag-p target)
-      (semantic-symref-hits-in-region
-       target (lambda (start end prefix) (setq Lcount (1+ Lcount)))
-       (semantic-tag-start tag)
-       (semantic-tag-end tag))
-      (when (cedet-called-interactively-p)
-	(message "Found %d occurances of %s in %.2f seconds"
-		 Lcount (semantic-tag-name target)
-		 (semantic.elapsed-time start (current-time))))
-      Lcount)))
-
-;;;###autoload
 (defun semantic-symref-rename-local-variable ()
   "Fancy way to rename the local variable under point.
 Depends on the SRecode Field editing API."
@@ -153,4 +136,5 @@ Depends on the SRecode Field editing API."
     ))
 
 (provide 'semantic/symref/filter)
+
 ;;; semantic/symref/filter.el ends here

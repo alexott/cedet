@@ -1,23 +1,23 @@
 ;;; semantic/decorate/include.el --- Decoration modes for include statements
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
-;; Author: Eric M. Ludlam <eric@siege-engine.com>
+;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -31,6 +31,13 @@
 (require 'semantic/db)
 (require 'semantic/db-ref)
 (require 'semantic/db-find)
+
+(eval-when-compile
+  (require 'semantic/find))
+
+(defvar semantic-dependency-system-include-path)
+(declare-function ede-get-locator-object "ede/files")
+(declare-function ede-system-include-path "ede/cpp-root")
 
 ;;; Code:
 
@@ -577,7 +584,7 @@ Argument EVENT describes the event that caused this function to be called."
 (defun semantic-decoration-all-include-summary ()
   "Provide a general summary for the state of all includes."
   (interactive)
-
+  (require 'semantic/dep)
   (let* ((table semanticdb-current-table)
 	 (tags (semantic-fetch-tags))
 	 (inc (semantic-find-tags-by-class 'include table))
@@ -621,7 +628,9 @@ Argument EVENT describes the event that caused this function to be called."
 	)
 
       (princ "\nInclude Path Summary:\n\n")
-      (when ede-object
+      (when (and (boundp 'ede-object)
+		 (boundp 'ede-object-project)
+		 ede-object)
 	(princ "  This file's project include search is handled by the EDE object:\n")
 	(princ "    Buffer Target:  ")
 	(princ (object-print ede-object))
@@ -662,7 +671,7 @@ Argument EVENT describes the event that caused this function to be called."
 	  ))
 
       (let* ((semanticdb-find-default-throttle
-	      (if (featurep 'semanticdb-find)
+	      (if (featurep 'semantic/db-find)
 		  (remq 'unloaded semanticdb-find-default-throttle)
 		nil))
 	     (path (semanticdb-find-translate-path nil nil)))
@@ -758,5 +767,10 @@ If TABLE is not in a buffer, do nothing."
 
 
 (provide 'semantic/decorate/include)
+
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/decorate/include"
+;; End:
 
 ;;; semantic/decorate/include.el ends here

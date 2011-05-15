@@ -1,25 +1,24 @@
 ;;; semantic/bovine/el.el --- Semantic details for Emacs Lisp
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008,
+;;   2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic-ex is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -27,11 +26,11 @@
 
 (require 'semantic)
 (require 'semantic/bovine)
-(require 'backquote)
 (require 'find-func)
-(eval-when-compile
-  (require 'semantic/imenu)
-  )
+
+(require 'semantic/ctxt)
+(require 'semantic/format)
+(require 'thingatpt)
 
 ;;; Code:
 
@@ -617,6 +616,51 @@ define-mode-overload\\)\
   last-up))
 
 
+(define-mode-local-override semantic-ctxt-current-function emacs-lisp-mode
+  (&optional point same-as-symbol-return)
+  "Return a string which is the current function being called."
+  (save-excursion
+    (if point (goto-char point) (setq point (point)))
+    ;; (semantic-beginning-of-command)
+    (if (condition-case nil
+	    (and (save-excursion
+		   (up-list -2)
+		   (looking-at "(("))
+		 (save-excursion
+		   (up-list -3)
+		   (looking-at "(let")))
+	  (error nil))
+	;; This is really a let statement, not a function.
+	nil
+      (let ((fun (condition-case nil
+		     (save-excursion
+		       (up-list -1)
+		       (forward-char 1)
+		       (buffer-substring-no-properties
+			(point) (progn (forward-sexp 1)
+				       (point))))
+		   (error nil))
+		 ))
+	(when fun
+	  ;; Do not return FUN IFF the cursor is on FUN.
+	  ;; Huh?  Thats because if cursor is on fun, it is
+	  ;; the current symbol, and not the current function.
+	  (if (save-excursion
+		(condition-case nil
+		    (progn (forward-sexp -1)
+			   (and
+			    (looking-at (regexp-quote fun))
+			    (<= point (+ (point) (length fun))))
+			   )
+		  (error t)))
+	      ;; Go up and try again.
+	      same-as-symbol-return
+	    ;; We are ok, so get it.
+	    (list fun))
+	  ))
+      )))
+
+
 (define-mode-local-override semantic-get-local-variables emacs-lisp-mode
   (&optional point)
   "Return a list of local variables for POINT.
@@ -704,49 +748,6 @@ In Emacs Lisp this is easily defined by parenthesis bounding."
       (if sym (list sym)))
     ))
 
-(define-mode-local-override semantic-ctxt-current-function emacs-lisp-mode
-  (&optional point same-as-symbol-return)
-  "Return a string which is the current function being called."
-  (save-excursion
-    (if point (goto-char point) (setq point (point)))
-    ;; (semantic-beginning-of-command)
-    (if (condition-case nil
-	    (and (save-excursion
-		   (up-list -2)
-		   (looking-at "(("))
-		 (save-excursion
-		   (up-list -3)
-		   (looking-at "(let")))
-	  (error nil))
-	;; This is really a let statement, not a function.
-	nil
-      (let ((fun (condition-case nil
-		     (save-excursion
-		       (up-list -1)
-		       (forward-char 1)
-		       (buffer-substring-no-properties
-			(point) (progn (forward-sexp 1)
-				       (point))))
-		   (error nil))
-		 ))
-	(when fun
-	  ;; Do not return FUN IFF the cursor is on FUN.
-	  ;; Huh?  Thats because if cursor is on fun, it is
-	  ;; the current symbol, and not the current function.
-	  (if (save-excursion
-		(condition-case nil
-		    (progn (forward-sexp -1)
-			   (and
-			    (looking-at (regexp-quote fun))
-			    (<= point (+ (point) (length fun))))
-			   )
-		  (error t)))
-	      ;; Go up and try again.
-	      same-as-symbol-return
-	    ;; We are ok, so get it.
-	    (list fun))
-	  ))
-      )))
 
 (define-mode-local-override semantic-ctxt-current-assignment emacs-lisp-mode
   (&optional point)
@@ -823,8 +824,8 @@ In Emacs Lisp this is easily defined by parenthesis bounding."
   (&optional point)
   "Return a list of tag classes allowed at POINT.
 Emacs Lisp knows much more about the class of the tag needed to perform
-completion than some languages.  We distincly know if we are to be
-a function name, variable name, or any type of symbol.  We could identify
+completion than some languages.  We distincly know if we are to be a
+function name, variable name, or any type of symbol.  We could identify
 fields and such to, but that is for some other day."
   (save-excursion
     (if point (goto-char point))
@@ -940,12 +941,10 @@ ELisp variables can be pretty long, so track this one too.")
 (define-child-mode lisp-mode emacs-lisp-mode
   "Make `lisp-mode' inherit mode local behavior from `emacs-lisp-mode'.")
 
-;;;###autoload
 (defun semantic-default-elisp-setup ()
   "Setup hook function for Emacs Lisp files and Semantic."
   )
 
-;;;###autoload
 (add-hook 'emacs-lisp-mode-hook 'semantic-default-elisp-setup)
 
 ;;; LISP MODE
@@ -956,14 +955,12 @@ ELisp variables can be pretty long, so track this one too.")
 ;; See this syntax:
 ;; (defun foo () /#A)
 ;;
-;;;###autoload
 (add-hook 'lisp-mode-hook 'semantic-default-elisp-setup)
 
-;;;###autoload
-(eval-after-load "semanticdb"
-  '(require 'semantic/db.el)
+(eval-after-load "semantic/db"
+  '(require 'semantic/db-el)
   )
 
-(provide 'semantic.el)
+(provide 'semantic/bovine/el)
 
 ;;; semantic/bovine/el.el ends here

@@ -1,25 +1,24 @@
 ;;; semantic/bovine.el --- LL Parser/Analyzer core.
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2006, 2007 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2006, 2007, 2009, 2010
+;;   Free Software Foundation, Inc.
 
-;; X-CVS: $Id: semantic/bovine.el,v 1.16 2010-03-15 13:40:55 xscript Exp $
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -33,11 +32,15 @@
 
 ;;; Code:
 (require 'semantic)
-(require 'semantic/bovine/debug)
+
+(declare-function semantic-create-bovine-debug-error-frame
+		  "semantic/bovine/debug")
+(declare-function semantic-bovine-debug-create-frame
+		  "semantic/bovine/debug")
+(declare-function semantic-debug-break "semantic/debug")
 
 ;;; Variables
 ;;
-;;;###autoload
 (defvar semantic-bovinate-nonterminal-check-obarray nil
   "Obarray of streams already parsed for nonterminal symbols.
 Use this to detect infinite recursion during a parse.")
@@ -48,7 +51,6 @@ Use this to detect infinite recursion during a parse.")
 ;; These are functions that can be called from within a bovine table.
 ;; Most of these have code auto-generated from other construct in the
 ;; bovine input grammar.
-;;;###autoload
 (defmacro semantic-lambda (&rest return-val)
   "Create a lambda expression to return a list including RETURN-VAL.
 The return list is a lambda expression to be used in a bovine table."
@@ -152,15 +154,18 @@ list of semantic tokens found."
                             (not (listp (car lte))))
 
                   ;; GRAMMAR SOURCE DEBUGGING!
-                  (if semantic-debug-enabled
+                  (if (and (boundp 'semantic-debug-enabled)
+			   semantic-debug-enabled)
                       (let* ((db-nt   (semantic-bovinate-nonterminal-db-nt))
                              (db-ml   (cdr (assq db-nt table)))
                              (db-mlen (length db-ml))
                              (db-midx (- db-mlen (length matchlist)))
                              (db-tlen (length (nth db-midx db-ml)))
                              (db-tidx (- db-tlen (length lte)))
-			     (frame (semantic-bovine-debug-create-frame
-				     db-nt db-midx db-tidx cvl (car s)))
+			     (frame (progn
+				      (require 'semantic/bovine/debug)
+				      (semantic-bovine-debug-create-frame
+				       db-nt db-midx db-tidx cvl (car s))))
 			     (cmd (semantic-debug-break frame))
 			     )
                         (cond ((eq 'fail cmd) (setq lte '(trash 0 . 0)))
@@ -269,12 +274,12 @@ list of semantic tokens found."
       (error
        ;; On error just move forward the stream of lexical tokens
        (setq result (list (cdr starting-stream) nil))
-       (if semantic-debug-enabled
-	   (let ((frame (semantic-create-bovine-debug-error-frame
-			 debug-condition)))
-	     (semantic-debug-break frame)
-	     ))
-       ))
+       (when (and (boundp 'semantic-debug-enabled)
+		  semantic-debug-enabled)
+	 (require 'semantic/bovine/debug)
+	 (let ((frame (semantic-create-bovine-debug-error-frame
+		       debug-condition)))
+	   (semantic-debug-break frame)))))
     result))
 
 ;; Make it the default parser
@@ -282,5 +287,10 @@ list of semantic tokens found."
 (defalias 'semantic-parse-stream-default 'semantic-bovinate-stream)
 
 (provide 'semantic/bovine)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/bovine"
+;; End:
 
 ;;; semantic/bovine.el ends here

@@ -1,23 +1,23 @@
 ;;; semantic/analyze/refs.el --- Analysis of the references between tags.
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
-;; Author: Eric M. Ludlam <eric@siege-engine.com>
+;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -33,6 +33,15 @@
 ;;
 ;; Once the raw data is available, queries for impl, prototype, or
 ;; perhaps other things become cheap.
+
+(require 'semantic)
+(require 'semantic/analyze)
+(require 'semantic/db-find)
+(eval-when-compile (require 'semantic/find))
+
+(declare-function data-debug-new-buffer "data-debug")
+(declare-function data-debug-insert-object-slots "eieio-datadebug")
+(declare-function semantic-momentary-highlight-tag "semantic/decorate")
 
 ;;; Code:
 (defclass semantic-analyze-references ()
@@ -53,7 +62,6 @@
    )
   "Class containing data from a semantic analysis.")
 
-;;;###autoload
 (define-overloadable-function semantic-analyze-tag-references (tag &optional db)
   "Analyze the references for TAG.
 Returns a class with information about TAG.
@@ -305,6 +313,7 @@ Only works for tags in the global namespace."
     (message "Analysis took %.2f seconds." (semantic.elapsed-time start end))
     (if sac
 	(progn
+	  (require 'eieio-datadebug)
 	  (data-debug-new-buffer "*Analyzer Reference ADEBUG*")
 	  (data-debug-insert-object-slots sac "]"))
       (message "No Context to analyze here."))))
@@ -313,6 +322,7 @@ Only works for tags in the global namespace."
 (defun semantic-analyze-proto-impl-toggle ()
   "Toggle between the implementation, and a prototype of tag under point."
   (interactive)
+  (require 'semantic/decorate)
   (semantic-fetch-tags)
   (let* ((tag (semantic-current-tag))
 	 (sar (if tag
@@ -334,5 +344,10 @@ Only works for tags in the global namespace."
   )
 
 (provide 'semantic/analyze/refs)
+
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/analyze/refs"
+;; End:
 
 ;;; semantic/analyze/refs.el ends here

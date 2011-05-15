@@ -1,25 +1,24 @@
 ;;; semantic/tag.el --- tag creation and access
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008,
+;;   2009, 2010  Free Software Foundation, Inc.
 
-;; X-CVS: $Id: semantic/tag.el,v 1.75 2010-03-15 13:40:55 xscript Exp $
+;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -48,8 +47,13 @@
 
 ;; Keep this only so long as we have obsolete fcns.
 (require 'semantic/fw)
+(require 'semantic/lex)
 
-(defconst semantic-tag-version semantic-version
+(declare-function semantic-analyze-split-name "semantic/analyze/fcn")
+(declare-function semantic-fetch-tags "semantic")
+(declare-function semantic-clear-toplevel-cache "semantic")
+
+(defconst semantic-tag-version "2.0"
   "Version string of semantic tags made with this code.")
 
 (defconst semantic-tag-incompatible-version "1.0"
@@ -307,8 +311,6 @@ If TAG is unlinked, but has a :filename property, then that is used."
       (semantic--tag-get-property tag :filename))))
 
 ;;; Tag tests and comparisons.
-;;
-;;;###autoload
 (defsubst semantic-tag-p (tag)
   "Return non-nil if TAG is most likely a semantic tag."
   (condition-case nil
@@ -688,7 +690,7 @@ This function is for internal use only."
   "Make a deep copy of TAG, applying FILTER to each child-tag.
 No properties are copied except for :filename.
 Overlay will be a vector.
-FILTER takes TAG as an argument, and should returns a `semantic-tag'.
+FILTER takes TAG as an argument, and should return a `semantic-tag'.
 It is safe for FILTER to modify the input tag and return it."
   (when (not filter) (setq filter 'identity))
   (when (not (semantic-tag-p tag))
@@ -702,8 +704,8 @@ It is safe for FILTER to modify the input tag and return it."
 			  ;; Only copy the filename property
 			  (when fn (list :filename fn))
 			  ;; Only setup a vector if we had an overlay.
-			  (when ol (vector (semantic-tag-start tag) (semantic-tag-end tag)))
-			  ))))
+			  (when ol (vector (semantic-tag-start tag)
+					   (semantic-tag-end tag)))))))
 
 (defun semantic--tag-deep-copy-attributes (attrs &optional filter)
   "Make a deep copy of ATTRS, applying FILTER to each child-tag.
@@ -819,6 +821,7 @@ in SUPERS."
     (setq stag (semantic-find-first-tag-by-name name supers))
 
     (when (not stag)
+      (require 'semantic/analyze/fcn)
       (dolist (S supers)
 	(let* ((sname (semantic-tag-name S))
 	       (splitparts (semantic-analyze-split-name sname))
@@ -952,7 +955,6 @@ ATTRIBUTES is a list of additional attributes belonging to this tag."
   "Return the class of tag TAG is an alias."
   (semantic-tag-get-attribute tag :aliasclass))
 
-;;;###autoload
 (define-overloadable-function semantic-tag-alias-definition (tag)
   "Return the definition TAG is an alias.
 The returned value is a tag of the class that
@@ -983,7 +985,6 @@ Perform the described task in `semantic-tag-components'."
 	 (semantic-tag-function-arguments tag))
 	(t nil)))
 
-;;;###autoload
 (define-overloadable-function semantic-tag-components-with-overlays (tag)
   "Return the list of top level components belonging to TAG.
 Children are any sub-tags which contain overlays.
@@ -1164,13 +1165,17 @@ This function is for internal use only."
 (defun semantic--tag-unlink-cache-from-buffer ()
   "Convert all tags in the current cache to use overlay proxys.
 This function is for internal use only."
+  (require 'semantic)
   (semantic--tag-unlink-list-from-buffer
    ;; @todo- use fetch-tags-fast?
    (semantic-fetch-tags)))
 
+(defvar semantic--buffer-cache)
+
 (defun semantic--tag-link-cache-to-buffer ()
   "Convert all tags in the current cache to use overlays.
 This function is for internal use only."
+  (require 'semantic)
   (condition-case nil
       ;; In this unique case, we cannot call the usual toplevel fn.
       ;; because we don't want a reparse, we want the old overlays.
@@ -1253,15 +1258,6 @@ This function is for internal use only."
        (message "A Rule must return a single tag-line list!")
        (debug tag)
        nil))
-
-;;    @todo - I think we've waited long enough.  Lets find out.
-;;
-;;    ;; Compatibility code to be removed in future versions.
-;;    (unless semantic-tag-expand-function
-;;      ;; This line throws a byte compiler warning.
-;;      (setq semantic-tag-expand-function semantic-expand-nonterminal)
-;;      )
-
     ;; Expand based on local configuration
     (if semantic-tag-expand-function
         (or (funcall semantic-tag-expand-function tag)
@@ -1307,8 +1303,6 @@ See also `semantic-foreign-tag-p'."
         ftag))))
 
 ;; High level obtain/insert foreign tag overloads
-;;
-;;;###autoload
 (define-overloadable-function semantic-obtain-foreign-tag (&optional tag)
   "Obtain a foreign tag from TAG.
 TAG defaults to the tag at point in current buffer.
@@ -1323,7 +1317,6 @@ and attempts to insert a prototype/function call."
   ;; for the given tag.
   (insert (semantic-format-tag-prototype foreign-tag)))
 
-;;;###autoload
 (define-overloadable-function semantic-insert-foreign-tag (foreign-tag)
   "Insert FOREIGN-TAG into the current buffer.
 Signal an error if FOREIGN-TAG is not a valid foreign tag.
@@ -1342,19 +1335,6 @@ This function is overridable with the symbol `insert-foreign-tag'."
   change-log-mode (foreign-tag)
   "Insert foreign tags into log-edit mode."
   (insert (concat "(" (semantic-format-tag-name foreign-tag) "): ")))
-
-
-;;; EDEBUG display support
-;;
-(eval-after-load "cedet-edebug"
-  '(progn
-     (cedet-edebug-add-print-override
-      '(semantic-tag-p object)
-      '(concat "#<TAG " (semantic-format-tag-name object) ">"))
-     (cedet-edebug-add-print-override
-      '(and (listp object) (semantic-tag-p (car object)))
-      '(cedet-edebug-prin1-recurse object))
-     ))
 
 ;;; Compatibility
 ;;
@@ -1362,66 +1342,6 @@ This function is overridable with the symbol `insert-foreign-tag'."
   semantic-tag-version)
 (defconst semantic-token-incompatible-version
   semantic-tag-incompatible-version)
-
-(semantic-alias-obsolete 'semantic-token-name
-                         'semantic-tag-name)
-
-(semantic-alias-obsolete 'semantic-token-token
-                         'semantic-tag-class)
-
-(semantic-alias-obsolete 'semantic-token-extra-specs
-                         'semantic-tag-attributes)
-
-(semantic-alias-obsolete 'semantic-token-properties
-                         'semantic-tag-properties)
-
-(semantic-alias-obsolete 'semantic-token-properties-cdr
-                         'semantic--tag-properties-cdr)
-
-(semantic-alias-obsolete 'semantic-token-overlay
-                         'semantic-tag-overlay)
-
-(semantic-alias-obsolete 'semantic-token-overlay-cdr
-                         'semantic--tag-overlay-cdr)
-
-(semantic-alias-obsolete 'semantic-token-start
-                         'semantic-tag-start)
-
-(semantic-alias-obsolete 'semantic-token-end
-                         'semantic-tag-end)
-
-(semantic-alias-obsolete 'semantic-token-extent
-                         'semantic-tag-bounds)
-
-(semantic-alias-obsolete 'semantic-token-buffer
-                         'semantic-tag-buffer)
-
-(semantic-alias-obsolete 'semantic-token-put
-                         'semantic--tag-put-property)
-
-(semantic-alias-obsolete 'semantic-token-put-no-side-effect
-                         'semantic--tag-put-property-no-side-effect)
-
-(semantic-alias-obsolete 'semantic-token-get
-                         'semantic--tag-get-property)
-
-(semantic-alias-obsolete 'semantic-token-add-extra-spec
-                         'semantic-tag-put-attribute)
-
-(semantic-alias-obsolete 'semantic-token-extra-spec
-                         'semantic-tag-get-attribute)
-
-(semantic-alias-obsolete 'semantic-token-type
-                         'semantic-tag-type)
-
-(semantic-alias-obsolete 'semantic-token-modifiers
-                         'semantic-tag-modifiers)
-
-(semantic-alias-obsolete 'semantic-token-docstring
-                         'semantic-tag-docstring)
-
-(semantic-alias-obsolete 'semantic-token-type-parts
-                         'semantic-tag-type-members)
 
 (defsubst semantic-token-type-parent (tag)
   "Return the parent of the type that TAG describes.
@@ -1434,138 +1354,19 @@ interfaces, or abstract classes which are parents of TAG."
 (make-obsolete 'semantic-token-type-parent
 	       "\
 use `semantic-tag-type-superclass' \
-and `semantic-tag-type-interfaces' instead")
-
-(semantic-alias-obsolete 'semantic-token-type-parent-superclass
-                         'semantic-tag-type-superclasses)
-
-(semantic-alias-obsolete 'semantic-token-type-parent-implement
-                         'semantic-tag-type-interfaces)
-
-(semantic-alias-obsolete 'semantic-token-type-extra-specs
-                         'semantic-tag-attributes)
-
-(semantic-alias-obsolete 'semantic-token-type-extra-spec
-                         'semantic-tag-get-attribute)
-
-(semantic-alias-obsolete 'semantic-token-type-modifiers
-                         'semantic-tag-modifiers)
-
-(semantic-alias-obsolete 'semantic-token-function-args
-                         'semantic-tag-function-arguments)
-
-(semantic-alias-obsolete 'semantic-token-function-extra-specs
-                         'semantic-tag-attributes)
-
-(semantic-alias-obsolete 'semantic-token-function-extra-spec
-                         'semantic-tag-get-attribute)
-
-(semantic-alias-obsolete 'semantic-token-function-modifiers
-                         'semantic-tag-modifiers)
-
-(semantic-alias-obsolete 'semantic-token-function-throws
-                         'semantic-tag-function-throws)
-
-(semantic-alias-obsolete 'semantic-token-function-parent
-                         'semantic-tag-function-parent)
-
-(semantic-alias-obsolete 'semantic-token-function-destructor
-                         'semantic-tag-function-destructor-p)
-
-(semantic-alias-obsolete 'semantic-token-variable-default
-			 'semantic-tag-variable-default)
-
-(semantic-alias-obsolete 'semantic-token-variable-extra-specs
-                         'semantic-tag-attributes)
-
-(semantic-alias-obsolete 'semantic-token-variable-extra-spec
-                         'semantic-tag-get-attribute)
-
-(semantic-alias-obsolete 'semantic-token-variable-modifiers
-                         'semantic-tag-modifiers)
-
-(semantic-alias-obsolete 'semantic-token-variable-const
-                         'semantic-tag-variable-constant-p)
-
-(semantic-alias-obsolete 'semantic-token-variable-optsuffix
-                         'semantic-tag-variable-optsuffix)
-
-(semantic-alias-obsolete 'semantic-token-include-system
-                         'semantic-tag-include-system-p)
-
-(semantic-alias-obsolete 'semantic-token-p
-                         'semantic-tag-p)
-
-(semantic-alias-obsolete 'semantic-token-with-position-p
-                         'semantic-tag-with-position-p)
+and `semantic-tag-type-interfaces' instead" "23.2")
 
 (semantic-alias-obsolete 'semantic-tag-make-assoc-list
-                         'semantic-tag-make-plist)
-
-(semantic-alias-obsolete 'semantic-nonterminal-children
-			 'semantic-tag-children-compatibility)
-
-(semantic-alias-obsolete 'semantic-narrow-to-token
-			 'semantic-narrow-to-tag)
-
-(semantic-alias-obsolete 'semantic-with-buffer-narrowed-to-current-token
-			 'semantic-with-buffer-narrowed-to-current-tag)
-
-(semantic-alias-obsolete 'semantic-with-buffer-narrowed-to-token
-			 'semantic-with-buffer-narrowed-to-tag)
-
-(semantic-alias-obsolete 'semantic-deoverlay-token
-                         'semantic--tag-unlink-from-buffer)
-
-(semantic-alias-obsolete 'semantic-overlay-token
-                         'semantic--tag-link-to-buffer)
-
-(semantic-alias-obsolete 'semantic-deoverlay-list
-                         'semantic--tag-unlink-list-from-buffer)
-
-(semantic-alias-obsolete 'semantic-overlay-list
-                         'semantic--tag-link-list-to-buffer)
-
-(semantic-alias-obsolete 'semantic-deoverlay-cache
-                         'semantic--tag-unlink-cache-from-buffer)
-
-(semantic-alias-obsolete 'semantic-overlay-cache
-                         'semantic--tag-link-cache-to-buffer)
-
-(semantic-alias-obsolete 'semantic-cooked-token-p
-                         'semantic--tag-expanded-p)
+                         'semantic-tag-make-plist "23.2")
 
 (semantic-varalias-obsolete 'semantic-expand-nonterminal
-                            'semantic-tag-expand-function)
-
-(semantic-alias-obsolete 'semantic-raw-to-cooked-token
-                         'semantic--tag-expand)
-
-;; Lets test this out during this short transition.
-(semantic-alias-obsolete 'semantic-clone-tag
-                         'semantic-tag-clone)
-
-(semantic-alias-obsolete 'semantic-token
-                         'semantic-tag)
-
-(semantic-alias-obsolete 'semantic-token-new-variable
-                         'semantic-tag-new-variable)
-
-(semantic-alias-obsolete 'semantic-token-new-function
-                         'semantic-tag-new-function)
-
-(semantic-alias-obsolete 'semantic-token-new-type
-                         'semantic-tag-new-type)
-
-(semantic-alias-obsolete 'semantic-token-new-include
-                         'semantic-tag-new-include)
-
-(semantic-alias-obsolete 'semantic-token-new-package
-                         'semantic-tag-new-package)
-
-(semantic-alias-obsolete 'semantic-equivalent-tokens-p
-                         'semantic-equivalent-tag-p)
+                            'semantic-tag-expand-function "23.2")
 
 (provide 'semantic/tag)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/tag"
+;; End:
 
 ;;; semantic/tag.el ends here

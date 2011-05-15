@@ -1,26 +1,25 @@
 ;;; semantic/decorate.el --- Utilities for decorating/highlighting tokens.
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2009, 2010
+;;; Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -35,8 +34,6 @@
 ;;; Code:
 
 ;;; Highlighting Basics
-;;
-;;;###autoload
 (defun semantic-highlight-tag (tag &optional face)
   "Specify that TAG should be highlighted.
 Optional FACE specifies the face to use."
@@ -47,7 +44,6 @@ Optional FACE specifies the face to use."
     (semantic-overlay-put o 'face (or face 'semantic-tag-highlight-face))
     ))
 
-;;;###autoload
 (defun semantic-unhighlight-tag (tag)
   "Unhighlight TAG, restoring its previous face."
   (let ((o (semantic-tag-overlay tag)))
@@ -56,8 +52,6 @@ Optional FACE specifies the face to use."
     ))
 
 ;;; Momentary Highlighting - One line
-;;
-;;;###autoload
 (defun semantic-momentary-highlight-one-tag-line (tag &optional face)
   "Highlight the first line of TAG, unhighlighting before next command.
 Optional argument FACE specifies the face to do the highlighting."
@@ -67,8 +61,6 @@ Optional argument FACE specifies the face to do the highlighting."
     (pulse-momentary-highlight-one-line (point))))
 
 ;;; Momentary Highlighting - Whole Tag
-;;
-;;;###autoload
 (defun semantic-momentary-highlight-tag (tag &optional face)
   "Highlight TAG, removing highlighting when the user hits a key.
 Optional argument FACE is the face to use for highlighting.
@@ -82,24 +74,20 @@ If FACE is not specified, then `highlight' will be used."
 					 face)
       )))
 
-;;;###autoload
 (defun semantic-set-tag-face (tag face)
   "Specify that TAG should use FACE for display."
   (semantic-overlay-put (semantic-tag-overlay tag) 'face face))
 
-;;;###autoload
 (defun semantic-set-tag-invisible (tag &optional visible)
   "Enable the text in TAG to be made invisible.
 If VISIBLE is non-nil, make the text visible."
   (semantic-overlay-put (semantic-tag-overlay tag) 'invisible
 			(not visible)))
 
-;;;###autoload
 (defun semantic-tag-invisible-p (tag)
   "Return non-nil if TAG is invisible."
   (semantic-overlay-get (semantic-tag-overlay tag) 'invisible))
 
-;;;###autoload
 (defun semantic-set-tag-intangible (tag &optional tangible)
   "Enable the text in TAG to be made intangible.
 If TANGIBLE is non-nil, make the text visible.
@@ -108,7 +96,6 @@ the extent 'intangible' property does not exist."
   (semantic-overlay-put (semantic-tag-overlay tag) 'intangible
 			(not tangible)))
 
-;;;###autoload
 (defun semantic-tag-intangible-p (tag)
   "Return non-nil if TAG is intangible.
 This function does not have meaning in XEmacs because it seems that
@@ -126,7 +113,6 @@ Argument OVERLAY, AFTER, START, END, and LEN are passed in by the system."
 	       (> (semantic-overlay-end overlay) end)))
       (error "This text is read only")))
 
-;;;###autoload
 (defun semantic-set-tag-read-only (tag &optional writable)
   "Enable the text in TAG to be made read-only.
 Optional argument WRITABLE should be non-nil to make the text writable
@@ -140,7 +126,6 @@ instead of read-only."
       (semantic-overlay-put o 'insert-in-front-hooks hook)
       (semantic-overlay-put o 'insert-behind-hooks hook))))
 
-;;;###autoload
 (defun semantic-tag-read-only-p (tag)
   "Return non-nil if the current TAG is marked read only."
   (let ((o (semantic-tag-overlay tag)))
@@ -150,39 +135,6 @@ instead of read-only."
       (member 'semantic-overlay-signal-read-only
               (semantic-overlay-get o 'modification-hooks)))))
 
-;;; backwards compatability
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-highlight-token
-			 'semantic-highlight-tag)
-;;;###autoload
-(semantic-alias-obsolete 'semantic-unhighlight-token
-			 'semantic-unhighlight-tag)
-;;;###autoload
-(semantic-alias-obsolete 'semantic-momentary-highlight-token
-			 'semantic-momentary-highlight-tag)
-;;;###autoload
-(semantic-alias-obsolete 'semantic-set-token-face
-			 'semantic-set-tag-face)
-;;;###autoload
-(semantic-alias-obsolete 'semantic-set-token-invisible
-			 'semantic-set-tag-invisible)
-;;;###autoload
-(semantic-alias-obsolete 'semantic-token-invisible-p
-			 'semantic-tag-invisible-p)
-;;;###autoload
-(semantic-alias-obsolete 'semantic-set-token-intangible
-			 'semantic-set-tag-intangible)
-;;;###autoload
-(semantic-alias-obsolete 'semantic-token-intangible-p
-			 'semantic-tag-intangible-p)
-;;;###autoload
-(semantic-alias-obsolete 'semantic-set-token-read-only
-			 'semantic-set-tag-read-only)
-;;;###autoload
-(semantic-alias-obsolete 'semantic-token-read-only-p
-			 'semantic-tag-read-only-p)
-
 ;;; Secondary overlays
 ;;
 ;; Some types of decoration require a second overlay to be made.
@@ -190,12 +142,10 @@ instead of read-only."
 ;; We need a way to create such an overlay, and make sure it
 ;; gets whacked, but doesn't show up in the master list
 ;; of overlays used for searching.
-;;;###autoload
 (defun semantic-tag-secondary-overlays (tag)
   "Return a list of secondary overlays active on TAG."
   (semantic--tag-get-property tag 'secondary-overlays))
 
-;;;###autoload
 (defun semantic-tag-create-secondary-overlay (tag &optional link-hook)
   "Create a secondary overlay for TAG.
 Returns an overlay.  The overlay is also saved in TAG.
@@ -220,7 +170,6 @@ generated secondary overlay."
       (run-hook-with-args link-hook tag o)
       o)))
 
-;;;###autoload
 (defun semantic-tag-get-secondary-overlay (tag property)
   "Return secondary overlays from TAG with PROPERTY.
 PROPERTY is a symbol and all overlays with that symbol are returned.."
@@ -232,7 +181,6 @@ PROPERTY is a symbol and all overlays with that symbol are returned.."
       (setq olsearch (cdr olsearch)))
     o))
 
-;;;###autoload
 (defun semantic-tag-delete-secondary-overlay (tag overlay-or-property)
   "Delete from TAG the secondary overlay OVERLAY-OR-PROPERTY.
 If OVERLAY-OR-PROPERTY is an overlay, delete that overlay.
@@ -303,7 +251,6 @@ from them in TAG."
 ;;; Secondary Overlay Uses
 ;;
 ;; States to put on tags that depend on a secondary overlay.
-;;;###autoload
 (defun semantic-set-tag-folded (tag &optional folded)
   "Fold TAG, such that only the first line of text is shown.
 Optional argument FOLDED should be non-nil to fold the tag.
@@ -334,13 +281,14 @@ nil implies the tag should be fully shown."
 		       'semantic-set-tag-folded-isearch)))
 	  ))
 
+(declare-function semantic-current-tag "semantic/find")
+
 (defun semantic-set-tag-folded-isearch (overlay)
   "Called by isearch if it discovers text in the folded region.
 OVERLAY is passed in by isearch."
   (semantic-set-tag-folded (semantic-current-tag) nil)
   )
 
-;;;###autoload
 (defun semantic-tag-folded-p (tag)
   "Non-nil if TAG is currently folded."
   (semantic-tag-get-secondary-overlay tag 'semantic-folded)

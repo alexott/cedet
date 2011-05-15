@@ -1,33 +1,31 @@
 ;;; semantic/db-file.el --- Save a semanticdb to a cache file.
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010
+;;; Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semanticdb is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;;
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 ;;
 ;; A set of semanticdb classes for persistently saving caches on disk.
 ;;
 
-(require 'inversion)
 (require 'semantic)
 (require 'semantic/db)
 (require 'cedet-files)
@@ -39,15 +37,14 @@
 
 ;;; Settings
 ;;
-;;;###autoload
 (defcustom semanticdb-default-file-name "semantic.cache"
-  "*File name of the semantic tag cache."
+  "File name of the semantic tag cache."
   :group 'semanticdb
   :type 'string)
 
-;;;###autoload
-(defcustom semanticdb-default-save-directory (expand-file-name "~/.semanticdb")
-  "*Directory name where semantic cache files are stored.
+(defcustom semanticdb-default-save-directory
+  (locate-user-emacs-file "semanticdb" ".semanticdb")
+  "Directory name where semantic cache files are stored.
 If this value is nil, files are saved in the current directory.  If the value
 is a valid directory, then it overrides `semanticdb-default-file-name' and
 stores caches in a coded file name in this directory."
@@ -57,9 +54,8 @@ stores caches in a coded file name in this directory."
                  (const :tag "Use current directory" :value nil)
                  (directory)))
 
-;;;###autoload
 (defcustom semanticdb-persistent-path '(always)
-  "*List of valid paths that semanticdb will cache tags to.
+  "List of valid paths that semanticdb will cache tags to.
 When `global-semanticdb-minor-mode' is active, tag lists will
 be saved to disk when Emacs exits.  Not all directories will have
 tags that should be saved.
@@ -73,7 +69,7 @@ passes a list of predicates in `semanticdb-project-predicate-functions'."
   :type nil)
 
 (defcustom semanticdb-save-database-hooks nil
-  "*Hooks run after a database is saved.
+  "Abnormal hook run after a database is saved.
 Each function is called with one argument, the object representing
 the database recently written."
   :group 'semanticdb
@@ -153,6 +149,9 @@ If DIRECTORY doesn't exist, create a new one."
     db))
 
 ;;; File IO
+
+(declare-function inversion-test "inversion")
+
 (defun semanticdb-load-database (filename)
   "Load the database FILENAME."
   (condition-case foo
@@ -165,29 +164,31 @@ If DIRECTORY doesn't exist, create a new one."
 	(while c
 	  (oset (car c) parent-db r)
 	  (setq c (cdr c)))
-	(if (not (inversion-test 'semanticdb-file fv))
-	    (when (inversion-test 'semantic-tag tv)
-	      ;; Incompatible version.  Flush tables.
-	      (semanticdb-flush-database-tables r)
-	      ;; Reset the version to new version.
-	      (oset r semantic-tag-version semantic-tag-version)
-	      ;; Warn user
-	      (message "Semanticdb file is old.  Starting over for %s"
-		       filename)
-	      )
-	  ;; Version is not ok.  Flush whole system
-	  (message "semanticdb file is old.  Starting over for %s"
-		   filename)
-	  ;; This database is so old, we need to replace it.
-	  ;; We also need to delete it from the instance tracker.
-	  (delete-instance r)
-	  (setq r nil))
+	(unless (and (equal semanticdb-file-version fv)
+		     (equal semantic-tag-version tv))
+	  ;; Try not to load inversion unless we need it:
+	  (require 'inversion)
+	  (if (not (inversion-test 'semanticdb-file fv))
+	      (when (inversion-test 'semantic-tag tv)
+		;; Incompatible version.  Flush tables.
+		(semanticdb-flush-database-tables r)
+		;; Reset the version to new version.
+		(oset r semantic-tag-version semantic-tag-version)
+		;; Warn user
+		(message "Semanticdb file is old.  Starting over for %s"
+			 filename))
+	    ;; Version is not ok.  Flush whole system
+	    (message "semanticdb file is old.  Starting over for %s"
+		     filename)
+	    ;; This database is so old, we need to replace it.
+	    ;; We also need to delete it from the instance tracker.
+	    (delete-instance r)
+	    (setq r nil)))
 	r)
     (error (message "Cache Error: [%s] %s, Restart"
 		    filename foo)
 	   nil)))
 
-;;;###autoload
 (defun semanticdb-file-loaded-p (filename)
   "Return the project belonging to FILENAME if it was already loaded."
   (eieio-instance-tracker-find filename 'file 'semanticdb-database-list))
@@ -209,11 +210,10 @@ If SUPRESS-QUESTIONS, then do not ask to create the directory."
 	  ((y-or-n-p (format "Create directory %s for SemanticDB? " dest))
 	   (make-directory dest t)
 	   t)
-	  (t 
+	  (t
 	   (if (boundp 'semanticdb--inhibit-make-directory)
-               (setq semanticdb--inhibit-make-directory t))
-	   nil))
-    ))
+	       (setq semanticdb--inhibit-make-directory t))
+	   nil))))
 
 (defmethod semanticdb-save-db ((DB semanticdb-project-database-file)
 			       &optional
@@ -255,7 +255,6 @@ If DB is not specified, then use the current database."
       )
     ))
 
-;;;###autoload
 (defmethod semanticdb-live-p ((obj semanticdb-project-database))
   "Return non-nil if the file associated with OBJ is live.
 Live databases are objects associated with existing directories."
@@ -274,9 +273,11 @@ Live files are either buffers in Emacs, or files existing on the filesystem."
 This variable is set to nil after the first error is encountered
 to prevent overload.")
 
+(declare-function data-debug-insert-thing "data-debug")
+
 (defmethod object-write ((obj semanticdb-table))
   "When writing a table, we have to make sure we deoverlay it first.
-Restore the overlays after writting.
+Restore the overlays after writing.
 Argument OBJ is the object to write."
   (when (semanticdb-live-p obj)
     (when (semanticdb-in-buffer-p obj)
@@ -310,6 +311,7 @@ Argument OBJ is the object to write."
 	(call-next-method)
       (error
        (when semanticdb-data-debug-on-write-error
+	 (require 'data-debug)
 	 (data-debug-new-buffer (concat "*SEMANTICDB ERROR*"))
 	 (data-debug-insert-thing obj "*" "")
 	 (setq semanticdb-data-debug-on-write-error nil))
@@ -393,7 +395,6 @@ name in a secondary directory."
   (concat (semanticdb-file-name-directory dbclass path)
 	  (semanticdb-file-name-non-directory dbclass)))
 
-;;;###autoload
 (defmethod semanticdb-full-filename ((obj semanticdb-project-database-file))
   "Fetch the full filename that OBJ refers to."
   (oref obj file))
@@ -445,5 +446,10 @@ Optional NOERROR prevents errors from being displayed."
 	))))
 
 (provide 'semantic/db-file)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/db-file"
+;; End:
 
 ;;; semantic/db-file.el ends here

@@ -1,23 +1,23 @@
 ;;; semantic/symref.el --- Symbol Reference API
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -64,10 +64,14 @@
 ;;
 ;; Your tool should then create an instance of `semantic-symref-result'.
 
-(require 'semantic/fw)
-(require 'ede)
-(eval-when-compile (require 'data-debug)
-		   (require 'eieio-datadebug))
+(require 'semantic)
+
+(defvar ede-minor-mode)
+(declare-function data-debug-new-buffer "data-debug")
+(declare-function data-debug-insert-object-slots "eieio-datadebug")
+(declare-function ede-toplevel "ede/base")
+(declare-function ede-project-root-directory "ede/files")
+(declare-function ede-up-directory "ede/files")
 
 ;;; Code:
 (defvar semantic-symref-tool 'detect
@@ -99,10 +103,10 @@ If no tools are supported, then 'grep is assumed.")
   "Calculate the root directory for a symref search.
 Start with and EDE project, or use the default directory."
   (let* ((rootproj (when (and (featurep 'ede) ede-minor-mode)
-		       (ede-toplevel)))
-	   (rootdirbase (if rootproj
-			    (ede-project-root-directory rootproj)
-			  default-directory)))
+		     (ede-toplevel)))
+	 (rootdirbase (if rootproj
+			  (ede-project-root-directory rootproj)
+			default-directory)))
     (if (and rootproj (condition-case nil
 			  ;; Hack for subprojects.
 			  (oref rootproj :metasubproject)
@@ -145,6 +149,7 @@ ARGS are the initialization arguments to pass to the created class."
 (defun semantic-symref-data-debug-last-result ()
   "Run the last symref data result in Data Debug."
   (interactive)
+  (require 'eieio-datadebug)
   (if semantic-symref-last-result
       (progn
 	(data-debug-new-buffer "*Symbol Reference ADEBUG*")
@@ -497,4 +502,10 @@ over until it returns nil."
   (error "Symref tool objects must implement `semantic-symref-parse-tool-output-one-line'"))
 
 (provide 'semantic/symref)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/symref"
+;; End:
+
 ;;; semantic/symref.el ends here

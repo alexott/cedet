@@ -1,27 +1,26 @@
 ;;; semantic/db-el.el --- Semantic database extensions for Emacs Lisp
 
-;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+;;; Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semanticdb is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;;
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 ;;
 ;; There are a lot of Emacs Lisp functions and variables available for
@@ -32,11 +31,15 @@
 ;; to also work in Emacs Lisp with no compromises.
 ;;
 
+(require 'semantic/db)
+
 (eval-when-compile
   ;; For generic function searching.
   (require 'eieio)
   (require 'eieio-opt)
   (require 'eieio-base))
+
+(declare-function semantic-elisp-desymbolify "semantic/bovine/el")
 
 ;;; Code:
 
@@ -203,6 +206,7 @@ TOKTYPE is a hint to the type of tag desired."
       (setq sym (intern-soft sym)))
   (when sym
     (cond ((and (eq toktype 'function) (fboundp sym))
+	   (require 'semantic/bovine/el)
 	   (semantic-tag-new-function
 	    (symbol-name sym)
 	    nil	;; return type
@@ -222,27 +226,27 @@ TOKTYPE is a hint to the type of tag desired."
 	   (semantic-tag-new-type
 	    (symbol-name sym)
 	    "class"
-	    (semantic.elisp-desymbolify
+	    (semantic-elisp-desymbolify
 	     (aref (class-v semanticdb-project-database)
 		   class-public-a)) ;; slots
-	    (semantic.elisp-desymbolify (class-parents sym)) ;; parents
+	    (semantic-elisp-desymbolify (class-parents sym)) ;; parents
 	    ))
 	  ((not toktype)
 	   ;; Figure it out on our own.
 	   (cond ((class-p sym)
-		  (semantic/db.elisp-sym->tag sym 'type))
+		  (semanticdb-elisp-sym->tag sym 'type))
 		 ((fboundp sym)
-		  (semantic/db.elisp-sym->tag sym 'function))
+		  (semanticdb-elisp-sym->tag sym 'function))
 		 ((boundp sym)
-		  (semantic/db.elisp-sym->tag sym 'variable))
+		  (semanticdb-elisp-sym->tag sym 'variable))
 		 (t nil))
 	   )
 	  (t nil))))
 
 ;;; Search Overrides
 ;;
-(defvar semantic/db.elisp-mapatom-collector nil
-  "Variable used to collect 'mapatoms' output.")
+(defvar semanticdb-elisp-mapatom-collector nil
+  "Variable used to collect `mapatoms' output.")
 
 (defmethod semanticdb-find-tags-by-name-method
   ((table semanticdb-table-emacs-lisp) name &optional tags)
@@ -252,9 +256,9 @@ Return a list of tags."
   (if tags (call-next-method)
     ;; No need to search.  Use `intern-soft' which does the same thing for us.
     (let* ((sym (intern-soft name))
-	   (fun (semantic/db.elisp-sym->tag sym 'function))
-	   (var (semantic/db.elisp-sym->tag sym 'variable))
-	   (typ (semantic/db.elisp-sym->tag sym 'type))
+	   (fun (semanticdb-elisp-sym->tag sym 'function))
+	   (var (semanticdb-elisp-sym->tag sym 'variable))
+	   (typ (semanticdb-elisp-sym->tag sym 'type))
 	   (taglst nil)
 	   )
       (when (or fun var typ)
@@ -272,7 +276,7 @@ Optional argument TAGS is a list of tags to search.
 Uses `apropos-internal' to find matches.
 Return a list of tags."
   (if tags (call-next-method)
-    (delq nil (mapcar 'semantic/db.elisp-sym->tag
+    (delq nil (mapcar 'semanticdb-elisp-sym->tag
 		      (apropos-internal regex)))))
 
 (defmethod semanticdb-find-tags-for-completion-method
@@ -281,7 +285,7 @@ Return a list of tags."
 Optional argument TAGS is a list of tags to search.
 Returns a table of all matching tags."
   (if tags (call-next-method)
-    (delq nil (mapcar 'semantic/db.elisp-sym->tag
+    (delq nil (mapcar 'semanticdb-elisp-sym->tag
 		      (all-completions prefix obarray)))))
 
 (defmethod semanticdb-find-tags-by-class-method
@@ -330,13 +334,13 @@ Return a list of tags."
       (let* ((class (intern-soft type))
 	     (taglst (when class
 		       (delq nil
-			     (mapcar 'semantic/db.elisp-sym->tag
+			     (mapcar 'semanticdb-elisp-sym->tag
 				     ;; Fancy eieio function that knows all about
 				     ;; built in methods belonging to CLASS.
 				     (eieio-all-generic-functions class)))))
 	     )
 	taglst))))
 
-(provide 'semantic/db.el)
+(provide 'semantic/db-el)
 
 ;;; semantic/db-el.el ends here

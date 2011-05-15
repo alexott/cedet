@@ -1,25 +1,24 @@
 ;;; semantic/edit.el --- Edit Management for Semantic
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+;;   2008, 2009, 2010 Free Software Foundation, Inc.
 
-;; X-CVS: $Id: semantic/edit.el,v 1.44 2010-03-26 22:18:02 xscript Exp $
+;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -60,11 +59,10 @@
 
 ;;
 (require 'semantic)
-(require 'working)
 
 ;;; Code:
 (defvar semantic-after-partial-cache-change-hook nil
-  "Hooks run after the buffer cache has been updated.
+  "Normal hook run after the buffer cache has been updated.
 
 This hook will run when the cache has been partially reparsed.
 Partial reparses are incurred when a user edits a buffer, and only the
@@ -75,8 +73,9 @@ updated in the current buffer.
 
 For language specific hooks, make sure you define this as a local hook.")
 
-(defvar semantic-change-hooks nil
-  "Hooks run when semantic detects a change in a buffer.
+(defvar semantic-change-hooks
+  '(semantic-edits-change-function-handle-changes)
+  "Abnormal hook run when semantic detects a change in a buffer.
 Each hook function must take three arguments, identical to the
 common hook `after-change-functions'.")
 
@@ -92,22 +91,22 @@ For language specific hooks, make sure you define this as a local hook.
 Not used yet; part of the next generation reparse mechanism.")
 
 (defvar semantic-edits-new-change-hooks nil
-  "Hooks run when a new change is found.
+  "Abnormal hook run when a new change is found.
 Functions must take one argument representing an overlay on that change.")
 
 (defvar semantic-edits-delete-change-hooks nil
-  "Hooks run before a change overlay is deleted.
+  "Abnormal hook run before a change overlay is deleted.
 Deleted changes occur when multiple changes are merged.
 Functions must take one argument representing an overlay being deleted.")
 
-(defvar semantic-edits-move-change-hooks nil
-  "Hooks run after a change overlay is moved.
+(defvar semantic-edits-move-change-hook nil
+  "Abnormal hook run after a change overlay is moved.
 Changes move when a new change overlaps an old change.  The old change
 will be moved.
 Functions must take one argument representing an overlay being moved.")
 
 (defvar semantic-edits-reparse-change-hooks nil
-  "Hooks run after a change results in a reparse.
+  "Abnormal hook run after a change results in a reparse.
 Functions are called before the overlay is deleted, and after the
 incremental reparse.")
 
@@ -116,9 +115,8 @@ incremental reparse.")
 When this happens, the buffer is marked as needing a full reparse.")
 
 (semantic-varalias-obsolete 'semantic-edits-incremental-reparse-failed-hooks
-                          'semantic-edits-incremental-reparse-failed-hook)
+			    'semantic-edits-incremental-reparse-failed-hook "23.2")
 
-;;;###autoload
 (defcustom semantic-edits-verbose-flag nil
   "Non-nil means the incremental parser is verbose.
 If nil, errors are still displayed, but informative messages are not."
@@ -154,7 +152,6 @@ Optional argument BUFFER is the buffer to search for changes in."
       (sort ret #'(lambda (a b) (< (semantic-overlay-start a)
 				   (semantic-overlay-start b)))))))
 
-;;;###autoload
 (defun semantic-edits-change-function-handle-changes  (start end length)
   "Run whenever a buffer controlled by `semantic-mode' change.
 Tracks when and how the buffer is re-parsed.
@@ -207,7 +204,6 @@ Argument START, END, and LENGTH specify the bounds of the change."
     (error nil))
   (semantic-overlay-delete change))
 
-;;;###autoload
 (defun semantic-edits-flush-changes ()
   "Flush the changes in the current buffer."
   (let ((changes (semantic-changes-in-region (point-min) (point-max))))
@@ -462,8 +458,8 @@ See `semantic-edits-change-leaf-tag' for details on parents."
 That is, display a message by passing all ARGS to `format', then throw
 a 'semantic-parse-changes-failed exception with value t."
   (when semantic-edits-verbose-flag
-    (working-temp-message "Semantic parse changes failed: %S"
-			  (apply 'format args)))
+    (message "Semantic parse changes failed: %S"
+	     (apply 'format args)))
   (throw 'semantic-parse-changes-failed t))
 
 (defsubst semantic-edits-incremental-fail ()
@@ -471,11 +467,10 @@ a 'semantic-parse-changes-failed exception with value t."
   ;;(debug)
   (semantic-parse-tree-set-needs-rebuild)
   (when semantic-edits-verbose-flag
-    (working-temp-message "Force full reparse (%s)"
-			  (buffer-name (current-buffer))))
+    (message "Force full reparse (%s)"
+	     (buffer-name (current-buffer))))
   (run-hooks 'semantic-edits-incremental-reparse-failed-hook))
 
-;;;###autoload
 (defun semantic-edits-incremental-parser ()
   "Incrementally reparse the current buffer.
 Incremental parser allows semantic to only reparse those sections of
@@ -492,8 +487,8 @@ the semantic cache to see what needs to be changed."
              (condition-case err
                  (semantic-edits-incremental-parser-1)
                (error
-                (working-temp-message "incremental parser error: %S"
-                                      (error-message-string err))
+                (message "incremental parser error: %S"
+			 (error-message-string err))
                 t))))))
     (when (eq changed-tags t)
       ;; Force a full reparse.
@@ -757,7 +752,7 @@ This function is for internal use by `semantic-edits-incremental-parser'."
         ;; A change that occurred outside of any existing tags
         ;; and there are no new tags to replace it.
 	(when semantic-edits-verbose-flag
-	  (working-temp-message "White space changes"))
+	  (message "White space changes"))
         nil
         )
 
@@ -772,8 +767,8 @@ This function is for internal use by `semantic-edits-incremental-parser'."
               (append newf-tags changed-tags))
 
 	(when semantic-edits-verbose-flag
-	  (working-temp-message "Inserted tags: (%s)"
-				(semantic-format-tag-name (car newf-tags))))
+	  (message "Inserted tags: (%s)"
+		   (semantic-format-tag-name (car newf-tags))))
         )
 
 ;;;; Old tags removed
@@ -786,8 +781,8 @@ This function is for internal use by `semantic-edits-incremental-parser'."
               (append tags changed-tags))
 
         (when semantic-edits-verbose-flag
-	  (working-temp-message "Deleted tags: (%s)"
-				(semantic-format-tag-name (car tags))))
+	  (message "Deleted tags: (%s)"
+		   (semantic-format-tag-name (car tags))))
         )
 
 ;;;; One tag was updated.
@@ -801,8 +796,8 @@ This function is for internal use by `semantic-edits-incremental-parser'."
         (setq changed-tags (cons (car tags) changed-tags))
         ;; Debug
         (when semantic-edits-verbose-flag
-	  (working-temp-message "Update Tag Table: %s"
-				(semantic-format-tag-name (car tags) nil t)))
+	  (message "Update Tag Table: %s"
+		   (semantic-format-tag-name (car tags) nil t)))
         ;; Flush change regardless of above if statement.
         )
 
@@ -859,8 +854,8 @@ pre-positioned to a convenient location."
 	;; First tags in the cache are being deleted.
 	(progn
 	  (when semantic-edits-verbose-flag
-	    (working-temp-message "To Remove First Tag: (%s)"
-				  (semantic-format-tag-name first)))
+	    (message "To Remove First Tag: (%s)"
+		     (semantic-format-tag-name first)))
 	  ;; Find the last tag
 	  (setq cacheend chil)
 	  (while (and cacheend (not (eq last (car cacheend))))
@@ -878,8 +873,8 @@ pre-positioned to a convenient location."
 	    ;; reparse
 	    (semantic-parse-changes-failed "Splice-remove failed.  Empty buffer?")
 	    ))
-      (working-temp-message "To Remove Middle Tag: (%s)"
-			    (semantic-format-tag-name first)))
+      (message "To Remove Middle Tag: (%s)"
+	       (semantic-format-tag-name first)))
     ;; Find in the cache the preceding tag
     (while (and cachestart (not (eq first (car (cdr cachestart)))))
       (setq cachestart (cdr cachestart)))
@@ -960,16 +955,15 @@ lost if not transferred into NEWTAG."
     ;; to point at the updated state of the world.
     (semantic-overlay-put o 'semantic oldtag)
     ))
-
-;;; Setup incremental parser
-;;
-;;;###autoload
-(add-hook 'semantic-change-hooks
-          #'semantic-edits-change-function-handle-changes)
-;;;###autoload
+
 (add-hook 'semantic-before-toplevel-cache-flush-hook
           #'semantic-edits-flush-changes)
 
 (provide 'semantic/edit)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/edit"
+;; End:
 
 ;;; semantic/edit.el ends here

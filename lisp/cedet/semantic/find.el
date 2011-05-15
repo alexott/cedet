@@ -1,26 +1,25 @@
-;;; semantic/find.el --- Search routines
+;;; semantic/find.el --- Search routines for Semantic
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -45,10 +44,13 @@
 ;;
 ;; 4) ...
 
+;;; Code:
+
+(require 'semantic)
 (require 'semantic/tag)
 
-;;; Code:
-
+(declare-function semantic-tag-protected-p "semantic/tag-ls")
+
 ;;; Overlay Search Routines
 ;;
 ;; These routines provide fast access to tokens based on a buffer that
@@ -182,7 +184,6 @@ A tag's parent would be a containing structure, such as a type
 containing a field.  Return nil if there is no parent."
   (car (cdr (nreverse (semantic-find-tag-by-overlay)))))
 
-;;;###autoload
 (defun semantic-current-tag-of-class (class)
   "Return the current (smallest) tags of CLASS in the current buffer.
 If the smallest tag is not of type CLASS, keep going upwards until one
@@ -260,7 +261,7 @@ TABLE is a semantic tags table.  See `semantic-something-to-tag-table'."
 ;;; Top level Searches
 ;;
 ;;;###autoload
-(defsubst semantic-find-first-tag-by-name (name &optional table)
+(defun semantic-find-first-tag-by-name (name &optional table)
   "Find the first tag with NAME in TABLE.
 NAME is a string.
 TABLE is a semantic tags table.  See `semantic-something-to-tag-table'.
@@ -268,7 +269,6 @@ This routine uses `assoc' to quickly find the first matching entry."
   (funcall (if semantic-case-fold 'assoc-ignore-case 'assoc)
            name (semantic-something-to-tag-table table)))
 
-;;;###autoload
 (defmacro semantic-find-tags-by-name (name &optional table)
   "Find all tags with NAME in TABLE.
 NAME is a string.
@@ -278,7 +278,6 @@ TABLE is a tag table.  See `semantic-something-to-tag-table'."
       (string= ,name (semantic-tag-name (car tags)))
       ,table)))
 
-;;;###autoload
 (defmacro semantic-find-tags-for-completion (prefix &optional table)
   "Find all tags whose name begins with PREFIX in TABLE.
 PREFIX is a string.
@@ -294,7 +293,6 @@ Uses `compare-strings' for fast comparison."
 	  t)
       ,table)))
 
-;;;###autoload
 (defmacro semantic-find-tags-by-name-regexp (regexp &optional table)
   "Find all tags with name matching REGEXP in TABLE.
 REGEXP is a string containing a regular expression,
@@ -306,7 +304,6 @@ attempting to do completions."
       (string-match ,regexp (semantic-tag-name (car tags)))
       ,table)))
 
-;;;###autoload
 (defmacro semantic-find-tags-by-class (class &optional table)
   "Find all tags of class CLASS in TABLE.
 CLASS is a symbol representing the class of the token, such as
@@ -316,7 +313,6 @@ TABLE is a tag table.  See `semantic-something-to-tag-table'."
     (eq ,class (semantic-tag-class (car tags)))
     ,table))
 
-;;;###autoload
 (defmacro semantic-find-tags-by-type (type &optional table)
   "Find all tags of with a type TYPE in TABLE.
 TYPE is a string or tag representing a data type as defined in the
@@ -327,7 +323,6 @@ TABLE is a tag table.  See `semantic-something-to-tag-table'."
     (semantic-tag-of-type-p (car tags) ,type)
     ,table))
 
-;;;###autoload
 (defmacro semantic-find-tags-of-compound-type (&optional table)
   "Find all tags which are a compound type in TABLE.
 Compound types are structures, or other data type which
@@ -355,7 +350,7 @@ See `semantic-tag-protected-p' for details on which tags are returned."
 
 (defun semantic-find-tags-by-scope-protection-default
   (scopeprotection parent &optional table)
-  "Find all tags accessable by SCOPEPROTECTION.
+  "Find all tags accessible by SCOPEPROTECTION.
 SCOPEPROTECTION is a symbol which can be returned by the method
 `semantic-tag-protection'.  A hard-coded order is used to determine a match.
 PARENT is a tag representing the PARENT slot needed for
@@ -366,20 +361,18 @@ See `semantic-tag-protected-p' for details on which tags are returned."
     (if (not table) (setq table (semantic-tag-type-members parent)))
     (if (null scopeprotection)
 	table
+      (require 'semantic/tag-ls)
       (semantic--find-tags-by-macro
        (not (semantic-tag-protected-p (car tags) scopeprotection parent))
        table)))
 
-;;;###autoload
 (defsubst semantic-find-tags-included (&optional table)
   "Find all tags in TABLE that are of the 'include class.
 TABLE is a tag table.  See `semantic-something-to-tag-table'."
   (semantic-find-tags-by-class 'include table))
 
 ;;; Deep Searches
-;;
 
-;;;###autoload
 (defmacro semantic-deep-find-tags-by-name (name &optional table)
   "Find all tags with NAME in TABLE.
 Search in top level tags, and their components, in TABLE.
@@ -389,7 +382,6 @@ See also `semantic-find-tags-by-name'."
   `(semantic-find-tags-by-name
     ,name (semantic-flatten-tags-table ,table)))
 
-;;;###autoload
 (defmacro semantic-deep-find-tags-for-completion (prefix &optional table)
   "Find all tags whose name begins with PREFIX in TABLE.
 Search in top level tags, and their components, in TABLE.
@@ -398,7 +390,6 @@ See also `semantic-find-tags-for-completion'."
   `(semantic-find-tags-for-completion
     ,prefix (semantic-flatten-tags-table ,table)))
 
-;;;###autoload
 (defmacro semantic-deep-find-tags-by-name-regexp (regexp &optional table)
   "Find all tags with name matching REGEXP in TABLE.
 Search in top level tags, and their components, in TABLE.
@@ -411,7 +402,7 @@ attempting to do completions."
     ,regexp (semantic-flatten-tags-table ,table)))
 
 ;;; Specialty Searches
-;;
+
 (defun semantic-find-tags-external-children-of-type (type &optional table)
   "Find all tags in whose parent is TYPE in TABLE.
 These tags are defined outside the scope of the original TYPE declaration.
@@ -445,7 +436,6 @@ TABLE is a tag table.  See `semantic-something-to-tag-table'."
 ;; not use `semantic-brute-find-tag-by-function' to do this,
 ;; instead erroring on the side of speed.
 
-;;;###autoload
 (defun semantic-brute-find-first-tag-by-name
   (name streamorbuffer &optional search-parts search-include)
   "Find a tag NAME within STREAMORBUFFER.  NAME is a string.
@@ -476,7 +466,6 @@ Use `semantic-find-first-tag-by-name' instead."
 	    nil)
 	m))))
 
-;;;###autoload
 (defmacro semantic-brute-find-tag-by-class
   (class streamorbuffer &optional search-parts search-includes)
   "Find all tags with a class CLASS within STREAMORBUFFER.
@@ -490,7 +479,6 @@ Use `semantic-find-tag-by-class' instead."
     (lambda (tag) (eq ,class (semantic-tag-class tag)))
     ,streamorbuffer ,search-parts ,search-includes))
 
-;;;###autoload
 (defmacro semantic-brute-find-tag-standard
   (streamorbuffer &optional search-parts search-includes)
   "Find all tags in STREAMORBUFFER which define simple class types.
@@ -502,7 +490,6 @@ Optional argument SEARCH-PARTS and SEARCH-INCLUDES are passed to
 			  '(function variable type)))
     ,streamorbuffer ,search-parts ,search-includes))
 
-;;;###autoload
 (defun semantic-brute-find-tag-by-type
   (type streamorbuffer &optional search-parts search-includes)
   "Find all tags with type TYPE within STREAMORBUFFER.
@@ -520,7 +507,6 @@ Optional argument SEARCH-PARTS and SEARCH-INCLUDES are passed to
        (equal type ts)))
    streamorbuffer search-parts search-includes))
 
-;;;###autoload
 (defun semantic-brute-find-tag-by-type-regexp
   (regexp streamorbuffer &optional search-parts search-includes)
   "Find all tags with type matching REGEXP within STREAMORBUFFER.
@@ -539,7 +525,6 @@ Optional argument SEARCH-PARTS and SEARCH-INCLUDES are passed to
        (and ts (string-match regexp ts))))
    streamorbuffer search-parts search-includes))
 
-;;;###autoload
 (defun semantic-brute-find-tag-by-name-regexp
   (regex streamorbuffer &optional search-parts search-includes)
   "Find all tags whose name match REGEX in STREAMORBUFFER.
@@ -550,7 +535,6 @@ Optional argument SEARCH-PARTS and SEARCH-INCLUDES are passed to
     streamorbuffer search-parts search-includes)
   )
 
-;;;###autoload
 (defun semantic-brute-find-tag-by-property
   (property value streamorbuffer &optional search-parts search-includes)
   "Find all tags with PROPERTY equal to VALUE in STREAMORBUFFER.
@@ -561,7 +545,6 @@ Optional argument SEARCH-PARTS and SEARCH-INCLUDES are passed to
    streamorbuffer search-parts search-includes)
   )
 
-;;;###autoload
 (defun semantic-brute-find-tag-by-attribute
   (attr streamorbuffer &optional search-parts search-includes)
   "Find all tags with a given ATTR in STREAMORBUFFER.
@@ -573,7 +556,6 @@ Optional argument SEARCH-PARTS and SEARCH-INCLUDES are passed to
    streamorbuffer search-parts search-includes)
   )
 
-;;;###autoload
 (defun semantic-brute-find-tag-by-attribute-value
   (attr value streamorbuffer &optional search-parts search-includes)
   "Find all tags with a given ATTR equal to VALUE in STREAMORBUFFER.
@@ -586,7 +568,6 @@ Optional argument SEARCH-PARTS and SEARCH-INCLUDES are passed to
    streamorbuffer search-parts search-includes)
   )
 
-;;;###autoload
 (defun semantic-brute-find-tag-by-function
   (function streamorbuffer &optional search-parts search-includes)
   "Find all tags for which FUNCTION's value is non-nil within STREAMORBUFFER.
@@ -624,7 +605,6 @@ This parameter hasn't be active for a while and is obsolete."
     (setq nl (nreverse nl))
     nl))
 
-;;;###autoload
 (defun semantic-brute-find-first-tag-by-function
   (function streamorbuffer &optional search-parts search-includes)
   "Find the first tag which FUNCTION match within STREAMORBUFFER.
@@ -652,7 +632,6 @@ searched for matches."
 ;;
 ;; Are these useful anymore?
 ;;
-;;;###autoload
 (defun semantic-brute-find-tag-by-position (position streamorbuffer
 						     &optional nomedian)
   "Find a tag covering POSITION within STREAMORBUFFER.
@@ -687,7 +666,6 @@ the median calculation, and return nil."
 	      stream (cdr stream)))
       found)))
 
-;;;###autoload
 (defun semantic-brute-find-innermost-tag-by-position
   (position streamorbuffer &optional nomedian)
   "Find a list of tags covering POSITION within STREAMORBUFFER.
@@ -714,138 +692,12 @@ details are available of findable."
 				(semantic-tag-type-members current)
 			      nil))))
     (nreverse (cons current returnme))))
-
-;;; Compatibility Aliases
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-overlay
-			 'semantic-find-tag-by-overlay)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-overlay-in-region
-			 'semantic-find-tag-by-overlay-in-region)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-overlay-next
-			 'semantic-find-tag-by-overlay-next)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-overlay-prev
-			 'semantic-find-tag-by-overlay-prev)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-parent-by-overlay
-			 'semantic-find-tag-parent-by-overlay)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-current-nonterminal
-			 'semantic-current-tag)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-current-nonterminal-parent
-			 'semantic-current-tag-parent)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-current-nonterminal-of-type
-			 'semantic-current-tag-of-class)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-name
-			 'semantic-brute-find-first-tag-by-name)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-token
-			 'semantic-brute-find-tag-by-class)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-standard
-			 'semantic-brute-find-tag-standard)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-type
-			 'semantic-brute-find-tag-by-type)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-type-regexp
-			 'semantic-brute-find-tag-by-type-regexp)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-name-regexp
-			 'semantic-brute-find-tag-by-name-regexp)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-property
-			 'semantic-brute-find-tag-by-property)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-extra-spec
-			 'semantic-brute-find-tag-by-attribute)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-extra-spec-value
-			 'semantic-brute-find-tag-by-attribute-value)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-function
-			 'semantic-brute-find-tag-by-function)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-function-first-match
-			 'semantic-brute-find-first-tag-by-function)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-nonterminal-by-position
-			 'semantic-brute-find-tag-by-position)
-
-;;;###autoload
-(semantic-alias-obsolete 'semantic-find-innermost-nonterminal-by-position
-			 'semantic-brute-find-innermost-tag-by-position)
-
-;;; TESTING
-;;
-(defun semantic-find-benchmark ()
-  "Run some simple benchmarks to see how we are doing.
-Optional argument ARG is the number of iterations to run."
-  (interactive)
-  (require 'benchmark)
-  (let ((f-name nil)
-	(b-name nil)
-	(f-comp)
-	(b-comp)
-	(f-regex)
-	)
-    (garbage-collect)
-    (setq f-name
-	  (benchmark-run-compiled
-	      1000 (semantic-find-first-tag-by-name "class3"
-						    "test/test.cpp")))
-    (garbage-collect)
-    (setq b-name
-	  (benchmark-run-compiled
-	      1000 (semantic-brute-find-first-tag-by-name "class3"
-							  "test/test.cpp")))
-    (garbage-collect)
-    (setq f-comp
-	  (benchmark-run-compiled
-	      1000 (semantic-find-tags-for-completion "method"
-						      "test/test.cpp")))
-    (garbage-collect)
-    (setq b-comp
-	  (benchmark-run-compiled
-	      1000 (semantic-brute-find-tag-by-name-regexp "^method"
-							   "test/test.cpp")))
-    (garbage-collect)
-    (setq f-regex
-	  (benchmark-run-compiled
-	      1000 (semantic-find-tags-by-name-regexp "^method"
-						      "test/test.cpp")))
-
-    (message "Name [new old] [ %.3f %.3f ] Complete [newc/new old] [ %.3f/%.3f %.3f ]"
-	     (car f-name) (car b-name)
-	     (car f-comp) (car f-regex)
-	     (car b-comp))
-  ))
-
 
 (provide 'semantic/find)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/find"
+;; End:
 
 ;;; semantic/find.el ends here

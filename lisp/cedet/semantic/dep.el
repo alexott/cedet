@@ -1,26 +1,24 @@
 ;;; semantic/dep.el --- Methods for tracking dependencies (include files)
 
-;;; Copyright (C) 2006, 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -41,7 +39,6 @@
 
 ;;; Code:
 
-;;;###autoload
 (defvar semantic-dependency-include-path nil
   "Defines the include path used when searching for files.
 This should be a list of directories to search which is specific
@@ -61,7 +58,6 @@ TODO: use ffap.el to locate such items?
 NOTE: Obsolete this, or use as special user")
 (make-variable-buffer-local `semantic-dependency-include-path)
 
-;;;###autoload
 (defvar semantic-dependency-system-include-path nil
   "Defines the system include path.
 This should be set with either `defvar-mode-local', or with
@@ -77,7 +73,6 @@ class include, this path will be inspected for includes of type
 check both the project and system directories.")
 (make-variable-buffer-local `semantic-dependency-system-include-path)
 
-;;;###autoload
 (defmacro defcustom-mode-local-semantic-dependency-system-include-path
   (mode name value &optional docstring)
   "Create a mode-local value of the system-dependency include path.
@@ -187,27 +182,22 @@ macro `defcustom-mode-local-semantic-dependency-system-include-path'."
 ;;; PATH SEARCH
 ;;
 ;; methods for finding files on a provided path.
-(if (fboundp 'locate-file)
-    (defsubst semantic--dependency-find-file-on-path (file path)
-      "Return an expanded file name for FILE on PATH."
-      (locate-file file path))
+(defmacro semantic--dependency-find-file-on-path (file path)
+  (if (fboundp 'locate-file)
+      `(locate-file ,file ,path)
+    `(let ((p ,path)
+	   (found nil))
+       (while (and p (not found))
+	 (let ((f (expand-file-name ,file (car p))))
+	   (if (file-exists-p f)
+	       (setq found f)))
+	 (setq p (cdr p)))
+       found)))
 
-  ;; Else, older version of Emacs.
+(defvar ede-minor-mode)
+(defvar ede-object)
+(declare-function ede-system-include-path "ede")
 
-  (defsubst semantic--dependency-find-file-on-path (file path)
-    "Return an expanded file name for FILE on PATH."
-    (let ((p path)
-	  (found nil))
-      (while (and p (not found))
-        (let ((f (expand-file-name file (car p))))
-	  (if (file-exists-p f)
-	      (setq found f)))
-        (setq p (cdr p)))
-      found))
-
-  )
-
-;;;###autoload
 (defun semantic-dependency-find-file-on-path (file systemp &optional mode)
   "Return an expanded file name for FILE on available paths.
 If SYSTEMP is true, then only search system paths.
@@ -235,5 +225,10 @@ provided mode, not from the current major mode."
 
 
 (provide 'semantic/dep)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/dep"
+;; End:
 
 ;;; semantic/dep.el ends here

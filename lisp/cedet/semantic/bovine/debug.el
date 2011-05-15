@@ -1,26 +1,24 @@
 ;;; semantic/bovine/debug.el --- Debugger support for bovinator
 
-;;; Copyright (C) 2003 Eric M. Ludlam
+;; Copyright (C) 2003, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; This is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;;
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 ;;
 ;; Implementation of the semantic debug support framework for the
@@ -28,6 +26,7 @@
 ;;
 
 (require 'semantic/debug)
+(require 'semantic/find)
 
 ;;; Code:
 
@@ -58,7 +57,6 @@ This is the lexical token being matched by the parser.")
    )
   "Debugger frame representation for the bovinator.")
 
-;;;###autoload
 (defun semantic-bovine-debug-create-frame (nonterm rule match collection
 						   lextoken)
   "Create one bovine frame.
@@ -89,7 +87,7 @@ LEXTOKEN, is a token returned by the lexer which is being matched."
   "Highlight one parser frame."
   (let* ((nonterm (oref frame nonterm))
 	 (pb (oref semantic-debug-current-interface parser-buffer))
-	 (start (semantic-find-nonterminal-by-token 'start pb))
+	 (start (semantic-brute-find-tag-by-class 'start pb))
 	)
     ;; Make sure we get a good rule name, and that it is a string
     (if (and (eq nonterm 'bovine-toplevel) start)
@@ -138,7 +136,6 @@ Argument CONDITION is the thrown error condition."
 
 ;;; Parser support for the debugger
 ;;
-;;;###autoload
 (defclass semantic-bovine-debug-parser (semantic-debug-parser)
   (
    )

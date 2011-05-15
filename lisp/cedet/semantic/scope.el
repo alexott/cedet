@@ -1,23 +1,23 @@
 ;;; semantic/scope.el --- Analyzer Scope Calculations
 
-;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -49,6 +49,13 @@
 (require 'semantic/analyze/fcn)
 (require 'semantic/ctxt)
 
+(eval-when-compile (require 'semantic/find))
+
+(declare-function data-debug-show "eieio-datadebug")
+(declare-function semantic-analyze-find-tag "semantic/analyze")
+(declare-function semantic-analyze-princ-sequence "semantic/analyze")
+(declare-function semanticdb-typecache-merge-streams "semantic/db-typecache")
+(declare-function semanticdb-typecache-add-dependant "semantic/db-typecache")
 
 ;;; Code:
 
@@ -122,7 +129,6 @@ Saves scoping information between runs of the analyzer.")
       (semantic-reset cache))
   )
 
-;;;###autoload
 (defun semantic-scope-reset-cache ()
   "Get the current cached scope, and reset it."
   (when semanticdb-current-table
@@ -151,7 +157,6 @@ If nil, then the typescope is reset."
 ;; will be attached to the tag.  Thus, in future scope based calls, a
 ;; tag can be passed in and a scope derived from it.
 
-;;;###autoload
 (defun semantic-scope-tag-clone-with-scope (tag scopetags)
   "Close TAG, and return it.  Add SCOPETAGS as a tag-local scope.
 Stores the SCOPETAGS as a set of tag properties on the cloned tag."
@@ -177,6 +182,7 @@ types available.")
 (defun semantic-analyze-scoped-types-default (position)
   "Return a list of types currently in scope at POSITION.
 Use `semantic-ctxt-scoped-types' to find types."
+  (require 'semantic/db-typecache)
   (save-excursion
     (goto-char position)
     (let ((code-scoped-types nil))
@@ -223,6 +229,7 @@ Optional SCOPETYPES are additional scoped entities in which our parent might
 be found.
 This only finds ONE immediate parent by name.  All other parents returned
 are from nesting data types."
+  (require 'semantic/analyze)
   (save-excursion
     (if position (goto-char position))
     (let* ((stack (reverse (semantic-find-tag-by-overlay (point))))
@@ -581,6 +588,7 @@ type."
   "Map all parents of TYPE to FCN.  Return tags of all the types.
 Argument SCOPE specify additional tags that are in scope
 whose tags can be searched when needed, OR it may be a scope object."
+  (require 'semantic/analyze)
   (let* (;; PARENTS specifies only the superclasses and not
 	 ;; interfaces.  Inheriting from an interfaces implies
 	 ;; you have a copy of all methods locally.  I think.
@@ -597,8 +605,6 @@ whose tags can be searched when needed, OR it may be a scope object."
       ;;         for recycling later?  Should this become a helpful
       ;;         extra routine?
       (when (and parents (semantic-tag-with-position-p type))
-	;; @NOTE - Does this save-excursion prevent the calculated
-	;; scope from working properly in any cases?
 	(save-excursion
 	  ;; If TYPE has a position, go there and get the scope.
 	  (semantic-go-to-tag type)
@@ -656,8 +662,9 @@ If POINT is not provided, then use the current location of point.
 The class returned from the scope calculation is variable
 `semantic-scope-cache'."
   (interactive)
-  (if (not (and (featurep 'semanticdb) semanticdb-current-database))
+  (if (not (and (featurep 'semantic/db) semanticdb-current-database))
       nil ;; Don't do anything...
+    (require 'semantic/db-typecache)
     (if (not point) (setq point (point)))
     (when (cedet-called-interactively-p 'any)
       (semantic-fetch-tags)
@@ -667,7 +674,8 @@ The class returned from the scope calculation is variable
       (let* ((TAG  (semantic-current-tag))
 	     (scopecache
 	      (semanticdb-cache-get semanticdb-current-table
-				    semantic-scope-cache)))
+				    semantic-scope-cache))
+	     )
 	(when (not (semantic-equivalent-tag-p TAG (oref scopecache tag)))
 	  (semantic-reset scopecache))
 	(if (oref scopecache tag)
@@ -721,6 +729,7 @@ The class returned from the scope calculation is variable
 	(semanticdb-typecache-add-dependant scopecache)
 	;; Handy debug output.
 	(when (cedet-called-interactively-p 'any)
+	  (require 'eieio-datadebug)
 	  (data-debug-show scopecache))
 	;; Return ourselves
 	scopecache))))
@@ -789,6 +798,7 @@ hits in order, with the first tag being in the closest scope."
 ;;
 (defmethod semantic-analyze-show ((context semantic-scope-cache))
   "Insert CONTEXT into the current buffer in a nice way."
+  (require 'semantic/analyze)
   (semantic-analyze-princ-sequence (oref context scopetypes) "-> ScopeTypes: " )
   (semantic-analyze-princ-sequence (oref context parents) "-> Parents: " )
   (semantic-analyze-princ-sequence (oref context scope) "-> Scope: " )
@@ -798,4 +808,10 @@ hits in order, with the first tag being in the closest scope."
   )
 
 (provide 'semantic/scope)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/scope"
+;; End:
+
 ;;; semantic/scope.el ends here

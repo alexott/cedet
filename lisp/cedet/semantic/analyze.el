@@ -1,26 +1,24 @@
 ;;; semantic/analyze.el --- Analyze semantic tags against local context
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -65,22 +63,19 @@
 ;; constants - Some datatypes define elements of themselves as a
 ;;       constant.  These need to be returned as there would be no
 ;;       other possible completions.
-;;
 
-
-(require 'inversion)
-(eval-and-compile
-  (inversion-require 'eieio "1.0"))
 (eval-when-compile (require 'cl))
 (require 'semantic)
 (require 'semantic/format)
 (require 'semantic/ctxt)
-(require 'semantic/sort)
-(eval-when-compile (require 'semantic/db)
-		   (require 'semantic/db-find))
-
 (require 'semantic/scope)
+(require 'semantic/sort)
 (require 'semantic/analyze/fcn)
+
+(eval-when-compile (require 'semantic/find))
+
+(declare-function data-debug-new-buffer "data-debug")
+(declare-function data-debug-insert-object-slots "eieio-datadebug")
 
 ;;; Code:
 (defvar semantic-analyze-error-stack nil
@@ -405,7 +400,6 @@ searches use the same arguments."
 ;;
 ;; Create a mini-analysis of just the symbol under point.
 ;;
-;;;###autoload
 (define-overloadable-function semantic-analyze-current-symbol
   (analyzehookfcn &optional position)
   "Call ANALYZEHOOKFCN after analyzing the symbol under POSITION.
@@ -687,13 +681,12 @@ Returns an object based on symbol `semantic-analyze-context'."
     context-return))
 
 
-;; Adebug output
-;;;###autoload
 (defun semantic-adebug-analyze (&optional ctxt)
   "Perform `semantic-analyze-current-context'.
 Display the results as a debug list.
 Optional argument CTXT is the context to show."
   (interactive)
+  (require 'data-debug)
   (let ((start (current-time))
 	(ctxt (or ctxt (semantic-analyze-current-context)))
 	(end (current-time)))
@@ -713,15 +706,18 @@ Optional argument CTXT is the context to show."
 ;;
 ;; Friendly output of a context analysis.
 ;;
+(declare-function pulse-momentary-highlight-region "pulse")
+
 (defmethod semantic-analyze-pulse ((context semantic-analyze-context))
   "Pulse the region that CONTEXT affects."
+  (require 'pulse)
   (with-current-buffer (oref context :buffer)
     (let ((bounds (oref context :bounds)))
       (when bounds
 	(pulse-momentary-highlight-region (car bounds) (cdr bounds))))))
 
 (defcustom semantic-analyze-summary-function 'semantic-format-tag-prototype
-  "*Function to use when creating items in Imenu.
+  "Function to use when creating items in Imenu.
 Some useful functions are found in `semantic-format-tag-functions'."
   :group 'semantic
   :type semantic-format-tag-custom-list)
@@ -793,5 +789,10 @@ CONTEXT's content is described in `semantic-analyze-current-context'."
   )
 
 (provide 'semantic/analyze)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/analyze"
+;; End:
 
 ;;; semantic/analyze.el ends here

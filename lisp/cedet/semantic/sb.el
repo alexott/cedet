@@ -1,42 +1,42 @@
 ;;; semantic/sb.el --- Semantic tag display for speedbar
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+;;   2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic-sb is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Convert a tag table into speedbar buttons.
 
 ;;; TODO:
-;;
+
 ;; Use semanticdb to find which semanticdb-table is being used for each
 ;; file/tag.  Replace `semantic-sb-with-tag-buffer' to instead call
 ;; children with the new `with-mode-local' instead.
 
 (require 'semantic)
+(require 'semantic/format)
+(require 'semantic/sort)
 (require 'semantic/util)
-(require 'inversion)
-(eval-and-compile
-  (inversion-require 'speedbar "0.15beta1"))
+(require 'speedbar)
+(declare-function semanticdb-file-stream "semantic/db")
 
 (defcustom semantic-sb-autoexpand-length 1
   "*Length of a semantic bucket to autoexpand in place.
@@ -382,7 +382,8 @@ to create much wiser decisions about how to sort and group these items."
   "Load FILE into a buffer, and generate tags using the Semantic parser.
 Returns the tag list, or t for an error."
   (let ((out nil))
-    (if (and (featurep 'semanticdb) (semanticdb-minor-mode-p)
+    (if (and (featurep 'semantic/db)
+	     (semanticdb-minor-mode-p)
 	     (not speedbar-power-click)
 	     ;; If the database is loaded and running, try to get
 	     ;; tokens from it.

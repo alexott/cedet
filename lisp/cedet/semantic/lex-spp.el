@@ -1,25 +1,23 @@
 ;;; semantic/lex-spp.el --- Semantic Lexical Pre-processor
 
-;;; Copyright (C) 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2006, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
-;; X-CVS: $Id: semantic/lex-spp.el,v 1.53 2010-04-18 20:40:15 zappo Exp $
+;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -69,6 +67,7 @@
 ;; NN_END
 ;;
 
+(require 'semantic)
 (require 'semantic/lex)
 
 ;;; Code:
@@ -1163,9 +1162,8 @@ The VALUE is a spp lexical table."
 	  (when (eq (car first) 'spp-arg-list)
 	    (princ " ")
 	    (prin1 first)
-	    (setq rest (cdr rest))
-	    )
-	
+	    (setq rest (cdr rest)))
+
 	  (when rest
 	    (princ " . ")
 	    (let ((len (length (cdr rest))))
@@ -1179,37 +1177,11 @@ The VALUE is a spp lexical table."
 		     (condition-case nil
 			 (prin1 rest)
 		       (error
-			(princ "nil ;; Error writing macro\n          ")))
-		     )
+			(princ "nil ;; Error writing macro\n          "))))
 		    (t ;; Too Long!
-		     (princ "nil ;; Too Long!\n          ")
-		     ))))
-	  ))
-      (princ ")\n          ")
-      )
-    (princ ")\n"))
-)
-
-;;; TESTS
-;;
-(defun semantic-lex-spp-write-test ()
-  "Test the semantic tag writer against the current buffer."
-  (interactive)
-  (with-output-to-temp-buffer "*SPP Write Test*"
-    (semantic-lex-spp-table-write-slot-value
-     (semantic-lex-spp-save-table))))
-
-;;;###autoload
-(defun semantic-lex-spp-write-utest ()
-  "Unit test using the test spp file to test the slot write fcn."
-  (interactive)
-  (let* ((sem (locate-library "semantic/lex-spp.el"))
-	 (dir (file-name-directory sem)))
-    (save-excursion
-      (set-buffer (find-file-noselect
-		   (expand-file-name "tests/testsppreplace.c"
-				     dir)))
-      (semantic-lex-spp-write-test))))
+		     (princ "nil ;; Too Long!\n          ")))))))
+      (princ ")\n          "))
+    (princ ")\n")))
 
 ;;; MACRO TABLE DEBUG
 ;;
@@ -1249,11 +1221,13 @@ If BUFFER is not provided, use the current buffer."
        )
 
      (def-edebug-spec define-lex-spp-include-analyzer
-       (&define name stringp stringp form def-body)
-       )
-     ))
-
+       (&define name stringp stringp form def-body))))
 
 (provide 'semantic/lex-spp)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/lex-spp"
+;; End:
 
 ;;; semantic/lex-spp.el ends here

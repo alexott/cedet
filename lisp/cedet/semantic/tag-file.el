@@ -1,26 +1,25 @@
 ;;; semantic/tag-file.el --- Routines that find files based on tags.
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008,
+;;   2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -28,6 +27,12 @@
 ;; These routines will find those files.
 
 (require 'semantic/tag)
+
+(defvar ede-minor-mode)
+(declare-function semanticdb-table-child-p "semantic/db" t t)
+(declare-function semanticdb-get-buffer "semantic/db")
+(declare-function semantic-dependency-find-file-on-path "semantic/dep")
+(declare-function ede-toplevel "ede/base")
 
 ;;; Code:
 
@@ -57,7 +62,8 @@ PARENT can also be a `semanticdb-table' object."
 	    ;; Tag had nothing, and the parent only has a file-name, then
 	    ;; find that file, and switch to that buffer.
 	    (set-buffer (find-file-noselect (semantic-tag-file-name parent))))
-	   ((and parent (semanticdb-table-child-p parent))
+	   ((and parent (featurep 'semantic/db)
+		 (semanticdb-table-child-p parent))
 	    (set-buffer (semanticdb-get-buffer parent)))
 	   (t
 	    ;; Well, just assume things are in the current buffer.
@@ -81,12 +87,13 @@ PARENT can also be a `semanticdb-table' object."
 			     t))
 	 ((semantic-tag-get-attribute tag :line)
 	  ;; The tag has a line number in it.  Go there.
-	  (goto-line (semantic-tag-get-attribute tag :line)))
+	  (goto-char (point-min))
+	  (forward-line (1- (semantic-tag-get-attribute tag :line))))
 	 ((and (semantic-tag-p parent) (semantic-tag-get-attribute parent :line))
 	  ;; The tag has a line number in it.  Go there.
-	  (goto-line (semantic-tag-get-attribute parent :line))
-	  (re-search-forward (semantic-tag-name tag) nil t)
-	  )
+	  (goto-char (point-min))
+	  (forward-line (1- (semantic-tag-get-attribute parent :line)))
+	  (re-search-forward (semantic-tag-name tag) nil t))
 	 (t
 	  ;; Take a guess that the tag has a unique name, and just
 	  ;; search for it from the beginning of the buffer.
@@ -96,7 +103,7 @@ PARENT can also be a `semanticdb-table' object."
   )
 
 (make-obsolete-overload 'semantic-find-nonterminal
-                        'semantic-go-to-tag)
+                        'semantic-go-to-tag "23.2")
 
 ;;; Dependencies
 ;;
@@ -153,6 +160,7 @@ Depends on `semantic-dependency-include-path' for searching.  Always searches
 		;;  (semantic--tag-get-property tag 'dependency-file)
 		(:override
 		 (save-excursion
+		   (require 'semantic/dep)
 		   (semantic-dependency-find-file-on-path
 		    tag-fname (semantic-tag-include-system-p tag))))
 		;; )
@@ -169,7 +177,7 @@ Depends on `semantic-dependency-include-path' for searching.  Always searches
       )))
 
 (make-obsolete-overload 'semantic-find-dependency
-                        'semantic-dependency-tag-file)
+                        'semantic-dependency-tag-file "23.2")
 
 ;;; PROTOTYPE FILE
 ;;
@@ -177,7 +185,6 @@ Depends on `semantic-dependency-include-path' for searching.  Always searches
 ;; corresponding .h file.  This routine attempts to find the
 ;; prototype file a given source file would be associated with.
 ;; This can be used by prototype manager programs.
-;;;###autoload
 (define-overloadable-function semantic-prototype-file (buffer)
   "Return a file in which prototypes belonging to BUFFER should be placed.
 Default behavior (if not overridden) looks for a token specifying the
@@ -194,12 +201,17 @@ file prototypes belong in."
            (match-string 1))))))
 
 (semantic-alias-obsolete 'semantic-find-nonterminal
-                         'semantic-go-to-tag)
+                         'semantic-go-to-tag "23.2")
 
 (semantic-alias-obsolete 'semantic-find-dependency
-                         'semantic-dependency-tag-file)
+                         'semantic-dependency-tag-file "23.2")
 
 
 (provide 'semantic/tag-file)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/tag-file"
+;; End:
 
 ;;; semantic/tag-file.el ends here

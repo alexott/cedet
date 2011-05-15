@@ -1,29 +1,37 @@
 ;;; semantic/analyze/fcn.el --- Analyzer support functions.
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
-;; Author: Eric M. Ludlam <eric@siege-engine.com>
+;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Analyzer support functions.
 
 ;;; Code:
+
+(require 'semantic)
+(eval-when-compile (require 'semantic/find))
+
+(declare-function semanticdb-typecache-merge-streams "semantic/db-typecache")
+(declare-function semantic-scope-find "semantic/scope")
+(declare-function semantic-scope-set-typecache "semantic/scope")
+(declare-function semantic-scope-tag-get-scope "semantic/scope")
 
 ;;; Small Mode Specific Options
 ;;
@@ -101,6 +109,7 @@ tags of TAGCLASS."
     ;;
     ;; 2)
     ;; It will also remove prototypes.
+    (require 'semantic/db-typecache)
     (setq sequence (semanticdb-typecache-merge-streams sequence nil))
 
     (if (< (length sequence) 2)
@@ -146,6 +155,27 @@ Almost all searches use the same arguments."
 
 ;;; Finding Datatypes
 ;;
+
+(define-overloadable-function semantic-analyze-dereference-metatype (type scope &optional type-declaration)
+  ;; todo - move into typecahe!!
+  "Return a concrete type tag based on input TYPE tag.
+A concrete type is an actual declaration of a memory description,
+such as a structure, or class.  A meta type is an alias,
+or a typedef in C or C++.  If TYPE is concrete, it
+is returned.  If it is a meta type, it will return the concrete
+type defined by TYPE.
+The default behavior always returns TYPE.
+Override functions need not return a real semantic tag.
+Just a name, or short tag will be ok.  It will be expanded here.
+SCOPE is the scope object with additional items in which to search for names."
+  (catch 'default-behavior
+    (let* ((ans-tuple (:override
+                       ;; Nothing fancy, just return type by default.
+                       (throw 'default-behavior (list type type-declaration))))
+           (ans-type (car ans-tuple))
+           (ans-type-declaration (cadr ans-tuple)))
+       (list (semantic-analyze-dereference-metatype-1 ans-type scope) ans-type-declaration))))
+
 ;; Finding a data type by name within a project.
 ;;
 (defun semantic-analyze-type-to-name (type)
@@ -180,6 +210,7 @@ Optional SCOPE represents a calculated scope in which the
 types might be found.  This can be nil.
 If NOMETADEREF, then do not dereference metatypes.  This is
 used by the analyzer debugger."
+  (require 'semantic/scope)
   (let ((name nil)
 	(typetag nil)
 	)
@@ -253,32 +284,13 @@ Optional argument TYPE-DECLARATION is how TYPE was found referenced."
 	))
     lasttype))
 
-(define-overloadable-function semantic-analyze-dereference-metatype (type scope &optional type-declaration)
-  ;; todo - move into typecahe!!
-  "Return a concrete type tag based on input TYPE tag.
-A concrete type is an actual declaration of a memory description,
-such as a structure, or class.  A meta type is an alias,
-or a typedef in C or C++.  If TYPE is concrete, it
-is returned.  If it is a meta type, it will return the concrete
-type defined by TYPE.
-The default behavior always returns TYPE.
-Override functions need not return a real semantic tag.
-Just a name, or short tag will be ok.  It will be expanded here.
-SCOPE is the scope object with additional items in which to search for names."
-  (catch 'default-behavior
-    (let* ((ans-tuple (:override
-                       ;; Nothing fancy, just return type by default.
-                       (throw 'default-behavior (list type type-declaration))))
-           (ans-type (car ans-tuple))
-           (ans-type-declaration (cadr ans-tuple)))
-       (list (semantic-analyze-dereference-metatype-1 ans-type scope) ans-type-declaration))))
-
 ;; @ TODO - the typecache can also return a stack of scope names.
 
 (defun semantic-analyze-dereference-metatype-1 (ans scope)
   "Do extra work after dereferencing a metatype.
 ANS is the answer from the language specific query.
 SCOPE is the current scope."
+  (require 'semantic/scope)
   ;; If ANS is a string, or if ANS is a short tag, we
   ;; need to do some more work to look it up.
   (if (stringp ans)

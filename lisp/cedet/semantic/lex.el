@@ -1,25 +1,24 @@
 ;;; semantic/lex.el --- Lexical Analyzer builder
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
+;;   2008, 2009, 2010  Free Software Foundation, Inc.
 
-;; X-CVS: $Id: semantic/lex.el,v 1.57 2010-03-26 22:18:03 xscript Exp $
+;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -98,7 +97,7 @@
 ;;
 ;;; Lexical Tables
 ;;
-;; There are tables of different symbols managed in semantic/lex.el.
+;; There are tables of different symbols managed in semantic-lex.el.
 ;; They are:
 ;;
 ;;   Lexical keyword table - A Table of symbols declared in a grammar
@@ -183,33 +182,9 @@
 ;; eliminate unneeded if statements to speed the lexer.
 
 (require 'semantic/fw)
+
 ;;; Code:
 
-;;; Compatibility
-;;
-(eval-and-compile
-  (if (not (fboundp 'with-syntax-table))
-
-;; Copied from Emacs 21 for compatibility with released Emacses.
-(defmacro with-syntax-table (table &rest body)
-  "With syntax table of current buffer set to a copy of TABLE, evaluate BODY.
-The syntax table of the current buffer is saved, BODY is evaluated, and the
-saved table is restored, even in case of an abnormal exit.
-Value is what BODY returns."
-  (let ((old-table (make-symbol "table"))
-	(old-buffer (make-symbol "buffer")))
-    `(let ((,old-table (syntax-table))
-	   (,old-buffer (current-buffer)))
-       (unwind-protect
-	   (progn
-	     (set-syntax-table (copy-syntax-table ,table))
-	     ,@body)
-	 (save-current-buffer
-	   (set-buffer ,old-buffer)
-	   (set-syntax-table ,old-table))))))
-
-))
-
 ;;; Semantic 2.x lexical analysis
 ;;
 (defun semantic-lex-map-symbols (fun table &optional property)
@@ -318,6 +293,10 @@ PROPERTY set."
     keywords))
 
 ;;; Inline functions:
+
+(defvar semantic-lex-unterminated-syntax-end-function)
+(defvar semantic-lex-analysis-bounds)
+(defvar semantic-lex-end-point)
 
 (defsubst semantic-lex-token-bounds (token)
   "Fetch the start and end locations of the lexical token TOKEN.
@@ -493,7 +472,6 @@ PROPERTY set."
 ;;; Lexical Analyzer framework settings
 ;;
 
-;;;###autoload
 (defvar semantic-lex-analyzer 'semantic-flex
   "The lexical analyzer used for a given buffer.
 See `semantic-lex' for documentation.
@@ -670,49 +648,20 @@ when finding unterminated syntax.")
 
 ;;; Interactive testing commands
 
+(declare-function semantic-elapsed-time "semantic")
+
 (defun semantic-lex-test (arg)
   "Test the semantic lexer in the current buffer.
 If universal argument ARG, then try the whole buffer."
   (interactive "P")
+  (require 'semantic)
   (let* ((start (current-time))
 	 (result (semantic-lex
 		  (if arg (point-min) (point))
 		  (point-max)))
 	 (end (current-time)))
     (message "Elapsed Time: %.2f seconds."
-	     (semantic.elapsed-time start end))
-    (pop-to-buffer "*Lexer Output*")
-    (require 'pp)
-    (erase-buffer)
-    (insert (pp-to-string result))
-    (goto-char (point-min))
-    ))
-
-(defun semantic-lex-test-full-depth (arg)
-  "Test the semantic lexer in the current buffer parsing through lists.
-Usually the lexer parses
-If universal argument ARG, then try the whole buffer."
-  (interactive "P")
-  (let* ((start (current-time))
-	 (result (semantic-lex
-		  (if arg (point-min) (point))
-		  (point-max)
-		  100))
-	 (end (current-time)))
-    (message "Elapsed Time: %.2f seconds."
-	     (semantic.elapsed-time start end))
-    (pop-to-buffer "*Lexer Output*")
-    (require 'pp)
-    (erase-buffer)
-    (insert (pp-to-string result))
-    (goto-char (point-min))
-    ))
-
-(defun semantic-lex-test-region (beg end)
-  "Test the semantic lexer in the current buffer.
-Analyze the area between BEG and END."
-  (interactive "r")
-  (let ((result (semantic-lex beg end)))
+	     (semantic-elapsed-time start end))
     (pop-to-buffer "*Lexer Output*")
     (require 'pp)
     (erase-buffer)
@@ -796,16 +745,16 @@ start position of the block, and STREAM is the list of tokens in that
 block.")
 
 (defvar semantic-lex-reset-hooks nil
-  "List of hooks major-modes use to reset lexical analyzers.
-Hooks are called with START and END values for the current lexical pass.
-Should be set with `add-hook'specifying a LOCAL option.")
+  "Abnormal hook used by major-modes to reset lexical analyzers.
+Hook functions are called with START and END values for the
+current lexical pass.  Should be set with `add-hook', specifying
+a LOCAL option.")
 
 ;; Stack of nested blocks.
 (defvar semantic-lex-block-stack nil)
 ;;(defvar semantic-lex-timeout 5
 ;;  "*Number of sections of lexing before giving up.")
 
-;;;###autoload
 (defmacro define-lex (name doc &rest analyzers)
   "Create a new lexical analyzer with NAME.
 DOC is a documentation string describing this analyzer.
@@ -858,7 +807,7 @@ analyzer which might mistake a number for as a symbol."
                     tmp-start (car semantic-lex-token-stream)))
 	   (setq tmp-start semantic-lex-end-point)
            (goto-char semantic-lex-end-point)
-	   ;;(when (> (semantic.elapsed-time starttime (current-time))
+	   ;;(when (> (semantic-elapsed-time starttime (current-time))
 	   ;;	    semantic-lex-timeout)
 	   ;;  (error "Timeout during lex at char %d" (point)))
 	   (semantic-throw-on-input 'lex)
@@ -995,6 +944,8 @@ This is an exhaustively robust check."
        (numberp (nth 2 thing)))
   )
 
+(eval-and-compile
+
 (defun semantic-lex-expand-block-specs (specs)
   "Expand block specifications SPECS into a Lisp form.
 SPECS is a list of (BLOCK BEGIN END) elements where BLOCK, BEGIN, and
@@ -1023,6 +974,7 @@ an END token class is encountered."
                        (car semantic-lex-token-stream))))
           (cond ,@(nreverse form))))
       )))
+)
 
 (defmacro semantic-lex-push-token (token &rest blockspecs)
   "Push TOKEN in the lexical analyzer token stream.
@@ -1056,7 +1008,6 @@ See also the function `semantic-lex-token'."
      (semantic-lex-token-start token)
      (semantic-lex-token-end   token))))
 
-;;;###autoload
 (defun semantic-lex-init ()
   "Initialize any lexical state for this buffer."
   (unless semantic-lex-comment-regex
@@ -1104,7 +1055,7 @@ Optional argument DEPTH is the depth to scan into lists."
 ;; Created analyzers become variables with the code associated with them
 ;; as the symbol value.  These analyzers are assembled into a lexer
 ;; to create new lexical analyzers.
-;;
+
 (defcustom semantic-lex-debug-analyzers nil
   "Non nil means to debug analyzers with syntax protection.
 Only in effect if `debug-on-error' is also non-nil."
@@ -1129,7 +1080,6 @@ Avoid using a large FORMS since it is duplicated."
 (put 'semantic-lex-unterminated-syntax-protection
      'lisp-indent-function 1)
 
-;;;###autoload
 (defmacro define-lex-analyzer (name doc condition &rest forms)
   "Create a single lexical analyzer NAME with DOC.
 When an analyzer is called, the current buffer and point are
@@ -1175,7 +1125,6 @@ This can be done by using `semantic-lex-push-token'."
 		      semantic-lex-token-stream)))
      ))
 
-;;;###autoload
 (defmacro define-lex-regex-analyzer (name doc regexp &rest forms)
   "Create a lexical analyzer with NAME and DOC that will match REGEXP.
 FORMS are evaluated upon a successful match.
@@ -1186,7 +1135,6 @@ See `define-lex-analyzer' for more about analyzers."
      ,@forms
      ))
 
-;;;###autoload
 (defmacro define-lex-simple-regex-analyzer (name doc regexp toksym
 						 &optional index
 						 &rest forms)
@@ -1208,7 +1156,6 @@ See `define-lex-analyzer' for more about analyzers."
 			  (match-end ,(or index 0))))
      ))
 
-;;;###autoload
 (defmacro define-lex-block-analyzer (name doc spec1 &rest specs)
   "Create a lexical analyzer NAME for paired delimiters blocks.
 It detects a paired delimiters block or the corresponding open or
@@ -1480,10 +1427,7 @@ Return either a paren token or a semantic list token depending on
 	;; to work properly.  Lets try and move over
 	;; whatever white space we matched to begin
 	;; with.
-	(skip-syntax-forward "-.'"
-			     (save-excursion
-			       (end-of-line)
-			       (point)))
+	(skip-syntax-forward "-.'" (point-at-eol))
       ;; We may need to back up so newlines or whitespace is generated.
       (if (bolp)
 	  (backward-char 1)))
@@ -1805,17 +1749,17 @@ If there is no error, then the last value of FORMS is returned."
 ;;
 ;; NOTE: DELETE THIS SOMEDAY SOON
 
-(semantic-alias-obsolete 'semantic-flex-start 'semantic-lex-token-start)
-(semantic-alias-obsolete 'semantic-flex-end 'semantic-lex-token-end)
-(semantic-alias-obsolete 'semantic-flex-text 'semantic-lex-token-text)
-(semantic-alias-obsolete 'semantic-flex-make-keyword-table 'semantic-lex-make-keyword-table)
-(semantic-alias-obsolete 'semantic-flex-keyword-p 'semantic-lex-keyword-p)
-(semantic-alias-obsolete 'semantic-flex-keyword-put 'semantic-lex-keyword-put)
-(semantic-alias-obsolete 'semantic-flex-keyword-get 'semantic-lex-keyword-get)
-(semantic-alias-obsolete 'semantic-flex-map-keywords 'semantic-lex-map-keywords)
-(semantic-alias-obsolete 'semantic-flex-keywords 'semantic-lex-keywords)
-(semantic-alias-obsolete 'semantic-flex-buffer 'semantic-lex-buffer)
-(semantic-alias-obsolete 'semantic-flex-list   'semantic-lex-list)
+(semantic-alias-obsolete 'semantic-flex-start 'semantic-lex-token-start "23.2")
+(semantic-alias-obsolete 'semantic-flex-end 'semantic-lex-token-end "23.2")
+(semantic-alias-obsolete 'semantic-flex-text 'semantic-lex-token-text "23.2")
+(semantic-alias-obsolete 'semantic-flex-make-keyword-table 'semantic-lex-make-keyword-table "23.2")
+(semantic-alias-obsolete 'semantic-flex-keyword-p 'semantic-lex-keyword-p "23.2")
+(semantic-alias-obsolete 'semantic-flex-keyword-put 'semantic-lex-keyword-put "23.2")
+(semantic-alias-obsolete 'semantic-flex-keyword-get 'semantic-lex-keyword-get "23.2")
+(semantic-alias-obsolete 'semantic-flex-map-keywords 'semantic-lex-map-keywords "23.2")
+(semantic-alias-obsolete 'semantic-flex-keywords 'semantic-lex-keywords "23.2")
+(semantic-alias-obsolete 'semantic-flex-buffer 'semantic-lex-buffer "23.2")
+(semantic-alias-obsolete 'semantic-flex-list   'semantic-lex-list "23.2")
 
 ;; This simple scanner uses the syntax table to generate a stream of
 ;; simple tokens of the form:
@@ -1863,8 +1807,8 @@ what syntax class CHAR has.")
 
 (defvar semantic-ignore-comments t
   "Default comment handling.
-t means to strip comments when flexing.  Nil means to keep comments
-as part of the token stream.")
+The value t means to strip comments when flexing; nil means
+to keep comments as part of the token stream.")
 (make-variable-buffer-local 'semantic-ignore-comments)
 
 (defvar semantic-flex-enable-newlines nil
@@ -1980,7 +1924,7 @@ return LENGTH tokens."
          ((looking-at "\\(\\sw\\|\\s_\\)+")
           (setq ts (cons (cons
                           ;; Get info on if this is a keyword or not
-                          (or (semantic-flex-keyword-p (match-string 0))
+                          (or (semantic-lex-keyword-p (match-string 0))
                               'symbol)
                           (cons (match-beginning 0) (match-end 0)))
                          ts)))
@@ -2050,10 +1994,7 @@ return LENGTH tokens."
                     ;; to work properly.  Lets try and move over
                     ;; whatever white space we matched to begin
                     ;; with.
-                    (skip-syntax-forward "-.'"
-                                         (save-excursion
-                                           (end-of-line)
-                                           (point)))
+                    (skip-syntax-forward "-.'" (point-at-eol))
                   ;;(forward-comment 1)
                   ;; Generate newline token if enabled
                   (if (and semantic-flex-enable-newlines
@@ -2096,5 +2037,10 @@ return LENGTH tokens."
     (nreverse ts)))
 
 (provide 'semantic/lex)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/lex"
+;; End:
 
 ;;; semantic/lex.el ends here

@@ -1,26 +1,25 @@
 ;;; semantic/format.el --- Routines for formatting tags
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008,
+;;   2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -35,13 +34,15 @@
 
 ;;; Code:
 (eval-when-compile (require 'font-lock))
-(require 'semantic/tag)
+(require 'semantic)
+(require 'semantic/tag-ls)
 (require 'ezimage)
+
+(eval-when-compile (require 'semantic/find))
 
 ;;; Tag to text overload functions
 ;;
 ;; abbreviations, prototypes, and coloring support.
-;;;###autoload
 (defvar semantic-format-tag-functions
   '(semantic-format-tag-name
     semantic-format-tag-canonical-name
@@ -65,10 +66,6 @@ would claim as a parent.
 COLOR indicates that the generated text should be colored using
 `font-lock'.")
 
-;;;###autoload
-(semantic-varalias-obsolete 'semantic-token->text-functions
-			    'semantic-format-tag-functions)
-;;;###autoload
 (defvar semantic-format-tag-custom-list
   (append '(radio)
 	  (mapcar (lambda (f) (list 'const f))
@@ -76,9 +73,6 @@ COLOR indicates that the generated text should be colored using
 	  '(function))
   "A List used by customizable variables to choose a tag to text function.
 Use this variable in the :type field of a customizable variable.")
-
-(semantic-varalias-obsolete 'semantic-token->text-custom-list
-			    'semantic-format-tag-custom-list)
 
 (defcustom semantic-format-use-images-flag ezimage-use-images
   "Non-nil means semantic format functions use images.
@@ -123,17 +117,13 @@ is a symbol representing a face.
 Faces used are generated in `font-lock' for consistency, and will not
 be used unless font lock is a feature.")
 
-(semantic-varalias-obsolete 'semantic-face-alist
-			    'semantic-format-face-alist)
-
-
 
 ;;; Coloring Functions
 ;;
 (defun semantic--format-colorize-text (text face-class)
   "Apply onto TEXT a color associated with FACE-CLASS.
-FACE-CLASS is a tag type found in `semantic-face-alist'.  See this variable
-for details on adding new types."
+FACE-CLASS is a tag type found in `semantic-format-face-alist'.
+See that variable for details on adding new types."
   (if (featurep 'font-lock)
       (let ((face (cdr-safe (assoc face-class semantic-format-face-alist)))
 	    (newtext (concat text)))
@@ -141,13 +131,10 @@ for details on adding new types."
 	newtext)
     text))
 
-(make-obsolete 'semantic-colorize-text
-	       'semantic--format-colorize-text)
-
 (defun semantic--format-colorize-merge-text (precoloredtext face-class)
   "Apply onto PRECOLOREDTEXT a color associated with FACE-CLASS.
-FACE-CLASS is a tag type found in 'semantic-face-alist'.  See this
-variable for details on adding new types."
+FACE-CLASS is a tag type found in `semantic-formatface-alist'.
+See that variable for details on adding new types."
   (let ((face (cdr-safe (assoc face-class semantic-format-face-alist)))
 	(newtext (concat precoloredtext))
 	)
@@ -192,8 +179,6 @@ COLOR specifies if color should be used."
     ))
 
 ;;; Data Type
-;;
-;;;###autoload
 (define-overloadable-function semantic-format-tag-type (tag color)
   "Convert the data type of TAG to a string usable in tag formatting.
 It is presumed that TYPE is a string or semantic tag.")
@@ -228,7 +213,6 @@ Argument COLOR specifies to colorize the text."
 ;;; Abstract formatting functions
 ;;
 
-;;;###autoload
 (defun semantic-format-tag-prin1 (tag &optional parent color)
   "Convert TAG to a string that is the print name for TAG.
 PARENT and COLOR are ignored."
@@ -280,6 +264,8 @@ Optional argument COLOR means highlight the prototype with font-lock colors."
 	(setq name (semantic--format-colorize-text name (semantic-tag-class tag))))
     name))
 
+(declare-function semantic-go-to-tag "semantic/tag-file")
+
 (defun semantic--format-tag-parent-tree (tag parent)
   "Under Consideration.
 
@@ -297,6 +283,7 @@ local definitions."
     ;; is nil because there isn't one.
     (setq parent (or (semantic-tag-function-parent tag)
 		     (save-excursion
+		       (require 'semantic/tag-file)
 		       (semantic-go-to-tag tag)
 		       (semantic-current-tag-parent)))))
   (when (stringp parent)
@@ -344,7 +331,6 @@ Optional argument COLOR means highlight the prototype with font-lock colors."
 	    (semantic-format-tag-name tag parent color))
     ))
 
-;;;###autoload
 (define-overloadable-function semantic-format-tag-abbreviate (tag &optional parent color)
   "Return an abbreviated string describing TAG.
 The abbreviation is to be short, with possible symbols indicating
@@ -382,10 +368,6 @@ This is a simple C like default."
     (setq str (concat prefix name suffix))
     str))
 
-;; Semantic 1.2.x had this misspelling.  Keep it for backwards compatibiity.
-(semantic-alias-obsolete
- 'semantic-summerize-nonterminal 'semantic-format-tag-summarize)
-
 ;;;###autoload
 (define-overloadable-function semantic-format-tag-summarize (tag &optional parent color)
   "Summarize TAG in a reasonable way.
@@ -407,7 +389,6 @@ Optional argument COLOR means highlight the prototype with font-lock colors."
 	(setq label (semantic--format-colorize-text label 'label)))
     (concat label ": " proto)))
 
-;;;###autoload
 (define-overloadable-function semantic-format-tag-summarize-with-file (tag &optional parent color)
   "Like `semantic-format-tag-summarize', but with the file name.
 Optional argument PARENT is the parent type if TAG is a detail.
@@ -433,11 +414,12 @@ Optional argument COLOR means highlight the prototype with font-lock colors."
 	(setq file (semantic--format-colorize-text file 'label)))
       (concat file ": " proto))))
 
-;;;###autoload
 (define-overloadable-function semantic-format-tag-short-doc (tag &optional parent color)
   "Display a short form of TAG's documentation. (Comments, or docstring.)
 Optional argument PARENT is the parent type if TAG is a detail.
 Optional argument COLOR means highlight the prototype with font-lock colors.")
+
+(declare-function semantic-documentation-for-tag "semantic/doc")
 
 (defun semantic-format-tag-short-doc-default (tag &optional parent color)
   "Display a short form of TAG's documentation.  (Comments, or docstring.)
@@ -455,6 +437,7 @@ Optional argument COLOR means highlight the prototype with font-lock colors."
 	(setq buf (find-file-noselect fname)))
       (setq doc (semantic-tag-docstring tag buf)))
     (when (not doc)
+      (require 'semantic/doc)
       (setq doc (semantic-documentation-for-tag tag))
       )
     (setq doc
@@ -658,7 +641,6 @@ COLOR indicates if it should be colorized."
     (if str
 	(concat semantic-uml-colon-string str))))
 
-;;;###autoload
 (define-overloadable-function semantic-format-tag-uml-abbreviate (tag &optional parent color)
   "Return a UML style abbreviation for TAG.
 Optional argument PARENT is the parent type if TAG is a detail.
@@ -681,7 +663,6 @@ Optional argument COLOR means highlight the prototype with font-lock colors."
 	(setq text (semantic--format-uml-post-colorize text tag parent)))
     text))
 
-;;;###autoload
 (define-overloadable-function semantic-format-tag-uml-prototype (tag &optional parent color)
   "Return a UML style prototype for TAG.
 Optional argument PARENT is the parent type if TAG is a detail.
@@ -713,7 +694,6 @@ Optional argument COLOR means highlight the prototype with font-lock colors."
     text
     ))
 
-;;;###autoload
 (define-overloadable-function semantic-format-tag-uml-concise-prototype (tag &optional parent color)
   "Return a UML style concise prototype for TAG.
 Optional argument PARENT is the parent type if TAG is a detail.
@@ -731,66 +711,13 @@ Optional argument COLOR means highlight the prototype with font-lock colors."
     (setq text (concat prot cp type))
     (if color
 	(setq text (semantic--format-uml-post-colorize text tag parent)))
-    text
-    ))
-
-
-;;; Test routines
-;;
-(defun semantic-test-all-format-tag-functions (&optional arg)
-  "Test all outputs from `semantic-format-tag-functions'.
-Output is generated from the function under `point'.
-Optional argument ARG specifies not to use color."
-  (interactive "P")
-  (semantic-fetch-tags)
-  (let* ((tag (semantic-current-tag))
-	 (par (semantic-current-tag-parent))
-	 (fns semantic-format-tag-functions))
-    (with-output-to-temp-buffer "*format-tag*"
-      (princ "Tag->format function tests:")
-      (while fns
-	(princ "\n")
-	(princ (car fns))
-	(princ ":\n ")
-	(let ((s (funcall (car fns) tag par (not arg))))
-	  (save-excursion
-	    (set-buffer "*format-tag*")
-	    (goto-char (point-max))
-	    (insert s)))
-	(setq fns (cdr fns))))
-      ))
-
-
-;;; Compatibility and aliases
-;;
-(semantic-alias-obsolete 'semantic-prin1-nonterminal
-			 'semantic-format-tag-prin1)
-
-(semantic-alias-obsolete 'semantic-name-nonterminal
-			 'semantic-format-tag-name)
-
-(semantic-alias-obsolete 'semantic-abbreviate-nonterminal
-			 'semantic-format-tag-abbreviate)
-
-(semantic-alias-obsolete 'semantic-summarize-nonterminal
-			 'semantic-format-tag-summarize)
-
-(semantic-alias-obsolete 'semantic-prototype-nonterminal
-			 'semantic-format-tag-prototype)
-
-(semantic-alias-obsolete 'semantic-concise-prototype-nonterminal
-			 'semantic-format-tag-concise-prototype)
-
-(semantic-alias-obsolete 'semantic-uml-abbreviate-nonterminal
-			 'semantic-format-tag-uml-abbreviate)
-
-(semantic-alias-obsolete 'semantic-uml-prototype-nonterminal
-			 'semantic-format-tag-uml-prototype)
-
-(semantic-alias-obsolete 'semantic-uml-concise-prototype-nonterminal
-			 'semantic-format-tag-uml-concise-prototype)
-
+    text))
 
 (provide 'semantic/format)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/format"
+;; End:
 
 ;;; semantic/format.el ends here

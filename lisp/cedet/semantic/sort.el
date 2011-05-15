@@ -1,26 +1,25 @@
 ;;; semantic/sort.el --- Utilities for sorting and re-arranging tag tables.
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007,
+;;; 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semantic is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -32,12 +31,12 @@
 ;; Originally written in semantic/util.el
 ;;
 
-(require 'assoc)
 (require 'semantic)
-(require 'semantic/db)
 (eval-when-compile
-  (require 'semantic/find)
-  (require 'semantic/db-find))
+  (require 'semantic/find))
+
+(declare-function semanticdb-find-tags-external-children-of-type
+		  "semantic/db-find")
 
 ;;; Alphanumeric sorting
 ;;
@@ -93,7 +92,6 @@ each tag."
 	;; This nil is if A > B, but not =
 	nil))))
 
-;;;###autoload
 (defun semantic-sort-tags-by-name-increasing (tags)
   "Sort TAGS by name in increasing order with side effects.
 Return the sorted list."
@@ -101,7 +99,6 @@ Return the sorted list."
 	       (string-lessp (semantic-tag-name a)
 			     (semantic-tag-name b)))))
 
-;;;###autoload
 (defun semantic-sort-tags-by-name-decreasing (tags)
   "Sort TAGS by name in decreasing order with side effects.
 Return the sorted list."
@@ -109,7 +106,6 @@ Return the sorted list."
 	       (string-lessp (semantic-tag-name b)
 			     (semantic-tag-name a)))))
 
-;;;###autoload
 (defun semantic-sort-tags-by-type-increasing (tags)
   "Sort TAGS by type in increasing order with side effects.
 Return the sorted list."
@@ -117,7 +113,6 @@ Return the sorted list."
 	       (string-lessp (semantic-sort-tag-type a)
 			     (semantic-sort-tag-type b)))))
 
-;;;###autoload
 (defun semantic-sort-tags-by-type-decreasing (tags)
   "Sort TAGS by type in decreasing order with side effects.
 Return the sorted list."
@@ -125,7 +120,6 @@ Return the sorted list."
 	       (string-lessp (semantic-sort-tag-type b)
 			     (semantic-sort-tag-type a)))))
 
-;;;###autoload
 (defun semantic-sort-tags-by-name-increasing-ci (tags)
   "Sort TAGS by name in increasing order with side effects.
 Return the sorted list."
@@ -133,7 +127,6 @@ Return the sorted list."
 	       (semantic-string-lessp-ci (semantic-tag-name a)
 					 (semantic-tag-name b)))))
 
-;;;###autoload
 (defun semantic-sort-tags-by-name-decreasing-ci (tags)
   "Sort TAGS by name in decreasing order with side effects.
 Return the sorted list."
@@ -141,7 +134,6 @@ Return the sorted list."
 	       (semantic-string-lessp-ci (semantic-tag-name b)
 					 (semantic-tag-name a)))))
 
-;;;###autoload
 (defun semantic-sort-tags-by-type-increasing-ci (tags)
   "Sort TAGS by type in increasing order with side effects.
 Return the sorted list."
@@ -149,7 +141,6 @@ Return the sorted list."
 	       (semantic-string-lessp-ci (semantic-sort-tag-type a)
 					 (semantic-sort-tag-type b)))))
 
-;;;###autoload
 (defun semantic-sort-tags-by-type-decreasing-ci (tags)
   "Sort TAGS by type in decreasing order with side effects.
 Return the sorted list."
@@ -157,36 +148,15 @@ Return the sorted list."
 	       (semantic-string-lessp-ci (semantic-sort-tag-type b)
 					 (semantic-sort-tag-type a)))))
 
-;;;###autoload
 (defun semantic-sort-tags-by-name-then-type-increasing (tags)
   "Sort TAGS by name, then type in increasing order with side effects.
 Return the sorted list."
   (sort tags (lambda (a b) (semantic-tag-lessp-name-then-type a b))))
 
-;;;###autoload
 (defun semantic-sort-tags-by-name-then-type-decreasing (tags)
   "Sort TAGS by name, then type in increasing order with side effects.
 Return the sorted list."
   (sort tags (lambda (a b) (semantic-tag-lessp-name-then-type b a))))
-
-
-(semantic-alias-obsolete 'semantic-sort-tokens-by-name-increasing
-			 'semantic-sort-tags-by-name-increasing)
-(semantic-alias-obsolete 'semantic-sort-tokens-by-name-decreasing
-			 'semantic-sort-tags-by-name-decreasing)
-(semantic-alias-obsolete 'semantic-sort-tokens-by-type-increasing
-			 'semantic-sort-tags-by-type-increasing)
-(semantic-alias-obsolete 'semantic-sort-tokens-by-type-decreasing
-			 'semantic-sort-tags-by-type-decreasing)
-(semantic-alias-obsolete 'semantic-sort-tokens-by-name-increasing-ci
-			 'semantic-sort-tags-by-name-increasing-ci)
-(semantic-alias-obsolete 'semantic-sort-tokens-by-name-decreasing-ci
-			 'semantic-sort-tags-by-name-decreasing-ci)
-(semantic-alias-obsolete 'semantic-sort-tokens-by-type-increasing-ci
-			 'semantic-sort-tags-by-type-increasing-ci)
-(semantic-alias-obsolete 'semantic-sort-tokens-by-type-decreasing-ci
-			 'semantic-sort-tags-by-type-decreasing-ci)
-
 
 ;;; Unique
 ;;
@@ -196,7 +166,6 @@ Return the sorted list."
 ;; Useful for completion lists, or other situations where the
 ;; other data isn't as useful.
 
-;;;###autoload
 (defun semantic-unique-tag-table-by-name (tags)
   "Scan a list of TAGS, removing duplicate names.
 This must first sort the tags by name alphabetically ascending.
@@ -214,7 +183,6 @@ typecaching system, see `semanticdb-typecache-merge-streams'."
       )
     (nreverse uniq)))
 
-;;;###autoload
 (defun semantic-unique-tag-table (tags)
   "Scan a list of TAGS, removing duplicates.
 This must first sort the tags by position ascending.
@@ -292,7 +260,6 @@ To create new bins for an application augment
 `semantic-symbol->name-assoc-list-for-type-parts' in addition
 to setting this variable (locally in your function).")
 
-;;;###autoload
 (defun semantic-bucketize (tags &optional parent filter)
   "Sort TAGS into a group of buckets based on tag class.
 Unknown classes are placed in a Misc bucket.
@@ -348,7 +315,6 @@ may re-organize the list with side-effects."
 ;; external members, and bring them together in a cloned copy of the
 ;; class tag.
 ;;
-;;;###autoload
 (defvar semantic-orphaned-member-metaparent-type "class"
   "In `semantic-adopt-external-members', the type of 'type for metaparents.
 A metaparent is a made-up type semantic token used to hold the child list
@@ -365,7 +331,6 @@ a shallow copy of the token to be modified.  The second is the PARENT
 which is adopting TOKEN.  This function should return TOKEN (or a copy of it)
 which is then integrated into the revised token list.")
 
-;;;###autoload
 (defun semantic-adopt-external-members (tags)
   "Rebuild TAGS so that externally defined members are regrouped.
 Some languages such as C++ and CLOS permit the declaration of member
@@ -480,7 +445,7 @@ buckets with the bucket function."
 ;;
 ;; In order to adopt external children, we need a few overload methods
 ;; to enable the feature.
-;;
+
 ;;;###autoload
 (define-overloadable-function semantic-tag-external-member-parent (tag)
   "Return a parent for TAG when TAG is an external member.
@@ -498,18 +463,13 @@ include the default behavior, and merely extend your own."
   )
 
 (defun semantic-tag-external-member-parent-default (tag)
-  "Return the name of TAGs parent only if TAG is not defined in it's parent."
+  "Return the name of TAGs parent only if TAG is not defined in its parent."
   ;; Use only the extra spec because a type has a parent which
   ;; means something completely different.
   (let ((tp (semantic-tag-get-attribute tag :parent)))
     (when (stringp tp)
-      tp)
-    ))
+      tp)))
 
-(semantic-alias-obsolete 'semantic-nonterminal-external-member-parent
-			 'semantic-tag-external-member-parent)
-
-;;;###autoload
 (define-overloadable-function semantic-tag-external-member-p (parent tag)
   "Return non-nil if PARENT is the parent of TAG.
 TAG is an external member of PARENT when it is somehow tagged
@@ -531,13 +491,8 @@ include the default behavior, and merely extend your own."
   ;; means something completely different.
   (let ((tp (semantic-tag-external-member-parent tag)))
     (and (stringp tp)
-	 (string= (semantic-tag-name parent) tp))
-    ))
+	 (string= (semantic-tag-name parent) tp))))
 
-(semantic-alias-obsolete 'semantic-nonterminal-external-member-p
-			 'semantic-tag-external-member-p)
-
-;;;###autoload
 (define-overloadable-function semantic-tag-external-member-children (tag &optional usedb)
   "Return the list of children which are not *in* TAG.
 If optional argument USEDB is non-nil, then also search files in
@@ -564,8 +519,9 @@ include the default behavior, and merely extend your own."
 Optional argument USEDB specifies if the semantic database is used.
 See `semantic-tag-external-member-children' for details."
   (if (and usedb
-	   (fboundp 'semanticdb-minor-mode-p)
-	   (semanticdb-minor-mode-p))
+	   (require 'semantic/db-mode)
+	   (semanticdb-minor-mode-p)
+	   (require 'semantic/db-find))
       (let ((m (semanticdb-find-tags-external-children-of-type
 		(semantic-tag-name tag))))
 	(if m (apply #'append (mapcar #'cdr m))))
@@ -577,7 +533,6 @@ See `semantic-tag-external-member-children' for details."
      (current-buffer))
     ))
 
-;;;###autoload
 (define-overloadable-function semantic-tag-external-class (tag)
   "Return a list of real tags that faux TAG might represent.
 
@@ -594,7 +549,7 @@ likely derived, then this function is needed."
 (defun semantic-tag-external-class-default (tag)
   "Return a list of real tags that faux TAG might represent.
 See `semantic-tag-external-class' for details."
-  (if (and (fboundp 'semanticdb-minor-mode-p)
+  (if (and (require 'semantic/db-mode)
 	   (semanticdb-minor-mode-p))
       (let* ((semanticdb-search-system-databases nil)
 	     (m (semanticdb-find-tags-by-class
@@ -602,12 +557,13 @@ See `semantic-tag-external-class' for details."
 		 (semanticdb-find-tags-by-name (semantic-tag-name tag)))))
 	(semanticdb-strip-find-results m 'name))
     ;; Presumably, if the tag is faux, it is not local.
-    nil
-    ))
-
-(semantic-alias-obsolete 'semantic-nonterminal-external-member-children
-			 'semantic-tag-external-member-children)
+    nil))
 
 (provide 'semantic/sort)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/sort"
+;; End:
 
 ;;; semantic/sort.el ends here

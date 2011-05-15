@@ -1,27 +1,26 @@
 ;;; semantic/db-find.el --- Searching through semantic databases.
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008,
+;;   2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; Semanticdb is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;;
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
+
 ;;; Commentary:
 ;;
 ;; Databases of various forms can all be searched.
@@ -119,12 +118,17 @@
 (require 'semantic/db)
 (require 'semantic/db-ref)
 (eval-when-compile
-  (require 'semantic/find)
-  (require 'eieio)
-  )
+  (require 'semantic/find))
 
 ;;; Code:
-;;;###autoload
+
+(defvar data-debug-thing-alist)
+(declare-function data-debug-insert-stuff-list "data-debug")
+;;;(declare-function data-debug-insert-tag-list "adebug")
+(declare-function semantic-scope-reset-cache "semantic/scope")
+(declare-function semanticdb-typecache-notify-reset "semantic/db-typecache")
+(declare-function ede-current-project "ede")
+
 (defvar semanticdb-find-throttle-custom-list
   '(repeat (radio (const 'local)
 		  (const 'project)
@@ -192,6 +196,7 @@ This class will cache data derived during various searches.")
 
 (defmethod semantic-reset ((idx semanticdb-find-search-index))
   "Reset the object IDX."
+  (require 'semantic/scope)
   ;; Clear the include path.
   (oset idx include-path nil)
   (when (oref idx type-cache)
@@ -237,6 +242,7 @@ This class will cache data derived during various searches.")
 	   (let ((tab-idx (semanticdb-get-table-index tab)))
 	     ;; Not a full reset?
 	     (when (oref tab-idx type-cache)
+	       (require 'db-typecache)
 	       (semanticdb-typecache-notify-reset
 		(oref tab-idx type-cache)))
 	     )))
@@ -251,6 +257,7 @@ This class will cache data derived during various searches.")
 ;; These routines needed to be overloaded by specific language modes.
 ;; They are needed for translating an INCLUDE tag into a semanticdb
 ;; TABLE object.
+;;;###autoload
 (define-overloadable-function semanticdb-find-translate-path (path brutish)
   "Translate PATH into a list of semantic tables.
 Path translation involves identifying the PATH input argument
@@ -293,7 +300,6 @@ major mode, and your routine takes a long time, be sure to call
 so that it can be called from the idle work handler."
   )
 
-;;;###autoload
 (defun semanticdb-find-translate-path-default (path brutish)
   "Translate PATH into a list of semantic tables.
 If BRUTISH is non nil, return all tables associated with PATH.
@@ -466,7 +472,7 @@ a new path from the provided PATH."
 	     (semantic-refresh-tags-safe))
 	   (setq includetags (semantic-find-tags-included path)
 		 curtable (with-current-buffer path
-					  semanticdb-current-table)
+                            semanticdb-current-table)
 		 incfname (buffer-file-name path)))
 	  (t
 	   (setq includetags (semantic-find-tags-included path))
@@ -740,7 +746,7 @@ for details on how this list is derived."
   (semantic-fetch-tags)
   (require 'data-debug)
   (let* ((semanticdb-find-default-throttle
-	  (if (featurep 'semanticdb-find)
+	  (if (featurep 'semantic/db-find)
 	      (remq 'unloaded semanticdb-find-default-throttle)
 	    nil))
 	 (start (current-time))
@@ -754,18 +760,6 @@ for details on how this list is derived."
     (data-debug-insert-stuff-list p "*")))
 
 ;;;###autoload
-(defun semanticdb-test-current-database-list ()
-  "Call and output results of `semanticdb-current-database-list'.
-Uses the `default-directory' to derive results."
-  (interactive)
-  (require 'data-debug)
-  (let ((start (current-time))
-	(p (semanticdb-current-database-list))
-	)
-    (data-debug-new-buffer "*SEMANTICDB Current Database List*")
-    
-    (data-debug-insert-stuff-list p "*")))
-
 (defun semanticdb-find-adebug-lost-includes ()
   "Translate the current path, then display the lost includes.
 Examines the variable `semanticdb-find-lost-includes'."
@@ -780,7 +774,7 @@ Examines the variable `semanticdb-find-lost-includes'."
 		 (buffer-name))
 
       (data-debug-new-buffer "*SEMANTICDB lost-includes ADEBUG*")
-      (data-debug-insert-tag-list lost "*")
+      ;; (data-debug-insert-tag-list lost "*")
       )))
 
 (defun semanticdb-find-adebug-insert-scanned-tag-cons (consdata prefix prebuttontext)
@@ -818,7 +812,6 @@ PREBUTTONTEXT is some text between prefix and the overlay button."
     )
   )
 
-;;;###autoload
 (defun semanticdb-find-adebug-scanned-includes ()
   "Translate the current path, then display the lost includes.
 Examines the variable `semanticdb-find-lost-includes'."
@@ -844,17 +837,6 @@ Examines the variable `semanticdb-find-lost-includes'."
       (data-debug-new-buffer "*SEMANTICDB scanned-includes ADEBUG*")
       (data-debug-insert-stuff-list scanned "*")
       )))
-
-;;; FIND results and edebug
-;;
-(eval-after-load "cedet-edebug"
-  '(progn
-     (cedet-edebug-add-print-override
-      '(semanticdb-find-results-p object)
-      '(semanticdb-find-result-prin1-to-string object) )
-     ))
-
-
 
 ;;; API Functions
 ;;
@@ -910,7 +892,6 @@ instead."
     ;;         recycling the input after calling this routine.
     (apply #'append (mapcar #'cdr results))))
 
-;;;###autoload
 (defun semanticdb-fast-strip-find-results (results)
   "Destructively strip a semanticdb search RESULTS to exclude objects.
 This makes it appear more like the results of a `semantic-find-' call.
@@ -918,7 +899,6 @@ This is like `semanticdb-strip-find-results', except the input list RESULTS
 will be changed."
   (apply #'nconc (mapcar #'cdr results)))
 
-;;;###autoload
 (defun semanticdb-find-results-p (resultp)
   "Non-nil if RESULTP is in the form of a semanticdb search result.
 This query only really tests the first entry in the list that is RESULTP,
@@ -944,7 +924,6 @@ but should be good enough for debugging assertions."
 	    (semanticdb-find-result-length result)
 	    (length result))))
 
-;;;###autoload
 (defun semanticdb-find-result-with-nil-p (resultp)
   "Non-nil of RESULTP is in the form of a semanticdb search result.
 The value nil is valid where a TABLE usually is, but only if the TAG
@@ -962,6 +941,7 @@ but should be good enough for debugging assertions."
 		      (null tag-to-test))))
 	 )))
 
+;;;###autoload
 (defun semanticdb-find-result-length (result)
   "Number of tags found in RESULT."
   (let ((count 0))
@@ -1039,7 +1019,6 @@ is still made current."
     ;; Return the tag.
     ans))
 
-;;;###autoload
 (defun semanticdb-find-result-mapc (fcn result)
   "Apply FCN to each element of find RESULT for side-effects only.
 FCN takes two arguments.  The first is a TAG, and the
@@ -1108,10 +1087,8 @@ Returns result."
     (semanticdb-find-log-move-to-end)))
 
 ;;; Semanticdb find API functions
-;;
 ;; These are the routines actually used to perform searches.
 ;;
-;;;###autoload
 (defun semanticdb-find-tags-collector (function &optional path find-file-match
 						brutish)
   "Collect all tags returned by FUNCTION over PATH.
@@ -1222,8 +1199,6 @@ associated with that tag should be loaded into a buffer."
    path find-file-match))
 
 ;;; Deep Searches
-;;
-;;;###autoload
 (defun semanticdb-deep-find-tags-by-name (name &optional path find-file-match)
   "Search for all tags matching NAME on PATH.
 Search also in all components of top level tags founds.
@@ -1235,7 +1210,6 @@ associated with that tag should be loaded into a buffer."
      (semanticdb-deep-find-tags-by-name-method table name tags))
    path find-file-match))
 
-;;;###autoload
 (defun semanticdb-deep-find-tags-by-name-regexp (regexp &optional path find-file-match)
   "Search for all tags matching REGEXP on PATH.
 Search also in all components of top level tags founds.
@@ -1247,7 +1221,6 @@ associated with that tag should be loaded into a buffer."
      (semanticdb-deep-find-tags-by-name-regexp-method table regexp tags))
    path find-file-match))
 
-;;;###autoload
 (defun semanticdb-deep-find-tags-for-completion (prefix &optional path find-file-match)
   "Search for all tags matching PREFIX on PATH.
 Search also in all components of top level tags founds.
@@ -1261,7 +1234,6 @@ associated with that tag should be loaded into a buffer."
 
 ;;; Brutish Search Routines
 ;;
-;;;###autoload
 (defun semanticdb-brute-deep-find-tags-by-name (name &optional path find-file-match)
   "Search for all tags matching NAME on PATH.
 See `semanticdb-find-translate-path' for details on PATH.
@@ -1274,7 +1246,6 @@ associated wit that tag should be loaded into a buffer."
      (semanticdb-deep-find-tags-by-name-method table name tags))
    path find-file-match t))
 
-;;;###autoload
 (defun semanticdb-brute-deep-find-tags-for-completion (prefix &optional path find-file-match)
   "Search for all tags matching PREFIX on PATH.
 See `semanticdb-find-translate-path' for details on PATH.
@@ -1287,7 +1258,6 @@ associated wit that tag should be loaded into a buffer."
      (semanticdb-deep-find-tags-for-completion-method table prefix tags))
    path find-file-match t))
 
-;;;###autoload
 (defun semanticdb-brute-find-tags-by-class (class &optional path find-file-match)
   "Search for all tags of CLASS on PATH.
 See `semanticdb-find-translate-path' for details on PATH.
@@ -1301,8 +1271,6 @@ associated with that tag should be loaded into a buffer."
    path find-file-match t))
 
 ;;; Specialty Search Routines
-;;
-;;;###autoload
 (defun semanticdb-find-tags-external-children-of-type
   (type &optional path find-file-match)
   "Search for all tags defined outside of TYPE w/ TYPE as a parent.
@@ -1314,7 +1282,6 @@ associated with that tag should be loaded into a buffer."
      (semanticdb-find-tags-external-children-of-type-method table type tags))
    path find-file-match))
 
-;;;###autoload
 (defun semanticdb-find-tags-subclasses-of-type
   (type &optional path find-file-match)
   "Search for all tags of class type defined that subclass TYPE.
@@ -1360,12 +1327,14 @@ Returns a table of all matching tags."
    "In TABLE, find all occurrences of tags whose parent is the PARENT type.
 Optional argument TAGS is a list of tags to search.
 Returns a table of all matching tags."
+   (require 'semantic/find)
    (semantic-find-tags-external-children-of-type parent (or tags (semanticdb-get-tags table))))
 
 (defmethod semanticdb-find-tags-subclasses-of-type-method ((table semanticdb-abstract-table) parent &optional tags)
    "In TABLE, find all occurrences of tags whose parent is the PARENT type.
 Optional argument TAGS is a list of tags to search.
 Returns a table of all matching tags."
+   (require 'semantic/find)
    (semantic-find-tags-subclasses-of-type parent (or tags (semanticdb-get-tags table))))
 
 ;;; Deep Searches
@@ -1394,5 +1363,10 @@ Return a table of all matching tags."
   (semantic-find-tags-for-completion prefix (semantic-flatten-tags-table (or tags (semanticdb-get-tags table)))))
 
 (provide 'semantic/db-find)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/db-find"
+;; End:
 
 ;;; semantic/db-find.el ends here
