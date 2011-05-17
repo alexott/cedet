@@ -85,6 +85,7 @@ test-$(1): $$($(1)_TEST_CODE)
 
 clean-$(1):
 	$(RM) $(RMFLAGS) $$($(1)_CODE)
+	$(RM) $(RMFLAGS) $$($(1)_BOVINE_CODE) $$($(1)_WISENT_CODE)
 	$(RM) $(RMFLAGS) $$($(1)_INFO)
 endef
 
