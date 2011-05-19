@@ -615,7 +615,7 @@ The file associated with OBJ does not need to be in a buffer."
     )
 
   ;; Update cross references
-  ;; (semanticdb-refresh-references table)
+  (semanticdb-refresh-references table)
   )
 
 (defmethod semanticdb-partial-synchronize ((table semanticdb-abstract-table)
@@ -645,8 +645,8 @@ The file associated with OBJ does not need to be in a buffer."
     )
 
   ;; Update cross references
-  ;;(when (semantic-find-tags-by-class 'include new-tags)
-  ;;  (semanticdb-refresh-references table))
+  (when (semantic-find-tags-by-class 'include new-tags)
+    (semanticdb-refresh-references table))
   )
 
 ;;; SAVE/LOAD
