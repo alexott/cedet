@@ -302,7 +302,7 @@ and returning that tag instead."
 
 (defmethod semanticdb-javap-resolve-proxy ((obj semanticdb-table-java-directory) tag)
   "For the javap table OBJ, Resolve the proxy in TAG."
-  (semanticdb-normalize-tags obj (list tag)))
+  (car (semanticdb-normalize-tags obj (list tag))))
 
 ;;; Typecache support
 ;;
@@ -468,7 +468,7 @@ and returning that tag instead."
 
 (defmethod semanticdb-javap-resolve-proxy ((obj semanticdb-table-jar-directory) tag)
   "For the javap table OBJ, Resolve the proxy in TAG."
-  (semanticdb-normalize-tags obj (list tag)))
+  (car (semanticdb-normalize-tags obj (list tag))))
 
 ;;; Typecache support
 ;;
@@ -714,7 +714,7 @@ JARFILE is the full filename to some jar file.
 QUALIFIEDCLASSFILE is a filename with package qualifiers
 to some class in JARFILE."
   (when (not (file-exists-p jarfile))
-    (error "javap: Cannot find %S" jarfile))
+    (error "Javap: Cannot find %S" jarfile))
   (let ((javapbuff (cedet-javap-get-class
 		    jarfile
 		    (file-name-sans-extension qualifiedclassfile))))
@@ -726,9 +726,12 @@ to some class in JARFILE."
       ;; Enable java mode and semantic parsing.
       (java-mode)
       (semantic-new-buffer-fcn)
-      ;; Return the tag table
-      (semantic-fetch-tags)
-      )))
+      ;;Get the tags, and strip out buffer information.
+      (let ((tagsout (semantic-fetch-tags)))
+	;; Changes tags in place.
+	(semantic--tag-unlink-list-from-buffer tagsout)
+	;; Return the tag table
+	tagsout))))
 
 
 (provide 'semanticdb-javap)
