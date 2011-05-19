@@ -89,7 +89,8 @@ represent jar files."
 	   (edepaths (when ede-object-project
 		       (ede-source-paths ede-object-project 'java-mode)))
 	   ;; Try EDE's classpath feature
-	   (edeclasspath (ede-java-classpath ede-object-project))
+	   (edeclasspath (when ede-object-project
+			   (ede-java-classpath ede-object-project)))
 
 	   ;; Try JDEE to see if it knows
 	   ;; (jdeep - what to put here??)
