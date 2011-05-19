@@ -103,6 +103,7 @@ NOTE: In process of obsoleting this."
      ("__const" . "const")
      ("__restrict" . "")
      ("__attribute_malloc__" . "")
+     ("__nonnull" . "")
      ("__wur" . "")
      ("__declspec" . ((spp-arg-list ("foo") 1 . 2)))
      ("__attribute__" . ((spp-arg-list ("foo") 1 . 2)))
@@ -1010,7 +1011,7 @@ now.
       ;; If we didn't have a list, but the return-list is non-empty,
       ;; that means we still need to take our existing tag, and glom
       ;; it onto our extracted type.
-      (if (consp return-list)
+      (if (and tag (consp return-list))
 	  (setq return-list (cons tag return-list)))
       )
 
@@ -1545,7 +1546,7 @@ SCOPE is not used, and TYPE-DECLARATION is used only if TYPE is not a typedef."
            (string= (semantic-tag-type type) "typedef"))
       (let ((dt (semantic-tag-get-attribute type :typedef)))
         (cond ((and (semantic-tag-p dt)
-                    (not (semantic-analyze-tag-prototype-p dt)))
+                    (not (semantic-tag-prototype-p dt)))
 	       ;; In this case, DT was declared directly.  We need
 	       ;; to clone DT and apply a filename to it.
 	       (let* ((fname (semantic-tag-file-name type))
