@@ -1,23 +1,23 @@
 ;;; srecode/texi.el --- Srecode texinfo support.
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -31,7 +31,6 @@
 
 ;;; Code:
 
-;;;###autoload
 (defun srecode-texi-add-menu (newnode)
   "Add an item into the current menu.  Add @node statements as well.
 Argument NEWNODE is the name of the new node."
@@ -150,7 +149,7 @@ Adds the following:
     ;; If the user didn't apply :tag, then do so now.
     (when (not tag)
       (srecode-semantic-handle-:tag dict))
-    
+
     (setq tag (srecode-dictionary-lookup-name dict "TAG"))
 
     (when (not tag)
@@ -161,7 +160,7 @@ Adds the following:
 
     ;; Extract the doc string
     (setq doc (semantic-documentation-for-tag tag))
-    
+
     (when doc
       (srecode-dictionary-set-value dict "TAGDOC"
 				    (srecode-texi-massage-to-texinfo
@@ -174,7 +173,6 @@ Adds the following:
 ;; Override some semantic and srecode features with texi specific
 ;; versions.
 
-;;;###autoload
 (define-mode-local-override semantic-insert-foreign-tag
   texinfo-mode (foreign-tag)
   "Insert FOREIGN-TAG from a foreign buffer in TAGFILE.
@@ -182,7 +180,6 @@ Assume TAGFILE is a source buffer, and create a documentation
 thingy from it using the `document' tool."
   (srecode-texi-insert-tag-as-doc foreign-tag))
 
-;;;###autoload
 (defun srecode-texi-insert-tag-as-doc (tag)
   "Insert TAG into the current buffer with SRecode."
   (when (not (eq major-mode 'texinfo-mode))
@@ -193,19 +190,9 @@ thingy from it using the `document' tool."
     ;; or put all that logic into srecode.
     (srecode-insert "declaration:function")))
 
+
 
 ;;; Texinfo mangling.
-;;
-(defun srecode-texi-massage-to-texinfo (tag buffer string)
-  "Massage TAG's documentation from BUFFER as STRING.
-This is to take advantage of TeXinfo's markup symbols."
-  (save-excursion
-    (if buffer 
-	(progn (set-buffer buffer)
-	       (srecode-texi-texify-docstring string))
-      ;; Else, no buffer, so lets do something else
-      (with-mode-local texinfo-mode
-	(srecode-texi-texify-docstring string)))))
 
 (define-overloadable-function srecode-texi-texify-docstring
   (docstring)
@@ -224,7 +211,7 @@ Takes a few very generic guesses as to what the formatting is."
       (let ((ms (match-string 2 docstring)))
 	;(when (eq mode 'emacs-lisp-mode)
 	;  (setq ms (downcase ms)))
-	
+
 	(when (not (or (string= ms "A")
 		       (string= ms "a")
 		       ))
@@ -236,6 +223,17 @@ Takes a few very generic guesses as to what the formatting is."
       (setq start (match-end 2)))
     ;; Return our modified doc string.
     docstring))
+
+(defun srecode-texi-massage-to-texinfo (tag buffer string)
+  "Massage TAG's documentation from BUFFER as STRING.
+This is to take advantage of TeXinfo's markup symbols."
+  (save-excursion
+    (if buffer
+	(progn (set-buffer buffer)
+	       (srecode-texi-texify-docstring string))
+      ;; Else, no buffer, so lets do something else
+      (with-mode-local texinfo-mode
+	(srecode-texi-texify-docstring string)))))
 
 (define-mode-local-override srecode-texi-texify-docstring emacs-lisp-mode
   (string)
@@ -281,4 +279,10 @@ that class.
   (srecode-texi-texify-docstring-default string))
 
 (provide 'srecode/texi)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/texi"
+;; End:
+
 ;;; srecode/texi.el ends here

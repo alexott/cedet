@@ -1,23 +1,23 @@
 ;;; srecode/dictionary.el --- Dictionary code for the semantic recoder.
 
-;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -27,9 +27,22 @@
 ;;; Code:
 
 ;;; CLASSES
-;;
 
-;;;###autoload
+(eval-when-compile (require 'cl))
+(require 'eieio)
+(require 'srecode)
+(require 'srecode/table)
+(eval-when-compile (require 'semantic))
+
+(declare-function srecode-compile-parse-inserter "srecode/compile")
+(declare-function srecode-dump-code-list "srecode/compile")
+(declare-function srecode-load-tables-for-mode "srecode/find")
+(declare-function srecode-template-table-in-project-p "srecode/find")
+(declare-function srecode-insert-code-stream "srecode/insert")
+(declare-function data-debug-new-buffer "data-debug")
+(declare-function data-debug-insert-object-slots "eieio-datadebug")
+(declare-function srecode-field "srecode/fields")
+
 (defclass srecode-dictionary ()
   ((namehash :initarg :namehash
 	     :documentation
@@ -53,7 +66,6 @@ Useful only while debugging.")
 Dictionaries are used to look up named symbols from
 templates to decide what to do with those symbols.")
 
-;;;###autoload
 (defclass srecode-dictionary-compound-value ()
   ()
   "A compound dictionary value.
@@ -66,7 +78,6 @@ provide a sequence of method implementations to convert into
 a string."
   :abstract t)
 
-;;;###autoload
 (defclass srecode-dictionary-compound-variable
   (srecode-dictionary-compound-value)
   ((value :initarg :value
@@ -120,6 +131,7 @@ Makes sure that :value is compiled."
 		   (setq comp (cons nval comp)))
 		  ((and (listp nval)
 			(equal (car nval) 'macro))
+		   (require 'srecode/compile)
 		   (setq comp (cons
 			       (srecode-compile-parse-inserter
 				(cdr nval)
@@ -134,7 +146,6 @@ Makes sure that :value is compiled."
 ;;; DICTIONARY METHODS
 ;;
 
-;;;###autoload
 (defun srecode-create-dictionary (&optional buffer-or-parent)
   "Create a dictionary for BUFFER.
 If BUFFER-OR-PARENT is not specified, assume a buffer, and
@@ -210,6 +221,7 @@ associated with a buffer or parent."
 TPL is an object representing a compiled template file."
   (when tpl
     (let ((tabs (oref tpl :tables)))
+      (require 'srecode/find) ; For srecode-template-table-in-project-p
       (while tabs
 	(when (srecode-template-table-in-project-p (car tabs))
 	  (let ((vars (oref (car tabs) variables)))
@@ -217,7 +229,7 @@ TPL is an object representing a compiled template file."
 	      (srecode-dictionary-set-value
 	       dict (car (car vars)) (cdr (car vars)))
 	      (setq vars (cdr vars)))))
-	(setq tabs (cdr tabs))))))
+  	(setq tabs (cdr tabs))))))
 
 
 (defmethod srecode-dictionary-set-value ((dict srecode-dictionary)
@@ -405,7 +417,7 @@ This function derives values for some special NAMEs, such as
   (if (not (slot-boundp dict 'namehash))
       nil
     ;; Get the value of this name from the dictionary or its parent
-    ;; unless the lookup should be non-recursive..
+    ;; unless the lookup should be non-recursive.
     (with-slots (namehash parent) dict
       (or (gethash name namehash)
 	  (and (not non-recursive)
@@ -452,12 +464,14 @@ standard out is a buffer, and using `insert'."
 				      dictionary)
   "Convert the compound dictionary variable value CP into a string.
 FUNCTION and DICTIONARY are as for the baseclass."
+  (require 'srecode/insert)
   (srecode-insert-code-stream (oref cp compiled) dictionary))
 
 
 (defmethod srecode-dump ((cp srecode-dictionary-compound-variable)
 			 &optional indent)
   "Display information about this compound value."
+  (require 'srecode/compile)
   (princ "# Compound Variable #\n")
   (let ((indent (+ 4 (or indent 0)))
 	(cmp (oref cp compiled))
@@ -471,7 +485,6 @@ FUNCTION and DICTIONARY are as for the baseclass."
 ;; instead of asking questions.  This provides the basics
 ;; behind this compound value.
 
-;;;###autoload
 (defclass srecode-field-value (srecode-dictionary-compound-value)
   ((firstinserter :initarg :firstinserter
 		  :documentation
@@ -489,6 +502,7 @@ inserted with a new editable field.")
 				     function
 				     dictionary)
   "Convert this field into an insertable string."
+  (require 'srecode/fields)
   ;; If we are not in a buffer, then this is not supported.
   (when (not (bufferp standard-output))
     (error "FIELDS invoked while inserting template to non-buffer"))
@@ -617,11 +631,12 @@ STATE is the current compiler state."
 ;;
 ;; Make a dictionary, and dump it's contents.
 
-;;;###autoload
 (defun srecode-adebug-dictionary ()
   "Run data-debug on this mode's dictionary."
   (interactive)
-  (require 'data-debug)
+  (require 'eieio-datadebug)
+  (require 'semantic)
+  (require 'srecode/find)
   (let* ((modesym major-mode)
 	 (start (current-time))
 	 (junk (or (progn (srecode-load-tables-for-mode modesym)
@@ -635,10 +650,10 @@ STATE is the current compiler state."
     (data-debug-new-buffer "*SRECODE ADEBUG*")
     (data-debug-insert-object-slots dict "*")))
 
-;;;###autoload
 (defun srecode-dictionary-dump ()
   "Dump a typical fabricated dictionary."
   (interactive)
+  (require 'srecode/find)
   (let ((modesym major-mode))
     ;; This load allows the dictionary access to inherited
     ;; and stacked dictionary entries.
@@ -692,4 +707,5 @@ STATE is the current compiler state."
   )
 
 (provide 'srecode/dictionary)
+
 ;;; srecode/dictionary.el ends here

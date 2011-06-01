@@ -1,21 +1,24 @@
-;;; srecode-compile --- Compilation of srecode template files.
+;;; srecode/compile --- Compilation of srecode template files.
 
-;; This file is not part of GNU Emacs.
+;; Copyright (C) 2005, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
-;; This is free software; you can redistribute it and/or modify
+;; Author: Eric M. Ludlam <zappo@gnu.org>
+;; Keywords: codegeneration
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -29,10 +32,14 @@
 ;; templates in a way that could be inserted later.
 
 (eval-when-compile (require 'cl))
-(require 'semantic/fw)
+(require 'semantic)
 (require 'eieio)
 (require 'eieio-base)
 (require 'srecode/table)
+(require 'srecode/dictionary)
+
+(declare-function srecode-template-inserter-newline-child-p "srecode/insert"
+		  t t)
 
 ;;; Code:
 
@@ -171,7 +178,6 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
 
 ;;;  TEMPLATE COMPILER
 ;;
-;;;###autoload
 (defun srecode-compile-file (fname)
   "Compile the templates from the file FNAME."
   (let ((peb (get-file-buffer fname)))
@@ -182,7 +188,7 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
 	(set-buffer peb))
       ;; Do the compile.
       (unless (semantic-active-p)
-        (semantic-new-buffer-fcn))
+	(semantic-new-buffer-fcn))
       (srecode-compile-templates)
       ;; Trash the buffer if we had to read it in.
       (if (not peb)
@@ -259,6 +265,7 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
 	    ;; variable belongs to a compound dictionary value.
 	    ;;
 	    ;; Create a compound dictionary value from "value".
+	    (require 'srecode/dictionary)
 	    (let ((cv (srecode-dictionary-compound-variable
 		       name :value value)))
 	      (setq vars (cons (cons name cv) vars)))
@@ -369,6 +376,7 @@ It is hard if the previous inserter is a newline object."
   (while (and comp (stringp (car comp)))
     (setq comp (cdr comp)))
   (or (not comp)
+      (require 'srecode/insert)
       (srecode-template-inserter-newline-child-p (car comp))))
 
 (defun srecode-compile-split-code (tag str STATE
@@ -640,5 +648,10 @@ Argument INDENT specifies the indentation level for the list."
   )
 
 (provide 'srecode/compile)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/compile"
+;; End:
 
 ;;; srecode/compile.el ends here

@@ -1,27 +1,27 @@
 ;;; srecode/document.el --- Documentation (comment) generation
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
-;; Routines for fabricating human readable text from function an
+;; Routines for fabricating human readable text from function and
 ;; variable names as base-text for function comments.  Document is not
 ;; meant to generate end-text for any function.  It is merely meant to
 ;; provide some useful base words and text, and as a framework for
@@ -37,33 +37,230 @@
 ;; Document has now been ported to srecode, using the semantic recoder
 ;; as the templating engine.
 
-(require 'srecode/semantic)
-(require 'srecode/insert)
+;; This file combines srecode/document.el and srecode/document-vars.el
+;; from the CEDET repository.
+
+(require 'srecode/args)
 (require 'srecode/dictionary)
 (require 'srecode/extract)
-(require 'srecode/args)
-(require 'srecode/document-vars)
+(require 'srecode/insert)
+(require 'srecode/semantic)
+
 (require 'semantic)
 (require 'semantic/tag)
 (require 'semantic/doc)
 (require 'pulse)
 
 ;;; Code:
+
 (defgroup document nil
   "File and tag browser frame."
   :group 'texinfo
-  :group 'srecode
-  )
+  :group 'srecode)
 
-;;;###autoload
-(eval-after-load "srecode-mode"
-  ;; Once SRecode mode is loaded, then lets add ourself to the keymap.
-  '(progn
-     (srecode-add-code-generator 'srecode-document-insert-comment
-				 "Comments"
-				 "C")
+(defcustom srecode-document-autocomment-common-nouns-abbrevs
+  '(
+    ("sock\\(et\\)?" . "socket")
+    ("addr\\(ess\\)?" . "address")
+    ("buf\\(f\\(er\\)?\\)?" . "buffer")
+    ("cur\\(r\\(ent\\)?\\)?" . "current")
+    ("dev\\(ice\\)?" . "device")
+    ("doc" . "document")
+    ("i18n" . "internationalization")
+    ("file" . "file")
+    ("line" . "line")
+    ("l10n" . "localization")
+    ("msg\\|message" . "message")
+    ("name" . "name")
+    ("next\\|nxt" . "next")
+    ("num\\(ber\\)?" . "number")
+    ("port" . "port")
+    ("host" . "host")
+    ("obj\\|object" . "object")
+    ("previous\\|prev" . "previous")
+    ("str\\(ing\\)?" . "string")
+    ("use?r" . "user")
+    ("\\(^\\|\\s-\\)id\\($\\|\\s-\\)" . "Identifier") ;complex cause ;common syllable
+    )
+  "List of common English abbreviations or full words.
+These are nouns (as opposed to verbs) for use in creating expanded
+versions of names.  This is an alist with each element of the form:
+ (MATCH . RESULT)
+MATCH is a regexp to match in the type field.
+RESULT is a string."
+  :group 'document
+  :type '(repeat (cons (string :tag "Regexp")
+		       (string :tag "Doc Text"))))
+
+(defcustom srecode-document-autocomment-function-alist
+  '(
+    ("abort" . "Aborts the")
+    ;; trick to get re-alloc and alloc to pair into one sentence.
+    ("realloc" . "moves or ")
+    ("alloc\\(ate\\)?" . "Allocates and initializes a new ")
+    ("clean" . "Cleans up the")
+    ("clobber" . "Removes")
+    ("close" . "Cleanly closes")
+    ("check" . "Checks the")
+    ("comp\\(are\\)?" . "Compares the")
+    ("create" . "Creates a new ")
+    ("find" . "Finds ")
+    ("free" . "Frees up space")
+    ("gen\\(erate\\)?" . "Generates a new ")
+    ("get\\|find" . "Looks for the given ")
+    ("gobble" . "Removes")
+    ("he?lp" . "Provides help for")
+    ("li?ste?n" . "Listens for ")
+    ("connect" . "Connects to ")
+    ("acc?e?pt" . "Accepts a ")
+    ("load" . "Loads in ")
+    ("match" . "Check that parameters match")
+    ("name" . "Provides a name which ")
+    ("new" . "Allocates a ")
+    ("parse" . "Parses the parameters and returns ")
+    ("print\\|display" . "Prints out")
+    ("read" . "Reads from")
+    ("reset" . "Resets the parameters and returns")
+    ("scan" . "Scans the ")
+    ("setup\\|init\\(iallize\\)?" . "Initializes the ")
+    ("select" . "Chooses the ")
+    ("send" . "Sends a")
+    ("re?c\\(v\\|ieves?\\)" . "Receives a ")
+    ("to" . "Converts ")
+    ("update" . "Updates the ")
+    ("wait" . "Waits for ")
+    ("write" . "Writes to")
+    )
+  "List of names to string match against the function name.
+This is an alist with each element of the form:
+ (MATCH . RESULT)
+MATCH is a regexp to match in the type field.
+RESULT is a string.
+
+Certain prefixes may always mean the same thing, and the same comment
+can be used as a beginning for the description.  Regexp should be
+lower case since the string they are compared to is downcased.
+A string may end in a space, in which case, last-alist is searched to
+see how best to describe what can be returned.
+Doesn't always work correctly, but that is just because English
+doesn't always work correctly."
+  :group 'document
+  :type '(repeat (cons (string :tag "Regexp")
+		       (string :tag "Doc Text"))))
+
+(defcustom srecode-document-autocomment-common-nouns-abbrevs
+  '(
+    ("sock\\(et\\)?" . "socket")
+    ("addr\\(ess\\)?" . "address")
+    ("buf\\(f\\(er\\)?\\)?" . "buffer")
+    ("cur\\(r\\(ent\\)?\\)?" . "current")
+    ("dev\\(ice\\)?" . "device")
+    ("file" . "file")
+    ("line" . "line")
+    ("msg\\|message" . "message")
+    ("name" . "name")
+    ("next\\|nxt" . "next")
+    ("port" . "port")
+    ("host" . "host")
+    ("obj\\|object" . "object")
+    ("previous\\|prev" . "previous")
+    ("str\\(ing\\)?" . "string")
+    ("use?r" . "user")
+    ("num\\(ber\\)?" . "number")
+    ("\\(^\\|\\s-\\)id\\($\\|\\s-\\)" . "Identifier") ;complex cause ;commen sylable
+    )
+  "List of common English abbreviations or full words.
+These are nouns (as opposed to verbs) for use in creating expanded
+versions of names.  This is an alist with each element of the form:
+ (MATCH . RESULT)
+MATCH is a regexp to match in the type field.
+RESULT is a string."
+  :group 'document
+  :type '(repeat (cons (string :tag "Regexp")
+		       (string :tag "Doc Text"))))
+
+(defcustom srecode-document-autocomment-return-first-alist
+  '(
+    ;; Static must be first in the list to provide the intro to the sentence
+    ("static" . "Locally defined function which ")
+    ("Bool\\|BOOL" . "Status of ")
+    )
+  "List of regexp matches for types.
+They provide a little bit of text when typing information is
+described.
+This is an alist with each element of the form:
+ (MATCH . RESULT)
+MATCH is a regexp to match in the type field.
+RESULT is a string."
+  :group 'document
+  :type '(repeat (cons (string :tag "Regexp")
+		       (string :tag "Doc Text"))))
+
+(defcustom srecode-document-autocomment-return-last-alist
+  '(
+    ("static[ \t\n]+struct \\([a-zA-Z0-9_]+\\)" . "%s")
+    ("struct \\([a-zA-Z0-9_]+\\)" . "%s")
+    ("static[ \t\n]+union \\([a-zA-Z0-9_]+\\)" . "%s")
+    ("union \\([a-zA-Z0-9_]+\\)" . "%s")
+    ("static[ \t\n]+enum \\([a-zA-Z0-9_]+\\)" . "%s")
+    ("enum \\([a-zA-Z0-9_]+\\)" . "%s")
+    ("static[ \t\n]+\\([a-zA-Z0-9_]+\\)" . "%s")
+    ("\\([a-zA-Z0-9_]+\\)" . "of type %s")
+    )
+  "List of regexps which provide the type of the return value.
+This is an alist with each element of the form:
+ (MATCH . RESULT)
+MATCH is a regexp to match in the type field.
+RESULT is a string, which can contain %s, which is replaced with
+`match-string' 1."
+  :group 'document
+  :type '(repeat (cons (string :tag "Regexp")
+		       (string :tag "Doc Text"))))
+
+(defcustom srecode-document-autocomment-param-alist
+  '( ("[Cc]txt" . "Context")
+     ("[Ii]d" . "Identifier of")
+     ("[Tt]ype" . "Type of")
+     ("[Nn]ame" . "Name of")
+     ("argc" . "Number of arguments")
+     ("argv" . "Argument vector")
+     ("envp" . "Environment variable vector")
      )
-)
+  "Alist of common variable names appearing as function parameters.
+This is an alist with each element of the form:
+ (MATCH . RESULT)
+MATCH is a regexp to match in the type field.
+RESULT is a string of text to use to describe MATCH.
+When one is encountered, document-insert-parameters will automatically
+place this comment after the parameter name."
+  :group 'document
+  :type '(repeat (cons (string :tag "Regexp")
+		       (string :tag "Doc Text"))))
+
+(defcustom srecode-document-autocomment-param-type-alist
+  '(("const" . "Constant")
+    ("void" . "Empty")
+    ("char[ ]*\\*" . "String ")
+    ("\\*\\*" . "Pointer to ")
+    ("\\*" . "Pointer ")
+    ("char[ ]*\\([^ \t*]\\|$\\)" . "Character")
+    ("int\\|long" . "Number of")
+    ("FILE" . "File of")
+    ("float\\|double" . "Value of")
+    ;; How about some X things?
+    ("Bool\\|BOOL" . "Flag")
+    ("Window" . "Window")
+    ("GC" . "Graphic Context")
+    ("Widget" . "Widget")
+    )
+  "Alist of input parameter types and strings describing them.
+This is an alist with each element of the form:
+ (MATCH . RESULT)
+MATCH is a regexp to match in the type field.
+RESULT is a string."
+  :group 'document
+  :type '(repeat (cons (string :tag "Regexp")
+		       (string :tag "Doc Text"))))
 
 ;;;###autoload
 (defun srecode-document-insert-comment ()
@@ -88,7 +285,7 @@ If the cursor is on a one line prototype, then insert post-fcn comments."
 
       ;; A declaration comment.  Find what it documents.
       (when (equal ctxt '("declaration" "comment"))
-	
+
 	;; If we are on a one line tag/comment, go to that fcn.
 	(if (save-excursion (back-to-indentation)
 			    (semantic-current-tag))
@@ -119,7 +316,7 @@ If the cursor is on a one line prototype, then insert post-fcn comments."
 	;; header??
 
 	(let ((title (read-string "Section Title (RET to skip): ")))
-	  
+
 	  (when (and (stringp title) (not (= (length title) 0)))
 	    (srecode-document-insert-section-comment title)))
 
@@ -128,13 +325,13 @@ If the cursor is on a one line prototype, then insert post-fcn comments."
 (defun srecode-document-insert-section-comment (&optional title)
   "Insert a section comment with TITLE."
   (interactive "sSection Title: ")
-  
+
   (srecode-load-tables-for-mode major-mode)
   (srecode-load-tables-for-mode major-mode 'document)
 
   (if (not (srecode-table))
       (error "No template table found for mode %s" major-mode))
-  
+
   (let* ((dict (srecode-create-dictionary))
 	 (temp (srecode-template-get-table (srecode-table)
 					   "section-comment"
@@ -146,7 +343,7 @@ If the cursor is on a one line prototype, then insert post-fcn comments."
     (when title
       (srecode-dictionary-set-value
        dict "TITLE" title))
-    
+
     (srecode-insert-fcn temp dict)
     ))
 
@@ -172,7 +369,7 @@ It is assumed that the comment occurs just in front of FCN-IN."
 
   (if (not (srecode-table))
       (error "No template table found for mode %s" major-mode))
-  
+
   (let* ((dict (srecode-create-dictionary))
 	 (temp (srecode-template-get-table (srecode-table)
 					   "function-comment"
@@ -185,7 +382,7 @@ It is assumed that the comment occurs just in front of FCN-IN."
     (when (not fcn-in)
       (semantic-fetch-tags)
       (setq fcn-in (semantic-current-tag)))
-  
+
     (when (or (not fcn-in)
 	      (not (semantic-tag-of-class-p fcn-in 'function)))
       (error "No tag of class 'function to insert comment for"))
@@ -283,7 +480,7 @@ It is assumed that the comment occurs just after VAR-IN."
 
   (if (not (srecode-table))
       (error "No template table found for mode %s" major-mode))
-  
+
   (let* ((dict (srecode-create-dictionary))
 	 (temp (srecode-template-get-table (srecode-table)
 					   "variable-same-line-comment"
@@ -296,7 +493,7 @@ It is assumed that the comment occurs just after VAR-IN."
     (when (not var-in)
       (semantic-fetch-tags)
       (setq var-in (semantic-current-tag)))
-  
+
     (when (or (not var-in)
 	      (not (semantic-tag-of-class-p var-in 'variable)))
       (error "No tag of class 'variable to insert comment for"))
@@ -357,7 +554,7 @@ If there is only one tag in the region, complain."
 
   (if (not (srecode-table))
       (error "No template table found for mode %s" major-mode))
-  
+
   (let* ((dict (srecode-create-dictionary))
 	 (context "declaration")
 	 (temp-start nil)
@@ -435,7 +632,7 @@ If there is only one tag in the region, complain."
     (srecode-dictionary-set-value
      dict "GROUPNAME"
      (read-string "Name of group: "))
-    
+
     ;; Perform the insertion
     ;; Do the end first so we don't need to recalculate anything.
     ;;
@@ -561,7 +758,7 @@ Works with the following rules:
   1) convert all _ into spaces.
   2) inserts spaces between CamelCasing word breaks.
   3) expands noun names based on common programmer nouns.
-  
+
   This function is designed for variables, not functions.  This does
 not account for verb parts."
   (if (string= "" programmer)
@@ -633,55 +830,11 @@ not account for verb parts."
 	 (goto-char (semantic-tag-end tag))
 	 (< (current-column) 70))))
 
-;;; TESTS
-;;
-;;;###autoload
-(defun srecode-document-function-comment-extract-test ()
-  "Test old comment extraction.
-Dump out the extracted dictionary."
-  (interactive)
-
-  (srecode-load-tables-for-mode major-mode)
-  (srecode-load-tables-for-mode major-mode 'document)
-
-  (if (not (srecode-table))
-      (error "No template table found for mode %s" major-mode))
-  
-  (let* ((temp (srecode-template-get-table (srecode-table)
-					   "function-comment"
-					   "declaration"
-					   'document))
-	 (fcn-in (semantic-current-tag)))
-
-    (if (not temp)
-	(error "No templates for function comments"))
-
-    ;; Try to figure out the tag we want to use.
-    (when (or (not fcn-in)
-	      (not (semantic-tag-of-class-p fcn-in 'function)))
-      (error "No tag of class 'function to insert comment for"))
-
-    (let ((lextok (semantic-documentation-comment-preceeding-tag fcn-in 'lex))
-	  )
-
-      (when (not lextok)
-	(error "No comment to attempt an extraction"))
-
-      (let ((s (semantic-lex-token-start lextok))
-	    (e (semantic-lex-token-end lextok))
-	    (extract nil))
-
-	(pulse-momentary-highlight-region s e)
-
-	;; Extract text from the existing comment.
-	(setq extract (srecode-extract temp s e))
-
-	(with-output-to-temp-buffer "*SRECODE DUMP*"
-	  (princ "EXTRACTED DICTIONARY FOR ")
-	  (princ (semantic-tag-name fcn-in))
-	  (princ "\n--------------------------------------------\n")
-	  (srecode-dump extract))
-	))))
-
 (provide 'srecode/document)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/document"
+;; End:
+
 ;;; srecode/document.el ends here

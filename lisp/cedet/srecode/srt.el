@@ -1,23 +1,23 @@
 ;;; srecode/srt.el --- argument handlers for SRT files
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -25,10 +25,14 @@
 
 ;;; Code:
 
+(eval-when-compile (require 'cl))
+(require 'eieio)
+(require 'srecode/dictionary)
+(require 'srecode/insert)
+
 (defvar srecode-read-variable-name-history nil
   "History for `srecode-read-variable-name'.")
 
-;;;###autoload
 (defun srecode-read-variable-name (prompt &optional initial hist default)
   "Read in the name of a declared variable in the current SRT file.
 PROMPT is the prompt to use.
@@ -53,7 +57,6 @@ DEFAULT is the default if RET is hit."
 (defvar srecode-read-major-mode-history nil
   "History for `srecode-read-variable-name'.")
 
-;;;###autoload
 (defun srecode-read-major-mode-name (prompt &optional initial hist default)
   "Read in the name of a desired `major-mode'.
 PROMPT is the prompt to use.
@@ -66,7 +69,6 @@ DEFAULT is the default if RET is hit."
 		   nil initial (or hist 'srecode-read-major-mode-history))
   )
 
-;;;###autoload
 (defun srecode-semantic-handle-:srt (dict)
   "Add macros into the dictionary DICT based on the current SRT file.
 Adds the following:
@@ -97,8 +99,9 @@ MODE - The mode of this buffer.  If not declared yet, guess."
 
     (when mode
       (srecode-dictionary-set-value dict "MAJORMODE" mode))
-	  
+
     ))
 
 (provide 'srecode/srt)
+
 ;;; srecode/srt.el ends here

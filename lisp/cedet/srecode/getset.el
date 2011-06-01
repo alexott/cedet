@@ -1,23 +1,23 @@
-;;; srecode/getset.el --- 
+;;; srecode/getset.el --- Package for inserting new get/set methods.
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -25,18 +25,9 @@
 
 (require 'semantic)
 (require 'semantic/analyze)
+(require 'semantic/find)
 (require 'srecode/insert)
 (require 'srecode/dictionary)
-
-;;;###autoload
-(eval-after-load "srecode-mode"
-  ;; Once SRecode mode is loaded, then lets add ourself to the keymap.
-  '(progn
-     (srecode-add-code-generator 'srecode-insert-getset
-				 "Get/Set"
-				 "G")
-
-     ))
 
 ;;; Code:
 (defvar srecode-insert-getset-fully-automatic-flag nil
@@ -122,7 +113,7 @@ will be derived."
 
       ;; Step 3.5: Insert an initializer if needed.
       ;; ...
-      
+
 
       ;; Set up for the rest.
       )
@@ -255,7 +246,7 @@ INCLASS specifies if the cursor is already in CLASS or not."
   "Select a position for a new field for CLASS.
 If INCLASS is non-nil, then the cursor is already in the class
 and should not be moved during point selection."
-  
+
   ;; If we aren't in the class, get the cursor there, pronto!
   (when (not inclass)
 
@@ -291,7 +282,7 @@ Base selection on the field related to POINT."
       (goto-char point))
 
     (let ((field (semantic-current-tag-of-class 'variable)))
-      
+
       ;; If we get a field, make sure the user gets a chance to choose.
       (when field
 	(if srecode-insert-getset-fully-automatic-flag
@@ -318,7 +309,7 @@ Base selection on the field related to POINT."
   (save-excursion
     (when point
       (goto-char point))
-    
+
     (let ((tag (semantic-current-tag-of-class 'type)))
 
       (when (or (not tag)
@@ -367,5 +358,9 @@ Base selection on the field related to POINT."
 
 (provide 'srecode/getset)
 
-;;; srecode/getset.el ends here
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/getset"
+;; End:
 
+;;; srecode/getset.el ends here

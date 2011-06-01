@@ -1,23 +1,23 @@
 ;;; srecode/table.el --- Tables of Semantic Recoders
 
-;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -27,6 +27,11 @@
 
 (require 'eieio)
 (require 'eieio-base)
+(require 'mode-local)
+(require 'srecode)
+
+(declare-function srecode-load-tables-for-mode "srecode/find")
+(declare-function srecode-template-table-in-project-p "srecode/find")
 
 ;;; Code:
 
@@ -62,7 +67,7 @@ Format is from the `file-attributes' function.")
 If this is nil, then this template table belongs to a set of generic
 templates that can be used with no additional dictionary values.
 When it is non-nil, it is assumed the template macros need specialized
-Emacs Lisp code to fill in the dictoinary.")
+Emacs Lisp code to fill in the dictionary.")
    (priority :initarg :priority
 	     :type number
 	     :documentation
@@ -115,7 +120,6 @@ Tracks various lookup hash tables.")
    "Track template tables for a particular major mode.
 Tracks all the template-tables for a specific major mode.")
 
-;;;###autoload
 (defun srecode-get-mode-table (mode)
   "Get the SRecoder mode table for the major mode MODE.
 Optional argument SOFT indicates to not make a new one if a table
@@ -139,7 +143,7 @@ was not found."
 				      :tables nil)))
 	;; Save this new mode table in that mode's variable.
 	(eval `(setq-mode-local ,mode srecode-table ,new))
-	
+
 	new))))
 
 (defmethod srecode-mode-table-find ((mt srecode-mode-table) file)
@@ -147,7 +151,6 @@ was not found."
 Return nil if there was none."
   (object-assoc file 'file (oref mt tables)))
 
-;;;###autoload
 (defun srecode-mode-table-new (mode file &rest init)
   "Create a new template table for MODE in FILE.
 INIT are the initialization parameters for the new template table."
@@ -187,10 +190,10 @@ Use PREDICATE is the same as for the `sort' function."
 ;;
 ;; Dump out information about the current srecoder compiled templates.
 ;;
-;;;###autoload
 (defun srecode-dump-templates (mode)
   "Dump a list of the current templates for MODE."
   (interactive "sMode: ")
+  (require 'srecode/find)
   (let ((modesym (cond ((string= mode "")
 			major-mode)
 		       ((not (string-match "-mode" mode))
@@ -229,6 +232,7 @@ Use PREDICATE is the same as for the `sort' function."
     (princ "\nApplication: ")
     (princ (oref tab :application)))
   (when (oref tab :project)
+    (require 'srecode/find) ; For srecode-template-table-in-project-p
     (princ "\nProject Directory: ")
     (princ (oref tab :project))
     (when (not (srecode-template-table-in-project-p tab))
@@ -248,10 +252,9 @@ Use PREDICATE is the same as for the `sort' function."
     (while temp
       (srecode-dump (car temp))
       (setq temp (cdr temp))))
-  )  
+  )
 
 
 (provide 'srecode/table)
 
 ;;; srecode/table.el ends here
-

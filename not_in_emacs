@@ -62,3 +62,5 @@ etc/semantic/bovine/skel.el
 etc/semantic/bovine/skeleton.by
 etc/semantic/db-skel.el
 etc/semantic/example.el
+doc/cedet/srecode.texi
+etc/srecode/proj-test.srt

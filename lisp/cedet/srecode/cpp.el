@@ -1,38 +1,36 @@
 ;;; srecode/cpp.el --- C++ specific handlers for Semantic Recoder
 
-;; Copyright (C) 2007, 2009 Eric M. Ludlam
-;; Copyright (C) 2009, 2010 Jan Moringen
+;; Copyright (C) 2007, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;;         Jan Moringen <scymtym@users.sourceforge.net>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
-
 ;;; Commentary:
 ;;
 ;; Supply some C++ specific dictionary fillers and helpers
 
-
 ;;; Code:
-;;
 
+(require 'srecode)
+(require 'srecode/dictionary)
+(require 'srecode/semantic)
 (require 'semantic/tag)
 
-
 ;;; Customization
 ;;
 
@@ -109,21 +107,21 @@ special behavior for tag of classes include, using and function."
 	 (class (semantic-tag-class tag)))
 
     ;; Add additional information based on the class of the tag.
-    (case class
+    (cond
      ;;
      ;; INCLUDE
      ;;
-     (include
+     ((eq class 'include)
       ;; For include tags, we have to discriminate between system-wide
       ;; and local includes.
       (if (semantic-tag-include-system-p tag)
-	  (srecode-dictionary-show-section dict "SYSTEM")
+	(srecode-dictionary-show-section dict "SYSTEM")
 	(srecode-dictionary-show-section dict "LOCAL")))
 
      ;;
      ;; USING
      ;;
-     (using
+     ((eq class 'using)
       ;; Insert the subject (a tag) of the include statement as VALUE
       ;; entry into the dictionary.
       (let ((value-tag  (semantic-tag-get-attribute tag :value))
@@ -142,13 +140,13 @@ special behavior for tag of classes include, using and function."
      ;;
      ;; FUNCTION
      ;;
-     (function
+     ((eq class 'function)
       ;; @todo It would be nice to distinguish member functions from
       ;; free functions and only apply the const and pure modifiers,
       ;; when they make sense. My best bet would be
       ;; (semantic-tag-function-parent tag), but it is not there, when
       ;; the function is defined in the scope of a class.
-      (let ((member    t)
+      (let ((member t)
 	    (templates (semantic-tag-get-attribute tag :template))
 	    (modifiers (semantic-tag-modifiers tag)))
 
@@ -179,7 +177,7 @@ special behavior for tag of classes include, using and function."
      ;;
      ;; CLASS
      ;;
-     (type
+     ((eq class 'type)
       ;; For classes, add template parameters.
       (when (or (semantic-tag-of-type-p tag "class")
 		(semantic-tag-of-type-p tag "struct"))
@@ -209,4 +207,10 @@ special behavior for tag of classes include, using and function."
   )
 
 (provide 'srecode/cpp)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/cpp"
+;; End:
+
 ;;; srecode/cpp.el ends here

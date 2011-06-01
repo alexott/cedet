@@ -1,23 +1,23 @@
 ;;; srecode/map.el --- Manage a template file map
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -26,15 +26,17 @@
 ;; Emacs session with srecode.
 
 (require 'semantic)
+(require 'eieio-base)
+(require 'srecode)
 
 ;;; Code:
+
+;; The defcustom is given at the end of the file.
+(defvar srecode-map-load-path)
+
 (defun srecode-map-base-template-dir ()
   "Find the base template directory for SRecode."
-  (let* ((lib (locate-library "srecode.el"))
-	 (dir (file-name-directory lib)))
-    (expand-file-name "templates/" dir)
-    ))
-
+  (expand-file-name "srecode" data-directory))
 
 ;;; Current MAP
 ;;
@@ -42,7 +44,8 @@
 (defvar srecode-current-map nil
   "The current map for global SRecode templates.")
 
-(defcustom srecode-map-save-file (expand-file-name "~/.srecode/srecode-map")
+(defcustom srecode-map-save-file
+  (locate-user-emacs-file "srecode-map.el" ".srecode/srecode-map")
   "The save location for SRecode's map file.
 If the save file is nil, then the MAP is not saved between sessions."
   :group 'srecode
@@ -120,7 +123,7 @@ in the global map."
 Return non-nil if the MAP was changed."
   (let ((entry (srecode-map-entry-for-file map file))
 	(dirty t))
-    (cond 
+    (cond
      ;; It is already a match.. do nothing.
      ((and entry (eq (cdr entry) mode))
       (setq dirty nil))
@@ -214,7 +217,6 @@ Optional argument RESET forces a reset of the current map."
 
 (eval-when-compile (require 'data-debug))
 
-;;;###autoload
 (defun srecode-adebug-maps ()
   "Run ADEBUG on the output of `srecode-get-maps'."
   (interactive)
@@ -271,7 +273,7 @@ if that file is NEW, otherwise assume the mode has not changed."
 	(setq srecode-current-map (srecode-map "SRecode Map"))
 	(message "SRecode map created in non-save mode.")
 	)
-    
+
     ;; 1) Do we even have a MAP or save file?
     (when (and (not srecode-current-map)
 	       (not (file-exists-p srecode-map-save-file)))
@@ -302,6 +304,7 @@ if that file is NEW, otherwise assume the mode has not changed."
 	       (srecode-map "SRecode Map"
 			    :file srecode-map-save-file))))
       )
+
     )
 
   ;;
@@ -356,7 +359,7 @@ Return non-nil if the map changed."
 	  (insert-file-contents file nil nil nil t)
 	  ;; Force it to be ready to parse.
 	  (srecode-template-mode)
-	  (let ((semantic-init-hooks nil))
+	  (let ((semantic-init-hook nil))
 	    (semantic-new-buffer-fcn))
 	  )
 
@@ -405,6 +408,11 @@ Return non-nil if the map changed."
   :type '(repeat file)
   :set 'srecode-map-load-path-set)
 
-
 (provide 'srecode/map)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/map"
+;; End:
+
 ;;; srecode/map.el ends here

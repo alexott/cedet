@@ -1,32 +1,31 @@
 ;;; srecode/template.el --- SRecoder template language parser support.
 
-;;; Copyright (C) 2005, 2007, 2008 Eric M. Ludlam
+;; Copyright (C) 2005, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; This is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Parser setup for the semantic recoder template parser.
 
 ;;; Code:
-(require 'semantic/wisent)
 (require 'semantic)
-(require 'srecode/template.wy)
+(require 'semantic/ctxt)
+(require 'semantic/wisent)
+(require 'srecode/srt-wy)
 
 (define-mode-local-override semantic-tag-components
   srecode-template-mode (tag)
@@ -37,8 +36,11 @@
       (while dicts
 	(setq ans (append ans (cdr (car dicts))))
 	(setq dicts (cdr dicts)))
-      ans)      
+      ans)
     ))
+
+;; In semantic-imenu.el, not part of Emacs.
+(defvar semantic-imenu-summary-function)
 
 ;;;###autoload
 (defun srecode-template-setup-parser ()
@@ -63,9 +65,11 @@
    senator-step-at-tag-classes '(function variable)
    ))
 
-;;;###autoload
-(add-hook 'srecode-template-mode-hook 'srecode-template-setup-parser)
-
 (provide 'srecode/template)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/template"
+;; End:
 
 ;;; srecode/template.el ends here

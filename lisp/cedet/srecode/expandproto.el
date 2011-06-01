@@ -1,32 +1,36 @@
 ;;; srecode/expandproto.el --- Expanding prototypes.
 
-;; Copyright (C) 2007 Eric M. Ludlam
+;; Copyright (C) 2007, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Methods for expanding a prototype into an implementation.
 
+(require 'ring)
 (require 'semantic)
 (require 'semantic/analyze)
+(require 'semantic/senator)
 (require 'srecode/insert)
 (require 'srecode/dictionary)
+
+(declare-function semantic-brute-find-tag-by-attribute-value "semantic/find")
 
 ;;; Code:
 (defcustom srecode-expandproto-template-file-alist
@@ -78,6 +82,7 @@
       (when (and tag (semantic-tag-of-class-p tag 'type))
 	;; If the current class has prototype members, then
 	;; we will do the whole class!
+	(require 'semantic/find)
 	(if (semantic-brute-find-tag-by-attribute-value
 	     :prototype t
 	     (semantic-tag-type-members tag))
@@ -107,6 +112,7 @@
 		     (semantic-tag-get-attribute tag :prototype))
 		    (and
 		     (semantic-tag-of-class-p tag 'type)
+		     (require 'semantic/find)
 		     (semantic-brute-find-tag-by-attribute-value
 		      :prototype t
 		      (semantic-tag-type-members tag))))
@@ -117,5 +123,10 @@
     proto))
 
 (provide 'srecode/expandproto)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/expandproto"
+;; End:
 
 ;;; srecode/expandproto.el ends here

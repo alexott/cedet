@@ -1,28 +1,38 @@
-;;; srecode/template-mode.el --- Major mode for writing screcode macros
+;;; srecode/srt-mode.el --- Major mode for writing screcode macros
 
-;; This file is not part of GNU Emacs.
+;; Copyright (C) 2005, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
-;; This is free software; you can redistribute it and/or modify
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;;
 
+;; Originally named srecode-template-mode.el in the CEDET repository.
+
+(require 'srecode/compile)
+(require 'srecode/ctxt)
 (require 'srecode/template)
+
 (require 'semantic)
+(require 'semantic/analyze)
 (require 'semantic/wisent)
+(eval-when-compile
+  (require 'semantic/find))
+
+(declare-function srecode-create-dictionary "srecode/dictionary")
+(declare-function srecode-resolve-argument-list "srecode/insert")
 
 ;;; Code:
 (defvar srecode-template-mode-syntax-table
@@ -197,11 +207,10 @@ we can tell font lock about them.")
          ;; This puts _ & - as a word constituant,
          ;; simplifying our keywords significantly
          ((?_ . "w") (?- . "w"))))
-  (run-hooks 'srecode-template-mode-hook)
-  )
+  (run-hooks 'srecode-template-mode-hook))
 
 ;;;###autoload
-(add-to-list 'auto-mode-alist '("\\.srt$" . srecode-template-mode))
+(defalias 'srt-mode 'srecode-template-mode)
 
 ;;; Template Commands
 ;;
@@ -297,9 +306,6 @@ we can tell font lock about them.")
 
 
 ;;; Local Context Parsing.
-;;
-(eval-when-compile
-  (require 'semantic/analyze))
 
 (defun srecode-in-macro-p (&optional point)
   "Non-nil if POINT is inside a macro bounds.
@@ -429,6 +435,7 @@ Moves to the end of one named section."
 (define-mode-local-override semantic-get-local-arguments
   srecode-template-mode (&optional point)
   "Get local arguments from an SRecode template."
+  (require 'srecode/insert)
   (save-excursion
     (when point (goto-char (point)))
     (let* ((tag (semantic-current-tag))
@@ -734,30 +741,14 @@ When optional BUFFER is provided, search that buffer."
 
       (nreverse ans))))
 
-
-;;; MMM-Mode support ??
-;;(condition-case nil
-;;    (require 'mmm-mode)
-;;  (error (message "SRecoder Template Mode: No multi-mode not support.")))
-;;
-;;(defun srecode-template-add-submode ()
-;;  "Add a submode to the current template file using mmm-mode.
-;;If mmm-mode isn't available, then do nothing."
-;;  (if (not (featurep 'mmm-mode))
-;;      nil  ;; Nothing to do.
-;;    ;; Else, set up mmm-mode in this buffer.
-;;    (let ((submode (semantic-find-tags-by-name "mode")))
-;;      (if (not submode)
-;;	  nil  ;; Nothing to do.
-;;	;; Well, we have a mode, lets try turning on mmm-mode.
-;;
-;;	;; (mmm-mode-on)
-;;
-;;
-;;
-;;	))))
-;;
+(provide 'srecode/srt-mode)
 
-(provide 'srecode/template-mode)
+;; The autoloads in this file must go into the global loaddefs.el, not
+;; the srecode one, so that srecode-template-mode can be called from
+;; auto-mode-alist.
 
-;;; srecode/template-mode.el ends here
+;; Local variables:
+;; generated-autoload-load-name: "srecode/srt-mode"
+;; End:
+
+;;; srecode/srt-mode.el ends here

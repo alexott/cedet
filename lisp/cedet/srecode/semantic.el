@@ -1,23 +1,23 @@
 ;;; srecode/semantic.el --- Semantic specific extensions to SRecode.
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -32,10 +32,13 @@
 ;;   - <more goes here>
 
 ;;; Code:
+
 (require 'srecode/insert)
 (require 'srecode/dictionary)
-(require 'semantic/tag)
+(require 'semantic/find)
+(require 'semantic/format)
 (require 'semantic/senator)
+(require 'ring)
 
 
 ;;; The SEMANTIC TAG inserter
@@ -80,43 +83,6 @@ If this is nil, then `senator-tag-ring' is used.")
   (ring-ref senator-tag-ring 0))
 
 
-;;; ARGUMENT HANDLERS
-
-;;; :tag ARGUMENT HANDLING
-;;
-;; When a :tag argument is required, identify the current :tag,
-;; and apply its parts into the dictionary.
-;;;###autoload
-(defun srecode-semantic-handle-:tag (dict)
-  "Add macros into the dictionary DICT based on the current :tag."
-  ;; We have a tag, start adding "stuff" into the dictionary.
-  (let ((tag (or srecode-semantic-selected-tag
-		 (srecode-semantic-tag-from-kill-ring))))
-    (when (not tag)
-      "No tag for current template.  Use the semantic kill-ring.")
-    (srecode-semantic-apply-tag-to-dict
-     (srecode-semantic-tag (semantic-tag-name tag)
-			   :prime tag)
-     dict)))
-
-;;; :tagtype ARGUMENT HANDLING
-;;
-;; When a :tagtype argument is required, identify the current tag, of
-;; cf class 'type.  Apply those parameters to the dictionary.
-
-;;;###autoload
-(defun srecode-semantic-handle-:tagtype (dict)
-  "Add macros into the dictionary DICT based on a tag of class type at point.
-Assumes the cursor is in a tag of class type.  If not, throw an error."
-  (let ((typetag (or srecode-semantic-selected-tag
-		     (semantic-current-tag-of-class 'type))))
-    (when (not typetag)
-      (error "Cursor is not in a TAG of class 'type"))
-    (srecode-semantic-apply-tag-to-dict
-     typetag
-     dict)))
-
-
 ;;; TAG in a DICTIONARY
 ;;
 (defvar srecode-semantic-apply-tag-augment-hook nil
@@ -124,7 +90,6 @@ Assumes the cursor is in a tag of class type.  If not, throw an error."
 The hook is called with two arguments, the TAG and DICT
 to be augmented.")
 
-;;;###autoload
 (define-overload srecode-semantic-apply-tag-to-dict (tagobj dict)
   "Insert features of TAGOBJ into the dictionary DICT.
 TAGOBJ is an object of class `srecode-semantic-tag'.  This class
@@ -135,7 +100,6 @@ It is also likely to create macros for TYPE (data type), function arguments,
 variable default values, and other things."
   )
 
-;;;###autoload
 (defun srecode-semantic-apply-tag-to-dict-default (tagobj dict)
   "Insert features of TAGOBJ into dictionary DICT."
   ;; Store the sst into the dictionary.
@@ -223,10 +187,42 @@ variable default values, and other things."
 ;	   (srecode-semantic-tag (semantic-tag-name mem)
 ;				 :prime mem)
 ;	   subdict)))
-      )
-     )
-    ))
+      ))))
 
+
+;;; ARGUMENT HANDLERS
+
+;;; :tag ARGUMENT HANDLING
+;;
+;; When a :tag argument is required, identify the current :tag,
+;; and apply its parts into the dictionary.
+(defun srecode-semantic-handle-:tag (dict)
+  "Add macros into the dictionary DICT based on the current :tag."
+  ;; We have a tag, start adding "stuff" into the dictionary.
+  (let ((tag (or srecode-semantic-selected-tag
+		 (srecode-semantic-tag-from-kill-ring))))
+    (when (not tag)
+      "No tag for current template.  Use the semantic kill-ring.")
+    (srecode-semantic-apply-tag-to-dict
+     (srecode-semantic-tag (semantic-tag-name tag)
+			   :prime tag)
+     dict)))
+
+;;; :tagtype ARGUMENT HANDLING
+;;
+;; When a :tagtype argument is required, identify the current tag, of
+;; cf class 'type.  Apply those parameters to the dictionary.
+
+(defun srecode-semantic-handle-:tagtype (dict)
+  "Add macros into the dictionary DICT based on a tag of class type at point.
+Assumes the cursor is in a tag of class type.  If not, throw an error."
+  (let ((typetag (or srecode-semantic-selected-tag
+		     (semantic-current-tag-of-class 'type))))
+    (when (not typetag)
+      (error "Cursor is not in a TAG of class 'type"))
+    (srecode-semantic-apply-tag-to-dict
+     typetag
+     dict)))
 
 
 ;;; INSERT A TAG API
@@ -284,7 +280,6 @@ CTXT is the pre-calculated context."
 		))
     temp))
 
-;;;###autoload
 (defun srecode-semantic-insert-tag (tag &optional style-option
 					point-insert-fcn
 					&rest dict-entries)
@@ -387,7 +382,7 @@ as `function' will leave point where code might be inserted."
       (error "Cannot find template %s in %s for inserting tag %S"
 	     errtype top (semantic-format-tag-summarize tag)))
 
-    ;; Resolve arguments.
+    ;; Resolve arguments
     (let ((srecode-semantic-selected-tag tag))
       (srecode-resolve-arguments temp dict))
 

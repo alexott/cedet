@@ -1,23 +1,23 @@
 ;;;; srecode/find.el --- Tools for finding templates in the database.
 
-;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -26,12 +26,12 @@
 
 (require 'srecode/ctxt)
 (require 'srecode/table)
+(require 'srecode/map)
+
+(declare-function srecode-compile-file "srecode/compile")
+
 ;;; Code:
 
-;;; Basics
-;;
-
-;;;###autoload
 (defun srecode-table (&optional mode)
   "Return the currently active Semantic Recoder table for this buffer.
 Optional argument MODE specifies the mode table to use."
@@ -52,13 +52,13 @@ Optional argument MODE specifies the mode table to use."
 ;;
 ;; Template file tracker for between sessions.
 ;;
-;;;###autoload
 (defun srecode-load-tables-for-mode (mmode &optional appname)
   "Load all the template files for MMODE.
 Templates are found in the SRecode Template Map.
 See `srecode-get-maps' for more.
 APPNAME is the name of an application.  In this case,
 all template files for that application will be loaded."
+  (require 'srecode/compile)
   (let ((files
 	 (if appname
 	     (apply 'append
@@ -82,7 +82,7 @@ all template files for that application will be loaded."
 	;; No parent mode, all templates depend on the defaults being
 	;; loaded in, so get that in instead.
 	(srecode-load-tables-for-mode 'default appname)))
-    
+
     ;; Load in templates for our major mode.
     (dolist (f files)
       (let ((mt (srecode-get-mode-table mmode))
@@ -129,7 +129,6 @@ The APPLICATION argument is unused."
       ;; No context, perhaps a merged name?
       (gethash template-name (oref tab namehash)))))
 
-;;;###autoload
 (defmethod srecode-template-get-table ((tab srecode-mode-table)
 				       template-name &optional
 				       context application)
@@ -191,7 +190,6 @@ of a particular context."
 	(maphash hashfcn (oref tab namehash)))
       keyout)))
 
-;;;###autoload
 (defmethod srecode-template-get-table-for-binding
   ((tab srecode-mode-table) binding &optional context application)
   "Find in the template name in mode table TAB, the template with BINDING.
@@ -263,7 +261,6 @@ with `srecode-calculate-context'."
       ;; the prefix for the completing read
       (concat (nth 0 ctxt) ":"))))
 
-;;;###autoload
 (defun srecode-read-template-name (prompt &optional initial hist default)
   "Completing read for Semantic Recoder template names.
 PROMPT is used to query for the name of the template desired.
@@ -278,8 +275,6 @@ DEFAULT is what to use if the user presses RET."
 		     nil t def
 		     (or hist
 			 'srecode-read-template-name-history))))
-
-
 
 (provide 'srecode/find)
 

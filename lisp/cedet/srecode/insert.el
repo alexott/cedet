@@ -1,25 +1,23 @@
-;;; srecode-insert --- Insert srecode templates to an output stream.
+;;; srecode/insert.el --- Insert srecode templates to an output stream.
 
-;;; Copyright (C) 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2005, 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
-;; This file is not part of GNU Emacs.
+;; This file is part of GNU Emacs.
 
-;; This is free software; you can redistribute it and/or modify
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -35,8 +33,10 @@
 (require 'srecode/find)
 (require 'srecode/dictionary)
 (require 'srecode/args)
-(eval-when-compile
-  (require 'srecode/fields))
+
+(defvar srecode-template-inserter-point)
+(declare-function srecode-overlaid-activate "srecode/fields")
+(declare-function srecode-template-inserted-region "srecode/fields")
 
 ;;; Code:
 
@@ -63,7 +63,6 @@ NOTE: The field feature does not yet work with XEmacs."
 (defvar srecode-insertion-start-context nil
   "The context that was at point at the beginning of the template insertion.")
 
-;;;###autoload
 (defun srecode-insert-again ()
   "Insert the previously inserted template (by name) again."
   (interactive)
@@ -95,7 +94,6 @@ DICT-ENTRIES are additional dictionary values to add."
     ;; for this insertion step.
     ))
 
-;;;###autoload
 (defun srecode-insert-fcn (template dictionary &optional stream skipresolver)
   "Insert TEMPLATE using DICTIONARY into STREAM.
 Optional SKIPRESOLVER means to avoid refreshing the tag list,
@@ -681,11 +679,13 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
   )
 
 (defvar srecode-template-inserter-point-override nil
-  "When nil, perform normal point-positioning behavior. When the
-value is a cons cell (DEPTH . FUNCTION), the point inserter will
-call FUNCTION instead, unless the template nesting
-depth (measured by (length (oref srecode-template active))) is
-greater than DEPTH.")
+  "Point-positioning method for the SRecode template inserter.
+When nil, perform normal point-positioning behavior.
+When the value is a cons cell (DEPTH . FUNCTION), call FUNCTION
+instead, unless the template nesting depth, measured
+by (length (oref srecode-template active)), is greater than
+DEPTH.")
+
 
 (defclass srecode-template-inserter-point (srecode-template-inserter)
   ((key :initform ?^
@@ -911,7 +911,7 @@ this template instance."
 	  (setq active (cdr active)))
 	(when (not tmpl)
 	  ;; If it wasn't in this context, look to see if it
-	  ;; defines its own context
+	  ;; defines it's own context
 	  (setq tmpl (srecode-template-get-table (srecode-table)
 						 templatenamepart)))
 	)
@@ -1014,5 +1014,10 @@ template where a ^ inserter occurs."
     (call-next-method)))
 
 (provide 'srecode/insert)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/insert"
+;; End:
 
 ;;; srecode/insert.el ends here

@@ -1,39 +1,43 @@
 ;;; srecode/ctxt.el --- Derive a context from the source buffer.
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Manage context calculations for Semantic Recoder.
 ;;
 ;; SRecode templates are always bound to a context.  By calculating
-;; the current context, we can narrow down the selection of possible 
+;; the current context, we can narrow down the selection of possible
 ;; templates to something reasonable.
 ;;
 ;; Alternately, code here will find a context for templates that
 ;; require different pieces of code placed in multiple areas.
 
 (require 'semantic)
+(require 'semantic/tag-ls)
+
+(declare-function srecode-dictionary-show-section "srecode/dictionary")
+(declare-function srecode-dictionary-set-value "srecode/dictionary")
 
 ;;; Code:
-;;;###autoload
+
 (define-overload srecode-calculate-context ()
   "Calculate the context at the current point.
 The returned context is a list, with the top-most context first.
@@ -75,7 +79,7 @@ Assume that what we want to insert next is based on what is just
 before point.  If there is nothing, then assume it is whatever is
 after point."
   ;; @todo - ADD BOUNDS TO THE PREV/NEXT TAG SEARCH
-  ;;         thus classdecl "near" stuff cannot be 
+  ;;         thus classdecl "near" stuff cannot be
   ;;         outside the bounds of the type in question.
   (let ((near (semantic-find-tag-by-overlay-prev))
 	(prot nil)
@@ -171,13 +175,15 @@ This might add the following:
    PURE - show a section if a function is pure virtual.
    PARENT - The name of a parent type for functions.
    PROTECTION - Show a protection section, and what the protection is."
+  (require 'srecode/dictionary)
   (when template
 
     (let ((name (oref template object-name))
-	  (cc srecode-insertion-start-context)
+	  (cc (if (boundp 'srecode-insertion-start-context)
+		  srecode-insertion-start-context))
 	  ;(context (oref template context))
 	  )
-  
+
 ;      (when (and cc
 ;		 (null (string= (car cc) context))
 ;		 )
@@ -190,7 +196,7 @@ This might add the following:
 ;	;; at the end.
 ;	;;
 ;	;; @todo -
-;	
+;
 ;	)
 
       ;; The various context all have different features.
@@ -239,4 +245,3 @@ This might add the following:
 (provide 'srecode/ctxt)
 
 ;;; srecode/ctxt.el ends here
-

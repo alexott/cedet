@@ -34,3 +34,4 @@
 * lisp/cedet/semantic/fw.el: deleted lots of compatibility code
 * lisp/cedet/semantic/senator.el: have a close look
 * lisp/cedet/semantic/grammar*: fix generation of meta-grammar
+* lisp/cedet/srecode/fields.el: Deleted overlay compatibility code for xemacs

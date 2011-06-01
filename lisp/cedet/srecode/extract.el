@@ -1,23 +1,23 @@
 ;;; srecode/extract.el --- Extract content from previously inserted macro.
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -143,7 +143,7 @@ Uses STATE to maintain the current extraction state."
   "Return non-nil if this inserter can extract values."
   nil)
 
-(defmethod srecode-inserter-extract ((ins srecode-template-inserter) 
+(defmethod srecode-inserter-extract ((ins srecode-template-inserter)
 				     start end dict state)
   "Extract text from START/END and store in DICT.
 Return nil as this inserter will extract nothing."
@@ -155,12 +155,12 @@ Return nil as this inserter will extract nothing."
   "Return non-nil if this inserter can extract values."
   'later)
 
-(defmethod srecode-inserter-extract ((ins srecode-template-inserter-variable) 
+(defmethod srecode-inserter-extract ((ins srecode-template-inserter-variable)
 				     start end vdict state)
   "Extract text from START/END and store in VDICT.
 Return t if something was extracted.
 Return nil if this inserter doesn't need to extract anything."
-  (srecode-dictionary-set-value vdict 
+  (srecode-dictionary-set-value vdict
 				(oref ins :object-name)
 				(buffer-substring-no-properties
 				 start end)
@@ -173,7 +173,7 @@ Return nil if this inserter doesn't need to extract anything."
   "Return non-nil if this inserter can extract values."
   'now)
 
-(defmethod srecode-inserter-extract ((ins srecode-template-inserter-section-start) 
+(defmethod srecode-inserter-extract ((ins srecode-template-inserter-section-start)
 				     start end indict state)
   "Extract text from START/END and store in INDICT.
 Return the starting location of the first plain-text match.
@@ -190,7 +190,7 @@ Return nil if nothing was extracted."
 		  (oref ins template) subdict state)
 		 t)
 	     (error nil))
-      
+
       ;; Success means keep this subdict, and also make a new one for
       ;; the next iteration.
       (setq allsubdict (cons subdict allsubdict))
@@ -207,7 +207,7 @@ Return nil if nothing was extracted."
   "Return non-nil if this inserter can extract values."
   'now)
 
-(defmethod srecode-inserter-extract ((ins srecode-template-inserter-include) 
+(defmethod srecode-inserter-extract ((ins srecode-template-inserter-include)
 				     start end dict state)
   "Extract text from START/END and store in DICT.
 Return the starting location of the first plain-text match.
@@ -238,4 +238,5 @@ Return nil if nothing was extracted."
 
 
 (provide 'srecode/extract)
+
 ;;; srecode/extract.el ends here

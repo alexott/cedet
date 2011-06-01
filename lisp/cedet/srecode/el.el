@@ -1,23 +1,23 @@
-;;; srecode.el.el --- Emacs Lisp specialize arguments
+;;; srecode/el.el --- Emacs Lisp specific arguments
 
-;; Copyright (C) 2008 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -28,6 +28,10 @@
 
 ;;; Code:
 
+(require 'srecode)
+(require 'srecode/semantic)
+
+(declare-function semanticdb-brute-find-tags-by-class "semantic/db-find")
 
 ;;;###autoload
 (defun srecode-semantic-handle-:el (dict)
@@ -38,7 +42,7 @@ Adds the following:
 			(semantic-find-tags-by-class 'variable (current-buffer)))
 		)
 	 (common (try-completion "" names)))
-    
+
     (srecode-dictionary-set-value dict "PRENAME" common)
     ))
 
@@ -48,6 +52,7 @@ Adds the following:
 Adds the following:
   GROUP - The 'defgroup' name we guess you want for variables.
   FACEGROUP - The `defgroup' name you might want for faces."
+  (require 'semantic/db-find)
   (let ((groups (semanticdb-strip-find-results
 		 (semanticdb-brute-find-tags-by-class 'customgroup)))
 	(varg nil)
@@ -67,7 +72,7 @@ Adds the following:
 
     ;; Double check the facegroup.
     (setq faceg (or faceg varg))
-    
+
     ;; Setup some variables
     (srecode-dictionary-set-value dict "GROUP" (semantic-tag-name varg))
     (srecode-dictionary-set-value dict "FACEGROUP" (semantic-tag-name faceg))
@@ -94,13 +99,14 @@ Calls `srecode-semantic-apply-tag-to-dict-default' first."
      ((eq (semantic-tag-class tag) 'function)
       (if (semantic-tag-get-attribute tag :user-visible-flag)
 	  (srecode-dictionary-set-value dict "INTERACTIVE" "  (interactive)\n  ")
-	(srecode-dictionary-set-value dict "INTERACTIVE" ""))
-      )
-     
-      
-     )
-    ))
+	(srecode-dictionary-set-value dict "INTERACTIVE" ""))))))
 
 
-(provide 'srecode.el)
-;;; srecode.el.el ends here
+(provide 'srecode/el)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/el"
+;; End:
+
+;;; srecode/el.el ends here

@@ -1,27 +1,27 @@
 ;;; srecode/args.el --- Provide some simple template arguments
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
+;; This file is part of GNU Emacs.
 
-;; This program is distributed in the hope that it will be useful, but
-;; WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
+;; but WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with this program; see the file COPYING.  If not, write to
-;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
-;; Srecode teplates can accept arguments.  These areguments represent
+;; Srecode templates can accept arguments.  These arguments represent
 ;; sets of dictionary words that need to be derived.  This file contains
 ;; a set of simple arguments for srecode templates.
 
@@ -34,7 +34,6 @@
 ;; Using :blank means that the template should force blank lines
 ;; before and after the template, reguardless of where the insertion
 ;; is occurring.
-;;;###autoload
 (defun srecode-semantic-handle-:blank (dict)
   "Add macros into the dictionary DICT specifying blank line spacing.
 The wrapgap means make sure the first and last lines of the macro
@@ -48,7 +47,6 @@ do not contain any text from preceding or following text."
 ;;
 ;; When a :indent argument is required, the default is to indent
 ;; for the current major mode.
-;;;###autoload
 (defun srecode-semantic-handle-:indent (dict)
   "Add macros into the dictionary DICT for indentation."
   (srecode-dictionary-set-value dict "INDENT" t)
@@ -65,7 +63,6 @@ do not contain any text from preceding or following text."
 (defvar srecode-handle-region-when-non-active-flag nil
   "Non-nil means do region handling w/out the region being active.")
 
-;;;###autoload
 (defun srecode-semantic-handle-:region (dict)
   "Add macros into the dictionary DICT based on the current :region."
   ;; Only enable the region section if we can clearly show that
@@ -87,7 +84,6 @@ do not contain any text from preceding or following text."
 ;;
 ;; When a :user argument is required, fill the dictionary with
 ;; information about the current Emacs user.
-;;;###autoload
 (defun srecode-semantic-handle-:user (dict)
   "Add macros into the dictionary DICT based on the current :user."
   (srecode-dictionary-set-value dict "AUTHOR" (user-full-name))
@@ -101,7 +97,6 @@ do not contain any text from preceding or following text."
 ;;
 ;; When a :time argument is required, fill the dictionary with
 ;; information about the current Emacs time.
-;;;###autoload
 (defun srecode-semantic-handle-:time (dict)
   "Add macros into the dictionary DICT based on the current :time."
   ;; DATE Values
@@ -140,7 +135,6 @@ do not contain any text from preceding or following text."
 ;; When a :file argument is required, fill the dictionary with
 ;; information about the file Emacs is editing at the time of
 ;; insertion.
-;;;###autoload
 (defun srecode-semantic-handle-:file (dict)
   "Add macros into the dictionary DICT based on the current :file."
   (let* ((bfn (buffer-file-name))
@@ -167,7 +161,6 @@ do not contain any text from preceding or following text."
 ;;
 ;; When a :system argument is required, fill the dictionary with
 ;; information about the computer Emacs is running on.
-;;;###autoload
 (defun srecode-semantic-handle-:system (dict)
   "Add macros into the dictionary DICT based on the current :system."
     (srecode-dictionary-set-value dict "SYSTEMCONF" system-configuration)
@@ -181,7 +174,6 @@ do not contain any text from preceding or following text."
 ;;
 ;; When a :kill argument is required, fill the dictionary with
 ;; information about the current kill ring.
-;;;###autoload
 (defun srecode-semantic-handle-:kill (dict)
   "Add macros into the dictionary DICT based on the kill ring."
   (srecode-dictionary-set-value dict "KILL" (car kill-ring))
@@ -193,4 +185,3 @@ do not contain any text from preceding or following text."
 (provide 'srecode/args)
 
 ;;; srecode/args.el ends here
-

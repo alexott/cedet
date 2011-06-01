@@ -1,21 +1,23 @@
-;;; srecode/mode.el --- Minor-mode for managing and using SRecode templates
+;;; srecode/mode.el --- Minor mode for managing and using SRecode templates
 
-;; This file is not part of GNU Emacs.
+;; Copyright (C) 2008, 2009, 2010 Free Software Foundation, Inc.
 
-;; This is free software; you can redistribute it and/or modify
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
 
-;; This software is distributed in the hope that it will be useful,
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
 
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
@@ -28,22 +30,12 @@
 (require 'srecode/insert)
 (require 'srecode/find)
 (require 'srecode/map)
-(require 'semantic/senator)
+(require 'semantic/decorate)
 (require 'semantic/wisent)
 
-;;; Code:
-(defcustom global-srecode-minor-mode nil
-  "Non-nil in buffers with Semantic Recoder macro keybindings."
-  :group 'srecode
-  :type 'boolean
-  :require 'srecode-mode
-  :initialize 'custom-initialize-default
-  :set (lambda (sym val)
-         (global-srecode-minor-mode (if val 1 -1))))
+(eval-when-compile (require 'semantic/find))
 
-(defvar srecode-minor-mode nil
-  "Non-nil in buffers with Semantic Recoder macro keybindings.")
-(make-variable-buffer-local 'srecode-minor-mode)
+;;; Code:
 
 (defcustom srecode-minor-mode-hook nil
   "Hook run at the end of the function `srecode-minor-mode'."
@@ -74,19 +66,19 @@
 (defvar srecode-menu-bar
   (list
    "SRecoder"
-   (senator-menu-item
+   (semantic-menu-item
     ["Insert Template"
      srecode-insert
      :active t
      :help "Insert a template by name."
      ])
-   (senator-menu-item
+   (semantic-menu-item
     ["Insert Template Again"
      srecode-insert-again
      :active t
      :help "Run the same template as last time again."
      ])
-   (senator-menu-item
+   (semantic-menu-item
     ["Edit Template"
      srecode-edit
      :active t
@@ -96,7 +88,7 @@
    '( "Insert ..." :filter srecode-minor-mode-templates-menu )
    `( "Generate ..." :filter srecode-minor-mode-generate-menu )
    "---"
-    (senator-menu-item
+    (semantic-menu-item
      ["Customize..."
       (customize-group "srecode")
       :active t
@@ -104,25 +96,25 @@
       ])
    (list
     "Debugging Tools..."
-    (senator-menu-item
+    (semantic-menu-item
      ["Dump Template MAP"
       srecode-get-maps
       :active t
       :help "Calculate (if needed) and display the current template file map."
       ])
-    (senator-menu-item
+    (semantic-menu-item
      ["Dump Tables"
       srecode-dump-templates
       :active t
       :help "Dump the current template table."
       ])
-    (senator-menu-item
+    (semantic-menu-item
      ["Dump Dictionary"
       srecode-dictionary-dump
       :active t
-      :help "Calculate a dump a dictionary for point."
+      :help "Calculate and dump a dictionary for point."
       ])
-    (senator-menu-item
+    (semantic-menu-item
      ["Show Macro Help"
       srecode-macro-help
       :active t
@@ -151,7 +143,7 @@
   "Keymap for srecode minor mode.")
 
 ;;;###autoload
-(defun srecode-minor-mode (&optional arg)
+(define-minor-mode srecode-minor-mode
   "Toggle srecode minor mode.
 With prefix argument ARG, turn on if positive, otherwise off.  The
 minor mode can be turned on only if semantic feature is available and
@@ -159,16 +151,7 @@ the current buffer was set up for parsing.  Return non-nil if the
 minor mode is enabled.
 
 \\{srecode-mode-map}"
-  (interactive
-   (list (or current-prefix-arg
-             (if srecode-minor-mode 0 1))))
-  ;; Flip the bits.
-  (setq srecode-minor-mode
-        (if arg
-            (>
-             (prefix-numeric-value arg)
-             0)
-          (not srecode-minor-mode)))
+  :keymap srecode-mode-map
   ;; If we are turning things on, make sure we have templates for
   ;; this mode first.
   (when srecode-minor-mode
@@ -177,27 +160,20 @@ minor mode is enabled.
 		(mapcar (lambda (map)
 			  (srecode-map-entries-for-mode map major-mode))
 			(srecode-get-maps))))
-      (setq srecode-minor-mode nil))
-    )
-  ;; Run hooks if we are turning this on.
-  (when srecode-minor-mode
-    (run-hooks 'srecode-minor-mode-hook))
-  srecode-minor-mode)
+      (setq srecode-minor-mode nil))))
 
 ;;;###autoload
-(defun global-srecode-minor-mode (&optional arg)
+(define-minor-mode global-srecode-minor-mode
   "Toggle global use of srecode minor mode.
-If ARG is positive, enable, if it is negative, disable.
-If ARG is nil, then toggle."
-  (interactive "P")
-  (setq global-srecode-minor-mode
-        (semantic-toggle-minor-mode-globally
-         'srecode-minor-mode arg)))
+If ARG is positive or nil, enable, if it is negative, disable."
+  :global t :group 'srecode
+  ;; Not needed because it's autoloaded instead.
+  ;; :require 'srecode/mode
+  (semantic-toggle-minor-mode-globally
+   'srecode-minor-mode (if global-srecode-minor-mode 1 -1)))
 
 ;; Use the semantic minor mode magic stuff.
-(semantic-add-minor-mode 'srecode-minor-mode
-			 ""
-			 srecode-mode-map)
+(semantic-add-minor-mode 'srecode-minor-mode "")
 
 ;;; Menu Filters
 ;;
@@ -263,7 +239,7 @@ MENU-DEF is the menu to bind this into."
 				  (cdr ctxtcons)))))
 
 	    (setq ltab (cdr ltab))))
-	(setq subtab (cdr subtab)))
+  	(setq subtab (cdr subtab)))
 
       ;; Now create the menu
       (easy-menu-filter-return
@@ -305,7 +281,7 @@ This command will insert whichever srecode template has a binding
 to the current key."
   (interactive)
   (srecode-load-tables-for-mode major-mode)
-  (let* ((k last-command-char)
+  (let* ((k last-command-event)
 	 (ctxt (srecode-calculate-context))
 	 ;; Find the template with the binding K
 	 (template (srecode-template-get-table-for-binding
@@ -409,6 +385,15 @@ programming modes."
 		 binding))))
   )
 
+;; Add default code generators:
+(srecode-add-code-generator 'srecode-document-insert-comment "Comments" "C")
+(srecode-add-code-generator 'srecode-insert-getset "Get/Set" "G")
+
 (provide 'srecode/mode)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/mode"
+;; End:
 
 ;;; srecode/mode.el ends here
