@@ -20,6 +20,9 @@
 
 ###### User-customizable part of the Makefile ##################################
 
+## Echo commands during compilation (you can set it at call time: "make V=1")
+V=0
+
 ## Paths and flags to common programs
 EMACS=emacs
 EMACSFLAGS=-batch --no-site-file
@@ -44,6 +47,11 @@ EEVAL=$(EMACS) $(EMACSFLAGS) --eval
 ECOMPILE=(or (byte-compile-file \"$(1)\") (kill-emacs 1))
 EGRAMMAR=(find-file \"$(1)\") (semantic-mode) (or (semantic-grammar-create-package) (kill-emacs 1))
 LISP_PATH=$(foreach pkg,$(PACKAGES),(add-to-list (quote load-path) \"$(lispdir)/$(pkg)/\"))
+ifeq ($(V),1)
+Q=
+else
+Q=@echo "    > $@";
+endif
 
 
 ### Top-level rules
@@ -104,15 +112,14 @@ require=$(foreach r,$(1),(require (quote $(r))))
 
 %-wy.el: REQUIRES=semantic/grammar semantic/wisent semantic/wisent/grammar
 %-wy.el: %.wy
-	$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))"
+	$(Q)$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))"
 
 %-by.el: REQUIRES=semantic/grammar semantic/wisent semantic/bovine/grammar
 %-by.el: %.by
-	$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))"
-
+	$(Q)$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))"
 
 %.elc: %.el
-	$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(EEXTRA) $(call ECOMPILE,$<))"
+	$(Q)$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(EEXTRA) $(call ECOMPILE,$<))"
 
 %.info: %.texi
-	$(MAKEINFO) $< -o $@
+	$(Q)$(MAKEINFO) $< -o $@
