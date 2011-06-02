@@ -1,4 +1,4 @@
-;;; semantic/bovine/scheme.by -- Scheme BNF language specification
+;;; semantic/bovine/scm.by -- Scheme BNF language specification
 ;;
 ;; Copyright (C) 2001, 2003, 2009 Eric M. Ludlam
 ;;
@@ -83,4 +83,4 @@ expression : symbol
 	   | number
 	   ;
 
-;;; semantic/bovine/scheme.by ends here
+;;; semantic/bovine/scm.by ends here
