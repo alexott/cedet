@@ -41,6 +41,8 @@ testdir=$(CURDIR)/tests
 
 ### Helpers
 EEVAL=$(EMACS) $(EMACSFLAGS) --eval
+ECOMPILE=(or (byte-compile-file \"$(1)\") (kill-emacs 1))
+EGRAMMAR=(find-file \"$(1)\") (semantic-mode) (or (semantic-grammar-create-package) (kill-emacs 1))
 LISP_PATH=$(foreach pkg,$(PACKAGES),(add-to-list (quote load-path) \"$(lispdir)/$(pkg)/\"))
 
 
@@ -65,6 +67,8 @@ cedet_WISENT=$(shell $(FIND) $(lispdir)/cedet/semantic/wisent/ -name \*.wy)
 cedet_BOVINE_CODE=$(patsubst %.by,%-by.elc,$(cedet_BOVINE))
 cedet_WISENT_CODE=$(patsubst %.wy,%-wy.elc,$(cedet_WISENT))
 
+grammar-cedet: EEXTRA=(setq max-specpdl-size (max 3000 max-specpdl-size) max-lisp-eval-depth (max 1000 max-lisp-eval-depth))
+grammar-cedet: REQUIRES=semantic/grammar
 grammar-cedet: $(lispdir)/cedet/semantic/grammar-wy.elc $(cedet_BOVINE_CODE) $(cedet_WISENT_CODE)
 
 ### Dynamic rules
@@ -92,17 +96,23 @@ endef
 $(eval $(call PACKAGE_template,common))
 $(foreach pkg,$(PACKAGES),$(eval $(call PACKAGE_template,$(pkg))))
 
+# Require the list of packages given as argument
+require=$(foreach r,$(1),(require (quote $(r))))
+
 
 ### Generic rules
 
+%-wy.el: REQUIRES=semantic/grammar semantic/wisent semantic/wisent/grammar
 %-wy.el: %.wy
-	$(EEVAL) "(progn $(LISP_PATH) (require 'semantic/grammar) (require 'semantic/wisent/grammar) (find-file \"$<\") (or (and (semantic-grammar-create-package) (save-buffer)) (kill-emacs 1)))"
+	$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))"
 
+%-by.el: REQUIRES=semantic/grammar semantic/wisent semantic/bovine/grammar
 %-by.el: %.by
-	$(EEVAL) "(progn $(LISP_PATH) (require 'semantic/grammar) (require 'semantic/bovine/grammar) (find-file \"$<\") (or (and (semantic-grammar-create-package) (save-buffer)) (kill-emacs 1)))"
+	$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))"
+
 
 %.elc: %.el
-	$(EEVAL) "(progn $(LISP_PATH) (or (byte-compile-file \"$<\") (kill-emacs 1)))"
+	$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(EEXTRA) $(call ECOMPILE,$<))"
 
 %.info: %.texi
 	$(MAKEINFO) $< -o $@
