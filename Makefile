@@ -45,7 +45,7 @@ testdir=$(CURDIR)/tests
 ### Helpers
 EEVAL=$(EMACS) $(EMACSFLAGS) --eval
 ECOMPILE=(or (byte-compile-file \"$(1)\") (kill-emacs 1))
-EGRAMMAR=(find-file \"$(1)\") (semantic-mode) (or (semantic-grammar-create-package) (kill-emacs 1))
+EGRAMMAR=(find-file \"$(1)\") (semantic-mode) (semantic-grammar-create-package)
 LISP_PATH=$(foreach pkg,$(PACKAGES),(add-to-list (quote load-path) \"$(lispdir)/$(pkg)/\"))
 ifeq ($(V),1)
 Q=
