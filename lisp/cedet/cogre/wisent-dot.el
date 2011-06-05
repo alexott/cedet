@@ -1,4 +1,4 @@
-;;; wisent-dot.el --- GraphViz DOT parser
+;;; cogre/wisent-dot.el --- GraphViz DOT parser
 
 ;; Copyright (C) 2003, 2004, 2009 Eric M. Ludlam
 
@@ -40,7 +40,7 @@
 ;;; Code:
 (require 'semantic/wisent)
 (require 'semantic)
-(require 'wisent-dot-wy)
+(require 'cogre/wisent-dot-wy)
 
 (define-mode-local-override semantic-tag-components
   graphviz-dot-mode (tag)
@@ -91,6 +91,6 @@
 ;;;###autoload
 (add-hook 'cogre-dot-mode-hook 'wisent-dot-setup-parser)
 
-(provide 'wisent-dot)
+(provide 'cogre/wisent-dot)
 
-;;; wisent-dot.el ends here
+;;; cogre/wisent-dot.el ends here

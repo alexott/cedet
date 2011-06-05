@@ -1,4 +1,4 @@
-;;; cogre-mode.el --- Graph editing mode
+;;; cogre/mode.el --- Graph editing mode
 
 ;;; Copyright (C) 2001, 2002, 2003, 2007, 2009, 2010 Eric M. Ludlam
 
@@ -30,7 +30,7 @@
 ;; graphs depend on the custom widget library to provide text
 ;; controls, or toggle buttons for editing state in a graph.
 
-(require 'picture-hack)
+(require 'cogre/picture-hack)
 (require 'eieio)
 (require 'eieio-opt)
 (require 'eieio-base)
@@ -885,6 +885,6 @@ Pops up a context menu of various activities to perform."
     (when (eq win (selected-window))
       (select-window startwin)) ))
 
-(provide 'cogre-mode)
+(provide 'cogre/mode)
 
-;;; cogre-mode.el ends here
+;;; cogre/mode.el ends here

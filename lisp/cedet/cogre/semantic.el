@@ -1,4 +1,4 @@
-;;; cogre-semantic.el --- Convert Semantic TAGS to COGRE nodes.
+;;; cogre/semantic.el --- Convert Semantic TAGS to COGRE nodes.
 ;;
 ;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
@@ -29,10 +29,10 @@
 ;; Used for cut/paste, or updating graphs linked to code from changes
 ;; made in the code.
 ;;
-;; To convert nodes into tags, see `cogre-convert.el'.
+;; To convert nodes into tags, see `cogre/convert.el'.
 
 (require 'semantic)
-(require 'cogre-srecode)
+(require 'cogre/srecode)
 (require 'cogre)
 
 ;;; Code:
@@ -422,5 +422,5 @@ that the children of TAG-NODE will be linked to."
     
     ))
 
-(provide 'cogre-semantic)
-;;; cogre-semantic.el ends here
+(provide 'cogre/semantic)
+;;; cogre/semantic.el ends here

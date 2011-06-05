@@ -36,10 +36,9 @@
 (require 'eieio)
 (require 'eieio-opt)
 (require 'eieio-base)
-(require 'cogre-load)
 (require 'semantic)
 (eval-when-compile
-  (require 'picture-hack))
+  (require 'cogre/picture-hack))
 
 ;;; Code:
 
@@ -329,7 +328,7 @@ Optional argument GRAPH-CLASS indicates the type of graph to create."
 		    (cogre-base-graph name :name name))))
     (setq cogre-graph newgraph)
     ;;(toggle-read-only 1)
-    (require 'cogre-mode)
+    (require 'cogre/mode)
     (cogre-mode)
     ))
 

@@ -1,4 +1,4 @@
-;;; cogre-ascii.el --- Export a cogre diagram to ASCII.
+;;; cogre/ascii.el --- Export a cogre diagram to ASCII.
 ;;
 ;; Copyright (C) 2009 Eric M. Ludlam
 ;;
@@ -166,5 +166,5 @@ tweaks the faces."
     ;; Return it.
     rect))
 
-(provide 'cogre-ascii)
-;;; cogre-ascii.el ends here
+(provide 'cogre/ascii)
+;;; cogre/ascii.el ends here

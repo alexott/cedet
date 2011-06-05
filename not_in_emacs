@@ -64,3 +64,8 @@ etc/semantic/db-skel.el
 etc/semantic/example.el
 doc/cedet/srecode.texi
 etc/srecode/proj-test.srt
+lisp/cedet/cogre*
+etc/cogre.texi
+etc/srecode/cogre-default.srt
+etc/srecode/srecode-dot.srt
+doc/cedet/cogre.texi

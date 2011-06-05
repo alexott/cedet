@@ -1,4 +1,4 @@
-;;; cogre-layout.el --- Execute a layout engine on a cogre graph.
+;;; cogre/layout.el --- Execute a layout engine on a cogre graph.
 ;;
 ;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
@@ -25,7 +25,7 @@
 ;;
 ;; Calls out to graphviz for node position information.
 
-(require 'cogre-convert)
+(require 'cogre/convert)
 
 ;;; Code:
 ;;;###autoload
@@ -102,5 +102,5 @@ This function depends on graphviz `dot' program."
     (cogre-refresh)
     ))
 
-(provide 'cogre-layout)
-;;; cogre-layout.el ends here
+(provide 'cogre/layout)
+;;; cogre/layout.el ends here

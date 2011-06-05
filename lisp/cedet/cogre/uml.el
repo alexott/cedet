@@ -1,4 +1,4 @@
-;;; cogre-uml.el --- UML support for COGRE
+;;; cogre/uml.el --- UML support for COGRE
 
 ;;; Copyright (C) 2001, 2008, 2009, 2010 Eric M. Ludlam
 
@@ -30,7 +30,7 @@
 ;; ASCII to draw UML diagrams.
 
 (require 'cogre)
-(eval-when-compile (require 'cogre-semantic))
+(eval-when-compile (require 'cogre/semantic))
 
 ;;; Code:
 ;;;###autoload
@@ -433,6 +433,6 @@ Return it as a list of lists.  Each entry is of the form:
       (data-debug-show-stuff out "SortedInheritanceNodes"))
     out))
 
-(provide 'cogre-uml)
+(provide 'cogre/uml)
 
-;;; cogre-uml.el ends here
+;;; cogre/uml.el ends here

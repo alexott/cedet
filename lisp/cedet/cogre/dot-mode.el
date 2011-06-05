@@ -1,4 +1,4 @@
-;;; cogre-dot-mode.el --- Mini-mode for Graphviz DOT files.
+;;; cogre/dot-mode.el --- Mini-mode for Graphviz DOT files.
 ;;
 ;; Copyright (C) 2009 Eric M. Ludlam
 ;;
@@ -109,5 +109,5 @@ as a parsing engine."
 ;;
 (set-mode-local-parent 'cogre-dot-mode 'graphviz-dot-mode)
 
-(provide 'cogre-dot-mode)
-;;; cogre-dot-mode.el ends here
+(provide 'cogre/dot-mode)
+;;; cogre/dot-mode.el ends here

@@ -1,4 +1,4 @@
-;;; picture-hack.el --- Updates to picture mode
+;;; cogre/picture-hack.el --- Updates to picture mode
 
 ;;; Copyright (C) 2001, 2009 Eric M. Ludlam
 
@@ -329,6 +329,6 @@ The line is drawn in a rectilinear fashion."
       )
     ))
 
-(provide 'picture-hack)
+(provide 'cogre/picture-hack)
 
-;;; picture-hack.el ends here
+;;; cogre/picture-hack.el ends here

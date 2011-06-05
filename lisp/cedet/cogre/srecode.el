@@ -1,4 +1,4 @@
-;;; cogre-srecode.el --- SRecode macros for COGRE.
+;;; cogre/srecode.el --- SRecode macros for COGRE.
 ;;
 ;; Copyright (C) 2009, 2010 Eric M. Ludlam
 ;;
@@ -148,5 +148,5 @@ This fcn is very sparing of fetching tags."
      )
     ))
 
-(provide 'cogre-srecode)
-;;; cogre-srecode.el ends here
+(provide 'cogre/srecode)
+;;; cogre/srecode.el ends here

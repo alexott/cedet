@@ -27,9 +27,9 @@
 
 (require 'cedet-utests)
 (eval-when-compile
-  (require 'picture-hack))
+  (require 'cogre/picture-hack))
 (require 'cogre)
-(require 'cogre-mode)
+(require 'cogre/mode)
 
 ;;; Code:
 
