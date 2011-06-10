@@ -697,7 +697,10 @@ Return non-nil if the minor mode is enabled.")
 		  (symbol-name mode) "'.")
 	 ,@forms))))
 (put 'define-semantic-idle-service 'lisp-indent-function 1)
-
+(add-hook 'edebug-setup-hook
+          (lambda ()
+	    (def-edebug-spec define-semantic-idle-service
+	      (&define name stringp def-body))))
 
 ;;; SUMMARY MODE
 ;;
