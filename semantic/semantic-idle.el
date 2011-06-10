@@ -912,7 +912,7 @@ Call `semantic-symref-hits-in-region' to identify local references."
 	   ;; We use pulse, but we don't want the flashy version,
 	   ;; just the stable version.
 	   (pulse-flag nil))
-      (when ctxt
+      (when (and ctxt tag)
 	;; Highlight the original tag?  Protect against problems.
 	(condition-case nil
 	    (semantic-idle-symbol-maybe-highlight target)
