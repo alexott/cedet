@@ -71,7 +71,7 @@ clean: clean-common $(patsubst %,clean-%,$(PACKAGES))
 
 cedet_PRE_CODE = grammar-cedet
 cedet_BOVINE=$(shell $(FIND) $(lispdir)/cedet/ -name \*.by)
-cedet_WISENT=$(shell $(FIND) $(lispdir)/cedet/ -name \*.wy -and -not -name $(lispdir)/cedet/semantic/grammar.wy)
+cedet_WISENT=$(shell $(FIND) $(lispdir)/cedet/ -name \*.wy -and -not -path $(lispdir)/cedet/semantic/grammar.wy)
 cedet_BOVINE_CODE=$(patsubst %.by,%-by.elc,$(cedet_BOVINE))
 cedet_WISENT_CODE=$(patsubst %.wy,%-wy.elc,$(cedet_WISENT))
 
