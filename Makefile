@@ -56,7 +56,9 @@ endif
 
 ### Top-level rules
 
-all: compile doc
+all: generate compile doc
+
+generate: $(patsubst %,generate-%,$(PACKAGES))
 
 compile: compile-common $(patsubst %,compile-%,$(PACKAGES))
 
@@ -69,15 +71,10 @@ clean: clean-common $(patsubst %,clean-%,$(PACKAGES))
 
 ### Specialized rules
 
-cedet_PRE_CODE = grammar-cedet
 cedet_BOVINE=$(shell $(FIND) $(lispdir)/cedet/ -name \*.by)
 cedet_WISENT=$(shell $(FIND) $(lispdir)/cedet/ -name \*.wy -and -not -path $(lispdir)/cedet/semantic/grammar.wy)
-cedet_BOVINE_CODE=$(patsubst %.by,%-by.elc,$(cedet_BOVINE))
-cedet_WISENT_CODE=$(patsubst %.wy,%-wy.elc,$(cedet_WISENT))
+cedet_GENERATE_LISP=$(patsubst %.by,%-by.el,$(cedet_BOVINE)) $(patsubst %.wy,%-wy.el,$(cedet_WISENT))
 
-grammar-cedet: EEXTRA=(setq max-specpdl-size (max 3000 max-specpdl-size) max-lisp-eval-depth (max 1000 max-lisp-eval-depth))
-grammar-cedet: REQUIRES=semantic/grammar
-grammar-cedet: $(lispdir)/cedet/semantic/grammar-wy.elc $(cedet_BOVINE_CODE) $(cedet_WISENT_CODE)
 
 ### Dynamic rules
 
@@ -89,15 +86,17 @@ $(1)_INFO=$$(patsubst %.texi,%.info,$$($(1)_TEXINFO))
 $(1)_TEST_LISP=$(shell test ! -d $(testdir)/$(1)/ || $(FIND) $(testdir)/$(1)/ -name \*.el)
 $(1)_TEST_CODE=$$(patsubst %.el,%.elc,$$($(1)_TEST_LISP))
 
-compile-$(1): $$($(1)_PRE_CODE) $$($(1)_CODE)
+generate-$(1): $$($(1)_GENERATE_LISP)
+
+compile-$(1): $$($(1)_CODE)
 
 doc-$(1): $$($(1)_INFO)
 
 test-$(1): $$($(1)_TEST_CODE)
 
 clean-$(1):
+	$(RM) $(RMFLAGS) $$($(1)_GENERATE_LISP)
 	$(RM) $(RMFLAGS) $$($(1)_CODE)
-	$(RM) $(RMFLAGS) $$($(1)_BOVINE_CODE) $$($(1)_WISENT_CODE)
 	$(RM) $(RMFLAGS) $$($(1)_INFO)
 endef
 
@@ -117,6 +116,11 @@ require=$(foreach r,$(1),(require (quote $(r))))
 %-by.el: REQUIRES=semantic/grammar semantic/wisent semantic/bovine/grammar
 %-by.el: %.by
 	$(Q)$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))"
+
+%-wy.elc: REQUIRES=semantic/grammar
+
+%-by.elc: REQUIRES=semantic/bovine
+%-by.elc: EEXTRA=(setq max-specpdl-size (max 3000 max-specpdl-size) max-lisp-eval-depth (max 1000 max-lisp-eval-depth))
 
 %.elc: %.el
 	$(Q)$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(EEXTRA) $(call ECOMPILE,$<))"
