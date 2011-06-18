@@ -31,8 +31,8 @@
 ;;; Code:
 
 (require 'semantic/wisent)
-(require 'semantic/wisent/java.wy)
-(require 'semantic/bovine/java)
+(require 'semantic/wisent/java-wy)
+(require 'semantic/java)
 (eval-when-compile
   (require 'semantic/util)
   (require 'semantic/ctxt)
