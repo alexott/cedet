@@ -269,12 +269,12 @@ It ignores whitespace, newlines and comments."
   semantic-lex-ignore-newline
   semantic-lex-ignore-comments
   srecode-template-separator-block
-  srecode/template-wy--<keyword>-keyword-analyzer
+  srecode/srt-wy--<keyword>-keyword-analyzer
   srecode-template-property-analyzer
-  srecode/template-wy--<symbol>-regexp-analyzer
-  srecode/template-wy--<number>-regexp-analyzer
-  srecode/template-wy--<string>-sexp-analyzer
-  srecode/template-wy--<punctuation>-string-analyzer
+  srecode/srt-wy--<symbol>-regexp-analyzer
+  srecode/srt-wy--<number>-regexp-analyzer
+  srecode/srt-wy--<string>-sexp-analyzer
+  srecode/srt-wy--<punctuation>-string-analyzer
   semantic-lex-default-action
   )
 
