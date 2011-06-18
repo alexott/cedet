@@ -240,11 +240,11 @@ elsewhere on a line outside a string literal."
   ;; Must analyze string before symbol to handle string prefix.
   wisent-python-lex-string
   ;; Analyzers auto-generated from grammar.
-  semantic/wisent/python.wy--<number>-regexp-analyzer
-  semantic/wisent/python.wy--<keyword>-keyword-analyzer
-  semantic/wisent/python.wy--<symbol>-regexp-analyzer
-  semantic/wisent/python.wy--<block>-block-analyzer
-  semantic/wisent/python.wy--<punctuation>-string-analyzer
+  semantic/wisent/python-wy--<number>-regexp-analyzer
+  semantic/wisent/python-wy--<keyword>-keyword-analyzer
+  semantic/wisent/python-wy--<symbol>-regexp-analyzer
+  semantic/wisent/python-wy--<block>-block-analyzer
+  semantic/wisent/python-wy--<punctuation>-string-analyzer
   ;; Ignored things.
   wisent-python-lex-ignore-backslash
   semantic-lex-ignore-whitespace
