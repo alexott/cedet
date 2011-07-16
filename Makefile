@@ -109,18 +109,18 @@ require=$(foreach r,$(1),(require (quote $(r))))
 
 ### Generic rules
 
-%-wy.el: REQUIRES=semantic/grammar semantic/wisent semantic/wisent/grammar
+%-wy.el: REQUIRES+=semantic/grammar semantic/wisent semantic/wisent/grammar
 %-wy.el: %.wy
 	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))'
 
-%-by.el: REQUIRES=semantic/grammar semantic/wisent semantic/bovine/grammar
+%-by.el: REQUIRES+=semantic/grammar semantic/wisent semantic/bovine/grammar
 %-by.el: %.by
 	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))'
 
-%-wy.elc: REQUIRES=semantic/grammar
+%-wy.elc: REQUIRES+=semantic/grammar
 
-%-by.elc: REQUIRES=semantic/bovine
-%-by.elc: EEXTRA=(setq max-specpdl-size (max 3000 max-specpdl-size) max-lisp-eval-depth (max 1000 max-lisp-eval-depth))
+%-by.elc: REQUIRES+=semantic/bovine
+%-by.elc: EEXTRA+=(setq max-specpdl-size (max 3000 max-specpdl-size) max-lisp-eval-depth (max 1000 max-lisp-eval-depth))
 
 %.elc: %.el
 	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(EEXTRA) $(call ECOMPILE,$<))'
