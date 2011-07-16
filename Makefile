@@ -44,9 +44,9 @@ testdir=$(CURDIR)/tests
 
 ### Helpers
 EEVAL=$(EMACS) $(EMACSFLAGS) --eval
-ECOMPILE=(or (byte-compile-file \"$(1)\") (kill-emacs 1))
-EGRAMMAR=(find-file \"$(1)\") (semantic-mode) (semantic-grammar-create-package)
-LISP_PATH=$(foreach pkg,$(PACKAGES),(add-to-list (quote load-path) \"$(lispdir)/$(pkg)/\"))
+ECOMPILE=(or (byte-compile-file "$(1)") (kill-emacs 1))
+EGRAMMAR=(find-file "$(1)") (semantic-mode) (semantic-grammar-create-package)
+LISP_PATH=$(foreach pkg,$(PACKAGES),(add-to-list (quote load-path) "$(lispdir)/$(pkg)/"))
 ifeq ($(V),1)
 Q=
 else
@@ -111,11 +111,11 @@ require=$(foreach r,$(1),(require (quote $(r))))
 
 %-wy.el: REQUIRES=semantic/grammar semantic/wisent semantic/wisent/grammar
 %-wy.el: %.wy
-	$(Q)$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))"
+	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))'
 
 %-by.el: REQUIRES=semantic/grammar semantic/wisent semantic/bovine/grammar
 %-by.el: %.by
-	$(Q)$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))"
+	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))'
 
 %-wy.elc: REQUIRES=semantic/grammar
 
@@ -123,7 +123,7 @@ require=$(foreach r,$(1),(require (quote $(r))))
 %-by.elc: EEXTRA=(setq max-specpdl-size (max 3000 max-specpdl-size) max-lisp-eval-depth (max 1000 max-lisp-eval-depth))
 
 %.elc: %.el
-	$(Q)$(EEVAL) "(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(EEXTRA) $(call ECOMPILE,$<))"
+	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(EEXTRA) $(call ECOMPILE,$<))'
 
 %.info: %.texi
 	$(Q)$(MAKEINFO) $< -o $@
