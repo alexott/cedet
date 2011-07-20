@@ -1078,8 +1078,8 @@ Something like this can work in your @file{.emacs} file.
 
 @section @semantic{} Database
 
-@semantic{} could use CScope as a back end for database searches,
-but this has not been implemented yet.  
+@semantic{} can use CScope as a back end for database searches.
+To enable it, use:
 
 @example
 (semanticdb-enable-cscope-databases)
