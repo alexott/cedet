@@ -436,7 +436,10 @@ mode.  nil means to toggle the mode."
 	    (not (or (and (null arg) ede-minor-mode)
 		     (<= (prefix-numeric-value arg) 0))))
       (if (and ede-minor-mode (not ede-constructing))
-	  (ede-initialize-state-current-buffer)
+	  (progn
+	    (ede-initialize-state-current-buffer)
+	    (when (not ede-object-root-project)
+	      (setq ede-minor-mode nil)))
 	;; If we fail to have a project here, turn it back off.
 	(if (not (cedet-called-interactively-p))
 	    (setq ede-minor-mode nil))))))
