@@ -487,6 +487,14 @@ and returning that tag instead."
     ;; so the typecache can fix them.
     tags))
 
+;;; @TODO
+;; 
+;; In order to expand a string like com.java.object.THING from a jar
+;; file, we'll need to override the default typecache methods.  This
+;; is because those depend on a complex typecache, whereas javap can
+;; just do the expansion of the package for us w/out that.
+
+
 ;;; Search Utils
 ;;
 (defmethod semanticdb-find-tags-by-name-method ((table semanticdb-table-jar-directory) name &optional tags)
@@ -652,7 +660,9 @@ tables of classes based on files, not files in a directory.
 DIR is a package name, such as 'java/net' which contains classes.
 We assume that java classes are rooted to be base of the jar file they
 are extracted from, so no prefixes are added."
-  (object-assoc dir 'directory (oref dbc tables)))
+  ;; Raw classes come in w/out the .class extension, so if there is an extension, remove it.
+  (object-assoc (concat (file-name-sans-extension dir) ".class") :filename (oref dbc tables)))
+
 
 (defmethod semanticdb-create-table ((db semanticdb-java-jar-database) dirorfile)
   "Create a new table in DB for DIR and return it.
