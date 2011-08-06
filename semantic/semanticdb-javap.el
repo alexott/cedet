@@ -219,7 +219,7 @@ that just points to a database, and must redirect all its calls to its decendent
 		(let ((tab (semanticdb-create-table
 			    P (if starry (file-name-directory fname) fname))))
 		  (when tab
-		    ;; We have a table, how we need to extract the tags from it.
+		    ;; We have a table, now we need to extract the tags from it.
 		    ;; TODO - just return the table normally for now.  Fix later.
 		    (setq def tab)
 		    (throw 'foo nil))))
@@ -227,6 +227,100 @@ that just points to a database, and must redirect all its calls to its decendent
 	       ;; Default - do ntohing
 	       (t nil)))))
 	def))))
+
+;;; TYPECACHE Overrides
+;;
+;; In order to expand a string like com.java.object.THING from a jar
+;; file, we'll need to override the default typecache methods.  This
+;; is because those depend on a complex typecache, whereas javap can
+;; just do the expansion of the package for us w/out that.
+(define-mode-local-override semanticdb-typecache-find 
+  java-mode (type &optional path find-file-match)
+  "For Java, try the default.  If nothing, look in our JAR files.
+This is because a string such as com.java.pgk.Class doesn't show up
+as a hierarchy from the JAR files in the regular typecache, but we
+can find it as a string directly from our directory and jar files."
+  (if (not (and (featurep 'semanticdb) semanticdb-current-database))
+      nil ;; No DB, no search
+    ;; Else, try a few things.
+    (or (semanticdb-typecache-find-default type path find-file-match)
+	(semanticdb-javap-typecache-find-by-include-hack
+	 type (or path semanticdb-current-table) find-file-match))))
+
+(defun semanticdb-javap-typecache-find-by-include-hack (type &optional path find-file-match)
+  "Search through java DIRECTORY databases for TYPE based on PATH.
+PATH is a database for the buffer from which the references should be derived.
+For each, ask if TYPE is found.  If TYPE is a fully qualified name, leave it alone.
+If it is a list, glom it back into a string for the search.
+Uses `semanticdb-find-table-for-include' to find the TYPE by fully qualified name
+using the same utility as looking for includes which are also fully qualified names."
+  (let* ((tname (cond ((stringp type) type)
+		      ((listp type) (mapconcat #'identity type "."))))
+	 (fauxtag (semantic-tag-new-include tname nil :faux t))
+	 (table (semanticdb-find-table-for-include fauxtag path))
+	 (ans nil))
+    ;; Look the answer up in TABLE from include search.
+    (if table
+	(let* ((tlist (cond ((listp type) type)
+			    ((stringp type) (semantic-analyze-split-name type))))
+	       (searchname (if (listp tlist) (car (last tlist))
+			     tlist))
+	       ;; Get the typecache version of the tags from the table.
+	       ;; That will allow us to do a typecache like search
+	       (tabletags (semanticdb-typecache-file-tags table))
+	       )
+	  (setq ans (semantic-find-first-tag-by-name searchname tabletags))
+	  )
+      ;; If there was no table, then perhaps it is just a package name.
+      ;; We can look up "java.com.*" instead of just "java.com.".
+      (semantic-tag-set-name fauxtag (concat tname "*"))
+      (setq table (semanticdb-find-table-for-include fauxtag path))
+
+      (when (semanticdb-table-jar-directory-child-p table)
+	(setq ans (semanticdb-table-javap-table-as-faux-tag table))
+	)
+      )
+    ;; Return what we found.
+    ans))
+
+;;; ANALYZER HACKS
+;;
+;; The analyze defaults to C/C++, but java is a bit simpler.
+;; If the standard sequence finder gets lost, we can run our backup
+;; which uses our typecache to find the beginning of a sequence via
+;; above tricks for only the starting subset.  This will allow us to
+;; perform completions in package names.
+
+(define-mode-local-override semantic-analyze-find-tag-sequence
+  java-mode (sequence &optional scope typereturn throwsym)
+  "For Java buffers, use our javap typecache as a backup search method.
+If the default returns only strings, search for the first part of sequence
+in the typecache.  Create a return list from that, and append the last
+string from sequence to the found tag in the typecache.
+SCOPE, TYPERETURN, and THROWSYM are all passed to the default method, but
+not used locally."
+  (let* ((lastpart (car (last sequence)))
+	 (ans (semantic-analyze-find-tag-sequence-default
+	       sequence scope typereturn throwsym)))
+    ;; If the car of ans is a STRING, then lets try our hack.
+    (when (and (> (length ans) 1) (stringp (car ans)))
+      (setq ans (append
+		 (semanticdb-typecache-find (nreverse (cdr (reverse sequence))))
+		 (list lastpart))))
+    ;; If we have only one answer, but the name doesn't match the last string in sequence
+    ;; then we need to perform a little trickery to fix up the problem.
+    (when (and (= (length ans) 1) (semantic-tag-p (car ans)) (stringp lastpart)
+	       (not (string= (semantic-tag-name (car ans)) lastpart)))
+      (setq ans (append ans (list lastpart))))
+
+    ;; Make sure typereturn has the right data in it.
+    ;; THIS IS A QUICK HACK
+    ;; Lets look for cases where this fails.
+    (when (and typereturn (not (symbol-value typereturn)))
+      (set typereturn (nreverse (cdr (reverse ans)))))
+
+    ;; Return whatever we have left.
+    ans))
 
 ;;; DIRECTORY DB TABLE
 ;;
@@ -385,6 +479,9 @@ Returns a list of all files in this table's directory that matches REGEXP."
    (filenamecache :type list
 		  :documentation
 		  "The list of files in the jar file in directory.")
+   (packagenamecache :type list
+		     :documentation
+		     "The list of subpackages in a jar file in directory.")
    (filetaghash :type hash-table
 		:initform (make-hash-table :test 'equal :size 11)
 		:documentation
@@ -422,6 +519,15 @@ Equivalent modes are specified by the `semantic-equivalent-major-modes'
 local variable."
   t
   )
+
+(defmethod object-print ((obj semanticdb-table-jar-directory) &rest strings)
+  "Pretty printer extension for `semanticdb-table-jar-directory'.
+Adds the number of tags in this file to the object print name."
+  (apply 'call-next-method obj
+	 (cons (format " (%d Classes, %d Packages)"
+		       (length (oref obj filenamecache))
+		       (length (oref obj packagenamecache)))
+	       strings)))
 
 ;;; Tag Normailzation
 ;;
@@ -487,13 +593,42 @@ and returning that tag instead."
     ;; so the typecache can fix them.
     tags))
 
-;;; @TODO
-;; 
-;; In order to expand a string like com.java.object.THING from a jar
-;; file, we'll need to override the default typecache methods.  This
-;; is because those depend on a complex typecache, whereas javap can
-;; just do the expansion of the package for us w/out that.
 
+(defmethod semanticdb-table-javap-table-as-faux-tag ((table semanticdb-table-jar-directory))
+  "Convert a database into a faux tag which child tags.
+The child tags will NOT have additional child tags.  This is solely to solve
+the problem of completion engines that only need to drop down a single level
+for the typecache search routines.
+NOTE: All tags are created as public.  This is probably incorrect.
+Solve this some other time."
+  (let* ((name (file-name-nondirectory
+		(directory-file-name (oref table directory))))
+	 (chilpkg (mapcar
+		   (lambda (pkg)
+		     (semantic-tag-new-type 
+		      (file-name-nondirectory (directory-file-name pkg)) ;; name
+		      "namespace" ;; namespace datatype
+		      nil	  ;; no children
+		      nil	  ;; no inheritance
+		      :faux t
+		      :typemodifiers '("public")))
+		   (oref table packagenamecache)))
+	 (chilclass (mapcar
+		     (lambda (cls)
+		       (semantic-tag-new-type
+			(file-name-sans-extension cls)
+			"class"
+			nil ;; There are members, but we're making stuff up.
+			nil ;; We won't know this either.
+			:faux t
+			:typemodifiers '("public")))
+		     (oref table filenamecache))))
+    ;; Create a new namespace full of our made up children.
+    (semantic-tag-new-type name "namespace"
+			   (append chilpkg chilclass)
+			   nil
+			   :faux t
+			   :typemodifiers '("public"))))
 
 ;;; Search Utils
 ;;
@@ -559,6 +694,7 @@ Returns a list of all files in this table's directory that matches REGEXP."
 		 "Track if this table is up to date.")
    )
   "Table which represents the classes found in files in series of diretories.")
+
 
 (defmethod semanticdb-table-java-package ((table semanticdb-table-jar-file))
   "Get the package name to use for this database as a directory."
@@ -647,6 +783,14 @@ from JARFILE, and create a database for it."
       (semanticdb-java-jar-extract-names db))
     db))
 
+(defmethod object-print ((obj semanticdb-java-jar-database) &rest strings)
+  "Pretty printer extension for `semanticdb-java-jar-database'.
+Adds the number of tags in this file to the object print name."
+  (apply 'call-next-method obj
+	 (cons (format " (%d Files)"
+		       (length (oref obj jarfilecache)))
+	       strings)))
+
 (defmethod semanticdb-java-jar-extract-names ((dbc semanticdb-java-jar-database))
   "Extract the directory structure from the jar file associated with DBC.
 Store the structure in our database cache."
@@ -674,7 +818,9 @@ If the table for DIR does not exist, create one."
   (let ((newtab (semanticdb-file-table db dirorfile)))
     (unless newtab
       (let ((matchingfiles (or (semanticdb-java-jar-package-files db dirorfile)
-			       (semanticdb-java-jar-package-one-file db dirorfile))))
+			       (semanticdb-java-jar-package-one-file
+				db dirorfile)))
+	    (matchingpkg (semanticdb-java-jar-package-packages db dirorfile)))
 	(when matchingfiles
 	  ;; Only make a table if there are any matching files in it.
 	  (if (= (length matchingfiles) 1)
@@ -688,7 +834,9 @@ If the table for DIR does not exist, create one."
 				  dirorfile
 				  :directory dirorfile))
 	    (oset newtab filenamecache
-		  (mapcar 'file-name-nondirectory matchingfiles)))
+		  (mapcar 'file-name-nondirectory matchingfiles))
+	    (oset newtab packagenamecache matchingpkg)
+	    )
 	  (oset newtab parent-db db)
 	  (object-add-to-list db 'tables newtab t)
 	  )))
@@ -709,9 +857,18 @@ If the table for DIR does not exist, create one."
 File should exclude an extension, as .class will be added."
   (let ((ans nil))
     (dolist (F (oref dbc jarfilecache))
-      (when (string-match (concat "^" (regexp-quote file) "\\.class$")
-			  F)
+      (when (string-match (concat "^" (regexp-quote file) "\\.class$") F)
 	(push F ans)))
+    (nreverse ans)))
+
+(defmethod semanticdb-java-jar-package-packages ((dbc semanticdb-java-jar-database) dir)
+  "Get the package names from DBC that match DIR.
+DIR may already have some .class files in it (see `semanticdb-java-jar-package-files')
+while also having sub-packages."
+  (let ((ans nil))
+    (dolist (F (oref dbc jarfilecache))
+      (when (string-match (concat "^" (regexp-quote dir) "\\w+/") F)
+	(add-to-list 'ans (match-string 0 F))))
     (nreverse ans)))
 
 ;;; JAVAP CALLS
