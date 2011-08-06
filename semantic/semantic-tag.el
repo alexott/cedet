@@ -209,16 +209,11 @@ See also the function `semantic-ctxt-current-mode'."
   (or tag (setq tag (semantic-current-tag)))
   (or (semantic--tag-get-property tag :mode)
       (let ((buffer (semantic-tag-buffer tag))
-            (start (semantic-tag-start tag))
-            (end   (semantic-tag-end tag)))
-        (save-excursion
-          (and buffer (set-buffer buffer))
-          ;; Unless point is inside TAG bounds, move it to the
-          ;; beginning of TAG.
-          (or (and (>= (point) start) (< (point) end))
-              (goto-char start))
-          (require 'semantic-ctxt)
-          (semantic-ctxt-current-mode)))))
+            (start (semantic-tag-start tag)))
+        (save-current-buffer
+          (and buffer (buffer-live-p buffer) (set-buffer buffer))
+	  (require 'semantic-ctxt)
+	  (semantic-ctxt-current-mode start)))))
 
 (defsubst semantic--tag-attributes-cdr (tag)
   "Return the cons cell whose car is the ATTRIBUTES part of TAG.
