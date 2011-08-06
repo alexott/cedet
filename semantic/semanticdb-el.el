@@ -56,6 +56,11 @@ It does not need refreshing."
   "Return nil, we never need a refresh."
   nil)
 
+(defmethod object-print ((obj semanticdb-table-emacs-lisp) &rest strings)
+  "Pretty printer extension for `semanticdb-table-emacs-lisp'.
+Adds the number of tags in this file to the object print name."
+  (apply 'call-next-method obj (cons " (proxy)" strings)))
+
 (defclass semanticdb-project-database-emacs-lisp
   (semanticdb-project-database eieio-singleton)
   ((new-table-class :initform semanticdb-table-emacs-lisp
@@ -64,6 +69,15 @@ It does not need refreshing."
 		    "New tables created for this database are of this class.")
    )
   "Database representing Emacs core.")
+
+(defmethod object-print ((obj semanticdb-project-database-emacs-lisp) &rest strings)
+  "Pretty printer extension for `semanticdb-table-emacs-lisp'.
+Adds the number of tags in this file to the object print name."
+  (let ((count 0))
+    (mapatoms (lambda (sym) (setq count (1+ count))))
+    (apply 'call-next-method obj (cons 
+				  (format " (%d known syms)" count)
+				  strings))))
 
 ;; Create the database, and add it to searchable databases for Emacs Lisp mode.
 (defvar-mode-local emacs-lisp-mode semanticdb-project-system-databases
