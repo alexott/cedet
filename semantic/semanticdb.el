@@ -149,13 +149,16 @@ them to convert TAG into a more complete form."
   (cons obj tag))
 
 (defmethod object-print ((obj semanticdb-abstract-table) &rest strings)
-  "Pretty printer extension for `semanticdb-table'.
+  "Pretty printer extension for `semanticdb-abstract-table'.
 Adds the number of tags in this file to the object print name."
-  (apply 'call-next-method obj
-	 (cons (format " (%d tags)"
-		       (length (semanticdb-get-tags obj))
-		       )
-	       strings)))
+  (if (or (not strings)
+	  (and (= (length strings) 1) (stringp (car strings))
+	       (string= (car strings) "")))
+      ;; Else, add a tags quantifier.
+      (call-next-method obj (format " (%d tags)" (length (semanticdb-get-tags obj))))
+    ;; Pass through.
+    (apply 'call-next-method obj strings)
+    ))
 
 ;;; Index Cache
 ;;
@@ -294,7 +297,8 @@ If OBJ's file is not loaded, read it in first."
   "Pretty printer extension for `semanticdb-table'.
 Adds the number of tags in this file to the object print name."
   (apply 'call-next-method obj
-	 (cons (if (oref obj dirty) ", DIRTY" "") strings)))
+	 (cons (format " (%d tags)" (length (semanticdb-get-tags obj)))
+	       (cons (if (oref obj dirty) ", DIRTY" "") strings))))
 
 ;;; DATABASE BASE CLASS
 ;;
