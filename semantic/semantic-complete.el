@@ -1656,8 +1656,10 @@ Display mechanism using tooltip for a list of possible completions.")
   "Return the location of POINT as positioned on the selected frame.
 Return a cons cell (X . Y)"
   (let* ((frame (selected-frame))
-	 (left (frame-parameter frame 'left))
-	 (top (frame-parameter frame 'top))
+	 (left (or (car-safe (cdr-safe (frame-parameter frame 'left)))
+		   (frame-parameter frame 'left)))
+         (top (or (car-safe (cdr-safe (frame-parameter frame 'top)))
+		  (frame-parameter frame 'top)))
 	 (point-pix-pos (posn-x-y (posn-at-point)))
 	 (edges (window-inside-pixel-edges (selected-window))))
     (cons (+ (car point-pix-pos) (car edges) left)
