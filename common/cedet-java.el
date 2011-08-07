@@ -26,7 +26,7 @@
 ;;; Code:
 (require 'inversion)
 
-(defvar cedet-java-min-version "1.6"
+(defvar cedet-java-min-version "1.4"
   "Minimum version of the java JDR.")
 
 (defcustom cedet-java-command "java"
@@ -146,9 +146,13 @@ Exclude empty directories."
 
 (defun cedet-javap-get-class (jar class)
   "In JAR, get a javap dump of CLASS, return the buffer."
-  (let ((cedet-java-classpath-extension (list jar)))
+  (let ((cedet-java-classpath-extension
+	 (if jar (list jar) cedet-java-classpath-extension)))
     (cedet-javap-call
-     (list "-protected" "-bootclasspath" "" class))))
+     (if cedet-java-classpath-extension
+	 (list "-protected" "-bootclasspath" "" class)
+       (list "-protected" class)
+       ))))
 
 ;;;###autoload
 (defun cedet-javap-dump-class (class)
