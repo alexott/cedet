@@ -23,6 +23,8 @@
 ;;
 ;; Support Android projects via EDE.
 
+(require 'cedet-android)
+
 ;;; Code:
 (defvar ede-android-project-list nil
   "List of projects created by option `ede-android-project'.")
@@ -297,13 +299,14 @@ If one doesn't exist, create a new one for this directory."
 
 (defmethod ede-source-paths ((proj ede-android-project) mode)
   "Get the base to all source trees in the current projet for MODE.
-For java, this is both src and gen.  For nxml, it is just res."
+For java, this is both src and gen.  For xml, it is just res."
   (let ((pr (ede-project-root-directory proj)))
     (cond ((eq mode 'java-mode)
 	   (list
 	    (ede-android-fname-if-exists (expand-file-name "src" pr))
 	    (ede-android-fname-if-exists (expand-file-name "gen" pr))))
-	  ((eq mode nxml-mode)
+	  ((or (eq mode 'nxml-mode) ;; emacs 23
+	       (and (eq mode 'sgml-mode) sgml-xml-mode)) ;; emacs 22
 	   (list
 	    (ede-android-fname-if-exists (expand-file-name "res" pr))))
 	  (t nil))))
@@ -311,7 +314,6 @@ For java, this is both src and gen.  For nxml, it is just res."
 (defmethod ede-java-classpath ((this ede-android-project))
   "Return the classpath for this project.
 For Android projects, look to the SDK android.jar."
-  (require 'cedet-android)
   ;; @TODO - does the local project get some libs or jars or something?
   (list (cedet-android-sdk-jar)))
 
@@ -354,7 +356,7 @@ Depends on `android.el' that comes with the SDK to get going."
 	  (message "Starting DDMS ...")
 	  (sit-for 10))
       (when (not (y-or-n-p "Start Debugger anyway? " ))
-	  (signal 'quit))))
+	  (signal 'quit nil))))
   ;; Step two, start jdb.
   (require 'android) ;; comes with SDK.
   ;; @TODO - the port should be selectable.
@@ -367,7 +369,10 @@ Depends on `android.el' that comes with the SDK to get going."
 
 ;;; XML Buffer
 ;;
-(require 'nxml-mode)
+(condition-case nil
+    (require 'nxml-mode)
+  ;; No nxml?  Use sgml instead.
+  (error (require 'sgml-mode)))
 
 (defun ede-android-xml-looking-at-elt-p (elt)
   "Return non-nil if POINT is in front of the element ELT.
@@ -379,7 +384,9 @@ ELT is a string representing the text right after the < of an element tag."
 Moves the cursor upward through nested elements until ELT is found, or
 an error occurs."
   (while (not (ede-android-xml-looking-at-elt-p elt))
-    (nxml-backward-up-element 1)))
+    (if (eq major-mode 'nxml-mode)
+	(nxml-backward-up-element 1)
+      (sgml-skip-tag-backward 1))))
 
 (defun ede-android-find-attribute (attr)
   "Find the attribute ATTR in the element immediatly in front of the cursor.
