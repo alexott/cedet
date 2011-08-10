@@ -100,7 +100,10 @@
 (require 'cogre)
 
 (eval-and-compile
-  (defvar cedet-integ-base "/tmp/CEDET_INTEG"
+  (defvar cedet-integ-base
+    (if (eq system-type 'windows-nt)
+	(expand-file-name "CEDET_INTEG" temporary-file-directory)
+      "/tmp/CEDET_INTEG")
     "Root of multiple project integration tests.")
   )
 
