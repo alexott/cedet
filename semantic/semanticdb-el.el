@@ -1,6 +1,6 @@
 ;;; semanticdb-el.el --- Semantic database extensions for Emacs Lisp
 
-;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009 Eric M. Ludlam
+;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2011 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
@@ -56,6 +56,11 @@ It does not need refreshing."
   "Return nil, we never need a refresh."
   nil)
 
+(defmethod object-print ((obj semanticdb-table-emacs-lisp) &rest strings)
+  "Pretty printer extension for `semanticdb-table-emacs-lisp'.
+Adds the number of tags in this file to the object print name."
+  (apply 'call-next-method obj (cons " (proxy)" strings)))
+
 (defclass semanticdb-project-database-emacs-lisp
   (semanticdb-project-database eieio-singleton)
   ((new-table-class :initform semanticdb-table-emacs-lisp
@@ -64,6 +69,15 @@ It does not need refreshing."
 		    "New tables created for this database are of this class.")
    )
   "Database representing Emacs core.")
+
+(defmethod object-print ((obj semanticdb-project-database-emacs-lisp) &rest strings)
+  "Pretty printer extension for `semanticdb-table-emacs-lisp'.
+Adds the number of tags in this file to the object print name."
+  (let ((count 0))
+    (mapatoms (lambda (sym) (setq count (1+ count))))
+    (apply 'call-next-method obj (cons 
+				  (format " (%d known syms)" count)
+				  strings))))
 
 ;; Create the database, and add it to searchable databases for Emacs Lisp mode.
 (defvar-mode-local emacs-lisp-mode semanticdb-project-system-databases
@@ -158,9 +172,9 @@ If Emacs cannot resolve this symbol to a particular file, then return nil."
 	  (setq file (concat file ".gz"))))
 
       (let* ((tab (semanticdb-file-table-object file))
-	     (alltags (semanticdb-get-tags tab))
-	     (newtags (semanticdb-find-tags-by-name-method
-		       tab (semantic-tag-name tag)))
+	     (alltags (when tab (semanticdb-get-tags tab)))
+	     (newtags (when tab (semanticdb-find-tags-by-name-method
+				 tab (semantic-tag-name tag))))
 	     (match nil))
 	;; Find the best match.
 	(dolist (T newtags)
@@ -170,7 +184,7 @@ If Emacs cannot resolve this symbol to a particular file, then return nil."
 	(when (not match)
 	    (setq match (car newtags)))
 	;; Return it.
-	(cons tab match)))))
+	(when tab (cons tab match))))))
 
 (defun semanticdb-elisp-sym-function-arglist (sym)
   "Get the argument list for SYM.
