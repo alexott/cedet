@@ -982,21 +982,37 @@ Output must be in semanticdb Find result format."
   "Calculate completions for prefix as setup for other queries."
   (let* ((case-fold-search semantic-case-fold)
 	 (same-prefix-p (semantic-collector-last-prefix= obj prefix))
+	 (last-prefix (and (slot-boundp obj 'last-prefix)
+			   (oref obj last-prefix)))
 	 (completionlist
-	  (if (or same-prefix-p
-		  (and (slot-boundp obj 'last-prefix)
-		       (eq (compare-strings (oref obj last-prefix) 0 nil
-					    prefix 0 (length prefix))
-			   t)))
-	      ;; New prefix is subset of old prefix
-	      (oref obj last-all-completions)
-	    (semantic-collector-get-cache obj)))
+	  (cond ((or same-prefix-p
+		     (and last-prefix (eq (compare-strings
+					   last-prefix 0 nil
+					   prefix 0 (length last-prefix)) t)))
+		 ;; We have the same prefix, or last-prefix is a
+		 ;; substring of the of new prefix, in which case we are
+		 ;; refining our symbol so just re-use cache.
+		 (oref obj last-all-completions))
+		((and last-prefix
+		      (> (length prefix) 1)
+		      (eq (compare-strings
+			   prefix 0 nil
+			   last-prefix 0 (length prefix)) t))
+		   ;; The new prefix is a substring of the old
+		   ;; prefix, and it's longer than one character.
+		   ;; Perform a full search to pull in additional
+		   ;; matches. 
+		 (let ((context (semantic-analyze-current-context (point))))
+		   (setq semantic-completion-collector-engine
+			 (semantic-collector-analyze-completions
+			  "inline" :buffer (oref context buffer) :context context))
+		   (setq obj semantic-completion-collector-engine))
+		 (semantic-collector-get-cache obj))))
 	 ;; Get the result
 	 (answer (if same-prefix-p
 		     completionlist
 		   (semantic-collector-calculate-completions-raw
-		    obj prefix completionlist))
-		 )
+		    obj prefix completionlist)))
 	 (completion nil)
 	 (complete-not-uniq nil)
 	 )
@@ -1631,7 +1647,7 @@ Display mechanism using tooltip for a list of possible completions.")
 	    (oset obj typing-count (1+ typing-count)))
 	;; At this point, we know we have too many items.
 	;; Lets be brave, and truncate l
-	(setcdr (nthcdr (oref obj max-tags) l) nil)
+	(setcdr (nthcdr (1- (oref obj max-tags)) l) nil)
 	(setq msg (mapconcat 'identity l "\n"))
 	(cond
 	 ((= force-show -1)
@@ -1656,8 +1672,10 @@ Display mechanism using tooltip for a list of possible completions.")
   "Return the location of POINT as positioned on the selected frame.
 Return a cons cell (X . Y)"
   (let* ((frame (selected-frame))
-	 (left (frame-parameter frame 'left))
-	 (top (frame-parameter frame 'top))
+	 (left (or (car-safe (cdr-safe (frame-parameter frame 'left)))
+		   (frame-parameter frame 'left)))
+         (top (or (car-safe (cdr-safe (frame-parameter frame 'top)))
+		  (frame-parameter frame 'top)))
 	 (point-pix-pos (posn-x-y (posn-at-point)))
 	 (edges (window-inside-pixel-edges (selected-window))))
     (cons (+ (car point-pix-pos) (car edges) left)

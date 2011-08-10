@@ -962,15 +962,18 @@ doing fancy completions."
   "Calculate and display a list of completions."
   (when (and (semantic-idle-summary-useful-context-p)
 	     (semantic-idle-completions-end-of-symbol-p))
-    ;; This mode can be fragile.  Ignore problems.
-    ;; If something doesn't do what you expect, run
-    ;; the below command by hand instead.
-    (condition-case nil
+    ;; This mode can be fragile, hence don't raise errors, and only
+    ;; report problems if semantic-idle-scheduler-verbose-flag is
+    ;; non-nil.  If something doesn't do what you expect, run the
+    ;; below command by hand instead.
+    (condition-case err
 	(semanticdb-without-unloaded-file-searches
 	    ;; Use idle version.
 	    (semantic-complete-analyze-inline-idle)
 	  )
-      (error nil))
+      (error
+       (when semantic-idle-scheduler-verbose-flag
+	 (message "  %s" (error-message-string err)))))
     ))
 
 (define-semantic-idle-service semantic-idle-completions
