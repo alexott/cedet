@@ -1328,8 +1328,9 @@ a collector, and tracking tables of completion to display."
 (defmethod semantic-displayor-next-action ((obj semantic-displayor-abstract))
   "The next action to take on the minibuffer related to display."
   (if (and (slot-boundp obj 'last-prefix)
-	   (string= (oref obj last-prefix) (semantic-completion-text))
-	   (eq last-command this-command))
+	   (or (eq this-command 'semantic-complete-inline-TAB)
+	       (and (string= (oref obj last-prefix) (semantic-completion-text))
+		    (eq last-command this-command))))
       'scroll
     'display))
 
