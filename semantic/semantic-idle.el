@@ -275,7 +275,7 @@ And also manages services that depend on tag values."
         ;; services.  Stop on keypress.
 
 	;; NOTE ON COMMENTED SAFE HERE
-	;; We used to not execute the services if the buffer wsa
+	;; We used to not execute the services if the buffer was
 	;; unparseable.  We now assume that they are lexically
 	;; safe to do, because we have marked the buffer unparseable
 	;; if there was a problem.
@@ -284,11 +284,11 @@ And also manages services that depend on tag values."
 	  (save-excursion
 	    (semantic-throw-on-input 'idle-queue)
 	    (when semantic-idle-scheduler-verbose-flag
-	      (working-temp-message "IDLE: execture service %s..." service))
+	      (working-temp-message "IDLE: execute service %s..." service))
 	    (semantic-safe (format "Idle Service Error %s: %%S" service)
 	      (funcall service))
 	    (when semantic-idle-scheduler-verbose-flag
-	      (working-temp-message "IDLE: execture service %s...done" service))
+	      (working-temp-message "IDLE: execute service %s...done" service))
 	    )))
 	;;)
       ;; Finally loop over remaining buffers, trying to update them as

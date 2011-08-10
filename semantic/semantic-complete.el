@@ -926,7 +926,7 @@ of a completion."
 
 (defmethod semantic-collector-next-action
   ((obj semantic-collector-abstract) partial)
-  "What should we do next?  OBJ can predict a next good action.
+  "What should we do next?  OBJ can be used to determine the next action.
 PARTIAL indicates if we are doing a partial completion."
   (if (and (slot-boundp obj 'last-completion)
 	   (string= (semantic-completion-text) (oref obj last-completion)))
@@ -1055,7 +1055,7 @@ Output must be in semanticdb Find result format."
 
 (defmethod semantic-collector-try-completion-whitespace
   ((obj semantic-collector-abstract) prefix)
-  "For OBJ, do whatepsace completion based on PREFIX.
+  "For OBJ, do whitespace completion based on PREFIX.
 This implies that if there are two completions, one matching
 the test \"preifx\\>\", and one not, the one matching the full
 word version of PREFIX will be chosen, and that text returned.
@@ -1185,7 +1185,7 @@ NEWCACHE is the new tag table, but we ignore it."
   (semantic-collector-buffer-abstract)
   ()
   "Completion engine for tags in the current buffer.
-When searching for a tag, uses semantic  deep searche functions.
+When searching for a tag, uses semantic deep search functions.
 Basics search only in the current buffer.")
 
 (defmethod semantic-collector-calculate-cache
