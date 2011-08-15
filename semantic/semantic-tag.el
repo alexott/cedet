@@ -1469,9 +1469,6 @@ and `semantic-tag-type-interfaces' instead" "Semantic 1.0")
 (semantic-alias-obsolete 'semantic-token-variable-const
                          'semantic-tag-variable-constant-p)
 
-(semantic-alias-obsolete 'semantic-token-variable-optsuffix
-                         'semantic-tag-variable-optsuffix)
-
 (semantic-alias-obsolete 'semantic-token-include-system
                          'semantic-tag-include-system-p)
 
