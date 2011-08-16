@@ -48,6 +48,7 @@
 ;;  2) Guess what an abstract converter looks like based on dot
 ;;  3) Promote the generic API, and write semantic-tag converter.
 
+(require 'cogre/uml)
 (require 'cogre/srecode)
 (require 'cedet-graphviz)
 (eval-when-compile (require 'ps-print))
