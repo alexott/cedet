@@ -1559,32 +1559,60 @@ one in the source buffer."
 ;; * Safe compatibility for tooltip free systems.
 ;; * Don't use 'avoid package for tooltip positioning.
 
+(defcustom semantic-displayor-tooltip-mode 'standard
+  "Mode for the tooltip inline completion.
+
+Standard: Show only `semantic-displayor-tooltip-initial-max-tags'
+number of completions initially.  Pressing TAB will show the
+extended set.
+
+Quiet: Only show completions when we have narrowed all
+posibilities down to a maximum of
+`semantic-displayor-tooltip-initial-max-tags' tags.  Pressing TAB
+multiple times will also show completions.
+
+Verbose: Always show all completions available.
+
+The absolute maximum number of completions for all mode is
+determined through `semantic-displayor-tooltip-max-tags'."
+  :group 'semantic
+  :type '(choice (const :tag "Standard" standard)
+		 (const :tag "Quiet" quiet)
+		 (const :tag "Verbose" verbose)))
+
+(defcustom semantic-displayor-tooltip-initial-max-tags 5
+  "Maximum number of tags to be displayed initially.
+See doc-string of `semantic-displayor-tooltip-mode' for details."
+  :group 'semantic
+  :type 'integer)
+
+(defcustom semantic-displayor-tooltip-max-tags 25
+ "The maximum number of tags to be displayed.
+Maximum number of completions where we have activated the
+extended completion list through typing TAB or SPACE multiple
+times.  This limit needs to fit on your screen!
+
+Note: Customizing this variable increases 'x-max-tooltip-size' to
+force over-sized tooltips if necessary.  This will not happen if
+you directly set this variable via `setq'."
+ :group 'semantic
+ :type 'integer
+ :set '(lambda (sym var)
+            (set-default sym var)
+	    (setcdr x-max-tooltip-size (max (1+ var) (cdr x-max-tooltip-size)))))
+
+
 (defclass semantic-displayor-tooltip (semantic-displayor-traditional)
-  ((max-tags     :type integer
-		 :initarg :max-tags
-		 :initform 5
-		 :custom integer
-		 :documentation
-		 "Max number of tags displayed on tooltip at once.
-If `force-show' is 1,  this value is ignored with typing tab or space twice continuously.
-if `force-show' is 0, this value is always ignored.")
-   (force-show   :type integer
-		 :initarg :force-show
-	         :initform 1
-		 :custom (choice (const
-				  :tag "Show when double typing"
-				  1)
-				 (const
-				  :tag "Show always"
-				  0)
-				 (const
-				  :tag "Show if the number of tags is less than `max-tags'."
-				  -1))
-	         :documentation
-		 "Control the behavior of the number of tags is greater than `max-tags'.
--1 means tags are never shown.
-0 means the tags are always shown.
-1 means tags are shown if space or tab is typed twice continuously.")
+  ((mode :initarg :mode
+	 :initform
+	 (symbol-value 'semantic-displayor-tooltip-mode)
+	 :documentation
+	 "See `semantic-displayor-tooltip-mode'.")
+   (max-tags-initial :initarg max-tags-initial
+		     :initform
+		     (symbol-value 'semantic-displayor-tooltip-initial-max-tags)
+		     :documentation
+		     "See `semantic-displayor-tooltip-initial-max-tags'.")
    (typing-count :type integer
 		 :initform 0
 		 :documentation
@@ -1592,7 +1620,7 @@ if `force-show' is 0, this value is always ignored.")
    (shown        :type boolean
 		 :initform nil
 		 :documentation
-		 "Flag representing whether tags is shown once or not.")
+		 "Flag representing whether tooltip has been shown yet.")
    )
   "Display completions options in a tooltip.
 Display mechanism using tooltip for a list of possible completions.")
@@ -1612,50 +1640,61 @@ Display mechanism using tooltip for a list of possible completions.")
       (call-next-method)
     (let* ((tablelong (semanticdb-strip-find-results (oref obj table)))
 	   (table (semantic-unique-tag-table-by-name tablelong))
-	   (l (mapcar semantic-completion-displayor-format-tag-function table))
-	   (ll (length l))
+	   (completions (mapcar semantic-completion-displayor-format-tag-function table))
+	   (numcompl (length completions))
 	   (typing-count (oref obj typing-count))
-	   (force-show (oref obj force-show))
+	   (mode (oref obj mode))
+	   (max-tags (oref obj max-tags-initial))
 	   (matchtxt (semantic-completion-text))
-	   msg)
-      (if (or (oref obj shown)
-	      (< ll (oref obj max-tags))
-	      (and (<= 0 force-show)
-		   (< (1- force-show) typing-count)))
-	  (progn
-	    (oset obj typing-count 0)
-	    (oset obj shown t)
-	    (if (eq 1 ll)
-		;; We Have only one possible match.  There could be two cases.
-		;; 1) input text != single match.
-		;;    --> Show it!
-		;; 2) input text == single match.
-		;;   --> Complain about it, but still show the match.
-		(if (string= matchtxt (semantic-tag-name (car table)))
-		    (setq msg (concat "[COMPLETE]\n" (car l)))
-		  (setq msg (car l)))
-	      ;; Create the long message.
-	      (setq msg (mapconcat 'identity l "\n"))
-	      ;; If there is nothing, say so!
-	      (if (eq 0 (length msg))
-		  (setq msg "[NO MATCH]")))
-	    (semantic-displayor-tooltip-show msg))
-	;; The typing count determines if the user REALLY REALLY
-	;; wanted to show that much stuff.  Only increment
-	;; if the current command is a completion command.
-	(if (and (stringp (this-command-keys))
-		 (string= (this-command-keys) "\C-i"))
-	    (oset obj typing-count (1+ typing-count)))
-	;; At this point, we know we have too many items.
-	;; Lets be brave, and truncate l
-	(setcdr (nthcdr (1- (oref obj max-tags)) l) nil)
-	(setq msg (mapconcat 'identity l "\n"))
+	   msg msg-tail)
+      ;; Keep a count of the consecutive completion commands entered by the user.
+      (if (and (stringp (this-command-keys))
+	       (string= (this-command-keys) "\C-i"))
+	  (oset obj typing-count (1+ (oref obj typing-count)))
+	(oset obj typing-count 0))
+      (cond
+       ((eq mode 'quiet)
+	;; Switch back to standard mode if user presses key more than 5 times.
+	(when (>= (oref obj typing-count) 5)
+	  (oset obj mode 'standard)
+	  (setq mode 'standard)
+	  (message "Resetting inline-mode to 'standard'."))
+	(when (and (> numcompl max-tags)
+		   (< (oref obj typing-count) 2))
+	  ;; Discretely hint at completion availability.
+	  (setq msg "...")))
+       ((eq mode 'verbose)
+	;; Always show extended match set.
+	(oset obj max-tags semantic-displayor-tooltip-max-tags)
+	(setq max-tags semantic-displayor-tooltip-max-tags)))
+      (unless msg
+	(oset obj shown t)
 	(cond
-	 ((= force-show -1)
-	  (semantic-displayor-tooltip-show (concat msg "\n...")))
-	 ((= force-show 1)
-	  (semantic-displayor-tooltip-show (concat msg "\n(TAB for more)")))
-	 )))))
+	 ((> numcompl max-tags)
+	  ;; We have too many items, be brave and truncate 'completions'.
+	  (setcdr (nthcdr (1- max-tags) completions) nil)
+	  (if (= max-tags semantic-displayor-tooltip-initial-max-tags)
+	      (setq msg-tail (concat "\n[<TAB> " (number-to-string (- numcompl max-tags)) " more]"))
+	    (setq msg-tail (concat "\n[<n/a> " (number-to-string (- numcompl max-tags)) " more]"))
+	    (if (>= (oref obj typing-count) 2)
+		(message "Refine search to display results beyond the '%s' limit"
+			 (symbol-name 'semantic-complete-inline-max-tags-extended)))))
+	 ((= numcompl 1)
+	  ;; two possible cases
+	  ;; 1. input text != single match - we found a unique completion!
+	  ;; 2. input text == single match - we found no additional matches, it's just the input text!
+	  (if (string= matchtxt (semantic-tag-name (car table)))
+	      (setq msg "[COMPLETE]\n")))
+	 ((zerop numcompl)
+	  (oset obj shown nil)
+	  ;; No matches, say so if in verbose mode!
+	  (if semantic-idle-scheduler-verbose-flag (setq msg "[NO MATCH]"))))
+	;; Create the tooltip text.
+	(setq msg (concat msg (mapconcat 'identity completions "\n"))))
+      ;; Add any tail info.
+      (setq msg (concat msg msg-tail))
+      ;; Display tooltip.
+      (if (not (eq msg "")) (semantic-displayor-tooltip-show msg)))))
 
 ;;; Compatibility
 ;;
@@ -1699,7 +1738,7 @@ Return a cons cell (X . Y)"
 (defmethod semantic-displayor-scroll-request ((obj semantic-displayor-tooltip))
   "A request to for the displayor to scroll the completion list (if needed)."
   ;; Do scrolling in the tooltip.
-  (oset obj max-tags 30)
+  (oset obj max-tags-initial 30)
   (semantic-displayor-show-request obj)
   )
 
