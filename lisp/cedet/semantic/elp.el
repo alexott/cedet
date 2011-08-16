@@ -24,6 +24,7 @@
 ;; Provide fast ways to profile various (often slow) Semantic processes.
 
 (require 'elp)
+(require 'eieio)
 (require 'data-debug)
 (require 'semantic/adebug)
 (require 'semantic/tag-ls)
