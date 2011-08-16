@@ -35,6 +35,7 @@
 ;;; Code:
 
 (require 'semantic/wisent)
+(require 'semantic/wisent/comp)
 
 (defconst wisent-expr-parser-tables
   (eval-when-compile
