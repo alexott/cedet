@@ -25,6 +25,16 @@
 
 (require 'elp)
 (require 'data-debug)
+(require 'semantic/adebug)
+(require 'semantic/tag-ls)
+(require 'semantic/tag-file)
+(require 'semantic/db)
+(require 'semantic/db-find)
+(require 'semantic/db-typecache)
+(require 'semantic/scope)
+(require 'semantic/analyze/fcn)
+(require 'semantic/analyze)
+(require 'semantic/analyze/complete)
 
 ;;; Code:
 (defvar semantic.elp-emacs-core-list

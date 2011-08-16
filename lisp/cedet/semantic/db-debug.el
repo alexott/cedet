@@ -25,6 +25,8 @@
 ;; semanticdb state.
 
 (require 'data-debug)
+(require 'semantic/db)
+(require 'semantic/format)
 
 ;;; Code:
 ;;
