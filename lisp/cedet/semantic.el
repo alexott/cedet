@@ -396,7 +396,7 @@ the output buffer."
 	 (out (semantic-fetch-tags))
 	 (end (current-time)))
     (message "Retrieving tags took %.2f seconds."
-	     (semantic.elapsed-time start end))
+	     (semantic-elapsed-time start end))
     (when (or (null clear) (not (listp clear)))
       (pop-to-buffer "*Parser Output*")
       (require 'pp)

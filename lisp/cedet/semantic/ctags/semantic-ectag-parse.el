@@ -61,7 +61,7 @@ Convert the output tags into Semantic tags."
     (when (cedet-called-interactively-p 'any)
       (message "Parsed %d tags in %d seconds."
                (length tags)
-               (semantic.elapsed-time start end))
+               (semantic-elapsed-time start end))
       (data-debug-new-buffer (concat "*" (buffer-name) " ADEBUG*"))
       (data-debug-insert-tag-list tags "* ")
       (when (consp semantic-ectag-collect-errors)

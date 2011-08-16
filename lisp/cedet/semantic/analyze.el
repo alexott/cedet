@@ -454,14 +454,14 @@ to provide a large number of non-cached analysis for filtering symbols."
 	  (error (semantic-analyze-push-error err))))
 
       (setq end (current-time))
-      ;;(message "Analysis took %.2f sec" (semantic.elapsed-time LLstart end))
+      ;;(message "Analysis took %.2f sec" (semantic-elapsed-time LLstart end))
 
       )
     (when prefix
       (prog1
 	  (funcall analyzehookfcn (car bounds) (cdr bounds) prefix)
 	;;(setq end (current-time))
-	;;(message "hookfcn took %.5f sec" (semantic.elapsed-time LLstart end))
+	;;(message "hookfcn took %.5f sec" (semantic-elapsed-time LLstart end))
 	)
 
 	)))
@@ -693,7 +693,7 @@ Optional argument CTXT is the context to show."
     (if (not ctxt)
 	(message "No Analyzer Results")
       (message "Analysis  took %.2f seconds."
-	       (semantic.elapsed-time start end))
+	       (semantic-elapsed-time start end))
       (semantic-analyze-pulse ctxt)
       (if ctxt
 	  (progn

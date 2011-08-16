@@ -310,7 +310,7 @@ Only works for tags in the global namespace."
 	 (sac (semantic-analyze-tag-references tag))
 	 (end (current-time))
 	 )
-    (message "Analysis took %.2f seconds." (semantic.elapsed-time start end))
+    (message "Analysis took %.2f seconds." (semantic-elapsed-time start end))
     (if sac
 	(progn
 	  (require 'eieio-datadebug)

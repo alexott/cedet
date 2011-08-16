@@ -590,7 +590,7 @@ If there isn't one, create it.
 	 )
     (data-debug-new-buffer "*TypeCache ADEBUG*")
     (message "Calculating Cache took %.2f seconds."
-	     (semantic.elapsed-time start end))
+	     (semantic-elapsed-time start end))
 
     (data-debug-insert-thing tc "]" "")
 

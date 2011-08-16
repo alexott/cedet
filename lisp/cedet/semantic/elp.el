@@ -580,7 +580,7 @@ Argument NAME is the name to give the ELP data object."
       (setq stop (current-time)))
     (semantic.elp-results "translate-path")
     (setq pathtime semantic.elp-last-results)
-    (oset pathtime :total (semantic.elapsed-time start stop))
+    (oset pathtime :total (semantic-elapsed-time start stop))
     ;; typecache
     (let* ((tab semanticdb-current-table)
 	   (idx (semanticdb-get-table-index tab))
@@ -594,7 +594,7 @@ Argument NAME is the name to give the ELP data object."
       (setq typecache tc))
     (semantic.elp-results "typecache")
     (setq typecachetime semantic.elp-last-results)
-    (oset typecachetime :total (semantic.elapsed-time start stop))
+    (oset typecachetime :total (semantic-elapsed-time start stop))
     ;; Scope
     (semantic.elp-scope-enable)
     (progn
@@ -603,7 +603,7 @@ Argument NAME is the name to give the ELP data object."
       (setq stop (current-time)))
     (semantic.elp-results "scope")
     (setq scopetime semantic.elp-last-results)
-    (oset scopetime :total (semantic.elapsed-time start stop))
+    (oset scopetime :total (semantic-elapsed-time start stop))
     ;; Analyze!
     (semantic.elp-analyze-enable)
     (progn
@@ -612,7 +612,7 @@ Argument NAME is the name to give the ELP data object."
       (setq stop (current-time)))
     (semantic.elp-results "analyze")
     (setq ctxttime semantic.elp-last-results)
-    (oset ctxttime :total (semantic.elapsed-time start stop))
+    (oset ctxttime :total (semantic-elapsed-time start stop))
     ;; Complete!
     (semantic.elp-complete-enable)
     (progn
@@ -621,13 +621,13 @@ Argument NAME is the name to give the ELP data object."
       (setq stop (current-time)))
     (semantic.elp-results "complete")
     (setq completiontime semantic.elp-last-results)
-    (oset completiontime :total (semantic.elapsed-time start stop))
+    (oset completiontime :total (semantic-elapsed-time start stop))
     ;; Finish it
     (setq totalstop (current-time))
     ;; build it
     (let ((elpobj (semantic.elp-object-analyze
 		   "ELP"
-		   :total          (semantic.elapsed-time totalstart totalstop)
+		   :total          (semantic-elapsed-time totalstart totalstop)
 		   :pathtime	   pathtime
 		   :typecachetime  typecachetime
 		   :scopetime	   scopetime
@@ -658,11 +658,11 @@ Argument NAME is the name to give the ELP data object."
     (setq totalstop (current-time))
     (semantic.elp-results "")
     (setq time semantic.elp-last-results)
-    (oset time :total (semantic.elapsed-time totalstart totalstop))
+    (oset time :total (semantic-elapsed-time totalstart totalstop))
     ;; build it
     (let ((elpobj (semantic.elp-object
 		   "ELP"
-		   :total          (semantic.elapsed-time totalstart totalstop)
+		   :total          (semantic-elapsed-time totalstart totalstop)
 		   :time	   time)))
       (data-debug-show elpobj)
       (setq semantic.elp-last-run elpobj)
@@ -696,11 +696,11 @@ The expectation is that you will edit this fcn with different
     (setq totalstop (current-time))
     (semantic.elp-results "")
     (setq time semantic.elp-last-results)
-    (oset time :total (semantic.elapsed-time totalstart totalstop))
+    (oset time :total (semantic-elapsed-time totalstart totalstop))
     ;; build it
     (let ((elpobj (semantic.elp-object
 		   "ELP"
-		   :total          (semantic.elapsed-time totalstart totalstop)
+		   :total          (semantic-elapsed-time totalstart totalstop)
 		   :time	   time
 		   :answer         ans)))
       (data-debug-show elpobj)
@@ -739,11 +739,11 @@ The expectation is that you will edit this fcn with different
 
     (semantic.elp-results "")
     (setq time semantic.elp-last-results)
-    (oset time :total (semantic.elapsed-time totalstart totalstop))
+    (oset time :total (semantic-elapsed-time totalstart totalstop))
     ;; build it
     (let ((elpobj (semantic.elp-object
 		   "ELP"
-		   :total          (semantic.elapsed-time totalstart totalstop)
+		   :total          (semantic-elapsed-time totalstart totalstop)
 		   :time	   time
 		   :answer         ans)))
       (data-debug-show elpobj)

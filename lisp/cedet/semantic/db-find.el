@@ -733,7 +733,7 @@ for details on how this list is derived."
 	)
     (data-debug-new-buffer "*SEMANTICDB FTP ADEBUG*")
     (message "Search of tags took %.2f seconds."
-	     (semantic.elapsed-time start end))
+	     (semantic-elapsed-time start end))
 
     (data-debug-insert-stuff-list p "*")))
 
@@ -755,7 +755,7 @@ for details on how this list is derived."
 	 )
     (data-debug-new-buffer "*SEMANTICDB FTP ADEBUG*")
     (message "Search of tags took %.2f seconds."
-	     (semantic.elapsed-time start end))
+	     (semantic-elapsed-time start end))
 
     (data-debug-insert-stuff-list p "*")))
 

@@ -646,7 +646,7 @@ STATE is the current compiler state."
 	 (end (current-time))
 	 )
     (message "Creating a dictionary took %.2f seconds."
-	     (semantic.elapsed-time start end))
+	     (semantic-elapsed-time start end))
     (data-debug-new-buffer "*SRECODE ADEBUG*")
     (data-debug-insert-object-slots dict "*")))
 

@@ -290,7 +290,7 @@ PREBUTTONTEXT is some text between prefix and the find results button."
 	 (end (current-time)))
 
     (message "Retrieving tags took %.2f seconds."
-	     (semantic.elapsed-time start end))
+	     (semantic-elapsed-time start end))
 
     (data-debug-new-buffer (concat "*" (buffer-name) " ADEBUG*"))
     (data-debug-insert-tag-list out "* "))
@@ -309,7 +309,7 @@ Display the results as a debug list."
 				   regex
 				   " ADEBUG*"))
     (message "Search of tags took %.2f seconds."
-	     (semantic.elapsed-time start end))
+	     (semantic-elapsed-time start end))
 
     (data-debug-insert-find-results fr "*")))
 

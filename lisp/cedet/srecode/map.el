@@ -226,7 +226,7 @@ Optional argument RESET forces a reset of the current map."
 	(end (current-time))
 	)
     (message "Updating the map took %.2f seconds."
-	     (semantic.elapsed-time start end))
+	     (semantic-elapsed-time start end))
     (data-debug-new-buffer "*SRECODE ADEBUG*")
     (data-debug-insert-stuff-list p "*")))
 
