@@ -1559,6 +1559,7 @@ one in the source buffer."
 ;; * Safe compatibility for tooltip free systems.
 ;; * Don't use 'avoid package for tooltip positioning.
 
+;;;###autoload
 (defcustom semantic-displayor-tooltip-mode 'standard
   "Mode for the tooltip inline completion.
 
@@ -1580,6 +1581,7 @@ determined through `semantic-displayor-tooltip-max-tags'."
 		 (const :tag "Quiet" quiet)
 		 (const :tag "Verbose" verbose)))
 
+;;;###autoload
 (defcustom semantic-displayor-tooltip-initial-max-tags 5
   "Maximum number of tags to be displayed initially.
 See doc-string of `semantic-displayor-tooltip-mode' for details."
