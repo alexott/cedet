@@ -49,7 +49,7 @@
 ;;; Code:
 (require 'cedet-compat)
 (require 'semantic/wisent)
-(require 'semantic/wisent/calc.wy)
+(require 'semantic/wisent/calc-wy)
 
 (define-lex-simple-regex-analyzer wisent-calc-lex-number
   "Detect and create number tokens."
