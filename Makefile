@@ -61,6 +61,7 @@ all: generate compile autoloads doc
 
 generate: $(patsubst %,generate-%,$(PACKAGES))
 
+compile: REQUIRES+=cedet-compat
 compile: compile-common $(patsubst %,compile-%,$(PACKAGES))
 
 autoloads: $(patsubst %,autoloads-%,$(PACKAGES))
