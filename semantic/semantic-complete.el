@@ -1678,25 +1678,27 @@ Display mechanism using tooltip for a list of possible completions.")
 	  (if (= max-tags semantic-displayor-tooltip-initial-max-tags)
 	      (setq msg-tail (concat "\n[<TAB> " (number-to-string (- numcompl max-tags)) " more]"))
 	    (setq msg-tail (concat "\n[<n/a> " (number-to-string (- numcompl max-tags)) " more]"))
-	    (if (>= (oref obj typing-count) 2)
-		(message "Refine search to display results beyond the '%s' limit"
-			 (symbol-name 'semantic-complete-inline-max-tags-extended)))))
+	    (when (>= (oref obj typing-count) 2)
+	      (message "Refine search to display results beyond the '%s' limit"
+		       (symbol-name 'semantic-complete-inline-max-tags-extended)))))
 	 ((= numcompl 1)
 	  ;; two possible cases
 	  ;; 1. input text != single match - we found a unique completion!
 	  ;; 2. input text == single match - we found no additional matches, it's just the input text!
-	  (if (string= matchtxt (semantic-tag-name (car table)))
-	      (setq msg "[COMPLETE]\n")))
+	  (when (string= matchtxt (semantic-tag-name (car table)))
+	    (setq msg "[COMPLETE]\n")))
 	 ((zerop numcompl)
 	  (oset obj shown nil)
 	  ;; No matches, say so if in verbose mode!
-	  (if semantic-idle-scheduler-verbose-flag (setq msg "[NO MATCH]"))))
+	  (when semantic-idle-scheduler-verbose-flag
+	    (setq msg "[NO MATCH]"))))
 	;; Create the tooltip text.
 	(setq msg (concat msg (mapconcat 'identity completions "\n"))))
       ;; Add any tail info.
       (setq msg (concat msg msg-tail))
       ;; Display tooltip.
-      (if (not (eq msg "")) (semantic-displayor-tooltip-show msg)))))
+      (when (not (eq msg ""))
+	(semantic-displayor-tooltip-show msg)))))
 
 ;;; Compatibility
 ;;
