@@ -1,3 +1,6 @@
+* All explicit requires in the Makefile will lead to execution errors when
+  running a non-compiled CEDET (thus should probably modify code into the proper
+  requires)
 * The 'obsolete' directory contains files that were no longer referenced from
   the original Project.ede files
 * Should compatibility functions be maintained (cedet-compat)?

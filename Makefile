@@ -79,12 +79,14 @@ cedet_BOVINE=$(shell $(FIND) $(lispdir)/cedet/ -name \*.by)
 cedet_WISENT=$(shell $(FIND) $(lispdir)/cedet/ -name \*.wy -and -not -path $(lispdir)/cedet/semantic/grammar.wy)
 cedet_GENERATE_LISP=$(patsubst %.by,%-by.el,$(cedet_BOVINE)) $(patsubst %.wy,%-wy.el,$(cedet_WISENT))
 
+%-by.elc: REQUIRES+=semantic/bovine
+
 
 ### Dynamic rules
 
 define PACKAGE_template
 $(1)_LISP=$(shell $(FIND) $(lispdir)/$(1)/ -name \*.el -and -not -name loaddefs.el)
-$(1)_CODE=$$(patsubst %.el,%.elc,$$($(1)_LISP))
+$(1)_CODE=$$(patsubst %.el,%.elc,$$($(1)_GENERATE_LISP) $$($(1)_LISP))
 $(1)_AUTOLOADS=$(foreach d,$(shell $(FIND) $(lispdir)/$(1)/ -type d),$(d)/loaddefs.el)
 $(1)_TEXINFO=$(shell $(FIND) $(docdir) -name $(1).texi) $(shell test ! -d $(docdir)/$(1) || $(FIND) $(docdir)/$(1)/ -name *.texi)
 $(1)_INFO=$$(patsubst %.texi,%.info,$$($(1)_TEXINFO))
