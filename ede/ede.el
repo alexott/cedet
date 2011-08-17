@@ -327,8 +327,8 @@ Argument MENU-DEF specifies the menu being created."
 This function is designed to be used by `ede-configuration-forms-menu'
 but can also be used interactively."
   (interactive
-   (list (let ((proj (ede-current-project))
-	       (configs (oref proj configurations)))
+   (list (let* ((proj (ede-current-project))
+		(configs (oref proj configurations)))
 	   (completing-read "New configuration: "
 			    configs nil t
 			    (oref proj configuration-default)))))
