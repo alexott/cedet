@@ -1,4 +1,4 @@
-;;; semantic-ectag-parse.el --- exuberent CTags into Semantic tags
+;;; semantic/ectags/parse.el --- exuberant CTags into Semantic tags
 
 ;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
 
@@ -29,33 +29,33 @@
 ;; Tags that appear as members, or otherwise appear to belong to
 ;; other tags in the list will be parented appropriately.
 
-(require 'semantic-ectag-util)
+(require 'semantic/ectags/util)
 ;;; Code:
 
 ;; These variables need to be bound to values on a per-mode basis.
-(defvar semantic-ectag-lang nil
-  "The language name used by Exuberent CTags for the current buffer.")
-(defvar semantic-ectag-lang-kind nil
-  "The kinds of tags fetched by Exuberent CTags for the current language.")
-(defvar semantic-ectag-lang-extra-flags nil
-  "Extra flags to pass to Exuberent CTags for a particular language.")
+(defvar semantic-ectags-lang nil
+  "The language name used by Exuberant CTags for the current buffer.")
+(defvar semantic-ectags-lang-kind nil
+  "The kinds of tags fetched by Exuberant CTags for the current language.")
+(defvar semantic-ectags-lang-extra-flags nil
+  "Extra flags to pass to Exuberant CTags for a particular language.")
 
-(defvar semantic-ectag-collect-errors nil
+(defvar semantic-ectags-collect-errors nil
   "When non-nil, collect errors.")
 
 ;;;###autoload
-(defun semantic-ectag-parse-buffer ()
-  "Execute Exuberent CTags on this buffer.
+(defun semantic-ectags-parse-buffer ()
+  "Execute Exuberant CTags on this buffer.
 Convert the output tags into Semantic tags."
   (interactive)
-  (require 'semantic-ectag-lang)
-  (when (not semantic-ectag-lang)
-    (error "Exuberent CTag support for Semantic not configured for %s"
+  (require 'semantic-ectags-lang)
+  (when (not semantic-ectags-lang)
+    (error "Exuberant CTags support for Semantic not configured for %s"
            major-mode))
-  (let* ((semantic-ectag-collect-errors (cedet-called-interactively-p 'any))
+  (let* ((semantic-ectags-collect-errors (cedet-called-interactively-p 'any))
          (start (current-time))
          (tags
-          (semantic-ectag-parse-file-with-mode (buffer-file-name) major-mode))
+          (semantic-ectags-parse-file-with-mode (buffer-file-name) major-mode))
          (end (current-time)))
 
     (when (cedet-called-interactively-p 'any)
@@ -64,23 +64,23 @@ Convert the output tags into Semantic tags."
                (semantic-elapsed-time start end))
       (data-debug-new-buffer (concat "*" (buffer-name) " ADEBUG*"))
       (data-debug-insert-tag-list tags "* ")
-      (when (consp semantic-ectag-collect-errors)
-        (insert "\n\nFound the following ctags config errors:\n")
-        (dolist (E semantic-ectag-collect-errors)
+      (when (consp semantic-ectags-collect-errors)
+        (insert "\n\nFound the following ectags config errors:\n")
+        (dolist (E semantic-ectags-collect-errors)
           (insert "  * " E "\n")))
       )
 
     tags)
   )
 
-(defun semantic-ectag-parse-file-with-mode (filename mode)
-  "Execute Exuberent CTags on FILENAME using major mode MODE settings."
+(defun semantic-ectags-parse-file-with-mode (filename mode)
+  "Execute Exuberant CTags on FILENAME using major mode MODE settings."
   (message "CTAGS/%s..." (file-name-nondirectory filename))
-  (let* ((xtra (mode-local-symbol-value 'semantic-ectag-lang-extra-flags
+  (let* ((xtra (mode-local-symbol-value 'semantic-ectags-lang-extra-flags
                                         mode))
-         (lang (mode-local-symbol-value 'semantic-ectag-lang
+         (lang (mode-local-symbol-value 'semantic-ectags-lang
                                         mode))
-         (kind (mode-local-symbol-value 'semantic-ectag-lang-kind
+         (kind (mode-local-symbol-value 'semantic-ectags-lang-kind
                                         mode))
          (arg-list (append
                     xtra
@@ -93,7 +93,7 @@ Convert the output tags into Semantic tags."
                      "-f" "-" ;; Send to standard out.
                      ;; We have to pass in the file, not buffer text.
                      filename)))
-         (buff (apply 'semantic-ectag-run arg-list))
+         (buff (apply 'semantic-ectags-run arg-list))
 
          )
     (save-excursion
@@ -102,18 +102,18 @@ Convert the output tags into Semantic tags."
           ;; Sometimes this might throw an error.  Be safe.
           (funcall mode)
         (error (message "Error attempting to use mode settings with CTAGS.")))
-      (semantic-ectag-parse-tags))
+      (semantic-ectags-parse-tags))
     ))
 
-(defun semantic-ectag-parse-tags ()
-  "Parse the Exuberent CTags output in the current buffer."
+(defun semantic-ectags-parse-tags ()
+  "Parse the Exuberant CTags output in the current buffer."
   (goto-char (point-min))
   (let ((tags nil)
         (ptag-stack nil) ; parent tag stack.
         (pname nil)      ; parent names.
         )
     (while (not (eobp))
-      (let* ((ptag (semantic-ectag-parse-one-tag
+      (let* ((ptag (semantic-ectags-parse-one-tag
                     (buffer-substring (point) (point-at-eol))))
              (tag (car ptag))
              (parents (cdr ptag))
@@ -121,7 +121,7 @@ Convert the output tags into Semantic tags."
 
         (when ptag
           ;; Set some language specific attributes.
-          (semantic-ectag-set-language-attributes tag parents)
+          (semantic-ectags-set-language-attributes tag parents)
 
           ;; At this point, we have to guess if TAG is embedded into one
           ;; of the parents in the parent stack.  There are three cases:
@@ -193,11 +193,11 @@ Convert the output tags into Semantic tags."
                   ;; No parent to add to.
                   (progn
                     (push tag tags)
-                    (semantic-ectag-add-parent tag parents)
+                    (semantic-ectags-add-parent tag parents)
                     )
                 ;; Add TAG to the correct parent, and save name
-                (semantic-ectag-add-child add-to-this-parent tag)
-                (semantic-ectag-add-parent tag pushed-parent-list)
+                (semantic-ectags-add-child add-to-this-parent tag)
+                (semantic-ectags-add-parent tag pushed-parent-list)
                 )
               )
             ))
@@ -206,7 +206,7 @@ Convert the output tags into Semantic tags."
         (condition-case nil (forward-char 1) (error nil))))
     (nreverse tags)))
 
-(defun semantic-ectag-add-child (parent child)
+(defun semantic-ectags-add-child (parent child)
   "Add into the PARENT tag a new CHILD tag."
   (let ((children (semantic-tag-type-members parent))
         )
@@ -214,15 +214,15 @@ Convert the output tags into Semantic tags."
     (semantic-tag-put-attribute parent :members children)
     ))
 
-(defun semantic-ectag-add-parent (tag parentlist)
+(defun semantic-ectags-add-parent (tag parentlist)
   "Add to TAG the tag name in PARENTLIST."
   (when parentlist
     (let ((pstring (semantic-analyze-unsplit-name parentlist)))
       (semantic-tag-put-attribute tag :parent pstring)
       )))
 
-(defun semantic-ectag-parse-one-tag (line)
-  "Split the Exuberent Ctag LINE into a new tag.
+(defun semantic-ectags-parse-one-tag (line)
+  "Split the Exuberant CTags LINE into a new tag.
 Returns the list ( TAG P1 P2 Pn...)
 where TAG is the new tag, P1, P2, and Pn is the list of
 parents running forward, such as namespace/namespace/class"
@@ -265,15 +265,15 @@ parents running forward, such as namespace/namespace/class"
                       'variable)
                      (t
                       (message "CTAG: Unknown output kind %s" class)
-                      (when semantic-ectag-collect-errors
+                      (when semantic-ectags-collect-errors
                         (let ((msg (format "Unknown class: %S" class)))
-                          (if (eq semantic-ectag-collect-errors t)
-                              (setq semantic-ectag-collect-errors (list msg))
-                            (add-to-list 'semantic-ectag-collect-errors msg ))))
+                          (if (eq semantic-ectags-collect-errors t)
+                              (setq semantic-ectags-collect-errors (list msg))
+                            (add-to-list 'semantic-ectags-collect-errors msg ))))
                       'unknown
                       )))
 
-         (attr (semantic-ectag-split-fields (nthcdr 4 elements)))
+         (attr (semantic-ectags-split-fields (nthcdr 4 elements)))
          (line (string-to-number (nth 2 elements)))
 
          (tag (semantic-tag (nth 0 elements)
@@ -305,7 +305,7 @@ parents running forward, such as namespace/namespace/class"
       (cons tag parents)
       )))
 
-(defun semantic-ectag-split-fields (fields)
+(defun semantic-ectags-split-fields (fields)
   "Convert FIELDS into a list of Semantic tag attributes."
   (let ((attr nil))
     (dolist (F fields)
@@ -339,66 +339,66 @@ parents running forward, such as namespace/namespace/class"
                (push str attr)
                (push :protection attr))
               ((string= field "signature")
-               (let ((sigattr (semantic-ectag-split-signature-summary str)))
+               (let ((sigattr (semantic-ectags-split-signature-summary str)))
                  (push sigattr attr)
                  (push :arguments attr)))
               ((string= field "implementation")
                (push str attr)
                (push :typemodifiers attr))
               (t
-               (message "Unknown ectag field %s" field))))
+               (message "Unknown ectags field %s" field))))
       )
     attr))
 
-(define-overloadable-function semantic-ectag-split-signature-summary (summary)
+(define-overloadable-function semantic-ectags-split-signature-summary (summary)
   "Split SUMMARY into Semantic tag compatible attributes.
-SUMMARY is part of the output from Exuberent CTags that shows the
+SUMMARY is part of the output from Exuberant CTags that shows the
 text from a file where the tag was found.")
 
-(defun semantic-ectag-split-signature-summary-default (summary)
-  "Default behavior for splitting a Exuberent CTags SUMMARY.
+(defun semantic-ectags-split-signature-summary-default (summary)
+  "Default behavior for splitting a Exuberant CTags SUMMARY.
 Assume comma separated list."
   (cedet-split-string summary "[(), ]" t))
 
-(define-overloadable-function semantic-ectag-set-language-attributes (tag parents)
+(define-overloadable-function semantic-ectags-set-language-attributes (tag parents)
   "Augment TAG with additional attributes based on language.
 PARENTS is the list of parent names for TAG.")
 
-(defun semantic-ectag-set-language-attributes-default (tag parents)
+(defun semantic-ectags-set-language-attributes-default (tag parents)
   "Default behavior does nothing.
 TAG and PARENTS are ignored."
   nil)
 
 ;;; MAIN PARSER SUPPORT
 ;;
-;; Tools for using ctags as the main parser for a language.
+;; Tools for using ectags as the main parser for a language.
 
-(defun semantic-ectag-setup-parse-table ()
-  "Setup the current buffer for parsing with Exuberent CTags.
-Unlike basic ECTag setup, this will setup the buffer so the main
+(defun semantic-ectags-setup-parse-table ()
+  "Setup the current buffer for parsing with Exuberant CTags.
+Unlike basic ECTags setup, this will setup the buffer so the main
 parser is also using CTags to dynamically parse the buffer."
   (semantic-install-function-overrides
-   '((parse-region . semantic-ectag-parse-region)
-     (parse-changes . semantic-ectag-parse-changes)))
+   '((parse-region . semantic-ectags-parse-region)
+     (parse-changes . semantic-ectags-parse-changes)))
   (setq semantic-parser-name "CTAGS"
         ;; Setup a dummy parser table to enable parsing!
         semantic--parse-table t
         )
   )
 
-(defun semantic-ectag-parse-region (&rest ignore)
+(defun semantic-ectags-parse-region (&rest ignore)
   "Parse the current shell script buffer for semantic tags.
 IGNORE any arguments, always parse the whole buffer."
-  (let ((tags (semantic-ectag-parse-buffer))
+  (let ((tags (semantic-ectags-parse-buffer))
         (newtags nil))
     (while tags
-      (push (semantic-ectag-expand-tag (car tags)
+      (push (semantic-ectags-expand-tag (car tags)
                                        (car (cdr tags)))
             newtags)
       (setq tags (cdr tags)))
     (nreverse newtags)))
 
-(defun semantic-ectag-parse-changes ()
+(defun semantic-ectags-parse-changes ()
   "Parse changes in the current shell script buffer."
   ;; NOTE: For now, just schedule a full reparse.
   ;;       To be implemented later.
@@ -407,8 +407,8 @@ IGNORE any arguments, always parse the whole buffer."
 ;;; TAG COOKING
 ;;
 ;; Tags are 'cooked' when they are bound into a buffer.
-(defun semantic-ectag-expand-tag (tag nexttag)
-  "Expand the Exuberent CTag TAG into the current buffer.
+(defun semantic-ectags-expand-tag (tag nexttag)
+  "Expand the Exuberant CTags TAG into the current buffer.
 NEXTTAG provides a clue to the end of TAG.
 CTags start out with a a line number.
 Cooking a tag needs character positions instead.
@@ -437,7 +437,7 @@ NOTE: Currently this only supports a flat-list style tag."
               (while (forward-comment -1) nil)
               (point)
               )))
-    ;; We can safely take the first because ctags
+    ;; We can safely take the first because ectags
     ;; doesn't produce compound tags.
     (let ((ret
            (car
@@ -447,5 +447,5 @@ NOTE: Currently this only supports a flat-list style tag."
            ))
       ret)))
 
-(provide 'semantic-ectag-parse)
-;;; semantic-ectag-parse.el ends here
+(provide 'semantic/ectags/parse)
+;;; semantic/ectags/parse.el ends here

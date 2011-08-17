@@ -1,4 +1,4 @@
-;;; semantic-ectag-lang2.el --- Secondary language support
+;;; semantic/ectags/lang2.el --- Secondary language support
 ;;
 ;; Copyright (C) 2009 Eric M. Ludlam
 ;;
@@ -21,38 +21,38 @@
 
 ;;; Commentary:
 ;;
-;; This file contains Exuberent CTags support for languages that
+;; This file contains Exuberant CTags support for languages that
 ;; already have a regular Semantic parser.  These parsers can be used
 ;; on files not in buffers.
 
 (require 'semantic/fw)
-(require 'semantic-ectag-parse)
+(require 'semantic/ectags/parse)
 
 ;;; Code:
 
 ;;; C/C++ Mode
 ;;
-(defvar-mode-local c-mode semantic-ectag-lang "c"
-  "Language name for Exuberent CTags.")
+(defvar-mode-local c-mode semantic-ectags-lang "c"
+  "Language name for Exuberant CTags.")
 
-(defvar-mode-local c++-mode semantic-ectag-lang "c++"
-  "Language name for Exuberent CTags.")
+(defvar-mode-local c++-mode semantic-ectags-lang "c++"
+  "Language name for Exuberant CTags.")
 
-(defvar-mode-local c-mode semantic-ectag-lang-kind "cdegmnpsufvt"
-  "Kinds of Exuberent CTags available.")
+(defvar-mode-local c-mode semantic-ectags-lang-kind "cdegmnpsufvt"
+  "Kinds of Exuberant CTags available.")
 
-(defvar-mode-local c-mode semantic-ectag-lang-extra-flags
+(defvar-mode-local c-mode semantic-ectags-lang-extra-flags
   '("--regex-c=/^[ \t]*#[ \t]*include[ \t]*[<\"]([\\/a-zA-Z0-9_.-]+)[>\"]/\\1/i,include/"
     "--regex-c++=/^[ \t]*#[ \t]*include[ \t]*[<\"]([\\/a-zA-Z0-9_.-]+)[>\"]/\\1/i,include/")
   "Add support for include files.
-Support C and C++ when in c-mode, because emacs and ctags sometimes dissagree
+Support C and C++ when in c-mode, because emacs and ectags sometimes dissagree
 on the major mode.")
 
 (define-mode-local-override
-  semantic-ectag-split-signature-summary c-mode (summary)
+  semantic-ectags-split-signature-summary c-mode (summary)
   "Convert the SUMMARY of function arguments into a list of tags.
 These tags can be used as the argument list for a C function."
-  (let* ((split (semantic-ectag-split-signature-summary-default summary))
+  (let* ((split (semantic-ectags-split-signature-summary-default summary))
 	 (arg nil) (args nil))
     (dolist (S split)
       (setq arg
@@ -89,7 +89,7 @@ These tags can be used as the argument list for a C function."
     (nreverse args)))
 
 (define-mode-local-override
-  semantic-ectag-set-language-attributes c-mode (tag parents)
+  semantic-ectags-set-language-attributes c-mode (tag parents)
   "Set some C specific attributs in TAG.
 Uses PARENTS to determine if it is a constructor or destructor."
   (let ((lastname (car (reverse parents)))
@@ -104,30 +104,30 @@ Uses PARENTS to determine if it is a constructor or destructor."
 
 ;;; Emacs Lisp Mode
 ;;
-(defvar-mode-local emacs-lisp-mode semantic-ectag-lang "lisp"
-  "Language name for Exuberent CTags.")
+(defvar-mode-local emacs-lisp-mode semantic-ectags-lang "lisp"
+  "Language name for Exuberant CTags.")
 
-(defvar-mode-local emacs-lisp-mode semantic-ectag-lang-kind "f"
-  "Kinds of Exuberent CTags available.")
+(defvar-mode-local emacs-lisp-mode semantic-ectags-lang-kind "f"
+  "Kinds of Exuberant CTags available.")
 
 ;;; SETUP
 ;;
 
 ;;;###autoload
-(defun semantic-load-enable-secondary-exuberent-ctags-support ()
-  "Enable exuberent ctags support as a secondary parser.
+(defun semantic-load-enable-secondary-ectags-support ()
+  "Enable exuberant ctags support as a secondary parser.
 This is for semanticdb out-of-buffer parsing support.
 Any mode that has been tested to work will be added to this function."
   (interactive)
 
-  ;; Make sure that the version of ctags installed will work.
-  (semantic-ectag-test-version)
+  ;; Make sure that the version of ectags installed will work.
+  (semantic-ectags-test-version)
 
-  (semanticdb-enable-exuberent-ctags 'c-mode)
-  (semanticdb-enable-exuberent-ctags 'emacs-lisp-mode)
+  (semanticdb-enable-ectags 'c-mode)
+  (semanticdb-enable-ectags 'emacs-lisp-mode)
 
   )
 
 
-(provide 'semantic-ectag-lang2)
-;;; semantic-ectag-lang2.el ends here
+(provide 'semantic/ectags/lang2)
+;;; semantic/ectags/lang2.el ends here

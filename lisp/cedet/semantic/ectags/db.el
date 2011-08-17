@@ -1,4 +1,4 @@
-;;; semanticdb-ectag.el --- Database support for Exuberent CTags files.
+;;; semantic/ectags/db.el --- Database support for Exuberant CTags files.
 
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
@@ -21,37 +21,37 @@
 
 ;;; Commentary:
 ;;
-;; Unlike some database support, The Exuberent CTag support only has
+;; Unlike some database support, The Exuberant CTags support only has
 ;; tables.  The standard semanticdb-project-database can contain these
 ;; tables.
 ;;
-;; The basic idea here is to use a ctag table for supported languages
+;; The basic idea here is to use a ectags table for supported languages
 ;; if the file is never loaded into a buffer.  Once it's in a buffer,
 ;; switch to the Emacs internal parser generated table.
 
-(require 'semantic-ectag-lang)
-(require 'semantic-ectag-parse)
-(require 'semantic-ectag-util)
+(require 'semantic/ectags/lang)
+(require 'semantic/ectags/parse)
+(require 'semantic/ectags/util)
 
 ;;; Code:
 
-;;; ENABLE CTAGS SUPPORT
+;;; ENABLE ECTAGS SUPPORT
 ;;
-;; Off by default, users can use this to enable ctags parsing
+;; Off by default, users can use this to enable ectags parsing
 ;; if they desire.
 ;;;###autoload
-(defun semanticdb-enable-exuberent-ctags (mode)
-  "Enable the use of exuberent ctags for out-of-buffer parsing for MODE.
+(defun semanticdb-enable-ectags (mode)
+  "Enable the use of exuberant ctags for out-of-buffer parsing for MODE.
 MODE is a `major-mode' symbol used.
-Throws an error if `semantic-ectag-program' is not of the correct
-version needed by Semantic ctags support."
+Throws an error if `semantic-ectags-program' is not of the correct
+version needed by Semantic ectags support."
   (interactive
    (list (completing-read
           "Mode: " obarray
           #'(lambda (s) (string-match "-mode$" (symbol-name s)))
           t (symbol-name major-mode))))
   ;; First, make sure the version is ok.
-  (semantic-ectag-test-version)
+  (semantic-ectags-test-version)
   ;; Make sure mode is a symbol.
   (when (stringp mode)
     (setq mode (intern mode)))
@@ -60,24 +60,24 @@ version needed by Semantic ctags support."
    `(setq-mode-local ,mode
 		     semanticdb-out-of-buffer-create-table-fcn
 		     (lambda (fname)
-		       (semanticdb-ectag-create-table-for-file-not-in-buffer
+		       (semanticdb-ectags-create-table-for-file-not-in-buffer
 			fname (quote ,mode)))))
   )
 
 ;;; PARSE REPLACEMENT
 ;;
-;; These functions will substitute in Exuberent CTag parsing
+;; These functions will substitute in Exuberant CTags parsing
 ;; within the Semanticdb framework.
-(defun semanticdb-ectag-create-table-for-file-not-in-buffer (filename mode)
-  "Create a SemanticDB table for the file in FILENAME using ctags.
+(defun semanticdb-ectags-create-table-for-file-not-in-buffer (filename mode)
+  "Create a SemanticDB table for the file in FILENAME using ectags.
 The argument MODE specifies the expected major mode to use in Emacs
 if FILENAME were loaded."
   (let* ((newstuff (semanticdb-create-table-for-file filename))
 	 (table (cdr newstuff))
-	 (tags (semantic-ectag-parse-file-with-mode filename mode))
+	 (tags (semantic-ectags-parse-file-with-mode filename mode))
 	 )
     ;; We've made the new table, now fill it in with tags determined with
-    ;; ctags.
+    ;; ectags.
     (semanticdb-synchronize table tags)
 
     ;; Leave the :mode slot empty.  The reset of semanticdb will force
@@ -88,5 +88,5 @@ if FILENAME were loaded."
     table))
 
 
-(provide 'semanticdb-ectag)
-;;; semanticdb-ectag.el ends here
+(provide 'semantic/ectags/db)
+;;; semantic/ectags/db.el ends here
