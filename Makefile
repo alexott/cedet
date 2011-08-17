@@ -46,6 +46,7 @@ testdir=$(CURDIR)/tests
 EEVAL=$(EMACS) $(EMACSFLAGS) --eval
 ECOMPILE=(or (byte-compile-file "$(1)") (kill-emacs 1))
 EGRAMMAR=(find-file "$(1)") (semantic-mode) (semantic-grammar-create-package)
+EAUTOLOADS=(setq generated-autoload-file "$(1)") (update-directory-autoloads "$(2)")
 LISP_PATH=$(foreach pkg,$(PACKAGES),(add-to-list (quote load-path) "$(lispdir)/$(pkg)/"))
 ifeq ($(V),1)
 Q=
@@ -56,11 +57,13 @@ endif
 
 ### Top-level rules
 
-all: generate compile doc
+all: generate compile autoloads doc
 
 generate: $(patsubst %,generate-%,$(PACKAGES))
 
 compile: compile-common $(patsubst %,compile-%,$(PACKAGES))
+
+autoloads: $(patsubst %,autoloads-%,$(PACKAGES))
 
 doc: $(patsubst %,doc-%,$(PACKAGES))
 
@@ -79,8 +82,9 @@ cedet_GENERATE_LISP=$(patsubst %.by,%-by.el,$(cedet_BOVINE)) $(patsubst %.wy,%-w
 ### Dynamic rules
 
 define PACKAGE_template
-$(1)_LISP=$(shell $(FIND) $(lispdir)/$(1)/ -name \*.el)
+$(1)_LISP=$(shell $(FIND) $(lispdir)/$(1)/ -name \*.el -and -not -name loaddefs.el)
 $(1)_CODE=$$(patsubst %.el,%.elc,$$($(1)_LISP))
+$(1)_AUTOLOADS=$(foreach d,$(shell $(FIND) $(lispdir)/$(1)/ -type d),$(d)/loaddefs.el)
 $(1)_TEXINFO=$(shell $(FIND) $(docdir) -name $(1).texi) $(shell test ! -d $(docdir)/$(1) || $(FIND) $(docdir)/$(1)/ -name *.texi)
 $(1)_INFO=$$(patsubst %.texi,%.info,$$($(1)_TEXINFO))
 $(1)_TEST_LISP=$(shell test ! -d $(testdir)/$(1)/ || $(FIND) $(testdir)/$(1)/ -name \*.el)
@@ -90,6 +94,8 @@ generate-$(1): $$($(1)_GENERATE_LISP)
 
 compile-$(1): $$($(1)_CODE)
 
+autoloads-$(1): $$($(1)_AUTOLOADS)
+
 doc-$(1): $$($(1)_INFO)
 
 test-$(1): $$($(1)_TEST_CODE)
@@ -97,6 +103,7 @@ test-$(1): $$($(1)_TEST_CODE)
 clean-$(1):
 	$(RM) $(RMFLAGS) $$($(1)_GENERATE_LISP)
 	$(RM) $(RMFLAGS) $$($(1)_CODE)
+	$(RM) $(RMFLAGS) $$($(1)_AUTOLOADS)
 	$(RM) $(RMFLAGS) $$($(1)_INFO)
 endef
 
@@ -124,6 +131,9 @@ require=$(foreach r,$(1),(require (quote $(r))))
 
 %.elc: %.el
 	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(EEXTRA) $(call ECOMPILE,$<))'
+
+%/loaddefs.el:
+	$(Q)$(EEVAL) '(progn $(call require,$(REQUIRES)) $(EEXTRA) $(call EAUTOLOADS,$@,$*))'
 
 %.info: %.texi
 	$(Q)$(MAKEINFO) $< -o $@
