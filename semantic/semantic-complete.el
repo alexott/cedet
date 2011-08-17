@@ -533,7 +533,7 @@ if INLINE, then completion is happening inline in a buffer."
 	  ;; when experimenting with the completion engine.  I don't
 	  ;; remember what the problem was though, and I wasn't sure why
 	  ;; the below two lines were there since they obviously added
-	  ;; some odd behavior.  -EML	  
+	  ;; some odd behavior.  -EML
 	  ;(and (not (eq na 'displayend))
 	  ;     (semantic-collector-current-exact-match collector))
 	  (semantic-collector-all-completions collector contents))
@@ -1001,7 +1001,7 @@ Output must be in semanticdb Find result format."
 		   ;; The new prefix is a substring of the old
 		   ;; prefix, and it's longer than one character.
 		   ;; Perform a full search to pull in additional
-		   ;; matches. 
+		   ;; matches.
 		 (let ((context (semantic-analyze-current-context (point))))
 		   (setq semantic-completion-collector-engine
 			 (semantic-collector-analyze-completions
