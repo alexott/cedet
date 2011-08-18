@@ -186,30 +186,10 @@ If Emacs cannot resolve this symbol to a particular file, then return nil."
 	;; Return it.
 	(when tab (cons tab match))))))
 
-(defun semanticdb-elisp-sym-function-arglist (sym)
-  "Get the argument list for SYM.
-Deal with all different forms of function.
-This was snarfed out of eldoc."
-  (let* ((prelim-def
-	  (let ((sd (and (fboundp sym)
-			 (symbol-function sym))))
-	    (and (symbolp sd)
-		 (condition-case err
-		     (setq sd (indirect-function sym))
-		   (error (setq sd nil))))
-	    sd))
-         (def (if (eq (car-safe prelim-def) 'macro)
-                  (cdr prelim-def)
-                prelim-def))
-         (arglist (cond ((null def) nil)
-			((byte-code-function-p def)
-			 ;; This is an eieio compatibility function.
-			 ;; We depend on EIEIO, so use this.
-			 (eieio-compiled-function-arglist def))
-                        ((eq (car-safe def) 'lambda)
-                         (nth 1 def))
-                        (t nil))))
-    arglist))
+(autoload 'help-function-arglist "help-fns")
+(defalias 'semanticdb-elisp-sym-function-arglist 'help-function-arglist)
+(make-obsolete 'semanticdb-elisp-sym-function-arglist
+	       'help-function-arglist "CEDET 1.1")
 
 (defun semanticdb-elisp-sym->tag (sym &optional toktype)
   "Convert SYM into a semantic tag.
@@ -222,7 +202,7 @@ TOKTYPE is a hint to the type of tag desired."
 	    (symbol-name sym)
 	    nil	;; return type
 	    (semantic-elisp-desymbolify
-	     (semanticdb-elisp-sym-function-arglist sym)) ;; arg-list
+	     (help-function-arglist sym)) ;; arg-list
 	    :user-visible-flag (condition-case nil
 				   (interactive-form sym)
 				 (error nil))
