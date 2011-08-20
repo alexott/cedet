@@ -1,6 +1,6 @@
 ;;; semantic/bovine/make.el --- Makefile parsing rules.
 
-;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2008, 2009, 2010
+;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2008, 2009, 2010, 2011
 ;;   Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
@@ -209,7 +209,7 @@ Uses default implementation, and also gets a list of filenames."
 ;;;###autoload
 (defun semantic-default-make-setup ()
   "Set up a Makefile buffer for parsing with semantic."
-  (semantic-make-by--install-parser)
+  (semantic/bovine/make-by--install-parser)
   (setq semantic-symbol->name-assoc-list '((variable . "Variables")
                                            (function . "Rules")
                                            (include . "Dependencies")
