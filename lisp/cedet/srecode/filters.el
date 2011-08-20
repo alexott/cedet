@@ -1,6 +1,6 @@
 ;;; srecode/filters.el --- Filters for use in template variables.
 
-;; Copyright (C) 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+;; Copyright (C) 2007, 2008, 2009, 2010, 2011 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -27,7 +27,6 @@
 
 (require 'newcomment)
 (require 'srecode/table)
-(require 'srecode/insert)
 
 (defun srecode-comment-prefix (str)
   "Prefix each line of STR with the comment prefix characters."
