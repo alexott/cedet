@@ -1,6 +1,6 @@
 ;;; ezimage --- Generalized Image management
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2005 Free Software Foundation
+;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2005, 2011 Free Software Foundation
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: file, tags, tools
@@ -309,46 +309,48 @@ Optional argument STRING is a string upon which to add text properties."
 See `ezimage-expand-image-button-alist' for details."
   (interactive)
   (with-output-to-temp-buffer "*Ezimage Images*"
-    (save-excursion
+    (save-current-buffer
       (set-buffer "*Ezimage Images*")
-      (goto-char (point-max))
-      (insert "Ezimage image cache.\n\n")
-      (let ((start (point)) (end nil))
-	(insert "Image\tText\tImage Name")
-	(setq end (point))
-	(insert "\n")
-	(put-text-property start end 'face 'underline))
-      (let ((ia ezimage-expand-image-button-alist))
-	(while ia
-	  (let ((start (point)))
-	    (insert (car (car ia)))
-	    (insert "\t")
-	    (ezimage-insert-image-button-maybe start
-						(length (car (car ia))))
-	    (insert (car (car ia)) "\t" (format "%s" (cdr (car ia))) "\n"))
-	  (setq ia (cdr ia)))))))
+      (save-excursion
+	(goto-char (point-max))
+	(insert "Ezimage image cache.\n\n")
+	(let ((start (point)) (end nil))
+	  (insert "Image\tText\tImage Name")
+	  (setq end (point))
+	  (insert "\n")
+	  (put-text-property start end 'face 'underline))
+	(let ((ia ezimage-expand-image-button-alist))
+	  (while ia
+	    (let ((start (point)))
+	      (insert (car (car ia)))
+	      (insert "\t")
+	      (ezimage-insert-image-button-maybe start
+						 (length (car (car ia))))
+	      (insert (car (car ia)) "\t" (format "%s" (cdr (car ia))) "\n"))
+	    (setq ia (cdr ia))))))))
 
 (defun ezimage-image-dump ()
   "Dump out the current state of the Ezimage image alist.
 See `ezimage-expand-image-button-alist' for details."
   (interactive)
   (with-output-to-temp-buffer "*Ezimage Images*"
-    (save-excursion
+    (save-current-buffer
       (set-buffer "*Ezimage Images*")
-      (goto-char (point-max))
-      (insert "Ezimage image cache.\n\n")
-      (let ((start (point)) (end nil))
-	(insert "Image\tImage Name")
-	(setq end (point))
-	(insert "\n")
-	(put-text-property start end 'face 'underline))
-      (let ((ia (ezimage-all-images)))
-	(while ia
-	  (let ((start (point)))
-	    (insert "cm")
-	    (ezimage-insert-over-text (symbol-value (car ia)) start (point))
-	    (insert "\t" (format "%s" (car ia)) "\n"))
-	  (setq ia (cdr ia)))))))
+      (save-excursion
+	(goto-char (point-max))
+	(insert "Ezimage image cache.\n\n")
+	(let ((start (point)) (end nil))
+	  (insert "Image\tImage Name")
+	  (setq end (point))
+	  (insert "\n")
+	  (put-text-property start end 'face 'underline))
+	(let ((ia (ezimage-all-images)))
+	  (while ia
+	    (let ((start (point)))
+	      (insert "cm")
+	      (ezimage-insert-over-text (symbol-value (car ia)) start (point))
+	      (insert "\t" (format "%s" (car ia)) "\n"))
+	    (setq ia (cdr ia))))))))
 
 (defun ezimage-all-images ()
   "Return a list of all variables containing ez images."
