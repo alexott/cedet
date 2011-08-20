@@ -1,3 +1,29 @@
+;;; gcc-utest.el --- 
+;;
+;; Copyright (C) 2011 Eric M. Ludlam
+;;
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
+;;
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation, either version 3 of the
+;; License, or (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see http://www.gnu.org/licenses/.
+
+
+;;; Commentary:
+;;
+;; 
+
+;;; Code:
+
 ;; Example output of "gcc -v"
 (defvar semantic-gcc-test-strings
   '(;; My old box:
@@ -102,3 +128,8 @@ gcc version 2.95.2 19991024 (release)"
   (let ((semantic-gcc-test-strings (list (semantic-gcc-query "gcc" "-v"))))
     (semantic-gcc-test-output-parser))
   )
+
+
+(provide 'cedet/semantic/gcc-utest)
+
+;;; gcc-utest.el ends here
