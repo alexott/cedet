@@ -164,7 +164,6 @@ DOT is a part of GraphVis."
 	(ps-do-despool nil))
       )))
 
-;;;###autoload
 (defmethod cogre-export-dot-method ((g cogre-base-graph))
   "Convert G into DOT syntax of semantic tags."
   (save-excursion
