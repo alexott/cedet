@@ -29,8 +29,9 @@
 ;; Tags that appear as members, or otherwise appear to belong to
 ;; other tags in the list will be parented appropriately.
 
-(require 'semantic/fw)
+(require 'mode-local)
 (require 'semantic/ectags/util)
+
 ;;; Code:
 
 ;; These variables need to be bound to values on a per-mode basis.
