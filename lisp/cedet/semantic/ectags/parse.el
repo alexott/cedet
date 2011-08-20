@@ -1,6 +1,6 @@
 ;;; semantic/ectags/parse.el --- exuberant CTags into Semantic tags
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010, 2011 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -29,6 +29,7 @@
 ;; Tags that appear as members, or otherwise appear to belong to
 ;; other tags in the list will be parented appropriately.
 
+(require 'semantic/fw)
 (require 'semantic/ectags/util)
 ;;; Code:
 
