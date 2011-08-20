@@ -1,6 +1,6 @@
 ;;; semantic/wisent/python.el --- Semantic support for Python
 
-;; Copyright (C) 2002, 2004, 2006, 2007, 2008, 2009, 2010
+;; Copyright (C) 2002, 2004, 2006, 2007, 2008, 2009, 2010, 2011
 ;; Free Software Foundation, Inc.
 
 ;; Author: Richard Kim  <emacs18@gmail.com>
@@ -286,7 +286,7 @@ To be implemented for Python!  For now just return nil."
 ;;;###autoload
 (defun wisent-python-default-setup ()
   "Setup buffer for parse."
-  (semantic/wisent/python.wy--install-parser)
+  (semantic/wisent/python-wy--install-parser)
   (set (make-local-variable 'parse-sexp-ignore-comments) t)
   (setq
    ;; Character used to separation a parent/child relationship
