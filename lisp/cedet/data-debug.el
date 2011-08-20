@@ -1,6 +1,6 @@
 ;;; data-debug.el --- Datastructure Debugger
 
-;; Copyright (C) 2007, 2008, 2009, 2010  Free Software Foundation, Inc.
+;; Copyright (C) 2007, 2008, 2009, 2010, 2011  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam  <zappo@gnu.org>
 ;; Version: 0.2
@@ -1074,6 +1074,7 @@ Do nothing if already expanded."
         (message "Expression %s is nil." expr)
       (data-debug-show-stuff v "expression"))))
 
+;;;###autoload
 (defun data-debug-eval-expression (expr)
   "Evaluate EXPR and display the value.
 If the result is something simple, show it in the echo area.
