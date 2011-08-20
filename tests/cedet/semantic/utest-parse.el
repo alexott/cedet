@@ -1,6 +1,6 @@
 ;;; semantic/utest.el --- Tests for semantic's parsing system.
 
-;;; Copyright (C) 2003, 2004, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2003, 2004, 2007, 2008, 2009, 2010, 2011 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
@@ -28,7 +28,6 @@
 ;; and full reparsing system, and anything else I may feel the urge
 ;; to write a test for.
 
-(require 'cedet-utests)
 (require 'semantic)
 
 (defvar semantic-utest-temp-directory (if (fboundp 'temp-directory)
@@ -1028,7 +1027,7 @@ SKIPNAMES is a list of names to remove from NAME-CONTENTS"
   (semantic-utest-unkill-indicator);put back killed stuff
   )
 
-
+(provide 'cedet/semantic/utest-parse)
 
 
 ;"#<overlay from \\([0-9]+\\) to \\([0-9]+\\) in \\([^>]*\\)>"
