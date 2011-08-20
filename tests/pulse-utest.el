@@ -1,3 +1,31 @@
+;;; pulse-utest.el --- Tests for Pulse.
+;;
+;; Copyright (C) 2011 Eric M. Ludlam
+;;
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
+;;
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation, either version 3 of the
+;; License, or (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see http://www.gnu.org/licenses/.
+
+
+;;; Commentary:
+;;
+;; 
+
+(require 'pulse)
+
+;;; Code:
+
 (defun pulse-test (&optional no-error)
   "Test the lightening function for pulsing a line.
 When optional NO-ERROR Don't throw an error if we can't run tests."
@@ -43,3 +71,8 @@ When optional NO-ERROR Don't throw an error if we can't run tests."
       )
     (when (cedet-called-interactively-p)
       (message "Done!"))))
+
+
+(provide 'pulse-utest)
+
+;;; pulse.el ends here
