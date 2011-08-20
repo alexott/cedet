@@ -1,8 +1,8 @@
 lisp/cedet/semantic/bovine/*-by.el
 lisp/cedet/semantic/wisent/*-wy.el
-lisp/cedet/srecode/template-wy.el
+lisp/cedet/srecode/srt-wy.el
 lisp/cedet/cogre/wisent-dot-wy.el
-semantic/doc/*.info
+*.info
 *.elc
 loaddefs.el
-doc/*.info
+
