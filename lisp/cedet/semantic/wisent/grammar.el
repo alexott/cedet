@@ -1,6 +1,6 @@
 ;;; semantic/wisent/grammar.el --- Wisent's input grammar mode
 ;;
-;; Copyright (C) 2002, 2003, 2004 David Ponce
+;; Copyright (C) 2002, 2003, 2004, 2011 David Ponce
 ;;
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
@@ -33,6 +33,18 @@
 
 ;;; Code:
 (require 'semantic/grammar)
+
+;; Note, declare mode before loading macros to solve order dependency.
+
+;;;###autoload
+(define-derived-mode wisent-grammar-mode semantic-grammar-mode "WY"
+  "Major mode for editing Wisent grammars."
+  (semantic-grammar-setup-menu wisent-grammar-menu)
+  (semantic-install-function-overrides
+   '((grammar-parsetable-builder . wisent-grammar-parsetable-builder)
+     (grammar-setupcode-builder  . wisent-grammar-setupcode-builder)
+     )))
+
 (require 'semantic/wisent/grammar-macros)
 (eval-when-compile
   (require 'semantic/find))
@@ -163,15 +175,6 @@ Return the expanded expression."
     )
   "WY mode specific grammar menu.
 Menu items are appended to the common grammar menu.")
-
-;;;###autoload
-(define-derived-mode wisent-grammar-mode semantic-grammar-mode "WY"
-  "Major mode for editing Wisent grammars."
-  (semantic-grammar-setup-menu wisent-grammar-menu)
-  (semantic-install-function-overrides
-   '((grammar-parsetable-builder . wisent-grammar-parsetable-builder)
-     (grammar-setupcode-builder  . wisent-grammar-setupcode-builder)
-     )))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.wy$" . wisent-grammar-mode))
