@@ -1,7 +1,7 @@
 ;;; semantic/bovine/c.el --- Semantic details for C
 
 ;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007,
-;;   2008, 2009, 2010  Free Software Foundation, Inc.
+;;   2008, 2009, 2010, 2011  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
@@ -1729,7 +1729,7 @@ For types with a :parent, create faux namespaces to put TAG into."
 ;;;###autoload
 (defun semantic-default-c-setup ()
   "Set up a buffer for semantic parsing of the C language."
-  (semantic-c-by--install-parser)
+  (semantic/bovine/c-by--install-parser)
   (setq semantic-lex-syntax-modifications '((?> ".")
                                             (?< ".")
                                             )
