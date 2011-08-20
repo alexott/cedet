@@ -1,6 +1,6 @@
 ;;; semantic/grammar.el --- Major mode framework for Semantic grammars
 
-;; Copyright (C) 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010
+;; Copyright (C) 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010, 2011
 ;;   Free Software Foundation, Inc.
 
 ;; Author: David Ponce <david@dponce.com>
@@ -569,6 +569,7 @@ Typically a DEFINE expression should look like this:
 ;;
 
 ;;; Code:
+" requires "
 ")
   "Generated header template.
 The symbols in the template are local variables in
@@ -605,6 +606,18 @@ The symbols in the list are local variables in
                              t)
       (match-string 0))))
 
+(defun semantic-grammar-requires-for-parser ()
+  "Calculate any special requires a generated grammar will need."
+  (let* ((source (semantic-grammar-source-file))
+	 (ext  (file-name-extension source)))
+    (cond ((string= ext "by")
+	   "(require 'semantic/bovine)")
+	  ((string= ext "wy")
+	   ";; @TODO - any requires for wisent?")
+	  (t
+	   ";; @TODO - Unknown parser extension, unknown requires needed."
+	   ))))
+
 (defun semantic-grammar-header ()
   "Return text of a generated standard header."
   (let ((file package-output)
@@ -623,6 +636,7 @@ The symbols in the list are local variables in
                             (format-time-string "%Y-%m-%d %T%z"))))
         (keywords (or (semantic-grammar-named-line "Keywords")
                      ";; Keywords: syntax"))
+	(requires (semantic-grammar-requires-for-parser))
         (out ""))
     (dolist (S semantic-grammar-header-template)
       (cond ((stringp S)
