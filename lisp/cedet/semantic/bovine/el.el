@@ -941,6 +941,7 @@ ELisp variables can be pretty long, so track this one too.")
 (define-child-mode lisp-mode emacs-lisp-mode
   "Make `lisp-mode' inherit mode local behavior from `emacs-lisp-mode'.")
 
+;;;###autoload
 (defun semantic-default-elisp-setup ()
   "Setup hook function for Emacs Lisp files and Semantic."
   )
