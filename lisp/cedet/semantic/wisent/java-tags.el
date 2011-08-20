@@ -1,6 +1,6 @@
 ;;; semantic/wisent/java-tags.el --- Java LALR parser for Emacs
 
-;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2009, 2010
+;; Copyright (C) 2001, 2002, 2003, 2004, 2005, 2006, 2009, 2010, 2011
 ;;   Free Software Foundation, Inc.
 
 ;; Author: David Ponce <david@dponce.com>
@@ -85,7 +85,7 @@ This function override `get-local-variables'."
 (defun wisent-java-default-setup ()
   "Hook run to setup Semantic in `java-mode'.
 Use the alternate LALR(1) parser."
-  (wisent-java-tags-wy--install-parser)
+  (semantic/wisent/java-tags-wy--install-parser)
   (setq
    ;; Lexical analysis
    semantic-lex-number-expression semantic-java-number-regexp
