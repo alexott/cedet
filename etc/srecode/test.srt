@@ -147,6 +147,7 @@ OUTSIDE SECTION: $UTESTVAR1$
 INSIDE SECTION: $#A$$UTESTVAR1$$/A$
 ----
 
+template custom-arg-w-arg :utestwitharg
 ----
 Value of xformed UTWA: $UTESTARGXFORM$
 ----
