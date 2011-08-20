@@ -54,6 +54,7 @@ else
 Q=@echo "    > $@";
 endif
 
+REQUIRES=semantic/bovine/el
 
 ### Top-level rules
 
@@ -110,6 +111,10 @@ clean-$(1):
 	$(RM) $(RMFLAGS) $$($(1)_AUTOLOADS)
 	$(RM) $(RMFLAGS) $$($(1)_INFO)
 endef
+
+utest: REQUIRES+=cedet-utests
+utest: 
+	$(Q)$(EEVAL) '(progn $(LISP_PATH) (add-to-list (quote load-path) "$(testdir)") $(call require,$(REQUIRES)) (cedet-utest-batch))'
 
 $(eval $(call PACKAGE_template,common))
 $(foreach pkg,$(PACKAGES),$(eval $(call PACKAGE_template,$(pkg))))
