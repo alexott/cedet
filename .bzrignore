@@ -5,4 +5,4 @@ lisp/cedet/cogre/wisent-dot-wy.el
 *.info
 *.elc
 loaddefs.el
-
+test-p.el
