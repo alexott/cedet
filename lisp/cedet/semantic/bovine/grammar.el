@@ -1,6 +1,6 @@
 ;;; semantic/bovine/grammar.el --- Bovine's input grammar mode
 ;;
-;; Copyright (C) 2002, 2003, 2004, 2007, 2009 David Ponce
+;; Copyright (C) 2002, 2003, 2004, 2007, 2009, 2011 David Ponce
 ;;
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
@@ -33,6 +33,18 @@
 
 ;;; Code:
 (require 'semantic/grammar)
+
+;; Note, declare mode before loading macros to solve order dependency.
+
+;;;###autoload
+(define-derived-mode bovine-grammar-mode semantic-grammar-mode "BY"
+  "Major mode for editing Bovine grammars."
+  (semantic-grammar-setup-menu bovine-grammar-menu)
+  (semantic-install-function-overrides
+   '((grammar-parsetable-builder . bovine-grammar-parsetable-builder)
+     (grammar-setupcode-builder  . bovine-grammar-setupcode-builder)
+     )))
+
 (require 'semantic/bovine/grammar-macros)
 
 ;; Cache of macro definitions currently in use.
@@ -334,15 +346,6 @@ manual."
     )
   "BY mode specific grammar menu.
 Menu items are appended to the common grammar menu.")
-
-;;;###autoload
-(define-derived-mode bovine-grammar-mode semantic-grammar-mode "BY"
-  "Major mode for editing Bovine grammars."
-  (semantic-grammar-setup-menu bovine-grammar-menu)
-  (semantic-install-function-overrides
-   '((grammar-parsetable-builder . bovine-grammar-parsetable-builder)
-     (grammar-setupcode-builder  . bovine-grammar-setupcode-builder)
-     )))
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.by$" . bovine-grammar-mode))
