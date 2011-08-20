@@ -1,6 +1,6 @@
 ;;; cogre-utest.el --- Tests for COGRE
 
-;; Copyright (C) 2009 Eric M. Ludlam
+;; Copyright (C) 2009, 2011 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -25,11 +25,13 @@
 ;;
 ;; These are effectively no-crash and UI tests.  I have not output tests.
 
-(require 'cedet-utests)
+(require 'cedet-uutil)
 (eval-when-compile
   (require 'cogre/picture-hack))
 (require 'cogre)
 (require 'cogre/mode)
+(require 'cogre/uml)
+(require 'cogre/semantic)
 
 ;;; Code:
 
@@ -114,9 +116,9 @@ Link is created with the specified TYPE."
 (defun cogre-utest-quick-class ()
   "Test the quick-class function."
   (interactive)
-  (let* ((lib (locate-library "cogre"))
+  (let* ((lib cedet-utest-root)
 	 (testfile
-	  (expand-file-name "tests/testclasses.hh"
+	  (expand-file-name "cedet/cogre/testclasses.hh"
 			    (file-name-directory lib))))
     (save-excursion
       (set-buffer (find-file-noselect testfile))
@@ -137,5 +139,5 @@ Link is created with the specified TYPE."
 	))))
     
 
-(provide 'cogre-utest)
+(provide 'cedet/cogre/utest)
 ;;; cogre-utest.el ends here
