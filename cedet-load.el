@@ -39,10 +39,29 @@
   (add-to-list 'load-path (expand-file-name "lisp/common" CEDETDIR))
   (add-to-list 'load-path (expand-file-name "lisp/speedbar" CEDETDIR))
 
+  (require 'eieio)
+  (require 'ede)
+
+  ;; Load in all the loaddefs
+  (load-file (expand-file-name "lisp/eieio/loaddefs.el"))
+  (load-file (expand-file-name "lisp/speedbar/loaddefs.el"))
+  (load-file (expand-file-name "lisp/cedet/ede/loaddefs.el"))
+  ;(load-file (expand-file-name "lisp/cedet/cogre/loaddefs.el"))
+  (load-file (expand-file-name "lisp/cedet/srecode/loaddefs.el"))
+  (load-file (expand-file-name "lisp/cedet/semantic/loaddefs.el"))
+  (load-file (expand-file-name "lisp/cedet/semantic/bovine/loaddefs.el"))
+  (load-file (expand-file-name "lisp/cedet/semantic/wisent/loaddefs.el"))
+  (load-file (expand-file-name "lisp/cedet/semantic/analyze/loaddefs.el"))
+  (load-file (expand-file-name "lisp/cedet/semantic/decorate/loaddefs.el"))
+  (load-file (expand-file-name "lisp/cedet/semantic/ectags/loaddefs.el"))
+
+
   ;; SETUP INFO DIRS
   ;; @TODO
   
   )
+
+
 
 (require 'cedet) ;; Get standard CEDET variables loaded.
 
@@ -58,5 +77,16 @@
 (autoload 'semantic-default-elisp-setup "semantic/bovine/el"
   "Setup hook function for Emacs Lisp files and Semantic.")
 
+;; Get SRecode initialized
+(require 'srecode)
+(require 'srecode/map) ;; Get the srecode load-path filled in.
+
+(let ((CEDETDIR (file-name-directory
+		 (or load-file-name (buffer-file-name)))))
+  (add-to-list 'srecode-map-load-path (expand-file-name "etc/srecode" CEDETDIR))
+
+  )
+
+
 ;; End
-(provide 'cedet-repository-load)
+(provide 'cedet-load)
