@@ -1,6 +1,6 @@
 ;;; semantic/bovine/erlang.el --- Semantic details for Erlang
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2011 Eric M. Ludlam
 ;; Copyright (C) 2003 David Ponce
 ;; Copyright (C) 2001, 2002, 2003 Vladimir G. Sekissov
 
@@ -70,7 +70,7 @@
 
 (defun semantic-erlang-default-setup ()
   "Set up a buffer for semantic parsing of the Erlang language."
-  (semantic-erlang-by--install-parser)
+  (semantic/bovine/erlang-by--install-parser)
   (setq
    ;; Lexical analysis
    semantic-lex-number-expression nil
