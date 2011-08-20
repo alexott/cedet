@@ -1,7 +1,7 @@
 ;;; eieio-tests.el -- eieio tests routines
 
 ;;;
-;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
 ;; RCS: $Id: eieio-tests.el,v 1.50 2010-06-18 00:08:17 zappo Exp $
@@ -31,6 +31,8 @@
 ;; entire buffer.
 
 (require 'eieio-base)
+(eval-when-compile
+  (require 'cl))
 
 ;;; Code:
 
@@ -304,12 +306,6 @@ METHOD is the method that was attempting to be called."
 ;; Try the self referencing test
 (oset a self a)
 (oset ab self ab)
-
-
-;;; Test the BEFORE, PRIMARY, and AFTER method tags.
-;;
-(let ((lib (locate-library  "eieio-test-methodinvoke.el")))
-  (load-file lib))
 
 ;;; Test value of a generic function call
 ;;
