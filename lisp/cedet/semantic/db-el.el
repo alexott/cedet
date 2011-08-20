@@ -1,6 +1,6 @@
 ;;; semantic/db-el.el --- Semantic database extensions for Emacs Lisp
 
-;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010
+;;; Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011
 ;;; Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
@@ -174,7 +174,7 @@ If Emacs cannot resolve this symbol to a particular file, then return nil."
 	;; Return it.
 	(cons tab match)))))
 
-(defun semantic/db.elisp-sym-function-arglist (sym)
+(defun semanticdb-elisp-sym-function-arglist (sym)
   "Get the argument list for SYM.
 Deal with all different forms of function.
 This was snarfed out of eldoc."
@@ -199,7 +199,7 @@ This was snarfed out of eldoc."
                         (t nil))))
     arglist))
 
-(defun semantic/db.elisp-sym->tag (sym &optional toktype)
+(defun semanticdb-elisp-sym->tag (sym &optional toktype)
   "Convert SYM into a semantic tag.
 TOKTYPE is a hint to the type of tag desired."
   (if (stringp sym)
@@ -211,7 +211,7 @@ TOKTYPE is a hint to the type of tag desired."
 	    (symbol-name sym)
 	    nil	;; return type
 	    (semantic.elisp-desymbolify
-	     (semantic/db.elisp-sym-function-arglist sym)) ;; arg-list
+	     (semanticdb-elisp-sym-function-arglist sym)) ;; arg-list
 	    :user-visible-flag (condition-case nil
 				   (interactive-form sym)
 				 (error nil))
