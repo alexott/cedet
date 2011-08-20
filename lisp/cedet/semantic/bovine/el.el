@@ -1,7 +1,7 @@
 ;;; semantic/bovine/el.el --- Semantic details for Emacs Lisp
 
 ;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008,
-;;   2009, 2010  Free Software Foundation, Inc.
+;;   2009, 2010, 2011  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
@@ -58,7 +58,7 @@ syntax as specified by the syntax table."
   `((bovine-toplevel
      (semantic-list
       ,(lambda (vals start end)
-         (let ((tag (semantic.elisp-use-read (car vals))))
+         (let ((tag (semantic-elisp-use-read (car vals))))
 	   (cond
 	    ((and (listp tag) (semantic-tag-p (car tag)))
 	     ;; We got a list of tags back.  This list is
@@ -67,7 +67,7 @@ syntax as specified by the syntax table."
 	     ;; items into reverse order later.
 	     (nreverse tag))
 	    ((semantic--tag-expanded-p tag)
-	     ;; At this point, if `semantic.elisp-use-read' returned an
+	     ;; At this point, if `semantic-elisp-use-read' returned an
 	     ;; already expanded tag (from definitions parsed inside an
 	     ;; eval and compile wrapper), just pass it!
 	     tag)
@@ -77,7 +77,7 @@ syntax as specified by the syntax table."
     )
   "Top level bovination table for elisp.")
 
-(defun semantic.elisp-desymbolify (arglist)
+(defun semantic-elisp-desymbolify (arglist)
   "Convert symbols to strings for ARGLIST."
   (let ((out nil))
     (while arglist
@@ -93,16 +93,16 @@ syntax as specified by the syntax table."
 	    arglist (cdr arglist)))
     (nreverse out)))
 
-(defun semantic.elisp-desymbolify-args (arglist)
+(defun semantic-elisp-desymbolify-args (arglist)
   "Convert symbols to strings for ARGLIST."
-  (let ((in (semantic.elisp-desymbolify arglist))
+  (let ((in (semantic-elisp-desymbolify arglist))
 	(out nil))
     (dolist (T in)
       (when (not (string-match "^&" T))
 	(push T out)))
     (nreverse out)))
 
-(defun semantic.elisp-clos-slot-property-string (slot property)
+(defun semantic-elisp-clos-slot-property-string (slot property)
   "For SLOT, a string representing PROPERTY."
   (let ((p (member property slot)))
     (if (not p)
@@ -117,7 +117,7 @@ syntax as specified by the syntax table."
 	(format "%S" (car p)))
        (t nil)))))
 
-(defun semantic.elisp-clos-args-to-semantic (partlist)
+(defun semantic-elisp-clos-args-to-semantic (partlist)
   "Convert a list of CLOS class slot PARTLIST to `variable' tags."
   (let (vars part v)
     (while partlist
@@ -125,20 +125,20 @@ syntax as specified by the syntax table."
             partlist (cdr partlist)
             v (semantic-tag-new-variable
                (symbol-name (car part))
-               (semantic.elisp-clos-slot-property-string part :type)
-               (semantic.elisp-clos-slot-property-string part :initform)
+               (semantic-elisp-clos-slot-property-string part :type)
+               (semantic-elisp-clos-slot-property-string part :initform)
                ;; Attributes
-               :protection (semantic.elisp-clos-slot-property-string
+               :protection (semantic-elisp-clos-slot-property-string
                             part :protection)
-               :static-flag (equal (semantic.elisp-clos-slot-property-string
+               :static-flag (equal (semantic-elisp-clos-slot-property-string
                                     part :allocation)
                                    ":class")
-               :documentation (semantic.elisp-clos-slot-property-string
+               :documentation (semantic-elisp-clos-slot-property-string
                                part :documentation))
             vars (cons v vars)))
     (nreverse vars)))
 
-(defun semantic.elisp-form-to-doc-string (form)
+(defun semantic-elisp-form-to-doc-string (form)
   "After reading a form FORM, convert it to a doc string.
 For Emacs Lisp, sometimes that string is non-existent.
 Sometimes it is a form which is evaluated at compile time, permitting
@@ -149,15 +149,15 @@ compound strings."
 	 (nth 1 form))
 	(t nil)))
 
-(defvar semantic.elisp-store-documentation-in-tag nil
+(defvar semantic-elisp-store-documentation-in-tag nil
   "*When non-nil, store documentation strings in the created tags.")
 
-(defun semantic.elisp-do-doc (str)
+(defun semantic-elisp-do-doc (str)
   "Return STR as a documentation string IF they are enabled."
-  (when semantic.elisp-store-documentation-in-tag
-    (semantic.elisp-form-to-doc-string str)))
+  (when semantic-elisp-store-documentation-in-tag
+    (semantic-elisp-form-to-doc-string str)))
 
-(defmacro semantic.elisp-setup-form-parser (parser &rest symbols)
+(defmacro semantic-elisp-setup-form-parser (parser &rest symbols)
   "Install the function PARSER as the form parser for SYMBOLS.
 SYMBOLS is a list of symbols identifying the forms to parse.
 PARSER is called on every forms whose first element (car FORM) is
@@ -169,22 +169,22 @@ where:
   corresponding data in the current buffer."
   (let ((sym (make-symbol "sym")))
     `(dolist (,sym ',symbols)
-       (put ,sym 'semantic.elisp-form-parser #',parser))))
-(put 'semantic.elisp-setup-form-parser 'lisp-indent-function 1)
+       (put ,sym 'semantic-elisp-form-parser #',parser))))
+(put 'semantic-elisp-setup-form-parser 'lisp-indent-function 1)
 
-(defmacro semantic.elisp-reuse-form-parser (symbol &rest symbols)
+(defmacro semantic-elisp-reuse-form-parser (symbol &rest symbols)
   "Reuse the form parser of SYMBOL for forms identified by SYMBOLS.
-See also `semantic.elisp-setup-form-parser'."
+See also `semantic-elisp-setup-form-parser'."
   (let ((parser (make-symbol "parser"))
         (sym (make-symbol "sym")))
-    `(let ((,parser (get ',symbol 'semantic.elisp-form-parser)))
+    `(let ((,parser (get ',symbol 'semantic-elisp-form-parser)))
        (or ,parser
            (signal 'wrong-type-argument
-                   '(semantic.elisp-form-parser ,symbol)))
+                   '(semantic-elisp-form-parser ,symbol)))
        (dolist (,sym ',symbols)
-         (put ,sym 'semantic.elisp-form-parser ,parser)))))
+         (put ,sym 'semantic-elisp-form-parser ,parser)))))
 
-(defun semantic.elisp-use-read (sl)
+(defun semantic-elisp-use-read (sl)
   "Use `read' on the semantic list SL.
 Return a bovination list to use."
   (let* ((start (car sl))
@@ -197,8 +197,8 @@ Return a bovination list to use."
       )
      ;; A special form parser is provided, use it.
      ((and (car form) (symbolp (car form))
-           (get (car form) 'semantic.elisp-form-parser))
-      (funcall (get (car form) 'semantic.elisp-form-parser)
+           (get (car form) 'semantic-elisp-form-parser))
+      (funcall (get (car form) 'semantic-elisp-form-parser)
                form start end))
      ;; Produce a generic code tag by default.
      (t
@@ -207,7 +207,7 @@ Return a bovination list to use."
 
 ;;; Form parsers
 ;;
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (semantic-tag-new-function
        (symbol-name (nth 2 form))
@@ -215,9 +215,9 @@ Return a bovination list to use."
        '("form" "start" "end")
        :form-parser t
        ))
-  semantic.elisp-setup-form-parser)
+  semantic-elisp-setup-form-parser)
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (let ((tags
              (condition-case foo
@@ -231,14 +231,14 @@ Return a bovination list to use."
   eval-when-compile
   )
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (semantic-tag-new-function
        (symbol-name (nth 1 form))
        nil
-       (semantic.elisp-desymbolify-args (nth 2 form))
+       (semantic-elisp-desymbolify-args (nth 2 form))
        :user-visible-flag (eq (car-safe (nth 4 form)) 'interactive)
-       :documentation (semantic.elisp-do-doc (nth 3 form))
+       :documentation (semantic-elisp-do-doc (nth 3 form))
        :overloadable (or (eq (car form) 'define-overload)
 			 (eq (car form) 'define-overloadable-function))
        ))
@@ -250,9 +250,9 @@ Return a bovination list to use."
   define-overloadable-function
   )
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
-      (let ((doc (semantic.elisp-form-to-doc-string (nth 3 form))))
+      (let ((doc (semantic-elisp-form-to-doc-string (nth 3 form))))
         (semantic-tag-new-variable
          (symbol-name (nth 1 form))
          nil
@@ -261,16 +261,16 @@ Return a bovination list to use."
                                  (> (length doc) 0)
                                  (= (aref doc 0) ?*))
          :constant-flag (eq (car form) 'defconst)
-         :documentation (semantic.elisp-do-doc doc)
+         :documentation (semantic-elisp-do-doc doc)
          )))
   defvar
   defconst
   defcustom
   )
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
-      (let ((doc (semantic.elisp-form-to-doc-string (nth 3 form))))
+      (let ((doc (semantic-elisp-form-to-doc-string (nth 3 form))))
         (semantic-tag-new-variable
          (symbol-name (nth 1 form))
          "face"
@@ -278,15 +278,15 @@ Return a bovination list to use."
          :user-visible-flag (and doc
                                  (> (length doc) 0)
                                  (= (aref doc 0) ?*))
-         :documentation (semantic.elisp-do-doc doc)
+         :documentation (semantic-elisp-do-doc doc)
          )))
   defface
   )
 
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
-      (let ((doc (semantic.elisp-form-to-doc-string (nth 3 form))))
+      (let ((doc (semantic-elisp-form-to-doc-string (nth 3 form))))
         (semantic-tag-new-variable
          (symbol-name (nth 1 form))
          "image"
@@ -294,28 +294,28 @@ Return a bovination list to use."
          :user-visible-flag (and doc
                                  (> (length doc) 0)
                                  (= (aref doc 0) ?*))
-         :documentation (semantic.elisp-do-doc doc)
+         :documentation (semantic-elisp-do-doc doc)
          )))
   defimage
   defezimage
   )
 
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
-      (let ((doc (semantic.elisp-form-to-doc-string (nth 3 form))))
+      (let ((doc (semantic-elisp-form-to-doc-string (nth 3 form))))
         (semantic-tag
          (symbol-name (nth 1 form))
          'customgroup
          :value (nth 2 form)
          :user-visible-flag t
-         :documentation (semantic.elisp-do-doc doc)
+         :documentation (semantic-elisp-do-doc doc)
          )))
   defgroup
   )
 
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (semantic-tag-new-function
        (symbol-name (cadr (cadr form)))
@@ -323,11 +323,11 @@ Return a bovination list to use."
        :user-visible-flag (and (nth 4 form)
                                (not (eq (nth 4 form) 'nil)))
        :prototype-flag t
-       :documentation (semantic.elisp-do-doc (nth 3 form))))
+       :documentation (semantic-elisp-do-doc (nth 3 form))))
   autoload
   )
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (let* ((a2 (nth 2 form))
              (a3 (nth 3 form))
@@ -338,36 +338,36 @@ Return a bovination list to use."
          nil
          (if (listp (car args))
              (cons (symbol-name (caar args))
-                   (semantic.elisp-desymbolify-args (cdr args)))
-           (semantic.elisp-desymbolify-args (cdr args)))
+                   (semantic-elisp-desymbolify-args (cdr args)))
+           (semantic-elisp-desymbolify-args (cdr args)))
          :parent (if (listp (car args)) (symbol-name (cadr (car args))) nil)
-         :documentation (semantic.elisp-do-doc doc)
+         :documentation (semantic-elisp-do-doc doc)
          )))
   defmethod
   defgeneric
   )
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (semantic-tag-new-function
        (symbol-name (nth 1 form))
        nil
-       (semantic.elisp-desymbolify (nth 2 form))
+       (semantic-elisp-desymbolify (nth 2 form))
        ))
   defadvice
   )
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (let ((docpart (nthcdr 4 form)))
 	(semantic-tag-new-type
 	 (symbol-name (nth 1 form))
          "class"
-	 (semantic.elisp-clos-args-to-semantic (nth 3 form))
-	 (semantic.elisp-desymbolify (nth 2 form))
-	 :typemodifiers (semantic.elisp-desymbolify
+	 (semantic-elisp-clos-args-to-semantic (nth 3 form))
+	 (semantic-elisp-desymbolify (nth 2 form))
+	 :typemodifiers (semantic-elisp-desymbolify
 			 (unless (stringp (car docpart)) docpart))
-	 :documentation (semantic.elisp-do-doc
+	 :documentation (semantic-elisp-do-doc
                          (if (stringp (car docpart))
                              (car docpart)
                            (cadr (member :documentation docpart))))
@@ -375,7 +375,7 @@ Return a bovination list to use."
   defclass
   )
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (let ((slots (nthcdr 2 form)))
         ;; Skip doc string if present.
@@ -386,39 +386,39 @@ Return a bovination list to use."
                           (car (nth 1 form))
                         (nth 1 form)))
          "struct"
-         (semantic.elisp-desymbolify slots)
+         (semantic-elisp-desymbolify slots)
          (cons nil nil)
          )))
   defstruct
   )
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (semantic-tag-new-function
        (symbol-name (nth 1 form))
        nil nil
        :lexical-analyzer-flag t
-       :documentation (semantic.elisp-do-doc (nth 2 form))
+       :documentation (semantic-elisp-do-doc (nth 2 form))
        ))
   define-lex
   )
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (let ((args (nth 3 form)))
 	(semantic-tag-new-function
 	 (symbol-name (nth 1 form))
          nil
-	 (and (listp args) (semantic.elisp-desymbolify args))
+	 (and (listp args) (semantic-elisp-desymbolify args))
 	 :override-function-flag t
 	 :parent (symbol-name (nth 2 form))
-	 :documentation (semantic.elisp-do-doc (nth 4 form))
+	 :documentation (semantic-elisp-do-doc (nth 4 form))
 	 )))
   define-mode-overload-implementation ;; obsoleted
   define-mode-local-override
   )
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (semantic-tag-new-variable
        (symbol-name (nth 2 form))
@@ -426,12 +426,12 @@ Return a bovination list to use."
        (nth 3 form)                     ; default value
        :override-variable-flag t
        :parent (symbol-name (nth 1 form))
-       :documentation (semantic.elisp-do-doc (nth 4 form))
+       :documentation (semantic-elisp-do-doc (nth 4 form))
        ))
   defvar-mode-local
   )
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (let ((name (nth 1 form)))
         (semantic-tag-new-include
@@ -443,7 +443,7 @@ Return a bovination list to use."
   require
   )
 
-(semantic.elisp-setup-form-parser
+(semantic-elisp-setup-form-parser
     (lambda (form start end)
       (let ((name (nth 1 form)))
         (semantic-tag-new-package
@@ -518,10 +518,10 @@ Optional argument NOSNARF is ignored."
       (cond ((semantic-tag-with-position-p tag)
 	     ;; Doc isn't in the tag itself.  Lets pull it out of the
 	     ;; sources.
-	     (let ((semantic.elisp-store-documentation-in-tag t))
+	     (let ((semantic-elisp-store-documentation-in-tag t))
 	       (setq tag (with-current-buffer (semantic-tag-buffer tag)
 			   (goto-char (semantic-tag-start tag))
-			   (semantic.elisp-use-read
+			   (semantic-elisp-use-read
 			    ;; concoct a lexical token.
 			    (cons (semantic-tag-start tag)
 				  (semantic-tag-end tag))))
