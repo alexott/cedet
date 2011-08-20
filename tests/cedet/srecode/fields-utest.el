@@ -1,3 +1,32 @@
+;;; fields-utest.el --- 
+;;
+;; Copyright (C) 2011 Eric M. Ludlam
+;;
+;; Author: Eric M. Ludlam <eric@siege-engine.com>
+;;
+;; This program is free software; you can redistribute it and/or
+;; modify it under the terms of the GNU General Public License as
+;; published by the Free Software Foundation, either version 3 of the
+;; License, or (at your option) any later version.
+
+;; This program is distributed in the hope that it will be useful, but
+;; WITHOUT ANY WARRANTY; without even the implied warranty of
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+;; General Public License for more details.
+
+;; You should have received a copy of the GNU General Public License
+;; along with this program.  If not, see http://www.gnu.org/licenses/.
+
+
+;;; Commentary:
+;;
+;; 
+
+(require 'srecode)
+(require 'srecode/fields)
+
+;;; Code:
+
 ;; Test out field modification w/out using srecode templates.
 ;;
 (defvar srecode-field-utest-text
@@ -39,14 +68,14 @@ It is filled with some text."
       (when (or (not (slot-boundp f 'overlay)) (not (oref f overlay)))
         (error "Field test: Overlay info not created for field"))
 
-      (when (and (srecode-overlay-p (oref f overlay))
-               (not (srecode-overlay-get (oref f overlay) 'srecode-init-only)))
+      (when (and (overlayp (oref f overlay))
+               (not (overlay-get (oref f overlay) 'srecode-init-only)))
         (error "Field creation overlay is not tagged w/ init flag"))
 
       (srecode-overlaid-activate f)
 
-      (when (or (not (srecode-overlay-p (oref f overlay)))
-                (srecode-overlay-get (oref f overlay) 'srecode-init-only))
+      (when (or (not (overlayp (oref f overlay)))
+                (overlay-get (oref f overlay) 'srecode-init-only))
         (error "New field overlay not created during activation"))
 
       (when (not (= (length srecode-field-archive) 1))
@@ -54,7 +83,7 @@ It is filled with some text."
       (when (not (eq f (car srecode-field-archive)))
         (error "Field test: Field did not auto-add itself to the field archive"))
 
-      (when (not (srecode-overlay-get (oref f overlay) 'keymap))
+      (when (not (overlay-get (oref f overlay) 'keymap))
         (error "Field test: Overlay keymap not set"))
 
       (when (not (string= "is" (srecode-overlaid-text f)))
@@ -213,3 +242,8 @@ It is filled with some text."
 
     (message "   All field tests passed.")
     ))
+
+
+(provide 'cedet/srecode/fields-utest)
+
+;;; fields-utest.el ends here
