@@ -1,6 +1,6 @@
 ;;; cogre/uml.el --- UML support for COGRE
 
-;;; Copyright (C) 2001, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2001, 2008, 2009, 2010, 2011 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: oop, uml
@@ -33,7 +33,6 @@
 (eval-when-compile (require 'cogre/semantic))
 
 ;;; Code:
-;;;###autoload
 (defclass cogre-package (cogre-node)
   ((name-default :initform "Package")
    (blank-lines-top :initform 1)
@@ -70,7 +69,6 @@ tweaks the faces."
     ;; Return it.
     rect))
 
-;;;###autoload
 (defclass cogre-note (cogre-node)
   ((name-default :initform "Note...")
    (blank-lines-top :initform 1)
@@ -94,7 +92,6 @@ tweaks the faces."
     ;; Return it.
     rect))
 
-;;;###autoload
 (defclass cogre-scoped-node (cogre-node)
   ((package-name :initform ""
 		 :initarg :package-name
@@ -136,7 +133,6 @@ Return the modified element."
 	  '( [ "Repackage" cogre-set-scoped-node-package t ]
 	     )))
 
-;;;###autoload
 (defclass cogre-class (cogre-scoped-node)
   ((name-default :initform "Class")
    (blank-lines-top :initform 0)
@@ -252,7 +248,6 @@ Argument CLASS is the class whose slots are referenced."
 	 )
 	)))))
 
-;;;###autoload
 (defclass cogre-instance (cogre-scoped-node)
   ((name-default :initform "Instance")
    (blank-lines-top :initform 1)
@@ -278,7 +273,6 @@ For example: ( \"Title\" ) or ( \"<Type>\" \"Title\" )"
 
 ;;; Links
 ;;
-;;;###autoload
 (defclass cogre-inherit (cogre-link)
   ((end-glyph :initform [ (" ^ " "/_\\")
 			  ("_|_" "\\ /" " V ")
@@ -290,7 +284,6 @@ For example: ( \"Title\" ) or ( \"<Type>\" \"Title\" )"
 The `start' node is the child, and the `end' node is the parent.
 This is supposed to infer that START inherits from END.")
 
-;;;###autoload
 (defclass cogre-aggregate (cogre-link)
   ((start-glyph :initform [ ("/\\ " "\\/" )
 			    ("/\\ " "\\/" )
