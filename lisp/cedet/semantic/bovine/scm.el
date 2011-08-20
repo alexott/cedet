@@ -1,6 +1,6 @@
 ;;; semantic/bovine/scm.el --- Semantic details for Scheme (guile)
 
-;;; Copyright (C) 2001, 2002, 2003, 2004, 2008, 2009, 2010
+;;; Copyright (C) 2001, 2002, 2003, 2004, 2008, 2009, 2010, 2011
 ;;; Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
@@ -96,7 +96,7 @@ syntax as specified by the syntax table."
 ;;;###autoload
 (defun semantic-default-scheme-setup ()
   "Setup hook function for Emacs Lisp files and Semantic."
-  (semantic-scm-by--install-parser)
+  (semantic/bovine/scm-by--install-parser)
   (setq semantic-symbol->name-assoc-list '( (variable . "Variables")
                                             ;;(type     . "Types")
                                             (function . "Functions")
