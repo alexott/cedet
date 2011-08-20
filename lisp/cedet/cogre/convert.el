@@ -1,6 +1,6 @@
 ;;; cogre/convert.el --- Conversion for cogre charts into other formats
 ;;
-;; Copyright (C) 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2009, 2010, 2011 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;;
@@ -48,8 +48,9 @@
 ;;  2) Guess what an abstract converter looks like based on dot
 ;;  3) Promote the generic API, and write semantic-tag converter.
 
-(require 'cogre/uml)
+(require 'cogre)
 (require 'cogre/srecode)
+(require 'cogre/uml)
 (require 'cedet-graphviz)
 (eval-when-compile (require 'ps-print))
 ;;; Code:
