@@ -1,6 +1,6 @@
 ;;; cogre.el --- COnnected GRaph Editor for Emacs
 
-;;; Copyright (C) 2001, 2002, 2003, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2001, 2002, 2003, 2005, 2007, 2008, 2009, 2010, 2011 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: graph, oop, extensions, outlines
@@ -32,6 +32,8 @@
 ;; allow Emacs to display such graphs with data generated from
 ;; source code.
 ;;
+
+(eval-when-compile (require 'cl))
 
 (require 'eieio)
 (require 'eieio-opt)
