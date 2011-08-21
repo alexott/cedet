@@ -26,6 +26,7 @@
 ;; allows this database to use cscope in semantic to lookup tags.
 ;;
 (require 'semantic/symref/cscope)
+(require 'semantic/db)
 
 (eval-when-compile
   ;; For generic function searching.
