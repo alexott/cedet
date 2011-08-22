@@ -108,7 +108,8 @@ use the mailing list cedet-devel.net via the URL:
 
 @menu
 * Overview::                    
-* Installation/Basic Configuration::                
+* Installation/Basic Configuration::
+* CEDET Context Menu::                
 * JDEE Target::
 * ECB Target::
 * Project Management::
@@ -463,6 +464,30 @@ To use the graphviz dot parser: @file{graphviz-dot-mode.el} see the
 commentary in cogre/wisent-dot.el
 
 @end enumerate
+
+@node CEDET Context Menu
+@chapter CEDET Context Menu
+
+@cedet{} is a collection of different tools, but it includes a minor mode of
+it's own that enables a context menu.  If you enable CEDET's context
+menu by adding this to your @file{.emacs}:
+
+@example
+(global-cedet-m3-minor-mode 1)
+@end example
+
+Once enabled, you can activate the context menu by right-clicking
+(with @kbd{mouse-3}).  You could bind this menu to a key with a
+command such as this which binds it to @kbd{C-c SPC}:
+
+@example
+(define-key cedet-m3-mode-map "\C-c " 'cedet-m3-menu-kbd)
+@end example
+
+The context menu pulls together helpful context aware suggestions from
+@semantic{}, or templates to insert with @srecode{}.  It also suggests
+compilation steps to take from @ede{}.
+
 
 @node JDEE Target
 @chapter @i{JDEE} Target
@@ -874,7 +899,7 @@ device.
 Builds the project in release mode.
 @end table
 
-@section ADB Featurse
+@section ADB Features
 
 CEDET supports several calls to ADB, including the following:
 
