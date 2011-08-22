@@ -436,7 +436,10 @@ WHERE is something like menu or layout, and what is the name of the resource."
       (error "Point is not on an XML based resource referred to by R"))
     (setq p (cdr p))
     ;; The next part refers to where in the resource hierarcy it is.
-    (find-file (ede-android-resource-file (car p) (car (cdr p))))))
+    (let ((fname (ede-android-resource-file (car p) (car (cdr p)))))
+      (if (file-exists-p fname)
+	  (find-file fname)
+	(error "Calculated filename %s does not exist" fname)))))
 
 (defun ede-android-visit-strings ()
   "Visit the strings resource for the current project."
