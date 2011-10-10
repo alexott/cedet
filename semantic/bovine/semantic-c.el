@@ -118,6 +118,7 @@ part of the preprocessor map.")
 (defun semantic-c-reset-preprocessor-symbol-map ()
   "Reset the C preprocessor symbol map based on all input variables."
   (when (featurep 'semantic-c)
+    (remove-hook 'mode-local-init-hook 'semantic-c-reset-preprocessor-symbol-map)
     (let ((filemap nil)
 	  )
       (when (and (not semantic-c-in-reset-preprocessor-table)
@@ -151,6 +152,9 @@ part of the preprocessor map.")
 				filemap))
 		       )
       )))
+;; Make sure the preprocessor symbols are set up when mode-local kicks
+;; in.
+(add-hook 'mode-local-init-hook 'semantic-c-reset-preprocessor-symbol-map)
 
 ;;;###autoload
 (defcustom semantic-lex-c-preprocessor-symbol-map nil
@@ -2184,8 +2188,6 @@ actually in their parent which is not accessible.")
       )))
 
 (provide 'semantic-c)
-
-(semantic-c-reset-preprocessor-symbol-map)
 
 ;;; semantic-c.el ends here
 
