@@ -119,6 +119,12 @@ part of the preprocessor map.")
   "Reset the C preprocessor symbol map based on all input variables."
   (when (featurep 'semantic-c)
     (remove-hook 'mode-local-init-hook 'semantic-c-reset-preprocessor-symbol-map)
+    ;; Initialize semantic-lex-spp-macro-symbol-obarray with symbols.
+    (setq-mode-local c-mode
+		     semantic-lex-spp-macro-symbol-obarray
+		     (semantic-lex-make-spp-table
+		      (append semantic-lex-c-preprocessor-symbol-map-builtin
+			      semantic-lex-c-preprocessor-symbol-map)))
     (let ((filemap nil)
 	  )
       (when (and (not semantic-c-in-reset-preprocessor-table)
@@ -141,17 +147,14 @@ part of the preprocessor map.")
 		    (error (message "Error updating tables for %S"
 				    (object-name table)))))
 		(setq filemap (append filemap (oref table lexical-table)))
-		)
-	      ))))
+		;; Update symbol obarray
+		(setq-mode-local c-mode
+				 semantic-lex-spp-macro-symbol-obarray
+				 (semantic-lex-make-spp-table
+				  (append semantic-lex-c-preprocessor-symbol-map-builtin
+					  semantic-lex-c-preprocessor-symbol-map
+					  filemap)))))))))))
 
-      (setq-mode-local c-mode
-		       semantic-lex-spp-macro-symbol-obarray
-		       (semantic-lex-make-spp-table
-			(append semantic-lex-c-preprocessor-symbol-map-builtin
-				semantic-lex-c-preprocessor-symbol-map
-				filemap))
-		       )
-      )))
 ;; Make sure the preprocessor symbols are set up when mode-local kicks
 ;; in.
 (add-hook 'mode-local-init-hook 'semantic-c-reset-preprocessor-symbol-map)
