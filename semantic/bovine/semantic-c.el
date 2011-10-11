@@ -107,6 +107,7 @@ NOTE: In process of obsoleting this."
      ("__wur" . "")
      ("__declspec" . ((spp-arg-list ("foo") 1 . 2)))
      ("__attribute__" . ((spp-arg-list ("foo") 1 . 2)))
+     ("__asm" . ((spp-arg-list ("foo") 1 . 2)))
      )
   "List of symbols to include by default.")
 
