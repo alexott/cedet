@@ -256,7 +256,11 @@ Return the defined symbol as a special spp lex token."
 	   (raw-stream
 	    (semantic-lex-spp-stream-for-macro (save-excursion
 						 (semantic-c-end-of-macro)
-						 (point))))
+						 ;; HACK - If there's a C comment after
+						 ;; the macro, do not parse it.
+						 (when (looking-back "/\\*.*")
+						   (goto-char (match-beginning 0)))
+						 (1- (point)))))
 	   )
 
       ;; Only do argument checking if the paren was immediatly after
