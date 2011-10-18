@@ -258,9 +258,11 @@ Return the defined symbol as a special spp lex token."
 						 (semantic-c-end-of-macro)
 						 ;; HACK - If there's a C comment after
 						 ;; the macro, do not parse it.
-						 (when (looking-back "/\\*.*")
-						   (goto-char (match-beginning 0)))
-						 (1- (point)))))
+						 (if (looking-back "/\\*.*")
+						     (progn
+						       (goto-char (match-beginning 0))
+						       (1- (point)))
+						   (point)))))
 	   )
 
       ;; Only do argument checking if the paren was immediatly after
