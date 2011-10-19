@@ -310,9 +310,10 @@ Moves completely over balanced #if blocks."
       (cond
        ((looking-at "^\\s-*#\\s-*if")
 	;; We found a nested if.  Skip it.
-	;; @TODO - can we use the new c-scan-conditionals
-	;; - available in Emacs/CVS as of AUG 2009
-	(c-forward-conditional 1))
+	(if (fboundp 'c-scan-conditionals)
+	    (goto-char (c-scan-conditionals 1))
+	  ;; For older Emacsen, but this will set the mark.
+	  (c-forward-conditional 1)))
        ((looking-at "^\\s-*#\\s-*elif")
 	;; We need to let the preprocessor analyze this one.
 	(beginning-of-line)
