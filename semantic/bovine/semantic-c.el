@@ -2064,6 +2064,8 @@ actually in their parent which is not accessible.")
 
   (setq semantic-lex-analyzer #'semantic-c-lexer)
   (add-hook 'semantic-lex-reset-hooks 'semantic-lex-spp-reset-hook nil t)
+  (when (eq major-mode 'c++-mode)
+    (add-to-list 'semantic-lex-c-preprocessor-symbol-map '("__cplusplus" . "")))
   )
 
 ;;;###autoload
