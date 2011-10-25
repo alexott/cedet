@@ -182,13 +182,6 @@ Stored outright without modifications or stripping.")
 	(t key) ;; already generic.. maybe.
 	))
 
-(defsubst eieio-specialized-key-to-generic-key (key)
-  "Convert a specialized KEY into a generic method key."
-  (cond ((eq key method-static) 0) ;; don't convert
-	((< key method-num-lists) (+ key 3)) ;; The conversion
-	(t key) ;; already generic.. maybe.
-	))
-
 ;; How to specialty compile stuff.
 (autoload 'byte-compile-file-form-defmethod "eieio-comp"
   "This function is used to byte compile methods in a nice way.")
@@ -819,9 +812,9 @@ See `defclass' for more information."
   "For SLOT, signal if SPEC does not match VALUE.
 If SKIPNIL is non-nil, then if VALUE is nil return t instead."
   (if (and (not (eieio-eval-default-p value))
-           (not eieio-skip-typecheck)
-           (not (and skipnil (null value)))
-           (not (eieio-perform-slot-validation spec value)))
+	   (not eieio-skip-typecheck)
+	   (not (and skipnil (null value)))
+	   (not (eieio-perform-slot-validation spec value)))
       (signal 'invalid-slot-type (list slot spec value))))
 
 (defun eieio-add-new-slot (newc a d doc type cust label custg print prot init alloc
@@ -1254,12 +1247,12 @@ IMPL is the symbol holding the method implementation."
 
 (defun eieio-defgeneric (method doc-string)
   "Engine part to `defgeneric' macro defining METHOD with DOC-STRING."
-  (when (and (fboundp method) (not (generic-p method))
-	     (or (byte-code-function-p (symbol-function method))
-		 (not (eq 'autoload (car-safe (symbol-function method))))))
-    (error "You cannot create a generic/method over an existing symbol: %s"
-	   method))
-
+  (if (and (fboundp method) (not (generic-p method))
+	   (or (byte-code-function-p (symbol-function method))
+	       (not (eq 'autoload (car (symbol-function method)))))
+	   )
+      (error "You cannot create a generic/method over an existing symbol: %s"
+	     method))
   ;; Don't do this over and over.
   (unless (fboundp 'method)
     ;; This defun tells emacs where the first definition of this
@@ -1534,8 +1527,8 @@ Fills in OBJ's SLOT with its default value."
 	 (eieio-default-eval-maybe val))
        obj cl 'oref-default))))
 
-(defun eieio-eval-default-p (val)
-  "Should the default value VAL be evaluated for use?"
+(defsubst eieio-eval-default-p (val)
+  "Whether the default value VAL should be evaluated for use."
   (and (consp val) (symbolp (car val)) (fboundp (car val))))
 
 (defun eieio-default-eval-maybe (val)
@@ -1702,99 +1695,6 @@ The CLOS function `class-direct-superclasses' is aliased to this function."
 The CLOS function `class-direct-subclasses' is aliased to this function."
   (if (not (class-p class)) (signal 'wrong-type-argument (list 'class-p class)))
   (class-children-fast class))
-
-(defun eieio-c3-candidate (class remaining-inputs)
-  "Returns CLASS if it can go in the result now, otherwise nil"
-  ;; Ensure CLASS is not in any position but the first in any of the
-  ;; element lists of REMAINING-INPUTS.
-  (and (not (some (lambda (l) (member class (rest l)))
-		  remaining-inputs))
-       class))
-
-(defun eieio-c3-merge-lists (reversed-partial-result remaining-inputs)
-  "Merge REVERSED-PARTIAL-RESULT REMAINING-INPUTS in a consistent order, if possible.
-If a consistent order does not exist, signal an error."
-  (if (every #'null remaining-inputs)
-      ;; If all remaining inputs are empty lists, we are done.
-      (nreverse reversed-partial-result)
-    ;; Otherwise, we try to find the next element of the result. This
-    ;; is achieved by considering the first element of each
-    ;; (non-empty) input list and accepting a candidate if it is
-    ;; consistent with the rests of the input lists.
-    (let ((next (some (lambda (c) (eieio-c3-candidate c remaining-inputs))
-		      (mapcar #'first
-			      (remove-if #'null remaining-inputs)))))
-      (if next
-	  ;; The graph is consistent so far, add NEXT to result and
-	  ;; merge input lists, dropping NEXT from their heads where
-	  ;; applicable.
-	  (eieio-c3-merge-lists
-	   (cons next reversed-partial-result)
-	   (mapcar (lambda (l) (if (eq (first l) next) (rest l) l))
-		   remaining-inputs))
-	;; The graph is inconsistent, give up
-	(signal 'inconsistent-class-hierarchy (list remaining-inputs)))))
-  )
-
-(defun eieio-class-precedence-dfs (class)
-  "Return all parents of CLASS in depth-first order."
-  (let ((parents (class-parents-fast class)))
-    (or (remove-duplicates
-	 (apply #'append
-		(list class)
-		(or
-		 (mapcar
-		  (lambda (parent)
-		    (cons parent (eieio-class-precedence-dfs parent)))
-		  parents)
-		 '((eieio-default-superclass))))
-	 :from-end t)))
-  )
-
-(defun eieio-class-precedence-bfs (class)
-  "Return all parents of CLASS in breadth-first order."
-  (let ((result)
-	(queue (or (class-parents-fast class)
-		   '(eieio-default-superclass))))
-    (while queue
-      (let ((head (pop queue)))
-	(unless (member head result)
-	  (push head result)
-	  (unless (eq head 'eieio-default-superclass)
-	    (setq queue (append queue (or (class-parents-fast head)
-					  '(eieio-default-superclass))))))))
-    (cons class (nreverse result)))
-  )
-
-(defun eieio-class-precedence-c3 (class)
-  "Return all parents of CLASS in c3 order."
-  (let ((parents (class-parents-fast class)))
-    (eieio-c3-merge-lists
-     (list class)
-     (append
-      (or
-       (mapcar
-	(lambda (x)
-	  (eieio-class-precedence-c3 x))
-	parents)
-       '((eieio-default-superclass)))
-      (list parents))))
-  )
-
-(defun class-precedence-list (class)
-  "Return (transitively closed) list of parents of CLASS.
-The order, in which the parents are returned depends on the
-method invocation orders of the involved classes."
-  (if (or (null class) (eq class 'eieio-default-superclass))
-      nil
-    (case (class-method-invocation-order class)
-      (:depth-first
-       (eieio-class-precedence-dfs class))
-      (:breadth-first
-       (eieio-class-precedence-bfs class))
-      (:c3
-       (eieio-class-precedence-c3 class))))
-  )
 
 (defun eieio-c3-candidate (class remaining-inputs)
   "Returns CLASS if it can go in the result now, otherwise nil"
@@ -2219,13 +2119,6 @@ This should only be called from a generic function."
       ;; :primary methods
       (setq tlambdas
 	    (or (and mclass (eieio-generic-form method method-primary mclass))
-
-		;; @TODO - June 2010 -
-		;; I think this coding pattern for :before, :after, and :primary
-		;; of checking mclass and if nil doing the below was in an
-		;; old implementation, and now you can't get here because
-		;; of the when statement above forcing only objects through here.
-
 		(eieio-generic-form method method-primary nil)))
       (when tlambdas
 	(setq lambdas (cons tlambdas lambdas)
@@ -2410,8 +2303,7 @@ If CLASS is nil, then an empty list of methods should be returned."
     ;; order (most general class last); Otherwise, reverse order.
     (if (eq key method-after)
 	lambdas
-      (nreverse lambdas)))
-  )
+      (nreverse lambdas))))
 
 (defun next-method-p ()
   "Return non-nil if there is a next method.
@@ -2546,8 +2438,7 @@ nil for superclasses.  This function performs no type checking!"
 			       eieiomt-optimizing-obarray)))
 	  (when (fboundp ov)
 	    (set s ov) ;; store ov as our next symbol
-	    (throw 'done ancestor))))))
-  )
+	    (throw 'done ancestor)))))))
 
 (defun eieio-generic-form (method key class)
  "Return the lambda form belonging to METHOD using KEY based upon CLASS.
@@ -2589,7 +2480,7 @@ is memorized for faster future use."
 	       nil)))
      ;; for a generic call, what is a list, is the function body we want.
      (let ((emtl (aref (get method 'eieio-method-tree)
-		       (if class key (eieio-specialized-key-to-generic-key key)))))
+ 		       (if class key (eieio-specialized-key-to-generic-key key)))))
        (if emtl
 	   ;; The car of EMTL is supposed to be a class, which in this
 	   ;; case is nil, so skip it.
@@ -2653,11 +2544,6 @@ This is usually a symbol that starts with `:'."
 (intern "unbound-slot")
 (put 'unbound-slot 'error-conditions '(unbound-slot error nil))
 (put 'unbound-slot 'error-message "Unbound slot")
-
-(intern "inconsistent-class-hierarchy")
-(put 'inconsistent-class-hierarchy 'error-conditions
-     '(inconsistent-class-hierarchy error nil))
-(put 'inconsistent-class-hierarchy 'error-message "Inconsistent class hierarchy")
 
 (intern "inconsistent-class-hierarchy")
 (put 'inconsistent-class-hierarchy 'error-conditions
@@ -3031,9 +2917,6 @@ Optional argument NOESCAPE is passed to `prin1-to-string' when appropriate."
 	    ;; (defalias 'edebug-prin1-to-string 'eieio-edebug-prin1-to-string)
 	    )
 	  )
-
-(eval-after-load "data-debug"
-  '(require 'eieio-datadebug))
 
 ;;; Interfacing with imenu in emacs lisp mode
 ;;    (Only if the expression is defined)

@@ -1,31 +1,30 @@
 ;;; eieio-speedbar.el -- Classes for managing speedbar displays.
 
-;;;
-;; Copyright (C) 1999, 2000, 2001, 2002, 2005, 2007, 2008 Eric M. Ludlam
-;;
-;; Author: <zappo@gnu.org>
-;; RCS: $Id: eieio-speedbar.el,v 1.20 2008-09-29 00:20:17 zappo Exp $
-;; Keywords: oop, tools
-;;
-;; This program is free software; you can redistribute it and/or modify
+;; Copyright (C) 1999, 2000, 2001, 2002, 2005, 2007, 2008, 2009, 2010
+;;   Free Software Foundation, Inc.
+
+;; Author: Eric M. Ludlam <zappo@gnu.org>
+;; Version: 0.2
+;; Keywords: OO, tools
+;; Package: eieio
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
-;; the Free Software Foundation; either version 2, or (at your option)
-;; any later version.
-;;
-;; This program is distributed in the hope that it will be useful,
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
 ;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 ;; GNU General Public License for more details.
-;;
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
-;;
-;; Please send bug reports, etc. to zappo@gnu.org
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;;  
+;;
 ;;  This provides some classes that can be used as a parent which
 ;; will automatically provide SPEEDBAR support for any list of objects
 ;; of that type.
@@ -79,15 +78,15 @@
 ;;    string.   This will automatically handle cases when speedbar is
 ;;    not already loaded, and specifying all overload functions.
 ;;
-;; 5) Create an initliazer function which looks like this:
-;; 
-;; (defun my-speedbar-mode-initilaize ()
+;; 5) Create an initializer function which looks like this:
+;;
+;; (defun my-speedbar-mode-initialize ()
 ;;   "documentation"
 ;;   (interactive)
 ;;   (speedbar-frame-mode 1)
 ;;   (speedbar-change-initial-expansion-list mymodename)
 ;;   (speedbar-get-focus))
-;; 
+;;
 ;; where `mymodename' is the same value as passed to `eieio-speedbar-create'
 ;; as the MODENAME parameter.
 
@@ -115,7 +114,7 @@
     map))
 
 (defvar eieio-speedbar-key-map (eieio-speedbar-make-map)
-  "A Generic object based speedbar display keymap.")
+  "A generic object based speedbar display keymap.")
 
 (defvar eieio-speedbar-menu
   '([ "Edit Object/Field" speedbar-edit-line t]
@@ -138,8 +137,8 @@
   "Create a speedbar mode for displaying an object hierarchy.
 MAP-FN is the keymap generator function used for extra keys.
 MAP-VAR is the keymap variable used.
-MENU-VAR is the symbol containting an easymenu compatible menu part to use.
-MODENAME is a s tring used to identify this browser mode.
+MENU-VAR is the symbol containing an easymenu compatible menu part to use.
+MODENAME is a string used to identify this browser mode.
 FETCHER is a generic function used to fetch the base object list used when
 creating the speedbar display."
   (if (not (featurep 'speedbar))
@@ -152,7 +151,7 @@ creating the speedbar display."
 (defun eieio-speedbar-create-engine (map-fn map-var menu-var modename fetcher)
   "Create a speedbar mode for displaying an object hierarchy.
 Called from `eieio-speedbar-create', or the speedbar load-hook.
-MAP-FN, MAP-VAR, MENU-VAR, MODENAME, and FETCHER are the same as
+MAP-FN, MAP-VAR, MENU-VAR, MODENAME, and FETCHER are the same as in
 `eieio-speedbar-create'."
   ;; make sure the keymap exists
   (funcall map-fn)
@@ -173,7 +172,7 @@ MAP-FN, MAP-VAR, MENU-VAR, MODENAME, and FETCHER are the same as
 (defun eieio-speedbar-buttons (dir-or-object depth fetcher)
   "Create buttons for the speedbar display.
 Start in directory DIR-OR-OBJECT.  If it is an object, just display that
-objects subelements.
+object's subelements.
 Argument DEPTH specifies how far down we have already been displayed.
 If it is a directory, use FETCHER to fetch all objects associated with
 that path."
@@ -229,7 +228,7 @@ attributes.  These default objects will be pulled up in a custom
 object edit buffer doing an in-place edit.
 
 If your object represents some other item, override this method
-and take the apropriate action."
+and take the appropriate action."
   (require 'eieio-custom)
   (speedbar-with-attached-buffer
    (eieio-customize-object object))
@@ -265,7 +264,7 @@ See `speedbar-make-tag-line' for details."
 	     "State of an object being expanded in speedbar.")
    )
   "Class which provides basic speedbar support for child classes.
-Add one of thie child classes to this class to the parent list of a class."
+Add one of the child classes to this class to the parent list of a class."
   :method-invocation-order :depth-first
   :abstract t)
 
@@ -279,7 +278,7 @@ Add one of thie child classes to this class to the parent list of a class."
 (defclass eieio-speedbar-file-button (eieio-speedbar)
   ((buttontype :initform bracket)
    (buttonface :initform speedbar-file-face))
-  "Class providing support for objects which behave like a directory."
+  "Class providing support for objects which behave like a file."
   :method-invocation-order :depth-first
   :abstract t)
 
@@ -289,8 +288,8 @@ Add one of thie child classes to this class to the parent list of a class."
 (defmethod eieio-speedbar-make-tag-line ((object eieio-speedbar)
 					 depth)
   "Insert a tag line into speedbar at point for OBJECT.
-All objects a child of symbol `eieio-speedbar' can be created from this
-method.  Override this if you need non-traditional tag lines.
+All objects a child of symbol `eieio-speedbar' can be created from
+this method.  Override this if you need non-traditional tag lines.
 Argument DEPTH is the depth at which the tag line is inserted."
   (let ((children (eieio-speedbar-object-children object))
 	(exp (oref object expanded)))
@@ -329,7 +328,7 @@ Argument DEPTH is the depth at which the tag line is inserted."
 
 (defmethod eieio-speedbar-expand ((object eieio-speedbar) depth)
   "Expand OBJECT at indentation DEPTH.
-Inserts a list of new tag lines representing expanded elements withing
+Inserts a list of new tag lines representing expanded elements within
 OBJECT."
   (let ((children (eieio-speedbar-object-children object)))
     (cond ((eieio-object-p (car children))
@@ -347,8 +346,8 @@ The object is at indentation level INDENT."
   (eieio-speedbar-handle-click token))
 
 (defun eieio-speedbar-object-expand (text token indent)
-  "Expand object represented by TEXT.  TOKEN is the object.
-INDENT is the current indentation level."
+  "Expand object represented by TEXT.
+TOKEN is the object.  INDENT is the current indentation level."
   (cond ((string-match "+" text)	;we have to expand this file
 	 (speedbar-change-expand-button-char ?-)
 	 (oset token expanded t)
@@ -414,7 +413,7 @@ Optional DEPTH is the depth we start at."
 ;;; Methods to the eieio-speedbar-* classes which need to be overriden.
 ;;
 (defmethod eieio-speedbar-object-children ((object eieio-speedbar))
-  "Return a list of children to be displayed in SPEEDBAR.
+  "Return a list of children to be displayed in speedbar.
 If the return value is a list of OBJECTs, then those objects are
 queried for details.  If the return list is made of strings,
 then this object will be queried for the details needed
