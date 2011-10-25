@@ -57,7 +57,7 @@
 (defalias 'customize-project 'ede-customize-project)
 
 ;;;###autoload
-(defun ede-customize-current-target ()
+(defun ede-customize-current-target()
   "Edit fields of the current target through EIEIO & Custom."
   (interactive)
   (require 'eieio-custom)
