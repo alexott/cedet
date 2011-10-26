@@ -40,13 +40,6 @@ GTAGS is used to create the tags table queried by the 'global' command."
   :type 'string
   :group 'cedet)
 
-;;;###autoload
-(defcustom cedet-global-gtags-command "gtags"
-  "Command name for the GNU Global gtags executable.
-GTAGS is used to create the tags table queried by the 'global' command."
-  :type 'string
-  :group 'cedet)
-
 ;;; Code:
 (defun cedet-gnu-global-search (searchtext texttype type scope)
   "Perform a search with GNU Global, return the created buffer.
