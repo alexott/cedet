@@ -82,10 +82,10 @@ what BODY returns."
   (let ((old-table (make-symbol "old-table")))
     `(let ((,old-table pprint-printers))
        (unwind-protect
-           (progn
-             (setq pprint-printers (copy-sequence ,table))
-             ,@body)
-         (setq pprint-printers ,old-table)))))
+	   (progn
+	     (setq pprint-printers (copy-sequence ,table))
+	     ,@body)
+	 (setq pprint-printers ,old-table)))))
 (put 'pprint-with-printers 'lisp-indent-function 1)
 
 ;;;;
@@ -106,8 +106,8 @@ nothing.")
      (let ((p (point)))
        ,@motions
        (and (<= (current-column) pprint-width)
-            (= (progn (beginning-of-line) (point))
-               (progn (goto-char p) (beginning-of-line) (point)))))))
+	    (= (progn (beginning-of-line) (point))
+	       (progn (goto-char p) (beginning-of-line) (point)))))))
 
 (defsubst pprint-maybe-newline-and-indent ()
   "Insert a newline, then indent.
@@ -140,15 +140,15 @@ beyond specified ROOM."
   (save-restriction
     (narrow-to-region (point) (progn (forward-sexp) (point)))
     (let* ((old-sexp (buffer-string))
-           (pprint-width room)
-           (nobreak t))
+	   (pprint-width room)
+	   (nobreak t))
       (goto-char (point-min))
       (pprint-sexp)
       (goto-char (point-min))
       (end-of-line)
       (while (and (setq nobreak (<= (current-column) room))
-                  (not (eobp)))
-        (end-of-line 2))
+		  (not (eobp)))
+	(end-of-line 2))
       (delete-region (point-min) (point-max))
       (insert old-sexp)
       nobreak)))
@@ -171,10 +171,10 @@ Return non-nil if nil has been found and printed."
   (down-list 1)
   (pprint-sexp t) ;; never break after an open paren
   (let* ((room (- pprint-width (current-column)))
-         (nobreak (>= room pprint-min-width)))
+	 (nobreak (>= room pprint-min-width)))
     (save-excursion
       (while (and nobreak (not (looking-at "\\s)")))
-        (setq nobreak (pprint-sexp-try room))))
+	(setq nobreak (pprint-sexp-try room))))
     (or nobreak (pprint-maybe-newline-and-indent))
     (while (not (looking-at "\\s)"))
       (pprint-sexp nobreak)
@@ -193,25 +193,25 @@ Insert a line break before each expression."
 If optional argument PPRINT-NO-BREAK is non-nil the pretty-printed
 representation will not start on a new line."
   (if (or (> pprint-min-width pprint-width)
-          (pprint-no-break-p (forward-sexp)))
+	  (pprint-no-break-p (forward-sexp)))
       (forward-sexp)
     (or pprint-no-break (pprint-maybe-newline-and-indent))
     (let ((old-mark (copy-marker (mark-marker))))
       (set-marker
        (mark-marker) (save-excursion (forward-sexp) (point)))
       (while (< (point) (marker-position (mark-marker)))
-        (skip-syntax-forward "-'")
-        (cond
-         ((pprint-no-break-p (forward-sexp))
-          (forward-sexp))
-         ((pprint-dispatch-printer))
-         ((looking-at "\\s(")
-          (pprint-list))
-         ((looking-at "\\s)")
-          (pprint-close-list))
-         (t
-          (forward-sexp)))
-        )
+	(skip-syntax-forward "-'")
+	(cond
+	 ((pprint-no-break-p (forward-sexp))
+	  (forward-sexp))
+	 ((pprint-dispatch-printer))
+	 ((looking-at "\\s(")
+	  (pprint-list))
+	 ((looking-at "\\s)")
+	  (pprint-close-list))
+	 (t
+	  (forward-sexp)))
+	)
       (set-marker (mark-marker) (marker-position old-mark))
       (set-marker old-mark nil))))
 
@@ -260,15 +260,15 @@ representation will not start on a new line."
   (skip-syntax-forward "-'")
   (if (looking-at "\\s(")
       (progn
-        (down-list 1)
-        (skip-syntax-forward "-'")
-        (unless (looking-at "\\s)")
-          (pprint-sexp t)
-          (pprint-sequence))
-        (pprint-close-list))
+	(down-list 1)
+	(skip-syntax-forward "-'")
+	(unless (looking-at "\\s)")
+	  (pprint-sexp t)
+	  (pprint-sequence))
+	(pprint-close-list))
     ;; Print empty let binding as () instead of nil
     (or (pprint-nil-as-list)
-        (pprint-sexp t)))
+	(pprint-sexp t)))
   (pprint-maybe-newline-and-indent)
   (pprint-sequence)
   (pprint-close-list))
@@ -325,7 +325,7 @@ representation will not start on a new line."
 (defun pprint-with ()
   "Standard printer for `with-' like forms."
   (let* ((withfun (intern-soft (match-string 1)))
-         (nobreak (or (get withfun 'lisp-indent-function) 0)))
+	 (nobreak (or (get withfun 'lisp-indent-function) 0)))
     (down-list 1)
     (forward-sexp)
     (while (> nobreak 0)
@@ -341,65 +341,65 @@ representation will not start on a new line."
   ;; So it could be important to push the most generic printers first!
   (pprint-push-printer 'pprint-with
     (format "(%s\\>" "\\(with[-]\\(\\sw\\|\\s_\\)+\\)"
-            ))
+	    ))
   (pprint-push-printer 'pprint-defun
     (format "(%s\\>"
-            (regexp-opt
-             '(
-               "defun" "defmacro" "defsubst"
-               ) t)))
+	    (regexp-opt
+	     '(
+	       "defun" "defmacro" "defsubst"
+	       ) t)))
   (pprint-push-printer 'pprint-lambda
     (format "(%s\\>"
-            (regexp-opt
-             '(
-               "lambda"
-               ) t)))
+	    (regexp-opt
+	     '(
+	       "lambda"
+	       ) t)))
   (pprint-push-printer 'pprint-defvar
     (format "(%s\\>"
-            (regexp-opt
-             '(
-               "defvar" "defconst"
-               ) t)))
+	    (regexp-opt
+	     '(
+	       "defvar" "defconst"
+	       ) t)))
   (pprint-push-printer 'pprint-let
     (format "(%s\\>"
-            (regexp-opt
-             '(
-               "let" "let*"
-               ) t)))
+	    (regexp-opt
+	     '(
+	       "let" "let*"
+	       ) t)))
   (pprint-push-printer 'pprint-if
     (format "(%s\\>"
-            (regexp-opt
-             '(
-               "if"
-               ) t)))
+	    (regexp-opt
+	     '(
+	       "if"
+	       ) t)))
   (pprint-push-printer 'pprint-while
     (format "(%s\\>"
-            (regexp-opt
-             '(
-               "while" "when" "unless"
-               "condition-case" "catch"
-               "dotimes"
-               ) t)))
+	    (regexp-opt
+	     '(
+	       "while" "when" "unless"
+	       "condition-case" "catch"
+	       "dotimes"
+	       ) t)))
   (pprint-push-printer 'pprint-cond
     (format "(%s\\>"
-            (regexp-opt
-             '(
-               "cond"
-               ) t)))
+	    (regexp-opt
+	     '(
+	       "cond"
+	       ) t)))
   (pprint-push-printer 'pprint-progn
     (format "(%s\\>"
-            (regexp-opt
-             '(
-               "prog1" "progn"
-               "save-excursion" "save-restriction"
-               "unwind-protect"
-               ) t)))
+	    (regexp-opt
+	     '(
+	       "prog1" "progn"
+	       "save-excursion" "save-restriction"
+	       "unwind-protect"
+	       ) t)))
   (pprint-push-printer 'pprint-setq
     (format "(%s\\>"
-            (regexp-opt
-             '(
-               "setq"
-               ) t)))
+	    (regexp-opt
+	     '(
+	       "setq"
+	       ) t)))
   (setq pprint-standard-printers pprint-printers))
 
 (pprint-setup-standard-printers)
@@ -419,19 +419,19 @@ given WIDTH.  WIDTH value defaults to `fill-column'."
     (lisp-mode-variables nil)
     (set-syntax-table emacs-lisp-mode-syntax-table)
     (let ((print-escape-newlines nil)
-          (print-quoted t))
+	  (print-quoted t))
       (prin1 object (current-buffer)))
     (goto-char (point-min))
     ;; Escape "(" at beginning of line.  Can only occur in strings.
     (when (looking-at "\\s(")
       (down-list 1)
       (while (re-search-forward "^\\s(" nil t)
-        (goto-char (match-beginning 0))
-        (insert "\\")))
+	(goto-char (match-beginning 0))
+	(insert "\\")))
     (goto-char (point-min))
     (let* ((pprint-width (or width fill-column))
-           (zmacs-regions nil) ;; XEmacs
-           (inhibit-modification-hooks t)) ;; Emacs
+	   (zmacs-regions nil) ;; XEmacs
+	   (inhibit-modification-hooks t)) ;; Emacs
       (pprint-sexp))
     (buffer-string)))
 
@@ -444,7 +444,7 @@ value of `standard-output' (which see).  The pretty printer try as
 much as possible to limit the length of lines to given WIDTH.  WIDTH
 value defaults to `fill-column'."
   (princ (pprint-to-string object width)
-         (or stream standard-output)))
+	 (or stream standard-output)))
 
 ;;;###autoload
 (defun pprint-function (function-name)
@@ -452,10 +452,10 @@ value defaults to `fill-column'."
   (interactive "aPretty print function: ")
   (let ((code (symbol-function function-name)))
     (if (byte-code-function-p code)
-        (error "Can't pretty-print a byte compiled function"))
+	(error "Can't pretty-print a byte compiled function"))
     (with-current-buffer
-        (get-buffer-create (format "*pprint-function %s*"
-                                   function-name))
+	(get-buffer-create (format "*pprint-function %s*"
+				   function-name))
       (erase-buffer)
       (emacs-lisp-mode)
       (pprint code (current-buffer))

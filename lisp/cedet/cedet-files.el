@@ -44,22 +44,22 @@ to the file's truename, and dodging platform tricks."
       ;; Replace any invalid file-name characters (for the
       ;; case of backing up remote files).
       (when (not testmode)
-        (setq file (expand-file-name (convert-standard-filename file))))
+	(setq file (expand-file-name (convert-standard-filename file))))
       ;; Normalize DOSish file names.
       (if (eq (aref file 1) ?:)
-          (setq file (concat "/"
-                             "drive_"
-                             (char-to-string (downcase (aref file 0)))
-                             (if (eq (aref file 2) ?/)
-                                 ""
-                               "/")
-                             (substring file 2)))))
+	  (setq file (concat "/"
+			     "drive_"
+			     (char-to-string (downcase (aref file 0)))
+			     (if (eq (aref file 2) ?/)
+				 ""
+			       "/")
+			     (substring file 2)))))
     ;; Make the name unique by substituting directory
     ;; separators.  It may not really be worth bothering about
     ;; doubling `!'s in the original name...
     (setq file (subst-char-in-string
-                ?/ ?!
-                (replace-regexp-in-string "!" "!!" file)))
+		?/ ?!
+		(replace-regexp-in-string "!" "!!" file)))
     file))
 
 (defun cedet-file-name-to-directory-name (referencefile &optional testmode)
@@ -78,14 +78,14 @@ specific conversions during tests."
 
       ;; Handle drive letters from DOSish file names.
       (when (string-match "^/drive_\\([a-z]\\)/" file)
-        (let ((driveletter (match-string 1 file))
-              )
-          (setq file (concat driveletter ":"
-                             (substring file (match-end 1))))))
+	(let ((driveletter (match-string 1 file))
+	      )
+	  (setq file (concat driveletter ":"
+			     (substring file (match-end 1))))))
 
       ;; Handle the \\file\name nomenclature on some windows boxes.
       (when (string-match "^!" file)
-        (setq file (concat "//" (substring file 1)))))
+	(setq file (concat "//" (substring file 1)))))
     file))
 
 (provide 'cedet-files)

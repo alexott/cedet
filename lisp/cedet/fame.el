@@ -89,11 +89,11 @@
   :format "%v\n"
   :entry-format " %v%b"
   :args '((const :format "%v" :value t)
-          (const :format "%v" :value nolog)
-          (const :format "%v" :value temp)
-          (const :format "%v" :value temp-nolog)
-          (const :format "%v" :value log)
-          (const :format "%v" :value none)))
+	  (const :format "%v" :value nolog)
+	  (const :format "%v" :value temp)
+	  (const :format "%v" :value temp-nolog)
+	  (const :format "%v" :value log)
+	  (const :format "%v" :value none)))
 
 (define-widget 'fame-level-widget 'const
   "Widget to display a level symbol."
@@ -104,13 +104,13 @@
   :tag "Display value of message levels"
   :format "%{%t%}:\n%v\n"
   :args '((fame-level-widget :tag ":debug  " :value :debug)
-          (fame-display-choice)
-          (fame-level-widget :tag ":info   " :value :info)
-          (fame-display-choice)
-          (fame-level-widget :tag ":warning" :value :warning)
-          (fame-display-choice)
-          (fame-level-widget :tag ":error  " :value :error)
-          (fame-display-choice)))
+	  (fame-display-choice)
+	  (fame-level-widget :tag ":info   " :value :info)
+	  (fame-display-choice)
+	  (fame-level-widget :tag ":warning" :value :warning)
+	  (fame-display-choice)
+	  (fame-level-widget :tag ":error  " :value :error)
+	  (fame-display-choice)))
 
 (defgroup fame nil
   "Framework for Applications' MEssages."
@@ -129,39 +129,39 @@
 ;;;; Read the message currently displayed in the echo area.
   (defalias 'fame-current-message
     (if (fboundp 'current-message)
-        'current-message
+	'current-message
       'ignore))
 
 ;;;; Show a message in the echo area without logging it.
   (if (fboundp 'lmessage)
       ;; XEmacs
       (defun fame-message-nolog (&rest args)
-        "Display but don't log a message on the echo area.
+	"Display but don't log a message on the echo area.
 ARGS are like those of the function `message'."
-        (and args (apply 'lmessage 'no-log args)))
+	(and args (apply 'lmessage 'no-log args)))
     ;; Emacs
     (defun fame-message-nolog (&rest args)
       "Display but don't log a message on the echo area.
 ARGS will be passed to the function `message'."
       (and args
-           (let ((message-log-max nil)) ;; No logging
-             (apply 'message args))))
+	   (let ((message-log-max nil)) ;; No logging
+	     (apply 'message args))))
     )
 
 ;;;; Log a message without showing it in the echo area.
   (if (fboundp 'log-message)
       ;; XEmacs
       (defun fame-log-message (&rest args)
-        "Log but don't display a message.
+	"Log but don't display a message.
 ARGS are like those of the function `message'."
-        (and args (log-message 'message (apply 'format args))))
+	(and args (log-message 'message (apply 'format args))))
     ;; Emacs
     (defun fame-log-message (&rest args)
       "Log but don't display a message.
 ARGS will be passed to the function `message'."
       (and args
-           (let ((executing-kbd-macro t)) ;; Inhibit display!
-             (apply 'message args))))
+	   (let ((executing-kbd-macro t)) ;; Inhibit display!
+	     (apply 'message args))))
     )
   ;; If the above definition fails, here is a portable implementation
   ;; of a `log-message' function.
@@ -170,23 +170,23 @@ ARGS will be passed to the function `message'."
 ARGS are like those of the function `message'."
      (when args
        (let ((text (apply 'format args)))
-         (with-current-buffer
-             (get-buffer-create (if (featurep 'xemacs)
-                                    " *Message-Log*"
-                                  "*Messages*"))
-           (goto-char (point-max))
-           (or (bobp) (bolp) (insert "\n"))
-           (forward-line -1)
-           (if (search-forward text nil t)
-               (if (looking-at " \\[\\([0-9]+\\) times\\]")
-                   (replace-match
-                    (number-to-string
-                     (1+ (string-to-number (match-string 1))))
-                    nil nil nil 1)
-                 (end-of-line)
-                 (insert " [2 times]"))
-             (forward-line 1)
-             (insert text))))))
+	 (with-current-buffer
+	     (get-buffer-create (if (featurep 'xemacs)
+				    " *Message-Log*"
+				  "*Messages*"))
+	   (goto-char (point-max))
+	   (or (bobp) (bolp) (insert "\n"))
+	   (forward-line -1)
+	   (if (search-forward text nil t)
+	       (if (looking-at " \\[\\([0-9]+\\) times\\]")
+		   (replace-match
+		    (number-to-string
+		     (1+ (string-to-number (match-string 1))))
+		    nil nil nil 1)
+		 (end-of-line)
+		 (insert " [2 times]"))
+	     (forward-line 1)
+	     (insert text))))))
 
 ;;;; Log and temporarily show a message in the echo area.
   (condition-case nil
@@ -196,10 +196,10 @@ ARGS are like those of the function `message'."
   (if (not (fboundp 'run-with-timer))
 
       (defun fame-temp-message-internal (fun &rest args)
-        "Display a message temporarily through the function FUN.
+	"Display a message temporarily through the function FUN.
 ARGS are like those of the function `message'."
-        ;; Without timers just call FUN.
-        (and args (apply fun args)))
+	;; Without timers just call FUN.
+	(and args (apply fun args)))
 
     (defvar fame-temp-message-timer nil)
     (defvar fame-temp-message-saved nil)
@@ -207,26 +207,26 @@ ARGS are like those of the function `message'."
     (defun fame-temp-restore-message ()
       "Restore a message previously displayed in the echo area."
       (when (timerp fame-temp-message-timer)
-        (cancel-timer fame-temp-message-timer)
-        (setq fame-temp-message-timer nil))
+	(cancel-timer fame-temp-message-timer)
+	(setq fame-temp-message-timer nil))
       (when fame-temp-message-saved
-        (prog1 (fame-message-nolog "%s" fame-temp-message-saved)
-          (setq fame-temp-message-saved nil))))
+	(prog1 (fame-message-nolog "%s" fame-temp-message-saved)
+	  (setq fame-temp-message-saved nil))))
 
     (defun fame-temp-message-internal (fun &rest args)
       "Display a message temporarily through the function FUN.
 ARGS are like those of the function `message'."
       (when args
-        (condition-case nil
-            (progn
-              (fame-temp-restore-message)
-              (setq fame-temp-message-saved (fame-current-message))
-              (prog1 (apply fun args)
-                (setq fame-temp-message-timer
-                      (run-with-timer fame-temp-message-delay nil
-                                      'fame-temp-restore-message))))
-          (error
-           (fame-temp-restore-message)))))
+	(condition-case nil
+	    (progn
+	      (fame-temp-restore-message)
+	      (setq fame-temp-message-saved (fame-current-message))
+	      (prog1 (apply fun args)
+		(setq fame-temp-message-timer
+		      (run-with-timer fame-temp-message-delay nil
+				      'fame-temp-restore-message))))
+	  (error
+	   (fame-temp-restore-message)))))
     )
   )
 
@@ -252,7 +252,7 @@ If valid, return LEVEL.  Signal an error otherwise."
   (if (memq level fame-valid-levels)
       level
     (signal 'wrong-type-argument
-            (list fame-valid-levels level))))
+	    (list fame-valid-levels level))))
 
 (defun fame-check-level-value (value)
   "Check that VALUE is a valid message level value.
@@ -260,7 +260,7 @@ If valid, return VALUE.  Signal an error otherwise."
   (if (memq value fame-valid-level-values)
       value
     (signal 'wrong-type-argument
-            (list fame-valid-level-values value))))
+	    (list fame-valid-level-values value))))
 
 (defun fame-check-channel (channel)
   "Check that CHANNEL is a non-nil symbol.
@@ -268,7 +268,7 @@ If valid, return CHANNEL.  Signal an error otherwise."
   (if (and channel (symbolp channel))
       channel
     (signal 'wrong-type-argument
-            (list 'symbolp channel))))
+	    (list 'symbolp channel))))
 
 (defun fame-check-channel-levels (levels)
   "Check that LEVELS is a valid specification of channel levels.
@@ -277,9 +277,9 @@ Signal an error otherwise."
   (let (spec)
     (dolist (level fame-valid-levels)
       (push (fame-check-level-value
-             ;; A nil level value means to use the default value.
-             (or (plist-get levels level)
-                 (plist-get fame-default-level-values level))) spec)
+	     ;; A nil level value means to use the default value.
+	     (or (plist-get levels level)
+		 (plist-get fame-default-level-values level))) spec)
       (push level spec))
     spec))
 
@@ -293,14 +293,14 @@ If CHANNEL doesn't exist return the default value in constant
 `fame-default-level-values'."
   (let ((symbol (fame-channel-symbol channel)))
     (if (boundp symbol)
-        (symbol-value symbol)
+	(symbol-value symbol)
       fame-default-level-values)))
 
 (defsubst fame-level-display (channel level)
   "For CHANNEL, return the display value of LEVEL.
 See also the option `fame-channels'."
   (plist-get (fame-channel-levels channel)
-             (fame-check-level level)))
+	     (fame-check-level level)))
 
 ;;; Sending messages to channels
 ;;
@@ -319,7 +319,7 @@ ARGS are like those of the function `message'.
 The message will be displayed according to what is specified for
 CHANNEL in the `fame-channels' option."
   (let ((sender (cdr (assq (fame-level-display channel level)
-                           fame-send-functions-alist))))
+			   fame-send-functions-alist))))
     (and sender (apply sender args))))
 
 (defsubst fame-send-debug (channel &rest args)
@@ -365,7 +365,7 @@ messages to CHANNEL."
   (let ((c-opt (fame-channel-symbol channel)))
     `(eval-when-compile
        (defcustom ,c-opt ',(fame-check-channel-levels default)
-         ,(format "*Display value of message levels in the %s channel.
+	 ,(format "*Display value of message levels in the %s channel.
 %s
 This is a plist where a message level is a property whose value
 defines how messages at this level will be displayed.
@@ -380,38 +380,38 @@ Level values can be:
  - none        to discard messages.
 
 The default behavior is specified in `fame-default-level-values'."
-                  channel
-                  (if docstring (format "%s\n" docstring) ""))
-         :group 'fame
-         :type 'fame-channel-widget)
+		  channel
+		  (if docstring (format "%s\n" docstring) ""))
+	 :group 'fame
+	 :type 'fame-channel-widget)
        (defsubst ,(intern (format "%s-send-debug" channel))
-         (&rest args)
-         ,(format "Send a debug message to the `%s' channel.
+	 (&rest args)
+	 ,(format "Send a debug message to the `%s' channel.
 ARGS will be passed to the function `fame-send'.
 To customize how such messages will be displayed, see the option
 `%s'." channel c-opt)
-         (apply 'fame-send ',channel :debug args))
+	 (apply 'fame-send ',channel :debug args))
        (defsubst ,(intern (format "%s-send-info" channel))
-         (&rest args)
-         ,(format "Send an informational message to the `%s' channel.
+	 (&rest args)
+	 ,(format "Send an informational message to the `%s' channel.
 ARGS will be passed to the function `fame-send'.
 To customize how such messages will be displayed, see the option
 `%s'." channel c-opt)
-         (apply 'fame-send ',channel :info args))
+	 (apply 'fame-send ',channel :info args))
        (defsubst ,(intern (format "%s-send-warn" channel))
-         (&rest args)
-         ,(format "Send a warning message to the `%s' channel.
+	 (&rest args)
+	 ,(format "Send a warning message to the `%s' channel.
 ARGS will be passed to the function `fame-send'.
 To customize how such messages will be displayed, see the option
 `%s'." channel c-opt)
-         (apply 'fame-send ',channel :warning args))
+	 (apply 'fame-send ',channel :warning args))
        (defsubst ,(intern (format "%s-send-error" channel))
-         (&rest args)
-         ,(format "Send an error message to the `%s' channel.
+	 (&rest args)
+	 ,(format "Send an error message to the `%s' channel.
 ARGS will be passed to the function `fame-send'.
 To customize how such messages will be displayed, see the option
 `%s'." channel c-opt)
-         (apply 'fame-send ',channel :error args))
+	 (apply 'fame-send ',channel :error args))
        ;; Return the CHANNEL symbol
        ',c-opt)))
 

@@ -52,7 +52,7 @@
 This means that it is a symbol with a print name beginning with `:'
 interned in the initial obarray."
     (and (symbolp object)
-         (char-equal ?: (aref 0 (symbol-name object)))))
+	 (char-equal ?: (aref 0 (symbol-name object)))))
   )
 
 (when (cedet-autogen-noninteractive)
@@ -60,7 +60,7 @@ interned in the initial obarray."
   ;; these conveniences.
   (add-to-list 'load-path nil)
   (setq find-file-hooks nil
-        find-file-suppress-same-file-warnings t)
+	find-file-suppress-same-file-warnings t)
   )
 
 (defadvice make-autoload (before cedet-make-autoload activate)
@@ -71,35 +71,35 @@ the true `make-autoload' function."
   (if (consp (ad-get-arg 0))
       (let* ((form (ad-get-arg 0))
 	     (file (ad-get-arg 1))
-             (car (car-safe form))
-             name args doc
-             )
-        (cond
-         ((or (eq car 'define-overload)
+	     (car (car-safe form))
+	     name args doc
+	     )
+	(cond
+	 ((or (eq car 'define-overload)
 	      (eq car 'define-overloadable-function))
-          (setcar form 'defun)
-          )
-         ((eq car 'defmethod)
-          (setq name (nth 1 form)
-                args (nthcdr 2 form))
-          (if (cedet-autogen-keywordp (car args))
-              (setq args (cdr args)))
-          (setq doc  (nth 1 args)
-                args (car args))
-          (setcar form 'defun)
-          (setcdr form (list name args (if (stringp doc) doc)))
-          )
-         ((eq car 'defclass)
-          (setq name (nth 1 form)
-                args (nth 2 form)
-                doc  (nth 4 form))
+	  (setcar form 'defun)
+	  )
+	 ((eq car 'defmethod)
+	  (setq name (nth 1 form)
+		args (nthcdr 2 form))
+	  (if (cedet-autogen-keywordp (car args))
+	      (setq args (cdr args)))
+	  (setq doc  (nth 1 args)
+		args (car args))
+	  (setcar form 'defun)
+	  (setcdr form (list name args (if (stringp doc) doc)))
+	  )
+	 ((eq car 'defclass)
+	  (setq name (nth 1 form)
+		args (nth 2 form)
+		doc  (nth 4 form))
 	  ;; @todo - use eieio-defclass-autoload instead.
-          ;(setcar form 'defun)
-          ;(setcdr form (list name args (if (stringp doc) doc)))
+	  ;(setcar form 'defun)
+	  ;(setcdr form (list name args (if (stringp doc) doc)))
 	  (setcar form 'eieio-defclass-autoload)
 	  (setcdr form (list (list 'quote name) (list 'quote args) file doc))
-          ))
-        )))
+	  ))
+	)))
 
 (defconst cedet-autogen-header
   "Auto-generated CEDET autoloads"
@@ -114,8 +114,8 @@ the true `make-autoload' function."
     (goto-char (point-min))
     (while (re-search-forward "(\\(featurep\\|provide\\) '\\sw+-autoloads" nil t)
       (condition-case nil
-          (while t (up-list -1))
-        (error nil))
+	  (while t (up-list -1))
+	(error nil))
       (kill-region (point) (save-excursion (forward-list) (point)))
       )))
 
@@ -124,23 +124,23 @@ the true `make-autoload' function."
 Run as `write-contents-hooks'."
   (when (string-equal generated-autoload-file (buffer-file-name))
     (let ((tag (format ";;; %s ---" (file-name-nondirectory
-                                     (buffer-file-name)))))
+				     (buffer-file-name)))))
       (message "Updating header...")
       (goto-char (point-min))
       (cond
        ;; Replace existing header line
        ((re-search-forward (concat "^" (regexp-quote tag)) nil t)
-        (beginning-of-line)
-        (kill-line 1)
-        )
+	(beginning-of-line)
+	(kill-line 1)
+	)
        ;; Insert header before first ^L encountered (XEmacs)
        ((re-search-forward "^" nil t)
-        (beginning-of-line)
-        ))
+	(beginning-of-line)
+	))
       (insert tag " " cedet-autogen-header)
       (newline)
       (when (featurep 'xemacs)
-        (cedet-autogen-kill-xemacs-autoloads-feature))
+	(cedet-autogen-kill-xemacs-autoloads-feature))
       (message "Updating header...done")
       nil ;; Say not already written.
       )))
@@ -152,19 +152,19 @@ Return a list of directory names, relative to ROOT-DIR."
   (let (dirs)
     (dolist (dir (directory-files default-directory))
       (and (file-directory-p dir) (not (string-match dir "\\`..?\\'"))
-           (let* ((default-directory (expand-file-name dir))
-                  (subdirs (cedet-autogen-subdirs root-dir)))
-             (when (file-exists-p cedet-autogen-tagfile)
-               (push (file-relative-name default-directory root-dir)
-                     subdirs))
-             (setq dirs (nconc dirs subdirs)))))
+	   (let* ((default-directory (expand-file-name dir))
+		  (subdirs (cedet-autogen-subdirs root-dir)))
+	     (when (file-exists-p cedet-autogen-tagfile)
+	       (push (file-relative-name default-directory root-dir)
+		     subdirs))
+	     (setq dirs (nconc dirs subdirs)))))
     dirs))
 
 (defun cedet-autogen-ensure-default-file (file)
   "Make sure that the autoload file FILE exists and if not create it."
   ;; If file don't exist, and is not automatically created...
   (unless (or (file-exists-p file)
-              (fboundp 'autoload-ensure-default-file))
+	      (fboundp 'autoload-ensure-default-file))
     ;; Create a file buffer.
     (find-file file)
     ;; Use Unix EOLs, so that the file is portable to all platforms.
@@ -172,16 +172,16 @@ Return a list of directory names, relative to ROOT-DIR."
     (unless (featurep 'xemacs)
       ;; Insert a GNU Emacs loaddefs skeleton.
       (insert ";;; " (file-name-nondirectory file)
-              " --- automatically extracted autoloads\n"
-              ";;\n"
-              ";;; Code:\n\n"
-              "\n;; Local" " Variables:\n"
-              ";; version-control: never\n"
-              ";; no-byte-compile: t\n"
-              ";; no-update-autoloads: t\n"
-              ";; End:\n"
-              ";;; " (file-name-nondirectory file)
-              " ends here\n"))
+	      " --- automatically extracted autoloads\n"
+	      ";;\n"
+	      ";;; Code:\n\n"
+	      "\n;; Local" " Variables:\n"
+	      ";; version-control: never\n"
+	      ";; no-byte-compile: t\n"
+	      ";; no-update-autoloads: t\n"
+	      ";; End:\n"
+	      ";;; " (file-name-nondirectory file)
+	      " ends here\n"))
     ;; Insert the header so that the buffer is not empty.
     (cedet-autogen-update-header))
   file)
@@ -197,14 +197,14 @@ sub directories of DIRECTORY where a `cedet-autogen-tagfile' file
 exists."
   (interactive "FLoaddefs file: \nDDirectory: ")
   (let* ((generated-autoload-file (expand-file-name loaddefs))
-         (default-directory
-           (file-name-as-directory
-            (expand-file-name (or directory default-directory))))
-         (extra-dirs (or directories
-                         (cedet-autogen-subdirs default-directory)))
-         (write-contents-hooks '(cedet-autogen-update-header))
-         (command-line-args-left (cons default-directory extra-dirs))
-         )
+	 (default-directory
+	   (file-name-as-directory
+	    (expand-file-name (or directory default-directory))))
+	 (extra-dirs (or directories
+			 (cedet-autogen-subdirs default-directory)))
+	 (write-contents-hooks '(cedet-autogen-update-header))
+	 (command-line-args-left (cons default-directory extra-dirs))
+	 )
     (cedet-autogen-ensure-default-file generated-autoload-file)
     (batch-update-autoloads)))
 

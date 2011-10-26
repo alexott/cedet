@@ -172,4 +172,5 @@ there is already a database in DIR."
     (cedet-cscope-create nil)))
 
 (provide 'cedet-cscope)
+
 ;;; cedet-cscope.el ends here

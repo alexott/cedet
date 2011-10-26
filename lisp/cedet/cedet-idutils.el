@@ -64,64 +64,64 @@ Note: Scope is not yet supported."
       (cedet-idutils-fnid-call (list searchtext))
     ;; Calls for text searches is more complex.
     (let* ((resultflg (if (eq texttype 'tagcompletions)
-                          (list "--key=token")
-                        (list "--result=grep")))
-           (scopeflgs nil) ; (cond ((eq scope 'project) "" ) ((eq scope 'target) "l")))
-           (stflag (cond ((or (eq texttype 'tagname)
-                              (eq texttype 'tagregexp))
-                          (list "-r" "-w"))
-                         ((eq texttype 'tagcompletions)
-                          ;; Add regex to search text for beginning of char.
-                          (setq searchtext (concat "^" searchtext))
-                          (list "-r" "-s" ))
-                         ((eq texttype 'regexp)
-                          (list "-r"))
-                         ;; t means 'symbol
-                         (t (list "-l" "-w"))))
-           )
+			  (list "--key=token")
+			(list "--result=grep")))
+	   (scopeflgs nil) ; (cond ((eq scope 'project) "" ) ((eq scope 'target) "l")))
+	   (stflag (cond ((or (eq texttype 'tagname)
+			      (eq texttype 'tagregexp))
+			  (list "-r" "-w"))
+			 ((eq texttype 'tagcompletions)
+			  ;; Add regex to search text for beginning of char.
+			  (setq searchtext (concat "^" searchtext))
+			  (list "-r" "-s" ))
+			 ((eq texttype 'regexp)
+			  (list "-r"))
+			 ;; t means 'symbol
+			 (t (list "-l" "-w"))))
+	   )
       (cedet-idutils-lid-call (append resultflg scopeflgs stflag
-                                      (list searchtext))))))
+				      (list searchtext))))))
 
 (defun cedet-idutils-fnid-call (flags)
   "Call ID Utils fnid with the list of FLAGS.
 Return the created buffer with with program output."
   (let ((b (get-buffer-create "*CEDET fnid*"))
-        (cd default-directory)
-        )
+	(cd default-directory)
+	)
     (with-current-buffer b
       (setq default-directory cd)
       (erase-buffer))
     (apply 'call-process cedet-idutils-file-command
-           nil b nil
-           flags)
+	   nil b nil
+	   flags)
     b))
 
 (defun cedet-idutils-lid-call (flags)
   "Call ID Utils lid with the list of FLAGS.
 Return the created buffer with with program output."
   (let ((b (get-buffer-create "*CEDET lid*"))
-        (cd default-directory)
-        )
+	(cd default-directory)
+	)
     (with-current-buffer b
       (setq default-directory cd)
       (erase-buffer))
     (apply 'call-process cedet-idutils-token-command
-           nil b nil
-           flags)
+	   nil b nil
+	   flags)
     b))
 
 (defun cedet-idutils-mkid-call (flags)
   "Call ID Utils mkid with the list of FLAGS.
 Return the created buffer with with program output."
   (let ((b (get-buffer-create "*CEDET mkid*"))
-        (cd default-directory)
-        )
+	(cd default-directory)
+	)
     (with-current-buffer b
       (setq default-directory cd)
       (erase-buffer))
     (apply 'call-process cedet-idutils-make-command
-           nil b nil
-           flags)
+	   nil b nil
+	   flags)
     b))
 
 ;;; UTIL CALLS
@@ -131,18 +131,18 @@ Return the created buffer with with program output."
 Return a filename relative to the default directory."
   (interactive "sFile: ")
   (let ((ans (with-current-buffer (cedet-idutils-fnid-call (list filename))
-               (goto-char (point-min))
-               (if (looking-at "[^ \n]*fnid: ")
-                   (error "ID Utils not available")
-                 (split-string (buffer-string) "\n" t)))))
+	       (goto-char (point-min))
+	       (if (looking-at "[^ \n]*fnid: ")
+		   (error "ID Utils not available")
+		 (split-string (buffer-string) "\n" t)))))
     (setq ans (mapcar 'expand-file-name ans))
     (when (cedet-called-interactively-p 'interactive)
       (if ans
-          (if (= (length ans) 1)
-              (message "%s" (car ans))
-            (message "%s + %d others" (car ans)
-                     (length (cdr ans))))
-        (error "No file found")))
+	  (if (= (length ans) 1)
+	      (message "%s" (car ans))
+	    (message "%s + %d others" (car ans)
+		     (length (cdr ans))))
+	(error "No file found")))
     ans))
 
 (defun cedet-idutils-support-for-directory (&optional dir)
@@ -153,13 +153,13 @@ the error code."
   (save-excursion
     (let ((default-directory (or dir default-directory)))
       (condition-case nil
-          (progn
-            (set-buffer (cedet-idutils-fnid-call '("moose")))
-            (goto-char (point-min))
-            (if (looking-at "[^ \n]*fnid: ")
-                nil
-              t))
-        (error nil)))))
+	  (progn
+	    (set-buffer (cedet-idutils-fnid-call '("moose")))
+	    (goto-char (point-min))
+	    (if (looking-at "[^ \n]*fnid: ")
+		nil
+	      t))
+	(error nil)))))
 
 (defun cedet-idutils-version-check (&optional noerror)
   "Check the version of the installed ID Utils command.
@@ -169,27 +169,27 @@ return nil."
   (interactive)
   (require 'inversion)
   (let ((b (condition-case nil
-               (cedet-idutils-fnid-call (list "--version"))
-             (error nil)))
-        (rev nil))
+	       (cedet-idutils-fnid-call (list "--version"))
+	     (error nil)))
+	(rev nil))
     (if (not b)
-        (progn
-          (when (cedet-called-interactively-p 'interactive)
-            (message "ID Utils not found."))
-          nil)
+	(progn
+	  (when (cedet-called-interactively-p 'interactive)
+	    (message "ID Utils not found."))
+	  nil)
       (with-current-buffer b
-        (goto-char (point-min))
-        (re-search-forward "fnid - \\([0-9.]+\\)" nil t)
-        (setq rev (match-string 1))
-        (if (inversion-check-version rev nil cedet-idutils-min-version)
-            (if noerror
-                nil
-              (error "Version of ID Utils is %s.  Need at least %s"
-                     rev cedet-idutils-min-version))
-          ;; Else, return TRUE, as in good enough.
-          (when (cedet-called-interactively-p 'interactive)
-            (message "ID Utils %s  - Good enough for CEDET." rev))
-          t)))))
+	(goto-char (point-min))
+	(re-search-forward "fnid - \\([0-9.]+\\)" nil t)
+	(setq rev (match-string 1))
+	(if (inversion-check-version rev nil cedet-idutils-min-version)
+	    (if noerror
+		nil
+	      (error "Version of ID Utils is %s.  Need at least %s"
+		     rev cedet-idutils-min-version))
+	  ;; Else, return TRUE, as in good enough.
+	  (when (cedet-called-interactively-p 'interactive)
+	    (message "ID Utils %s  - Good enough for CEDET." rev))
+	  t)))))
 
 (defun cedet-idutils-create/update-database (&optional dir)
   "Create an IDUtils database in DIR.

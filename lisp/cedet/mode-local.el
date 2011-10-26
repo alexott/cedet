@@ -78,7 +78,7 @@ Return nil if MODE has no parent."
   (let ((modes nil))
     (while mode
       (setq modes (cons mode modes)
-            mode  (get-mode-local-parent mode)))
+	    mode  (get-mode-local-parent mode)))
     modes))
 
 (defun mode-local-map-mode-buffers (function modes)
@@ -88,12 +88,12 @@ FUNCTION does not have arguments."
   (or (listp modes) (setq modes (list modes)))
   (mode-local-map-file-buffers
    function #'(lambda ()
-                (let ((mm (mode-local-equivalent-mode-p major-mode))
-                      (ans nil))
-                  (while (and (not ans) mm)
-                    (setq ans (memq (car mm) modes)
-                          mm (cdr mm)) )
-                  ans))))
+		(let ((mm (mode-local-equivalent-mode-p major-mode))
+		      (ans nil))
+		  (while (and (not ans) mm)
+		    (setq ans (memq (car mm) modes)
+			  mm (cdr mm)) )
+		  ans))))
 
 ;;; Hook machinery
 ;;
@@ -293,35 +293,36 @@ Elements are (SYMBOL . PREVIOUS-VALUE), describing one variable."
   ;; do not do this if we are inside set-auto-mode as we may be in
   ;; an initialization race condition.
   (if (or  (and (featurep 'emacs) (boundp 'keep-mode-if-same))
-           (and (featurep 'xemacs) (boundp 'just-from-file-name)))
+	   (and (featurep 'xemacs) (boundp 'just-from-file-name)))
       ;; We are inside set-auto-mode, as this is an argument that is
       ;; vaguely unique.
 
       ;; This will make sure that when everything is over, this will get
       ;; called and we won't be under set-auto-mode anymore.
       (mode-local-on-major-mode-change)
+
     ;; Do the normal thing.
     (let (modes table old-locals)
       (unless mode
-        (set (make-local-variable 'mode-local--init-mode) major-mode)
-        (setq mode major-mode))
+	(set (make-local-variable 'mode-local--init-mode) major-mode)
+	(setq mode major-mode))
       ;; Get MODE's parents & MODE in the right order.
       (while mode
-        (setq modes (cons mode modes)
-              mode  (get-mode-local-parent mode)))
+	(setq modes (cons mode modes)
+	      mode  (get-mode-local-parent mode)))
       ;; Activate mode bindings following parent modes order.
       (dolist (mode modes)
-        (when (setq table (get mode 'mode-local-symbol-table))
-          (mapatoms
-           #'(lambda (var)
-               (when (get var 'mode-variable-flag)
-                 (let ((v (intern (symbol-name var))))
-                   ;; Save the current buffer-local value of the
-                   ;; mode-local variable.
-                   (and (local-variable-p v (current-buffer))
-                        (push (cons v (symbol-value v)) old-locals))
-                   (set (make-local-variable v) (symbol-value var)))))
-           table)))
+	(when (setq table (get mode 'mode-local-symbol-table))
+	  (mapatoms
+	   #'(lambda (var)
+	       (when (get var 'mode-variable-flag)
+		 (let ((v (intern (symbol-name var))))
+		   ;; Save the current buffer-local value of the
+		   ;; mode-local variable.
+		   (and (local-variable-p v (current-buffer))
+			(push (cons v (symbol-value v)) old-locals))
+		   (set (make-local-variable v) (symbol-value var)))))
+	   table)))
       old-locals)))
 
 (defun deactivate-mode-local-bindings (&optional mode)
@@ -351,12 +352,12 @@ This is like `with-mode-local', except that MODE's value is used.
 To use the symbol MODE (quoted), use `with-mode-local'."
    (let ((old-mode  (make-symbol "mode"))
          (old-locals (make-symbol "old-locals"))
-         (new-mode (make-symbol "new-mode"))
+	 (new-mode (make-symbol "new-mode"))
          (local (make-symbol "local")))
      `(let ((,old-mode mode-local-active-mode)
             (,old-locals nil)
-            (,new-mode ,mode)
-            )
+	    (,new-mode ,mode)
+	    )
         (unwind-protect
             (progn
               (deactivate-mode-local-bindings ,old-mode)
@@ -571,11 +572,11 @@ BODY is the implementation of this function."
   (let ((newname (intern (format "%s-%s" name mode))))
     `(progn
        (eval-and-compile
-         (defun ,newname ,args
-           ,(format "%s\n\nOverride %s in `%s' buffers."
-                    docstring name mode)
-           ;; The body for this implementation
-           ,@body)
+	 (defun ,newname ,args
+	   ,(format "%s\n\nOverride %s in `%s' buffers."
+		    docstring name mode)
+	   ;; The body for this implementation
+	   ,@body)
          ;; For find-func to locate the definition of NEWNAME.
          (put ',newname 'definition-name ',name))
        (mode-local-bind '((,name . ,newname))
@@ -725,7 +726,7 @@ invoked interactively."
   "Display mode local bindings active in BUFFER."
   (interactive "b")
   (when (setq buffer (get-buffer buffer))
-    (mode-local-describe-bindings-1 buffer (cedet-called-interactively-p 'any))))
+    (mode-local-describe-bindings-1 buffer (called-interactively-p 'any))))
 
 (defun describe-mode-local-bindings-in-mode (mode)
   "Display mode local bindings active in MODE hierarchy."
@@ -748,13 +749,13 @@ invoked interactively."
 ;; (when (boundp 'find-function-regexp)
 ;;   (unless (string-match "ine-overload" find-function-regexp)
 ;;     (if (string-match "(def\\\\(" find-function-regexp)
-;;      (let ((end (match-end 0))
-;;            )
-;;        (setq find-function-regexp
-;;              (concat (substring find-function-regexp 0 end)
-;;                      "ine-overload\\|ine-mode-local-override\\|"
-;;                      "ine-child-mode\\|"
-;;                      (substring find-function-regexp end)))))))
+;; 	(let ((end (match-end 0))
+;; 	      )
+;; 	  (setq find-function-regexp
+;; 		(concat (substring find-function-regexp 0 end)
+;; 			"ine-overload\\|ine-mode-local-override\\|"
+;; 			"ine-child-mode\\|"
+;; 			(substring find-function-regexp end)))))))
 
 ;;; edebug support
 ;;

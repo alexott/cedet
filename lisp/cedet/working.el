@@ -149,7 +149,7 @@ it will take ahead of time.  Functions provided in `working' are:
   `working-bounce-display'"
   :group 'working
   :type '(choice (const working-number-display)
-                 (const working-text-display)
+		 (const working-text-display)
 		 (const working-spinner-display)
 		 (const working-dotgrowth-display)
 		 (const working-celeron-display)
@@ -251,11 +251,11 @@ See the function `message' for details on ARGS."
       (t 
        ;; This gets the message out but has no timers.
        (defun working-run-with-timer (&rest foo)
-         (working-message working-message))
+	 (working-message working-message))
        (defun working-cancel-timer (&rest foo)
-         (working-message "%s%s"
-                          working-message
-                          working-donestring)))
+	 (working-message "%s%s"
+			  working-message
+			  working-donestring)))
       )
 
 (defmacro working-status-forms (message donestr &rest forms)
@@ -264,17 +264,17 @@ MESSAGE is the message string to use and DONESTR is the completed text
 to use when the functions `working-status' is called from FORMS."
   (let ((current-message (make-symbol "working-current-message")))
     `(let ((,current-message (working-current-message))
-           (working-message ,message)
-           (working-donestring ,donestr)
-           (working-ref1 0)
-           (working-last-percent 0))
+	   (working-message ,message)
+	   (working-donestring ,donestr)
+	   (working-ref1 0)
+	   (working-last-percent 0))
        (unwind-protect
-           (progn ,@forms)
-         (setq working-mode-line-message nil)
-         (if working-use-echo-area-p
-             (message ,current-message)
-           (working-mode-line-update)
-           (sit-for 0))))
+	   (progn ,@forms)
+	 (setq working-mode-line-message nil)
+	 (if working-use-echo-area-p
+	     (message ,current-message)
+	   (working-mode-line-update)
+	   (sit-for 0))))
     ))
 (put 'working-status-forms 'lisp-indent-function 2)
 
@@ -287,21 +287,21 @@ MESSAGE is the message string to use and DONESTR is the completed text
 to use when the functions `working-status' is called from FORMS."
   (let ((current-message (make-symbol "working-current-message")))
     `(let* ((,current-message (working-current-message))
-            (working-message ,message)
-            (working-donestring ,donestr)
-            (working-ref1 0)
-            (time ,timeout)
-            (working-timer
-             (working-run-with-timer time time 'working-dynamic-status)))
+	    (working-message ,message)
+	    (working-donestring ,donestr)
+	    (working-ref1 0)
+	    (time ,timeout)
+	    (working-timer
+	     (working-run-with-timer time time 'working-dynamic-status)))
        (unwind-protect
-           (progn ,@forms)
-         (working-cancel-timer working-timer)
-         (working-dynamic-status t)
-         (setq working-mode-line-message nil)
-         (if working-use-echo-area-p
-             (message ,current-message)
-           (working-mode-line-update)
-           (sit-for 0))))
+	   (progn ,@forms)
+	 (working-cancel-timer working-timer)
+	 (working-dynamic-status t)
+	 (setq working-mode-line-message nil)
+	 (if working-use-echo-area-p
+	     (message ,current-message)
+	   (working-mode-line-update)
+	   (sit-for 0))))
     ))
 (put 'working-status-timeout 'lisp-indent-function 3)
 
@@ -478,7 +478,7 @@ is t to display the done string, or the number to display."
 LENGTH is the amount of display that has been used.  TEXT
 is t to display the done string, or the text to display."
     (if (eq text t)
-        (concat "... " working-donestring)
+	(concat "... " working-donestring)
       (format "... %s" text)))
 
 (defun working-spinner-display (length number)
