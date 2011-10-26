@@ -74,65 +74,6 @@
   "Menu keymap for the CEDET package.
 This is used by `semantic-mode' and `global-ede-mode'.")
 
-(defun cedet ()
-  "Display basic information/help about CEDET.
-
-Also output the results of `cedet-version-print'.
-
-See also function `cedet-version'."
-  (interactive)
-  (with-output-to-temp-buffer "*CEDET*"
-    (princ "You have invoked the `cedet' command.
-
-CEDET is a Collection of Emacs Development Environment Tools.
-CEDET is made up of several tools.
-
-Project Management:  EDE
-  EDE is a project managment system.  It can either create Makefiles
-  for your project, or identify different pre-existing project styles
-  including Automake, Make, SCons, CMake, Emacs or Linux.
-
-  (global-ede-mode 1)
-
-  Use M-x ede-new RET to create new projects.
-
-Code Completion, Smart Jump, Context Sensitive Help:  Semantic
-  Semantic is the infrastructure upon which helpful context sensitive
-  tools can be built.  Those tools include:
-  * Smart Completion
-  * Smart Help/Jump/Navigation
-  * Symbol Reference tools
-
-  The Semantic Manual can help setup and use a wide suite of these tools.
-  For CEDET distributed independently of Emacs, see semantic/load.el
-
-Code Generation, Template Insertion:  SRecode
-  SRecode, or the Semantic Re-Coder is a template system for code generation.
-  Templates can be used for code snippets, or to convert tags from
-  Semantic back into code for applications.
-
-  (global-srecode-minor-mode 1)
-
-  to enable the SRecode Menu for code generation.
-
-UML and other structured diagrams:  COGRE
-  COGRE is a Connected Graph Editor.
-
-  Use M-x cogre RET to create a new diagram using the keyboard and mouse.
-
-  Use M-x cogre-uml-quick-class RET to generate a UML diagram from source
-  code of your OO program.
-
-  COGRE requires that the 'dot' program is installed for
-  performing diagram layout.
-
-CLOS For Emacs: EIEIO
-  EIEIO is a CLOS clone for Emacs that allows you to write Emacs Lisp
-   programs in an object oriented way.")
-    (princ "\n\n")
-    (cedet-version-print)
-    (princ "\n\n\nC-h f cedet-version RET\n  for details on output format.")))
-
 (defun cedet-version ()
   "Display all active versions of CEDET and Dependant packages.
 
@@ -150,48 +91,43 @@ if the package has not been loaded."
   (interactive)
   (require 'inversion)
   (with-output-to-temp-buffer "*CEDET*"
-    (cedet-version-print)
-    (princ "\n\n\nC-h f cedet-version RET\n  for details on output format.")))
-
-(defun cedet-version-print ()
-  "Print the versions of CEDET packages to standard out.
-See `cedet-version' for details."
-  (princ "CEDET Version:\t") (princ cedet-version)
-  (princ "\n  \t\t\tRequested\tFile\t\tLoaded")
-  (princ "\n  Package\t\tVersion\t\tVersion\t\tVersion")
-  (princ "\n  ----------------------------------------------------------")
-  (let ((p cedet-packages))
-    (while p
-      (let ((sym (symbol-name (car (car p)))))
-	(princ "\n  ")
-	(princ sym)
-	(princ ":\t")
-	(if (< (length sym) 5)
-	    (princ "\t"))
-	(if (< (length sym) 13)
-	    (princ "\t"))
-	(let ((reqver (nth 1 (car p)))
-	      (filever (car (inversion-find-version sym)))
-	      (loadver (when (featurep (car (car p)))
-			 (symbol-value (intern-soft (concat sym "-version"))))))
-	  (princ reqver)
-	  (if (< (length reqver) 8) (princ "\t"))
-	  (princ "\t")
-	  (if (string= filever reqver)
-	      ;; I tried the words "check" and "match", but that
-	      ;; just looked lame.
-	      (princ "ok\t")
-	    (princ filever)
-	    (if (< (length filever) 8) (princ "\t")))
-	  (princ "\t")
-	  (if loadver
-	      (if (string= loadver reqver)
-		  (princ "ok")
-		(princ loadver))
-	    (princ "Not Loaded"))
-	  ))
-      (setq p (cdr p))))
-  (princ "\n"))
+    (princ "CEDET Version:\t") (princ cedet-version)
+    (princ "\n  \t\t\tRequested\tFile\t\tLoaded")
+    (princ "\n  Package\t\tVersion\t\tVersion\t\tVersion")
+    (princ "\n  ----------------------------------------------------------")
+    (let ((p cedet-packages))
+      (while p
+	(let ((sym (symbol-name (car (car p)))))
+	  (princ "\n  ")
+	  (princ sym)
+	  (princ ":\t")
+	  (if (< (length sym) 5)
+	      (princ "\t"))
+	  (if (< (length sym) 13)
+	      (princ "\t"))
+	  (let ((reqver (nth 1 (car p)))
+		(filever (car (inversion-find-version sym)))
+		(loadver (when (featurep (car (car p)))
+			   (symbol-value (intern-soft (concat sym "-version"))))))
+	    (princ reqver)
+	    (if (< (length reqver) 8) (princ "\t"))
+	    (princ "\t")
+	    (if (string= filever reqver)
+		;; I tried the words "check" and "match", but that
+		;; just looked lame.
+		(princ "ok\t")
+	      (princ filever)
+	      (if (< (length filever) 8) (princ "\t")))
+	    (princ "\t")
+	    (if loadver
+		(if (string= loadver reqver)
+		    (princ "ok")
+		  (princ loadver))
+	      (princ "Not Loaded"))
+	    ))
+	(setq p (cdr p))))
+    (princ "\n\n\nC-h f cedet-version RET\n  for details on output format.")
+    ))
 
 (provide 'cedet)
 
