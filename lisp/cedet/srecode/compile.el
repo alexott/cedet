@@ -375,8 +375,8 @@ STATE is the current compile state as an object of class
 It is hard if the previous inserter is a newline object."
   (while (and comp (stringp (car comp)))
     (setq comp (cdr comp)))
-  (require 'srecode/insert)
   (or (not comp)
+      (require 'srecode/insert)
       (srecode-template-inserter-newline-child-p (car comp))))
 
 (defun srecode-compile-split-code (tag str STATE

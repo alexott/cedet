@@ -59,6 +59,7 @@ movement to.  If this is nil, 'function is used.
 This will find the smallest tag of that class (function, variable,
 type, etc) and make sure non-nil is returned if you cannot
 go up past the bounds of that tag."
+  (require 'semantic/find)
   (if point (goto-char point))
   (let ((nar (semantic-current-tag-of-class (or bounds-type 'function))))
     (if nar

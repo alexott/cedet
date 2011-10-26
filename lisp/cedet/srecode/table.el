@@ -258,3 +258,4 @@ Use PREDICATE is the same as for the `sort' function."
 (provide 'srecode/table)
 
 ;;; srecode/table.el ends here
+

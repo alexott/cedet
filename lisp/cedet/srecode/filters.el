@@ -27,6 +27,7 @@
 
 (require 'newcomment)
 (require 'srecode/table)
+(require 'srecode/insert)
 
 (defun srecode-comment-prefix (str)
   "Prefix each line of STR with the comment prefix characters."
@@ -52,3 +53,4 @@
 (provide 'srecode/filters)
 
 ;;; srecode/filters.el ends here
+
