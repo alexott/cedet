@@ -449,8 +449,7 @@ DOCSTRING is optional."
   "Mark OLD overload as obsoleted by NEW overload.
 WHEN is a string describing the first release where it was made obsolete."
   (put old 'overload-obsoleted-by new)
-  (when when
-    (put old 'overload-obsoleted-since when))
+  (put old 'overload-obsoleted-since when)
   (put old 'mode-local-overload t)
   (put new 'overload-obsolete old))
 
@@ -737,7 +736,6 @@ invoked interactively."
           t (symbol-name major-mode))))
   (when (setq mode (intern-soft mode))
     (mode-local-describe-bindings-1 mode (cedet-called-interactively-p 'any))))
-
 
 ;; ;;; find-func support (Emacs 21.4, or perhaps 22.1)
 ;; ;;
