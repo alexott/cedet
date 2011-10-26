@@ -232,20 +232,10 @@ That is tag names plus names defined in tag attribute `:rest'."
            "\n"))
       "")))
 
-(defun semantic-grammar-source-file ()
-  "Hack to generate a meaningful path to describe the file."
-  (let (match)
-    (mapc '(lambda (path)
-             (unless match
-               (when (string-equal path
-                                   (substring (buffer-file-name)
-                                              0 (string-width path)))
-                 (setq match (substring (buffer-file-name)
-                                        (string-width path))))))
-          load-path)
-    (unless match
-      (error "The impossible has happened!"))
-    match))
+(defsubst semantic-grammar-buffer-file (&optional buffer)
+  "Return name of file sans directory BUFFER is visiting.
+No argument or nil as argument means use the current buffer."
+  (file-name-nondirectory (buffer-file-name buffer)))
 
 (defun semantic-grammar-package ()
   "Return the %package value as a string.
@@ -254,10 +244,10 @@ package name derived from the grammar file name.  For example, the
 default package name for the grammar file foo.wy is foo-wy, and for
 foo.by it is foo-by."
   (or (semantic-grammar-first-tag-name 'package)
-      (let* ((source (semantic-grammar-source-file))
-             (ext  (file-name-extension source))
-             (i    (string-match (format "\\([.]\\)%s\\'" ext) source)))
-        (concat (substring source 0 i) "-" ext))))
+      (let* ((file (semantic-grammar-buffer-file))
+             (ext  (file-name-extension file))
+             (i    (string-match (format "\\([.]\\)%s\\'" ext) file)))
+        (concat (substring file 0 i) "-" ext))))
 
 (defsubst semantic-grammar-languagemode ()
   "Return the %languagemode value as a list of symbols or nil."
@@ -480,19 +470,31 @@ Also load the specified macro libraries."
 
 (defsubst semantic-grammar-keywordtable ()
   "Return the variable name of the keyword table."
-  (concat package "--keyword-table"))
+  (concat (file-name-sans-extension
+           (semantic-grammar-buffer-file
+            semantic--grammar-output-buffer))
+          "--keyword-table"))
 
 (defsubst semantic-grammar-tokentable ()
   "Return the variable name of the token table."
-  (concat package "--token-table"))
+  (concat (file-name-sans-extension
+           (semantic-grammar-buffer-file
+            semantic--grammar-output-buffer))
+          "--token-table"))
 
 (defsubst semantic-grammar-parsetable ()
   "Return the variable name of the parse table."
-  (concat package "--parse-table"))
+  (concat (file-name-sans-extension
+           (semantic-grammar-buffer-file
+            semantic--grammar-output-buffer))
+          "--parse-table"))
 
 (defsubst semantic-grammar-setupfunction ()
   "Return the name of the parser setup function."
-  (concat package "--install-parser"))
+  (concat (file-name-sans-extension
+           (semantic-grammar-buffer-file
+            semantic--grammar-output-buffer))
+          "--install-parser"))
 
 (defmacro semantic-grammar-as-string (object)
   "Return OBJECT as a string value."
@@ -540,9 +542,10 @@ Typically a DEFINE expression should look like this:
 
 " copy "
 
-" author "
-" created "
-" keywords "
+;; Author: " user-full-name " <" user-mail-address ">
+;; Created: " date "
+;; Keywords: syntax
+;; X-RCS: " vcid "
 
 ;; This file is not part of GNU Emacs.
 
@@ -568,7 +571,6 @@ Typically a DEFINE expression should look like this:
 ;;
 
 ;;; Code:
-" requires "
 ")
   "Generated header template.
 The symbols in the template are local variables in
@@ -595,48 +597,19 @@ The symbols in the list are local variables in
                              t)
       (match-string 0))))
 
-(defun semantic-grammar-named-line (name)
-  "Return a grammar line describing NAME, or nil if not found."
-  (save-excursion
-    (goto-char (point-min))
-    (when (re-search-forward (format "^;;+[ \t]+%s: .*$" name)
-                             ;; Search only in the 15 top lines
-                             (save-excursion (forward-line 15) (point))
-                             t)
-      (match-string 0))))
-
-(defun semantic-grammar-requires-for-parser ()
-  "Calculate any special requires a generated grammar will need."
-  (let* ((source (semantic-grammar-source-file))
-	 (ext  (file-name-extension source)))
-    (cond ((string= ext "by")
-	   "(require 'semantic/bovine)")
-	  ((string= ext "wy")
-	   ";; @TODO - any requires for wisent?")
-	  (t
-	   ";; @TODO - Unknown parser extension, unknown requires needed."
-	   ))))
-
 (defun semantic-grammar-header ()
   "Return text of a generated standard header."
-  (let ((file package-output)
-        (gram (semantic-grammar-source-file))
+  (let ((file (semantic-grammar-buffer-file
+               semantic--grammar-output-buffer))
+        (gram (semantic-grammar-buffer-file))
+        (date (format-time-string "%Y-%m-%d %T%z"))
         (vcid (concat "$" "Id" "$")) ;; Avoid expansion
         ;; Try to get the copyright from the input grammar, or
         ;; generate a new one if not found.
         (copy (or (semantic-grammar-copyright-line)
                   (concat (format-time-string ";; Copyright (C) %Y ")
                           user-full-name)))
-        (author (or (semantic-grammar-named-line "Author")
-                   (concat ";; Author: " user-full-name
-                           " <" user-mail-address ">")))
-        (created (or (semantic-grammar-named-line "Created")
-                    (concat ";; Created: "
-                            (format-time-string "%Y-%m-%d %T%z"))))
-        (keywords (or (semantic-grammar-named-line "Keywords")
-                     ";; Keywords: syntax"))
-	(requires (semantic-grammar-requires-for-parser))
-        (out ""))
+	(out ""))
     (dolist (S semantic-grammar-header-template)
       (cond ((stringp S)
 	     (setq out (concat out S)))
@@ -646,8 +619,9 @@ The symbols in the list are local variables in
 
 (defun semantic-grammar-footer ()
   "Return text of a generated standard footer."
-  (let* ((file package-output)
-         (libr package)
+  (let* ((file (semantic-grammar-buffer-file
+                semantic--grammar-output-buffer))
+         (libr (file-name-sans-extension file))
 	 (out ""))
     (dolist (S semantic-grammar-footer-template)
       (cond ((stringp S)
@@ -753,8 +727,11 @@ Block definitions are read from the current table of lexical types."
     ;; explicitly declared in a %type statement, and if at least the
     ;; syntax property has been provided.
     (when (and declared syntax)
-      (setq mtype (or (get type 'matchdatatype) 'regexp)
-            name (intern (format "%s--<%s>-%s-analyzer" package type mtype))
+      (setq prefix (file-name-sans-extension
+                    (semantic-grammar-buffer-file
+                     semantic--grammar-output-buffer))
+            mtype (or (get type 'matchdatatype) 'regexp)
+            name (intern (format "%s--<%s>-%s-analyzer" prefix type mtype))
             doc (format "%s analyzer for <%s> tokens." mtype type))
       (cond
        ;; Regexp match analyzer
@@ -831,15 +808,14 @@ Lisp code."
   (interactive "P")
   (setq force (or force current-prefix-arg))
   (semantic-fetch-tags)
-  (let* ((indent-tabs-mode nil)         ; do not use tabs
+  (let* (
          ;; Values of the following local variables are obtained from
          ;; the grammar parsed tree in current buffer, that is before
          ;; switching to the output file.
          (package  (semantic-grammar-package))
-         (package-output (concat package ".el"))
-         (file-output    (file-name-nondirectory package-output))
+         (output   (concat package ".el"))
          (semantic--grammar-input-buffer  (current-buffer))
-         (semantic--grammar-output-buffer (find-file-noselect file-output))
+         (semantic--grammar-output-buffer (find-file-noselect output))
          (header   (semantic-grammar-header))
          (prologue (semantic-grammar-prologue))
          (epilogue (semantic-grammar-epilogue))
@@ -940,7 +916,7 @@ Lisp code."
         ;; have created this language for, and force them to call our
         ;; setup function again, refreshing all semantic data, and
         ;; enabling them to work with the new code just created.
-
+;;;; FIXME?
         ;; At this point, I don't know any user's defined setup code :-(
         ;; At least, what I can do for now, is to run the generated
         ;; parser-install function.
@@ -949,7 +925,7 @@ Lisp code."
          (semantic-grammar-languagemode)))
       )
     ;; Return the name of the generated package file.
-    package-output))
+    output))
 
 (defun semantic-grammar-recreate-package ()
   "Unconditionally create Lisp code from grammar in current buffer.
