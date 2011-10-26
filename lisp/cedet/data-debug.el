@@ -911,7 +911,7 @@ If PARENT is non-nil, it is somehow related as a parent to thing."
   (interactive)
   (kill-all-local-variables)
   (setq major-mode 'data-debug-mode
-	mode-name "DATA-DEBUG"
+        mode-name "DATA-DEBUG"
 	comment-start ";;"
 	comment-end "")
   (set (make-local-variable 'comment-start-skip)
@@ -1073,7 +1073,6 @@ Do nothing if already expanded."
 	(message "Expression %s is nil." expr)
       (data-debug-show-stuff v "expression"))))
 
-;;;###autoload
 (defun data-debug-eval-expression (expr)
   "Evaluate EXPR and display the value.
 If the result is something simple, show it in the echo area.

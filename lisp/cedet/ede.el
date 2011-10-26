@@ -218,18 +218,6 @@ Argument LIST-O-O is the list of objects to choose from."
   (if (or (null ede-object) (consp ede-object)) nil
     (obj-of-class-p ede-object ede-project)))
 
-(defun ede-buffer-belongs-to-target-p ()
-  "Return non-nil if this buffer belongs to at least one target."
-  (let ((obj ede-object))
-    (if (consp obj)
-	(setq obj (car obj)))
-    (and obj (obj-of-class-p obj ede-target))))
-
-(defun ede-buffer-belongs-to-project-p ()
-  "Return non-nil if this buffer belongs to at least one target."
-  (if (or (null ede-object) (consp ede-object)) nil
-    (obj-of-class-p ede-object ede-project)))
-
 (defun ede-menu-obj-of-class-p (class)
   "Return non-nil if some member of `ede-object' is a child of CLASS."
   (if (listp ede-object)
@@ -985,7 +973,7 @@ Optional argument OBJ is an object to find the parent of."
       (let* ((thisdir (if obj (oref obj directory)
 			default-directory))
 	     (updir (ede-up-directory thisdir)))
-	(when updir
+        (when updir
 	  ;; If there was no root, perhaps we can derive it from
 	  ;; updir now.
 	  (let ((root (or root (ede-directory-get-toplevel-open-project updir))))
@@ -1191,16 +1179,6 @@ See also `ede-map-subprojects'."
 Return the first non-nil value returned by PROC."
   (eval (cons 'or (ede-map-targets this proc))))
 
-;;; VC Handling
-;;
-(defun ede-maybe-checkout (&optional buffer)
-  "Check BUFFER out of VC if necessary."
-  (save-excursion
-    (if buffer (set-buffer buffer))
-    (if (and buffer-read-only vc-mode
-	     (y-or-n-p "Checkout Makefile.am from VC? "))
-	(vc-toggle-read-only))))
-
 
 ;;; Some language specific methods.
 ;;
@@ -1236,16 +1214,6 @@ Return the first non-nil value returned by PROC."
 (defmethod ede-preprocessor-map ((this ede-target))
   "Get the pre-processor map for project THIS."
   nil)
-
-;;; VC Handling
-;;
-(defun ede-maybe-checkout (&optional buffer)
-  "Check BUFFER out of VC if necessary."
-  (save-excursion
-    (if buffer (set-buffer buffer))
-    (if (and buffer-read-only vc-mode
-	     (y-or-n-p "Checkout Makefile.am from VC? "))
-	(vc-toggle-read-only))))
 
 
 ;;; Project-local variables
