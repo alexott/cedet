@@ -209,7 +209,7 @@ TOKTYPE is a hint to the type of tag desired."
 	   (semantic-tag-new-function
 	    (symbol-name sym)
 	    nil	;; return type
-	    (semantic.elisp-desymbolify
+	    (semantic-elisp-desymbolify
 	     (semanticdb-elisp-sym-function-arglist sym)) ;; arg-list
 	    :user-visible-flag (condition-case nil
 				   (interactive-form sym)

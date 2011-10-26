@@ -24,7 +24,6 @@
 ;; Various routines for debugging SemanticDB issues, or viewing
 ;; semanticdb state.
 
-(require 'eieio)
 (require 'data-debug)
 (require 'semantic/db)
 (require 'semantic/format)
