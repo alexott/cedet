@@ -187,27 +187,20 @@ we can tell font lock about them.")
   "Keymap used in srecode mode.")
 
 ;;;###autoload
-(defun srecode-template-mode ()
+(define-derived-mode srecode-template-mode fundamental-mode "SRecorder"
   "Major-mode for writing SRecode macros."
-  (interactive)
-  (kill-all-local-variables)
-  (setq major-mode 'srecode-template-mode
-        mode-name "SRecoder"
-	comment-start ";;"
+  (setq comment-start ";;"
 	comment-end "")
   (set (make-local-variable 'parse-sexp-ignore-comments) t)
   (set (make-local-variable 'comment-start-skip)
        "\\(\\(^\\|[^\\\\\n]\\)\\(\\\\\\\\\\)*\\);+ *")
-  (set-syntax-table srecode-template-mode-syntax-table)
-  (use-local-map srecode-template-mode-map)
   (set (make-local-variable 'font-lock-defaults)
        '(srecode-font-lock-keywords
          nil  ;; perform string/comment fontification
          nil  ;; keywords are case sensitive.
          ;; This puts _ & - as a word constituant,
          ;; simplifying our keywords significantly
-         ((?_ . "w") (?- . "w"))))
-  (run-hooks 'srecode-template-mode-hook))
+         ((?_ . "w") (?- . "w")))))
 
 ;;;###autoload
 (defalias 'srt-mode 'srecode-template-mode)
