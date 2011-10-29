@@ -70,10 +70,10 @@ IMAGESPEC is the image data, and DOCSTRING is documentation for the image."
 
 ;; This hack is for the ezimage install which has an icons direcory for
 ;; the default icons to be used.
-(add-to-list 'load-path
-	     (concat (file-name-directory
-		      (locate-library "ezimage.el"))
-		     "icons"))
+;; (add-to-list 'load-path
+;; 	     (concat (file-name-directory
+;; 		      (locate-library "ezimage.el"))
+;; 		     "icons"))
 
        )
   (if (not (fboundp 'make-glyph))
@@ -86,6 +86,7 @@ Argument DOCSTRING is the documentation for VARIABLE."
   `(defvar ,variable nil ,docstring))
 
 ;; ELSE
+(with-no-warnings
 (defun ezimage-find-image-on-load-path (image)
   "Find the image file IMAGE on the load path."
   (let ((l (cons
@@ -103,7 +104,9 @@ Argument DOCSTRING is the documentation for VARIABLE."
 	  ))
       (setq l (cdr l)))
     r))
+);with-no-warnings
 
+(with-no-warnings
 (defun ezimage-convert-emacs21-imagespec-to-xemacs (spec)
   "Convert the Emacs21 image SPEC into an XEmacs image spec.
 The Emacs 21 spec is what I first learned, and is easy to convert."
@@ -111,6 +114,7 @@ The Emacs 21 spec is what I first learned, and is easy to convert."
 	 (itype (nth 1 sl))
 	 (ifile (nth 3 sl)))
     (vector itype ':file (ezimage-find-image-on-load-path ifile))))
+);with-no-warnings
 
 (defmacro defezimage (variable imagespec docstring)
   "Define VARIABLE as an image if `defimage' is not available.
@@ -132,107 +136,107 @@ IMAGESPEC is the image data, and DOCSTRING is documentation for the image."
 )))
 
 (defezimage ezimage-directory
-  ((:type xpm :file "dir.xpm" :ascent center))
+  ((:type xpm :file "ezimage/dir.xpm" :ascent center))
   "Image used for empty directories.")
 
 (defezimage ezimage-directory-plus
-  ((:type xpm :file "dir-plus.xpm" :ascent center))
+  ((:type xpm :file "ezimage/dir-plus.xpm" :ascent center))
   "Image used for closed directories with stuff in them.")
 
 (defezimage ezimage-directory-minus
-  ((:type xpm :file "dir-minus.xpm" :ascent center))
+  ((:type xpm :file "ezimage/dir-minus.xpm" :ascent center))
   "Image used for open directories with stuff in them.")
 
 (defezimage ezimage-page-plus
-  ((:type xpm :file "page-plus.xpm" :ascent center))
+  ((:type xpm :file "ezimage/page-plus.xpm" :ascent center))
   "Image used for closed files with stuff in them.")
 
 (defezimage ezimage-page-minus
-  ((:type xpm :file "page-minus.xpm" :ascent center))
+  ((:type xpm :file "ezimage/page-minus.xpm" :ascent center))
   "Image used for open files with stuff in them.")
 
 (defezimage ezimage-page
-  ((:type xpm :file "page.xpm" :ascent center))
+  ((:type xpm :file "ezimage/page.xpm" :ascent center))
   "Image used for files with nothing interesting in it.")
 
 (defezimage ezimage-tag
-  ((:type xpm :file "tag.xpm" :ascent center))
+  ((:type xpm :file "ezimage/tag.xpm" :ascent center))
   "Image used for tags.")
 
 (defezimage ezimage-tag-plus
-  ((:type xpm :file "tag-plus.xpm" :ascent center))
+  ((:type xpm :file "ezimage/tag-plus.xpm" :ascent center))
   "Image used for closed tag groups.")
 
 (defezimage ezimage-tag-minus
-  ((:type xpm :file "tag-minus.xpm" :ascent center))
+  ((:type xpm :file "ezimage/tag-minus.xpm" :ascent center))
   "Image used for open tags.")
 
 (defezimage ezimage-tag-gt
-  ((:type xpm :file "tag-gt.xpm" :ascent center))
+  ((:type xpm :file "ezimage/tag-gt.xpm" :ascent center))
   "Image used for closed tags (with twist arrow).")
 
 (defezimage ezimage-tag-v
-  ((:type xpm :file "tag-v.xpm" :ascent center))
+  ((:type xpm :file "ezimage/tag-v.xpm" :ascent center))
   "Image used for open tags (with twist arrow).")
 
 (defezimage ezimage-tag-type
-  ((:type xpm :file "tag-type.xpm" :ascent center))
+  ((:type xpm :file "ezimage/tag-type.xpm" :ascent center))
   "Image used for tags that represent a data type.")
 
 (defezimage ezimage-box-plus
-  ((:type xpm :file "box-plus.xpm" :ascent center))
+  ((:type xpm :file "ezimage/box-plus.xpm" :ascent center))
   "Image of a closed box.")
 
 (defezimage ezimage-box-minus
-  ((:type xpm :file "box-minus.xpm" :ascent center))
+  ((:type xpm :file "ezimage/box-minus.xpm" :ascent center))
   "Image of an open box.")
 
 (defezimage ezimage-mail
-  ((:type xpm :file "mail.xpm" :ascent center))
+  ((:type xpm :file "ezimage/mail.xpm" :ascent center))
   "Image if an envelope.")
 
 (defezimage ezimage-checkout
-  ((:type xpm :file "checkmark.xpm" :ascent center))
+  ((:type xpm :file "ezimage/checkmark.xpm" :ascent center))
   "Image representing a checkmark.  For files checked out of a VC.")
 
 (defezimage ezimage-object
-  ((:type xpm :file "bits.xpm" :ascent center))
+  ((:type xpm :file "ezimage/bits.xpm" :ascent center))
   "Image representing bits (an object file.)")
 
 (defezimage ezimage-object-out-of-date
-  ((:type xpm :file "bitsbang.xpm" :ascent center))
+  ((:type xpm :file "ezimage/bitsbang.xpm" :ascent center))
   "Image representing bits with a ! in it.  (an out of data object file.)")
 
 (defezimage ezimage-label
-  ((:type xpm :file "label.xpm" :ascent center))
+  ((:type xpm :file "ezimage/label.xpm" :ascent center))
   "Image used for label prefix.")
 
 (defezimage ezimage-lock
-  ((:type xpm :file "lock.xpm" :ascent center))
+  ((:type xpm :file "ezimage/lock.xpm" :ascent center))
   "Image of a lock.  Used for Read Only, or private.")
 
 (defezimage ezimage-unlock
-  ((:type xpm :file "unlock.xpm" :ascent center))
+  ((:type xpm :file "ezimage/unlock.xpm" :ascent center))
   "Image of an unlocked lock.")
 
 (defezimage ezimage-key
-  ((:type xpm :file "key.xpm" :ascent center))
+  ((:type xpm :file "ezimage/key.xpm" :ascent center))
   "Image of a key.")
 
 (defezimage ezimage-document-tag
-  ((:type xpm :file "doc.xpm" :ascent center))
+  ((:type xpm :file "ezimage/doc.xpm" :ascent center))
   "Image used to indicate documentation available.")
 
 (defezimage ezimage-document-plus
-  ((:type xpm :file "doc-plus.xpm" :ascent center))
+  ((:type xpm :file "ezimage/doc-plus.xpm" :ascent center))
   "Image used to indicate closed documentation.")
 
 (defezimage ezimage-document-minus
-  ((:type xpm :file "doc-minus.xpm" :ascent center))
+  ((:type xpm :file "ezimage/doc-minus.xpm" :ascent center))
   "Image used to indicate open documentation.")
 
 (defezimage ezimage-info-tag
-  ((:type xpm :file "info.xpm" :ascent center))
+  ((:type xpm :file "ezimage/info.xpm" :ascent center))
   "Image used to indicate more information available.")
 
 (defvar ezimage-expand-image-button-alist
@@ -309,48 +313,46 @@ Optional argument STRING is a string upon which to add text properties."
 See `ezimage-expand-image-button-alist' for details."
   (interactive)
   (with-output-to-temp-buffer "*Ezimage Images*"
-    (save-current-buffer
+    (save-excursion
       (set-buffer "*Ezimage Images*")
-      (save-excursion
-	(goto-char (point-max))
-	(insert "Ezimage image cache.\n\n")
-	(let ((start (point)) (end nil))
-	  (insert "Image\tText\tImage Name")
-	  (setq end (point))
-	  (insert "\n")
-	  (put-text-property start end 'face 'underline))
-	(let ((ia ezimage-expand-image-button-alist))
-	  (while ia
-	    (let ((start (point)))
-	      (insert (car (car ia)))
-	      (insert "\t")
-	      (ezimage-insert-image-button-maybe start
-						 (length (car (car ia))))
-	      (insert (car (car ia)) "\t" (format "%s" (cdr (car ia))) "\n"))
-	    (setq ia (cdr ia))))))))
+      (goto-char (point-max))
+      (insert "Ezimage image cache.\n\n")
+      (let ((start (point)) (end nil))
+	(insert "Image\tText\tImage Name")
+	(setq end (point))
+	(insert "\n")
+	(put-text-property start end 'face 'underline))
+      (let ((ia ezimage-expand-image-button-alist))
+	(while ia
+	  (let ((start (point)))
+	    (insert (car (car ia)))
+	    (insert "\t")
+	    (ezimage-insert-image-button-maybe start
+						(length (car (car ia))))
+	    (insert (car (car ia)) "\t" (format "%s" (cdr (car ia))) "\n"))
+	  (setq ia (cdr ia)))))))
 
 (defun ezimage-image-dump ()
   "Dump out the current state of the Ezimage image alist.
 See `ezimage-expand-image-button-alist' for details."
   (interactive)
   (with-output-to-temp-buffer "*Ezimage Images*"
-    (save-current-buffer
+    (save-excursion
       (set-buffer "*Ezimage Images*")
-      (save-excursion
-	(goto-char (point-max))
-	(insert "Ezimage image cache.\n\n")
-	(let ((start (point)) (end nil))
-	  (insert "Image\tImage Name")
-	  (setq end (point))
-	  (insert "\n")
-	  (put-text-property start end 'face 'underline))
-	(let ((ia (ezimage-all-images)))
-	  (while ia
-	    (let ((start (point)))
-	      (insert "cm")
-	      (ezimage-insert-over-text (symbol-value (car ia)) start (point))
-	      (insert "\t" (format "%s" (car ia)) "\n"))
-	    (setq ia (cdr ia))))))))
+      (goto-char (point-max))
+      (insert "Ezimage image cache.\n\n")
+      (let ((start (point)) (end nil))
+	(insert "Image\tImage Name")
+	(setq end (point))
+	(insert "\n")
+	(put-text-property start end 'face 'underline))
+      (let ((ia (ezimage-all-images)))
+	(while ia
+	  (let ((start (point)))
+	    (insert "cm")
+	    (ezimage-insert-over-text (symbol-value (car ia)) start (point))
+	    (insert "\t" (format "%s" (car ia)) "\n"))
+	  (setq ia (cdr ia)))))))
 
 (defun ezimage-all-images ()
   "Return a list of all variables containing ez images."
