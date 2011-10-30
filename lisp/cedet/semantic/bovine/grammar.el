@@ -1,35 +1,32 @@
 ;;; semantic/bovine/grammar.el --- Bovine's input grammar mode
 ;;
-;; Copyright (C) 2002, 2003, 2004, 2007, 2009, 2011 David Ponce
+;; Copyright (C) 2002-2011 Free Software Foundation, Inc.
 ;;
 ;; Author: David Ponce <david@dponce.com>
 ;; Maintainer: David Ponce <david@dponce.com>
 ;; Created: 26 Aug 2002
 ;; Keywords: syntax
-;;
-;; This file is not part of GNU Emacs.
-;;
-;; This program is free software; you can redistribute it and/or
-;; modify it under the terms of the GNU General Public License as
-;; published by the Free Software Foundation; either version 2, or (at
-;; your option) any later version.
-;;
-;; This software is distributed in the hope that it will be useful,
+
+;; This file is part of GNU Emacs.
+
+;; GNU Emacs is free software: you can redistribute it and/or modify
+;; it under the terms of the GNU General Public License as published by
+;; the Free Software Foundation, either version 3 of the License, or
+;; (at your option) any later version.
+
+;; GNU Emacs is distributed in the hope that it will be useful,
 ;; but WITHOUT ANY WARRANTY; without even the implied warranty of
-;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-;; General Public License for more details.
-;;
+;; MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+;; GNU General Public License for more details.
+
 ;; You should have received a copy of the GNU General Public License
-;; along with GNU Emacs; see the file COPYING.  If not, write to the
-;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-;; Boston, MA 02110-1301, USA.
+;; along with GNU Emacs.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
 ;;
 ;; Major mode for editing Bovine's input grammar (.by) files.
 
 ;;; History:
-;;
 
 ;;; Code:
 (require 'semantic/grammar)
@@ -142,7 +139,7 @@ expanded from elsewhere."
                           " vals)")
                   (and (not x) (not inplace)
                        (setq inlist t)))
-              
+
               (when (and (not inlist) (not inplace))
                 (insert "\n(list")
                 (setq inlist t))
@@ -199,7 +196,7 @@ The format of a bovine parser table is:
    ( NONTERMINAL-SYMBOL2 MATCH-LIST2 )
    ...
    ( NONTERMINAL-SYMBOLn MATCH-LISTn )
- 
+
 Where each NONTERMINAL-SYMBOL is an artificial symbol which can appear
 in any child state.  As a starting place, one of the NONTERMINAL-SYMBOLS
 must be `bovine-toplevel'.
