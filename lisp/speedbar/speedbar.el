@@ -680,8 +680,10 @@ directories here; see `vc-directory-exclusion-list'."
 	    noext (cdr noext)))
     ;;               backup      refdir      lockfile
     (concat nstr "\\|#[^#]+#$\\|\\.\\.?\\'\\|\\.#"))
-  "Regular expression matching files not to show in speedbar.
-It is generated from the variable `completion-ignored-extensions'.")
+  "Regexp matching files we don't want displayed in a speedbar buffer.
+It is generated from the variable `completion-ignored-extensions'."
+  :group 'speedbar
+  :type 'string)
 
 (defvar speedbar-file-regexp nil
   "Regular expression matching files we know how to expand.
@@ -2105,7 +2107,7 @@ cell of the form ( 'DIRLIST . 'FILELIST )."
 
 (defun speedbar-default-directory-list (directory index)
   "Insert files for DIRECTORY with level INDEX at point."
-  (speedbar-insert-files-at-point 
+  (speedbar-insert-files-at-point
    (speedbar-file-lists directory) index)
   (speedbar-reset-scanners)
   (if (= index 0)
