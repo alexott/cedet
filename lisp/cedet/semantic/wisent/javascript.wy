@@ -57,7 +57,9 @@
 ;; USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH
 ;; DAMAGE.
 
-%package semantic/wisent/javascript-wy
+%package wisent-javascript-wy
+%provide semantic/wisent/javascript-wy
+
 ;; JAVE I prefere ecmascript-mode
 %languagemode ecmascript-mode javascript-mode
 

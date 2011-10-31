@@ -24,7 +24,8 @@
 ;; $Id: erlang.by,v 1.7 2005-09-30 20:21:53 zappo Exp $
 ;;
 
-%package semantic/bovine/erlang-by
+%package semantic-erlang-by
+%provide semantic/bovine/erlang-by
 
 %start         module-decl
 %languagemode  erlang-mode

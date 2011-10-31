@@ -86,7 +86,8 @@
 ;; Settings
 ;; --------
 
-%package semantic/wisent/python-wy
+%package wisent-python-wy
+%provide semantic/wisent/python-wy
 
 %languagemode python-mode
 

@@ -53,7 +53,8 @@
   (defvar semantic/wisent/java-wy--anons nil)
   }
 
-%package semantic/wisent/java-wy
+%package wisent-java-wy
+%provide semantic/wisent/java-wy
 
 %languagemode java-mode
 

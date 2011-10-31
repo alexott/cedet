@@ -34,7 +34,8 @@
 ;;; History:
 ;; 
 
-%package semantic/wisent/calc-wy
+%package wisent-calc-wy
+%provide semantic/wisent/calc-wy
 
 %token <number> NUM
 

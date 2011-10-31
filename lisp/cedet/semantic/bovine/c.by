@@ -38,7 +38,8 @@
 ;; >  * Can't parse signature element: "const RmcCmdMCDetailedStatus& status"
 ;; >  * Can't parse signature element: "RmcBucStatus* rftBucStatus"
 
-%package semantic/bovine/c-by
+%package semantic-c-by
+%provide semantic/bovine/c-by
 
 %languagemode  c-mode c++-mode
 %start         declaration
