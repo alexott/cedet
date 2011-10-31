@@ -467,33 +467,27 @@ Also load the specified macro libraries."
 ;;;;
 (defvar semantic--grammar-input-buffer  nil)
 (defvar semantic--grammar-output-buffer nil)
+(defvar semantic--grammar-package nil)
+(defvar semantic--grammar-provide nil)
 
 (defsubst semantic-grammar-keywordtable ()
   "Return the variable name of the keyword table."
-  (concat (file-name-sans-extension
-           (semantic-grammar-buffer-file
-            semantic--grammar-output-buffer))
+  (concat semantic--grammar-package
           "--keyword-table"))
 
 (defsubst semantic-grammar-tokentable ()
   "Return the variable name of the token table."
-  (concat (file-name-sans-extension
-           (semantic-grammar-buffer-file
-            semantic--grammar-output-buffer))
+  (concat semantic--grammar-package
           "--token-table"))
 
 (defsubst semantic-grammar-parsetable ()
   "Return the variable name of the parse table."
-  (concat (file-name-sans-extension
-           (semantic-grammar-buffer-file
-            semantic--grammar-output-buffer))
+  (concat semantic--grammar-package
           "--parse-table"))
 
 (defsubst semantic-grammar-setupfunction ()
   "Return the name of the parser setup function."
-  (concat (file-name-sans-extension
-           (semantic-grammar-buffer-file
-            semantic--grammar-output-buffer))
+  (concat semantic--grammar-package
           "--install-parser"))
 
 (defmacro semantic-grammar-as-string (object)
@@ -621,7 +615,8 @@ The symbols in the list are local variables in
   "Return text of a generated standard footer."
   (let* ((file (semantic-grammar-buffer-file
                 semantic--grammar-output-buffer))
-         (libr (file-name-sans-extension file))
+         (libr (or semantic--grammar-provide
+		   semantic--grammar-package))
 	 (out ""))
     (dolist (S semantic-grammar-footer-template)
       (cond ((stringp S)
@@ -812,10 +807,14 @@ Lisp code."
          ;; Values of the following local variables are obtained from
          ;; the grammar parsed tree in current buffer, that is before
          ;; switching to the output file.
-         (package  (semantic-grammar-package))
-         (output   (concat package ".el"))
+         (semantic--grammar-package (semantic-grammar-package))
+	 (semantic--grammar-provide (semantic-grammar-first-tag-name 'provide))
+         (output   (concat (or semantic--grammar-provide
+			       semantic--grammar-package) ".el"))
          (semantic--grammar-input-buffer  (current-buffer))
-         (semantic--grammar-output-buffer (find-file-noselect output))
+         (semantic--grammar-output-buffer
+	  (find-file-noselect
+	   (file-name-nondirectory output)))
          (header   (semantic-grammar-header))
          (prologue (semantic-grammar-prologue))
          (epilogue (semantic-grammar-epilogue))
