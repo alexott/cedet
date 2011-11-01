@@ -52,7 +52,7 @@ This is a needed first step in getting CEDET installed from outside sources."
 		   (and (listp sf) (eq (car sf) 'autoload))))
 	(fmakunbound (car S)))))
   )
-
+(cedet-remove-builtin)
 (provide 'cedet-butil)
 
 ;;; cedet-butil.el ends here

@@ -3038,7 +3038,7 @@ Optional argument NOESCAPE is passed to `prin1-to-string' when appropriate."
 ;;; Start of automatically extracted autoloads.
 
 ;;;### (autoloads (customize-object) "eieio-custom" "eieio-custom.el"
-;;;;;;  "cf1bd64c76a6e6406545e8c5a5530d43")
+;;;;;;  "e3e169623eb73406651b709c947ab11c")
 ;;; Generated autoloads from eieio-custom.el
 
 (autoload 'customize-object "eieio-custom" "\
@@ -3051,7 +3051,7 @@ Optional argument GROUP is the sub-group of slots to display.
 
 ;;;### (autoloads (eieio-help-mode-augmentation-maybee eieio-describe-generic
 ;;;;;;  eieio-describe-constructor eieio-describe-class eieio-browse)
-;;;;;;  "eieio-opt" "eieio-opt.el" "1bed0a56310f402683419139ebc18d7f")
+;;;;;;  "eieio-opt" "eieio-opt.el" "838c283fe9d2ed955b8b6c40f4f1275d")
 ;;; Generated autoloads from eieio-opt.el
 
 (autoload 'eieio-browse "eieio-opt" "\

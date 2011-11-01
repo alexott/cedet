@@ -24,7 +24,7 @@
 V=0
 
 ## Paths and flags to common programs
-EMACS=emacs
+EMACS=emacs -l cedet-butil.el
 EMACSFLAGS=-batch --no-site-file
 FIND=find
 RM=rm
