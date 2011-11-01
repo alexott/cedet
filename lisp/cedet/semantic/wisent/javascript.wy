@@ -511,14 +511,14 @@ OptionalExpression : Expression
   semantic-lex-ignore-comments
 
   ;;stuff generated from the wy file(one for each "type" declaration)
-  semantic/wisent/javascript-wy--<number>-regexp-analyzer
-  semantic/wisent/javascript-wy--<string>-sexp-analyzer
+  wisent-javascript-wy--<number>-regexp-analyzer
+  wisent-javascript-wy--<string>-sexp-analyzer
 
-  semantic/wisent/javascript-wy--<keyword>-keyword-analyzer
+  wisent-javascript-wy--<keyword>-keyword-analyzer
 
-  semantic/wisent/javascript-wy--<symbol>-regexp-analyzer
-  semantic/wisent/javascript-wy--<punctuation>-string-analyzer
-  semantic/wisent/javascript-wy--<block>-block-analyzer
+  wisent-javascript-wy--<symbol>-regexp-analyzer
+  wisent-javascript-wy--<punctuation>-string-analyzer
+  wisent-javascript-wy--<block>-block-analyzer
 
 
   ;;;;more std stuff
