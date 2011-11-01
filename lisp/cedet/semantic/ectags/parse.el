@@ -360,7 +360,7 @@ text from a file where the tag was found.")
 (defun semantic-ectags-split-signature-summary-default (summary)
   "Default behavior for splitting a Exuberant CTags SUMMARY.
 Assume comma separated list."
-  (cedet-split-string summary "[(), ]" t))
+  (split-string summary "[(), ]" t))
 
 (define-overloadable-function semantic-ectags-set-language-attributes (tag parents)
   "Augment TAG with additional attributes based on language.

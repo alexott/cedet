@@ -826,7 +826,7 @@ STR occurs in the current buffer between BEG and END."
 	     (symbolp (car token))
 	     (eq 'semantic-list (car token)))
     ;; Convert TOKEN in place.
-    (let ((argsplit (cedet-split-string (semantic-lex-token-text token)
+    (let ((argsplit (split-string (semantic-lex-token-text token)
 					"[(), ]" t)))
       (setcar token 'spp-arg-list)
       (setcar (nthcdr 1 token) argsplit))

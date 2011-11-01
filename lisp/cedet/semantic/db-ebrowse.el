@@ -422,7 +422,7 @@ Optional argument BASECLASSES specifies a baseclass to the tree being provided."
 		  (semanticdb-create-table dbe fname)))
 	 (class (ebrowse-ts-class tree))
 	 (scope (ebrowse-cs-scope class))
-	 (ns (when scope (cedet-split-string scope ":" t)))
+	 (ns (when scope (split-string scope ":" t)))
 	 (nst nil)
 	 (cls nil)
 	 )

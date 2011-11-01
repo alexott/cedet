@@ -114,7 +114,7 @@ to give to the program."
       (cond ((or (string-match "Configured with\\(:\\)" L)
                  (string-match "\\(:\\)\\s-*[^ ]*configure " L))
              (let* ((parts (substring L (match-end 1)))
-                    (opts (cedet-split-string parts " " t))
+                    (opts (split-string parts " " t))
                     )
                (dolist (O (cdr opts))
                  (let* ((data (split-string O "="))
