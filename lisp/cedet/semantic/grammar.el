@@ -722,9 +722,7 @@ Block definitions are read from the current table of lexical types."
     ;; explicitly declared in a %type statement, and if at least the
     ;; syntax property has been provided.
     (when (and declared syntax)
-      (setq prefix (file-name-sans-extension
-                    (semantic-grammar-buffer-file
-                     semantic--grammar-output-buffer))
+      (setq prefix semantic--grammar-package
             mtype (or (get type 'matchdatatype) 'regexp)
             name (intern (format "%s--<%s>-%s-analyzer" prefix type mtype))
             doc (format "%s analyzer for <%s> tokens." mtype type))
