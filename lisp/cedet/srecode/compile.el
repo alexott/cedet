@@ -376,8 +376,8 @@ It is hard if the previous inserter is a newline object."
   (while (and comp (stringp (car comp)))
     (setq comp (cdr comp)))
   (or (not comp)
-      (require 'srecode/insert)
-      (srecode-template-inserter-newline-child-p (car comp))))
+      (progn (require 'srecode/insert)
+	     (srecode-template-inserter-newline-child-p (car comp)))))
 
 (defun srecode-compile-split-code (tag str STATE
 				       &optional end-name)
