@@ -45,7 +45,7 @@
 ;;;###autoload
 (defun srecode-template-setup-parser ()
   "Setup buffer for parse."
-  (srecode/srt-wy--install-parser)
+  (srecode-template-wy--install-parser)
 
   (setq
    ;; Lexical Analysis

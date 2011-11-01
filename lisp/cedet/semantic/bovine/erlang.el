@@ -70,7 +70,7 @@
 
 (defun semantic-erlang-default-setup ()
   "Set up a buffer for semantic parsing of the Erlang language."
-  (semantic/bovine/erlang-by--install-parser)
+  (semantic-erlang-by--install-parser)
   (setq
    ;; Lexical analysis
    semantic-lex-number-expression nil

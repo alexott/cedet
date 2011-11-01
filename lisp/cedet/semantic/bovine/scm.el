@@ -95,7 +95,7 @@ syntax as specified by the syntax table."
 ;;;###autoload
 (defun semantic-default-scheme-setup ()
   "Setup hook function for Emacs Lisp files and Semantic."
-  (semantic/bovine/scm-by--install-parser)
+  (semantic-scm-by--install-parser)
   (setq semantic-symbol->name-assoc-list '( (variable . "Variables")
                                             ;;(type     . "Types")
                                             (function . "Functions")

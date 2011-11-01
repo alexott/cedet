@@ -84,7 +84,7 @@ This function override `get-local-variables'."
 (defun wisent-java-default-setup ()
   "Hook run to setup Semantic in `java-mode'.
 Use the alternate LALR(1) parser."
-  (semantic/wisent/java-tags-wy--install-parser)
+  (wisent-java-tags-wy--install-parser)
   (setq
    ;; Lexical analysis
    semantic-lex-number-expression semantic-java-number-regexp

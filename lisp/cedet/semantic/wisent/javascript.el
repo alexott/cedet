@@ -81,7 +81,7 @@ This function overrides `get-local-variables'."
 ;;;###autoload
 (defun wisent-javascript-setup-parser ()
   "Setup buffer for parse."
-  (semantic/wisent/javascript-wy--install-parser)
+  (wisent-javascript-wy--install-parser)
   (setq
    ;; Lexical Analysis
    semantic-lex-analyzer 'javascript-lexer

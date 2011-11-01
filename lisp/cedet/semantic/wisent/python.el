@@ -239,11 +239,11 @@ elsewhere on a line outside a string literal."
   ;; Must analyze string before symbol to handle string prefix.
   wisent-python-lex-string
   ;; Analyzers auto-generated from grammar.
-  semantic/wisent/python-wy--<number>-regexp-analyzer
-  semantic/wisent/python-wy--<keyword>-keyword-analyzer
-  semantic/wisent/python-wy--<symbol>-regexp-analyzer
-  semantic/wisent/python-wy--<block>-block-analyzer
-  semantic/wisent/python-wy--<punctuation>-string-analyzer
+  wisent-python-wy--<number>-regexp-analyzer
+  wisent-python-wy--<keyword>-keyword-analyzer
+  wisent-python-wy--<symbol>-regexp-analyzer
+  wisent-python-wy--<block>-block-analyzer
+  wisent-python-wy--<punctuation>-string-analyzer
   ;; Ignored things.
   wisent-python-lex-ignore-backslash
   semantic-lex-ignore-whitespace
@@ -285,7 +285,7 @@ To be implemented for Python!  For now just return nil."
 ;;;###autoload
 (defun wisent-python-default-setup ()
   "Setup buffer for parse."
-  (semantic/wisent/python-wy--install-parser)
+  (wisent-python-wy--install-parser)
   (set (make-local-variable 'parse-sexp-ignore-comments) t)
   (setq
    ;; Character used to separation a parent/child relationship

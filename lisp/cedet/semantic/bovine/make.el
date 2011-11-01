@@ -208,7 +208,7 @@ Uses default implementation, and also gets a list of filenames."
 ;;;###autoload
 (defun semantic-default-make-setup ()
   "Set up a Makefile buffer for parsing with semantic."
-  (semantic/bovine/make-by--install-parser)
+  (semantic-make-by--install-parser)
   (setq semantic-symbol->name-assoc-list '((variable . "Variables")
                                            (function . "Rules")
                                            (include . "Dependencies")

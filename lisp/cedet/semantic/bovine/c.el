@@ -1728,7 +1728,7 @@ For types with a :parent, create faux namespaces to put TAG into."
 ;;;###autoload
 (defun semantic-default-c-setup ()
   "Set up a buffer for semantic parsing of the C language."
-  (semantic/bovine/c-by--install-parser)
+  (semantic-c-by--install-parser)
   (setq semantic-lex-syntax-modifications '((?> ".")
                                             (?< ".")
                                             )
