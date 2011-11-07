@@ -1,4 +1,4 @@
-;;; srecode-android.el --- SRecoder support for Android projects
+;;; srecode/android.el --- SRecoder support for Android projects
 ;;
 ;; Copyright (C) 2011 Eric M. Ludlam
 ;;
@@ -39,6 +39,6 @@ DEFAULT-VALUE is the value to return if the user hits RET without typing anythin
   ;; @TODO - Convert to completing read.
   (read-string prompt initial-input history default-value))
 
-(provide 'srecode-android)
+(provide 'srecode/android)
 
 ;;; srecode-android.el ends here

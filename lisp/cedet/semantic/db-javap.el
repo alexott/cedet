@@ -1,4 +1,4 @@
-;;; semanticdb-javap.el --- Java include path management and symbol database via javap.
+;;; semantic/db-javap.el --- Java include path management and symbol database via javap.
 ;;
 ;; Copyright (C) 2011 Eric M. Ludlam
 ;;
@@ -902,6 +902,6 @@ to some class in JARFILE."
 	tagsout))))
 
 
-(provide 'semanticdb-javap)
+(provide 'semantic/db-javap)
 
 ;;; semanticdb-javap.el ends here

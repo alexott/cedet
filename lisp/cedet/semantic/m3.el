@@ -1,4 +1,4 @@
-;;; semantic-m3.el --- Utilities for CEDET/M3
+;;; semantic/m3.el --- Utilities for CEDET/M3
 ;;
 ;; Copyright (C) 2011 Eric M. Ludlam
 ;;
@@ -261,6 +261,6 @@ The what is under the cursor."
 	)))
 
 
-(provide 'semantic-m3)
+(provide 'semantic/m3)
 
 ;;; semantic-m3.el ends here

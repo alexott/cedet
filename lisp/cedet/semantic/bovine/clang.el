@@ -1,4 +1,4 @@
-;;; semantic-clang.el --- Use 'clang' to provide completions for C/C++
+;;; semantic/clang.el --- Use 'clang' to provide completions for C/C++
 
 ;; Copyright (C) 2011 David Engster
 
@@ -277,4 +277,4 @@ include directories (-I) and preprocessor symbols (-D)."
 			vars))))))))
 
 
-(provide 'semantic-clang)
+(provide 'semantic/clang)

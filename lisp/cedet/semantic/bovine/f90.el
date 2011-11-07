@@ -1,4 +1,4 @@
-;;; semantic-f90.el --- Semantic details for f90
+;;; semantic/f90.el --- Semantic details for f90
 
 ;;; Copyright (C) 2010 David Engster
 
@@ -555,6 +555,6 @@ A Component is a part of TAG which itself may be a TAG."
 ;;;###autoload
 (add-hook 'f90-mode-hook 'semantic-default-f90-setup)
 
-(provide 'semantic-f90)
+(provide 'semantic/f90)
 
 ;;; semantic-f90.el ends here

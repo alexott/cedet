@@ -1,4 +1,4 @@
-;;; ede-m3.el --- Project options in CEDET m3
+;;; ede/m3.el --- Project options in CEDET m3
 ;;
 ;; Copyright (C) 2011 Eric M. Ludlam
 ;;
@@ -56,6 +56,6 @@
 		      items))))
       items)))
 
-(provide 'ede-m3)
+(provide 'ede/m3)
 
 ;;; ede-m3.el ends here

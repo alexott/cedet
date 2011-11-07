@@ -1,4 +1,4 @@
-;;; ede-android.el --- Support Android code projects
+;;; ede/android.el --- Support Android code projects
 ;;
 ;; Copyright (C) 2011 Eric M. Ludlam
 ;;
@@ -447,6 +447,6 @@ WHERE is something like menu or layout, and what is the name of the resource."
   (interactive)
   (find-file (ede-android-resource-file "values" "strings")))
 
-(provide 'ede-android)
+(provide 'ede/android)
 
 ;;; ede-android.el ends here
