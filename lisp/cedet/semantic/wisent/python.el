@@ -36,6 +36,7 @@
 
 (require 'semantic/wisent)
 (require 'semantic/wisent/python-wy)
+(require 'semantic/find)
 (require 'semantic/dep)
 (require 'semantic/ctxt)
 

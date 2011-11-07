@@ -53,6 +53,11 @@
   "Semantic Navigator."
   :group 'semantic)
 
+(defvar senator-minor-mode nil
+  "Non-nil if Senator minor mode is enabled.
+Use the command `senator-minor-mode' to change this variable.")
+(make-variable-buffer-local 'senator-minor-mode)
+
 ;;;###autoload
 (defcustom senator-step-at-tag-classes nil
   "List of tag classes recognized by Senator's navigation commands.

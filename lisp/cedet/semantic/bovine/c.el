@@ -27,10 +27,12 @@
 
 (require 'semantic)
 (require 'semantic/analyze)
+(require 'semantic/bovine)
 (require 'semantic/bovine/gcc)
 (require 'semantic/idle)
 (require 'semantic/lex-spp)
 (require 'semantic/bovine/c-by)
+(require 'hideif)
 
 (eval-when-compile
   (require 'semantic/find))
