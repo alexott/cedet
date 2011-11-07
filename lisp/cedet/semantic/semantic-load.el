@@ -27,7 +27,7 @@
 ;;; Code:
 ;;
 
-(require 'semantic-fw)
+(require 'semantic/fw)
 
 ;;; Add parser and doc directories
 ;;

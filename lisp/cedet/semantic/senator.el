@@ -327,7 +327,7 @@ Return the tag or nil if at beginning of buffer."
 	       (semantic-tag-name  tag)
 	       where))
     tag))
-(semantic-alias-obsolete 'senator-previous-token 'senator-previous-tag)
+(semantic-alias-obsolete 'senator-previous-token 'senator-previous-tag nil)
 
 (defvar senator-jump-completion-list nil
   "`senator-jump' stores here its current completion list.
@@ -1070,7 +1070,7 @@ If semantic tags are available, use them to navigate."
 Semantic tags that are of these classes will be used to find the name
 used by add log.")
 (semantic-varalias-obsolete 'senator-add-log-tokens
-                            'senator-add-log-tags)
+                            'senator-add-log-tags nil)
 
 (defadvice add-log-current-defun (around senator activate)
   "Return name of function definition point is in, or nil."

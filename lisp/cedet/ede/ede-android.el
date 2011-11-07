@@ -24,6 +24,8 @@
 ;; Support Android projects via EDE.
 
 (require 'cedet-android)
+(require 'ede)
+(require 'semantic/analyze)
 
 ;;; Code:
 (defvar ede-android-project-list nil
@@ -419,7 +421,6 @@ Places the cursor on the = for that attribute, and returns the value."
 
 ;;; Java buffer features
 ;;
-(require 'semantic-analyze)
 
 (defun ede-android-resource-file (where what)
   "Find the file associated with the resource in WHERE that is WHAT.

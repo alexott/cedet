@@ -32,11 +32,11 @@
 (require 'srecode/map)
 (require 'semantic/decorate)
 (require 'semantic/wisent)
-(require 'senator)
-(require 'wisent)
+(require 'semantic/senator)
+(require 'semantic/wisent)
 
 (eval-when-compile
-  (require 'srecode-m3)
+  (require 'srecode/m3)
   (require 'semantic/find))
 
 ;;; Code:

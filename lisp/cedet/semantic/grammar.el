@@ -823,7 +823,7 @@ Lisp code."
              (file-newer-than-file-p
               (buffer-file-name semantic--grammar-output-buffer)
               (buffer-file-name semantic--grammar-input-buffer)))
-        (message "Package `%s' is up to date." package)
+        (message "Package `%s' is up to date." semantic--grammar-package)
       ;; Create the package
       (set-buffer semantic--grammar-output-buffer)
       ;; Use Unix EOLs, so that the file is portable to all platforms.

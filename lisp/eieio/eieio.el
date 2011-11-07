@@ -3078,9 +3078,9 @@ Optional argument GROUP is the sub-group of slots to display.
 
 ;;;***
 
-;;;### (autoloads (eieio-help-mode-augmentation-maybee eieio-describe-generic
-;;;;;;  eieio-describe-constructor eieio-describe-class eieio-browse)
-;;;;;;  "eieio-opt" "eieio-opt.el" "838c283fe9d2ed955b8b6c40f4f1275d")
+;;;### (autoloads (eieio-describe-generic eieio-describe-constructor
+;;;;;;  eieio-describe-class eieio-browse) "eieio-opt" "eieio-opt.el"
+;;;;;;  "fab816a466a2c79b5bac42a15d57bc5c")
 ;;; Generated autoloads from eieio-opt.el
 
 (autoload 'eieio-browse "eieio-opt" "\
@@ -3112,12 +3112,6 @@ Describe the generic function GENERIC.
 Also extracts information about all methods specific to this generic.
 
 \(fn GENERIC)" t nil)
-
-(autoload 'eieio-help-mode-augmentation-maybee "eieio-opt" "\
-For buffers thrown into help mode, augment for EIEIO.
-Arguments UNUSED are not used.
-
-\(fn &rest UNUSED)" nil nil)
 
 ;;;***
 

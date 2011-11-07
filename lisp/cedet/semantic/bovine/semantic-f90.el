@@ -36,15 +36,15 @@
 ;;
 
 (require 'semantic)
-(require 'semantic-f90-by)
+(require 'semantic/bovine/f90-by)
 (require 'backquote)
 
 (eval-when-compile
-  (require 'semantic-ctxt)
-  (require 'semantic-imenu)
-  (require 'semantic-decorate-mode)
+  (require 'semantic/ctxt)
+  (require 'semantic/imenu)
+  (require 'semantic/decorate)
   (require 'f90)
-  (require 'senator))
+  (require 'semantic/senator))
 
 ;;; Code:
 

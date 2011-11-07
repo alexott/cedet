@@ -1,4 +1,4 @@
-;;; srecode-m3.el --- Template insertion options for CEDET M3
+;;; srecode/m3.el --- Template insertion options for CEDET M3
 ;;
 ;; Copyright (C) 2011 Eric M. Ludlam
 ;;
@@ -25,9 +25,9 @@
 
 (require 'cedet-m3)
 (require 'srecode)
-(require 'srecode-ctxt)
-(require 'srecode-semantic)
-(require 'srecode-document)
+(require 'srecode/ctxt)
+(require 'srecode/semantic)
+(require 'srecode/document)
 
 ;;; Code:
 
@@ -51,6 +51,6 @@
       )))
 
 
-(provide 'srecode-m3)
+(provide 'srecode/m3)
 
 ;;; srecode-m3.el ends here

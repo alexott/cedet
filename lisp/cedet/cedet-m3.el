@@ -204,9 +204,7 @@ ATTRIBUTES are easymenu compatible attributes."
     ))
 
 ;; Use the semantic minor mode magic stuff.
-(semantic-add-minor-mode 'cedet-m3-minor-mode
-			 "" 
-			 cedet-m3-mode-map)
+(semantic-add-minor-mode 'cedet-m3-minor-mode "")
 
 (provide 'cedet-m3)
 

@@ -146,6 +146,25 @@
   (if (semantic-overlay-get overlay 'semantic)
       (semantic-overlay-delete overlay)))
 
+;;; Menu Item compatibility
+;;
+(defun semantic-menu-item (item)
+  "Build an XEmacs compatible menu item from vector ITEM.
+That is remove the unsupported :help stuff."
+  (if (featurep 'xemacs)
+      (let ((n (length item))
+            (i 0)
+            slot l)
+        (while (< i n)
+          (setq slot (aref item i))
+          (if (and (keywordp slot)
+                   (eq slot :help))
+              (setq i (1+ i))
+            (setq l (cons slot l)))
+          (setq i (1+ i)))
+        (apply #'vector (nreverse l)))
+    item))
+
 ;;; Positional Data Cache
 ;;
 (defvar semantic-cache-data-overlays nil

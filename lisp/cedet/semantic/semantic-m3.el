@@ -27,8 +27,8 @@
 ;; menu.
 
 (require 'cedet-m3)
-(require 'semantic-analyze)
-(require 'semantic-analyze-refs)
+(require 'semantic/analyze)
+(require 'semantic/analyze/refs)
 
 ;;; Code:
 

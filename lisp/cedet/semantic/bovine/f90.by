@@ -39,6 +39,7 @@
 ;; this happens.
 
 %package semantic-f90-by
+%provide semantic/bovine/f90-by
 
 %languagemode  f90-mode
 %start         starting_rule
