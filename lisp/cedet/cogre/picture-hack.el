@@ -331,4 +331,9 @@ The line is drawn in a rectilinear fashion."
 
 (provide 'cogre/picture-hack)
 
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "cogre/picture-hack"
+;; End:
+
 ;;; cogre/picture-hack.el ends here

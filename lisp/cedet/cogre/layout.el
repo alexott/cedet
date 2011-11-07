@@ -103,4 +103,10 @@ This function depends on graphviz `dot' program."
     ))
 
 (provide 'cogre/layout)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "cogre/layout"
+;; End:
+
 ;;; cogre/layout.el ends here

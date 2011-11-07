@@ -423,4 +423,10 @@ that the children of TAG-NODE will be linked to."
     ))
 
 (provide 'cogre/semantic)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "cogre/semantic"
+;; End:
+
 ;;; cogre/semantic.el ends here

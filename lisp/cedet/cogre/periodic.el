@@ -93,4 +93,10 @@ Link is created with the specified TYPE."
   )
 
 (provide 'cogre/periodic)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "cogre/periodic"
+;; End:
+
 ;;; cogre/periodic.el ends here

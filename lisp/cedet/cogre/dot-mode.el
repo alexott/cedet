@@ -110,4 +110,10 @@ as a parsing engine."
 (set-mode-local-parent 'cogre-dot-mode 'graphviz-dot-mode)
 
 (provide 'cogre/dot-mode)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "cogre/dot-mode"
+;; End:
+
 ;;; cogre/dot-mode.el ends here

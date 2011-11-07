@@ -93,4 +93,9 @@
 
 (provide 'cogre/wisent-dot)
 
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "cogre/wisent-dot"
+;; End:
+
 ;;; cogre/wisent-dot.el ends here

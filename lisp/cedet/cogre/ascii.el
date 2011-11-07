@@ -167,4 +167,10 @@ tweaks the faces."
     rect))
 
 (provide 'cogre/ascii)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "cogre/ascii"
+;; End:
+
 ;;; cogre/ascii.el ends here

@@ -887,4 +887,9 @@ Pops up a context menu of various activities to perform."
 
 (provide 'cogre/mode)
 
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "cogre/mode"
+;; End:
+
 ;;; cogre/mode.el ends here

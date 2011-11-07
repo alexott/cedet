@@ -428,4 +428,9 @@ Return it as a list of lists.  Each entry is of the form:
 
 (provide 'cogre/uml)
 
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "cogre/uml"
+;; End:
+
 ;;; cogre/uml.el ends here

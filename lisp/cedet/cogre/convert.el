@@ -327,4 +327,10 @@ DOT uses points, where as COGRE uses characters."
     tag))
 
 (provide 'cogre/convert)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "cogre/convert"
+;; End:
+
 ;;; cogre/convert.el ends here

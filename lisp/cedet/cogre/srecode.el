@@ -149,4 +149,10 @@ This fcn is very sparing of fetching tags."
     ))
 
 (provide 'cogre/srecode)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "cogre/srecode"
+;; End:
+
 ;;; cogre/srecode.el ends here
