@@ -36,7 +36,9 @@
    (keybindings :initform nil)
    (phony :initform t)
    (sourcetype :initform '(ede-source-emacs))
-   (availablecompilers :initform '(ede-emacs-compiler ede-xemacs-compiler))
+   (availablecompilers :initform '(ede-emacs-compiler 
+				   ede-xemacs-compiler
+				   ede-emacs-preload-compiler))
    (aux-packages :initarg :aux-packages
 		 :initform nil
 		 :type list
@@ -45,7 +47,16 @@
 There should only be one toplevel package per auxiliary tool needed.
 These packages location is found, and added to the compile time
 load path."
-   ))
+   )
+   (pre-load-packages :initarg :pre-load-packages
+		      :initform nil
+		      :type list
+		      :custom (repeat string)
+		      :documentation "Additional packages to pre-load.
+Each package name will be loaded with `require'.
+Each package's directory should also appear in :aux-packages via a package name.
+You must use the `ede-emacs-preload-compiler' if you provide values in this slot.")
+   )
   "This target consists of a group of lisp files.
 A lisp target may be one general program with many separate lisp files in it.")
 
@@ -75,6 +86,23 @@ A lisp target may be one general program with many separate lisp files in it.")
 ;   :objectextention ".elc"
    )
   "Compile Emacs Lisp programs.")
+
+(defvar ede-emacs-preload-compiler
+  (clone
+   ede-emacs-compiler "ede-emacs-preload-compiler"
+   :commands
+   '("@echo \"(add-to-list 'load-path nil)\" > $@-compile-script"
+     "for loadpath in . ${LOADPATH}; do \\"
+     "   echo \"(add-to-list 'load-path \\\"$$loadpath\\\")\" >> $@-compile-script; \\"
+     "done;"
+     "for preload in ${ELISPPRELOAD}; do \\"
+     "   echo \"(load \\\"$$preload\\\")\" >> $@-compile-script; \\"
+     "done;"
+     "@echo \"(setq debug-on-error t)\" >> $@-compile-script"
+     "\"$(EMACS)\" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^"
+     ))
+  "Compile Emacs Lisp programs with preload libraries.")
+	 
 
 (defvar ede-xemacs-compiler
   (clone ede-emacs-compiler "ede-xemacs-compiler"
@@ -171,6 +199,20 @@ is found, such as a `-version' variable, or the standard header."
   "Insert a sequence of ITEMS into the Makefile LOADPATH variable."
     (when items
       (ede-pmake-insert-variable-shared "LOADPATH"
+	(let ((begin (save-excursion (re-search-backward "\\s-*="))))
+	  (while items
+	    (when (not (save-excursion
+			 (re-search-backward
+			  (concat "\\s-" (regexp-quote (car items)) "[ \n\t\\]")
+			  begin t)))
+	      (insert " " (car items)))
+	    (setq items (cdr items)))))
+      ))
+
+(defun ede-proj-makefile-insert-preload-items (items)
+  "Insert a sequence of ITEMS into the Makefile ELISPPRELOAD variable."
+    (when items
+      (ede-pmake-insert-variable-shared "ELISPPRELOAD"
 	(let ((begin (save-excursion (re-search-backward "\\s-*="))))
 	  (while items
 	    (when (not (save-excursion
