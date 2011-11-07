@@ -27,6 +27,9 @@
 ;; that we created the correct objects.
 
 ;;; Code:
+
+(require 'cogre/uml)
+
 (defvar cit-uml-cogre-file "cit-uml.cgr"
   "The file read in for a COGRE diagram.")
 
