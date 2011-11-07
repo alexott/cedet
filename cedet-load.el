@@ -46,7 +46,7 @@
   (load-file (expand-file-name "lisp/eieio/loaddefs.el"))
   (load-file (expand-file-name "lisp/speedbar/loaddefs.el"))
   (load-file (expand-file-name "lisp/cedet/ede/loaddefs.el"))
-  ;(load-file (expand-file-name "lisp/cedet/cogre/loaddefs.el"))
+  (load-file (expand-file-name "lisp/cedet/cogre/loaddefs.el"))
   (load-file (expand-file-name "lisp/cedet/srecode/loaddefs.el"))
   (load-file (expand-file-name "lisp/cedet/semantic/loaddefs.el"))
   (load-file (expand-file-name "lisp/cedet/semantic/bovine/loaddefs.el"))

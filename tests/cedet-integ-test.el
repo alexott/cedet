@@ -115,7 +115,6 @@
 (require 'cit-el)
 (require 'cit-texi)
 (require 'cit-externaldb)
-(require 'cit-gnustep)
 (require 'cit-android)
 (require 'cit-dist)
 
