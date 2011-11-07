@@ -1,190 +1,149 @@
-## Makefile --- Definition file for building CEDET
-##
-## Copyright (C) 2005, 2007, 2008, 2009, 2010, 2011 by Eric M. Ludlam
-## Copyright (C) 2003, 2004  by David Ponce
-##
-## Author: David Ponce <david@dponce.com>
-## Maintainer: CEDET developers <http://sf.net/projects/cedet>
-## Created: 12 Sep 2003
-## X-RCS: $Id: Makefile,v 1.27 2010-04-23 00:04:39 zappo Exp $
-##
-## This program is free software; you can redistribute it and/or
-## modify it under the terms of the GNU General Public License as
-## published by the Free Software Foundation; either version 2, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful, but
-## WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with GNU Emacs; see the file COPYING.  If not, write to the
-## Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-## Boston, MA 02110-1301, USA.
+# Copyright (C) 2010, 2011 by Lluís Vilanova
+#
+# Maintainer: CEDET developers <http://sf.net/projects/cedet>
+# Created: 16 Sep 2010
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs; see the file COPYING.  If not, write to the
+# Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+# Boston, MA 02110-1301, USA.
 
-######## You can customize this part of the Makefile ########
+###### User-customizable part of the Makefile ##################################
 
-## The directory where CEDET is installed
-CEDET_HOME="$(CURDIR)"
+## Echo commands during compilation (you can set it at call time: "make V=1")
+V=0
 
-## The CEDET's packages installed
-CEDET_ELISP_PACKAGES=\
-common \
-speedbar \
-eieio \
-semantic \
-srecode \
-ede \
-cogre \
-contrib
-
-CEDET_PACKAGES=\
-$(CEDET_ELISP_PACKAGES) \
-tests
-
-## Path to your Emacs
-EMACS?=emacs
+## Paths and flags to common programs
+EMACS=emacs -l cedet-butil.el
 EMACSFLAGS=-batch --no-site-file
-
-## Your shell (On Windows/Cygwin I recommend to use bash)
-#SHELL=bash
-
-## Path to your find and rm commands
 FIND=find
-#RM = rm -f
+RM=rm
+RMFLAGS=-f
+MAKEINFO=makeinfo
 
-## INSTALL PATHS
-PREFIX=/usr/local
+## Which packages to compile, test, etc.
+PACKAGES=eieio speedbar cedet
 
-INFO_DIR=$(PREFIX)/share/info
+###### Internal part of the Makefile ###########################################
 
-INSTALL_INFO=ginstall-info
-
-############### Internal part of the Makefile ###############
-CEDET_VERSION=$(shell grep "defconst cedet-version" common/cedet.el | cut -d " " -f 3)
-
-CEDET_FILES=Makefile INSTALL cedet-build.el cedet-update-version.el PRERELEASE_CHECKLIST USING_CEDET_FROM_CVS
-DIST_ROOT=cedet-$(CEDET_VERSION)
-DIST_DIR=$(CEDET_HOME)/$(DIST_ROOT)
-DIST_FILE=$(DIST_DIR).tar.gz
-
-__BUILD_AUTOLOADS=$(patsubst %,%-autoloads,$(CEDET_ELISP_PACKAGES))
-__CLEAN_AUTOLOADS=$(patsubst %,clean-%,$(__BUILD_AUTOLOADS))
-__DOMAKE=$(MAKE) $(MFLAGS) EMACS="$(EMACS)" EMACSFLAGS="$(EMACSFLAGS)" SHELL="$(SHELL)"
-
-## Build
-##
-
-all: clean-autoloads packages
-
-bootstrap: clean-all packages
-
-packages: $(CEDET_PACKAGES)
-
-.PHONY: $(CEDET_PACKAGES)
-$(CEDET_PACKAGES):
-	cd $(CEDET_HOME)/$@ && $(__DOMAKE)
-
-.PHONY: ebuild
-ebuild:
-	$(EMACS) -q -batch --no-site-file -l cedet-build.el -f cedet-build
-
-## Update
-##
-
-autoloads: $(__BUILD_AUTOLOADS)
-
-.PHONY: $(__BUILD_AUTOLOADS)
-$(__BUILD_AUTOLOADS):
-	cd $(CEDET_HOME)/$(firstword $(subst -, ,$@)) && \
-	$(__DOMAKE) autoloads
-
-recompile: autoloads
-	cd $(CEDET_HOME) && \
-	"$(EMACS)" $(EMACSFLAGS) -l common/cedet.el \
-	-f batch-byte-recompile-directory $(CEDET_PACKAGES)
-
-## Cleanup
-##
-
-clean-autoloads: $(__CLEAN_AUTOLOADS)
-
-.PHONY: $(__CLEAN_AUTOLOADS)
-$(__CLEAN_AUTOLOADS):
-	$(FIND) $(CEDET_HOME)/$(word 2,$(subst -, ,$@)) -type f \
-	-name "*-loaddefs.el" \
-	-print -exec $(RM) {} \;
-
-.PHONY: clean-grammars
-clean-grammars:
-	$(FIND) $(CEDET_HOME) -type f -name "*-[bw]y.el" \
-	! -name "semantic-grammar-wy.el" \
-	-print -exec $(RM) {} \;
-
-.PHONY: clean-info
-clean-info:
-	$(FIND) $(CEDET_HOME) -type f -name "*.info*" \
-	-print -exec $(RM) {} \;
-
-.PHONY: clean-elc
-clean-elc:
-	$(FIND) $(CEDET_HOME) -type f -name "*.elc" \
-	-print -exec $(RM) {} \;
-
-.PHONY: clean
-clean:
-	$(FIND) $(CEDET_HOME) -type f \( -name "*-script" -o -name "*~" \) \
-	-print -exec $(RM) {} \;
-
-clean-all: clean clean-elc clean-info clean-grammars clean-autoloads
-
-### UNIT TEST Harness
-## Run the master CEDET unit-test suite.
-.PHONY: utest itest
-utest:
-	$(EMACS) $(EMACSFLAGS) -l "common/cedet.el" -f cedet-utest-batch
-
-itest:
-	cd tests; ./cit-test.sh Make
-	cd tests; ./cit-test.sh Automake
-	cd tests; ./cit-test.sh GNUStep
-	cd tests; ./cit-test.sh Android
-
-### Install info files
-## Thanks Stefano Sabatini for the info install patch.
-INFO_FILES=$(shell $(FIND) $(CEDET_HOME) -type f -name '*.info')
-
-.PHONY: install-info
-install-info:
-	for file in $(INFO_FILES); do \
-	    cp $$file $(INFO_DIR); \
-	    $(INSTALL_INFO) $$file $(INFO_DIR)/dir ;\
-	done 
-
-## Uninstall info files 
-INSTALLED_INFO_FILES=$(shell find . -name *.info | sed -e 's|.*/\(.*\.info$$\)|$(INFO_DIR)/\1|')
-
-.PHONY: uninstall-info
-uninstall-info:
-	for file in $(INSTALLED_INFO_FILES); do \
-	    $(INSTALL_INFO) --delete $$file $(INFO_DIR)/dir ;\
-	    rm -f $$file;\
-	done
+### Paths
+lispdir=$(CURDIR)/lisp
+docdir=$(CURDIR)/doc
+testdir=$(CURDIR)/tests
 
 
-## Build a distribution file.
-dist: # $(CEDET_PACKAGES)
-	rm -rf $(DIST_DIR)
-	mkdir $(DIST_DIR)
-	cp $(CEDET_FILES) $(DIST_DIR)
-	for package in ${CEDET_PACKAGES}; do \
-	   make -C $$package $(MFLAGS) DISTDIR=$(DIST_DIR)/$$package dist; \
-	done;
-	tar -cvzf $(DIST_FILE) $(DIST_ROOT)
-	rm -rf $(DIST_DIR)
+### Helpers
+EEVAL=$(EMACS) $(EMACSFLAGS) --eval
+ECOMPILE=(or (byte-compile-file "$(1)") (kill-emacs 1))
+EGRAMMAR=(find-file "$(1)") (semantic-mode) (semantic-grammar-create-package)
+EAUTOLOADS=(setq generated-autoload-file "$(1)") (update-directory-autoloads "$(2)")
+LISP_PATH=$(foreach pkg,$(PACKAGES),(add-to-list (quote load-path) "$(lispdir)/$(pkg)/"))
+ifeq ($(V),1)
+Q=
+else
+Q=@echo "    > $@";
+endif
 
-testvar:
-	@echo "$(TESTVAR)=$($(TESTVAR))"
+REQUIRES=semantic/bovine/el
 
-# Makefile ends here
+### Top-level rules
+
+all: autoloads generate compile doc
+
+generate: $(patsubst %,generate-%,$(PACKAGES))
+
+compile: REQUIRES+=cedet-compat
+compile: compile-common $(patsubst %,compile-%,$(PACKAGES))
+
+autoloads: $(patsubst %,autoloads-%,$(PACKAGES))
+
+doc: $(patsubst %,doc-%,$(PACKAGES))
+
+test: $(patsubst %,test-%,$(PACKAGES))
+
+clean: clean-common $(patsubst %,clean-%,$(PACKAGES))
+
+
+### Specialized rules
+
+cedet_BOVINE=$(shell $(FIND) $(lispdir)/cedet/ -name \*.by)
+cedet_WISENT=$(shell $(FIND) $(lispdir)/cedet/ -name \*.wy -and -not -path $(lispdir)/cedet/semantic/grammar.wy)
+cedet_GENERATE_LISP=$(patsubst %.by,%-by.el,$(cedet_BOVINE)) $(patsubst %.wy,%-wy.el,$(cedet_WISENT))
+
+%-by.elc: REQUIRES+=semantic/bovine
+
+
+### Dynamic rules
+
+define PACKAGE_template
+$(1)_LISP=$(shell $(FIND) $(lispdir)/$(1)/ -name \*.el)
+$(1)_CODE=$$(patsubst %.el,%.elc,$$($(1)_LISP))
+NO_TEXI=%/tags.texi %/minor-modes.texi %/internals.texi %/glossary.texi %/installation.texi \
+        %/overview.texi
+$(1)_TEXINFO=$(filter-out $(NO_TEXI),$(shell $(FIND) $(docdir) -name $(1).texi) $(shell test ! -d $(docdir)/$(1) || $(FIND) $(docdir)/$(1)/ -name *.texi))
+$(1)_AUTOLOADS=$(foreach d,$(shell $(FIND) $(lispdir)/$(1)/ -type d),$(d)/loaddefs.el)
+$(1)_INFO=$$(patsubst %.texi,%.info,$$($(1)_TEXINFO))
+$(1)_TEST_LISP=$(shell test ! -d $(testdir)/$(1)/ || $(FIND) $(testdir)/$(1)/ -name \*.el)
+$(1)_TEST_CODE=$$(patsubst %.el,%.elc,$$($(1)_TEST_LISP))
+
+generate-$(1): $$($(1)_GENERATE_LISP)
+
+compile-$(1): $$($(1)_CODE)
+
+autoloads-$(1): $$($(1)_AUTOLOADS)
+
+doc-$(1): $$($(1)_INFO)
+
+test-$(1): $$($(1)_TEST_CODE)
+
+clean-$(1):
+	$(RM) $(RMFLAGS) $$($(1)_GENERATE_LISP)
+	$(RM) $(RMFLAGS) $$($(1)_CODE)
+	$(RM) $(RMFLAGS) $$($(1)_AUTOLOADS)
+	$(RM) $(RMFLAGS) $$($(1)_INFO)
+endef
+
+utest: REQUIRES+=cedet-utests
+utest: 
+	$(Q)$(EEVAL) '(progn $(LISP_PATH) (add-to-list (quote load-path) "$(testdir)") $(call require,$(REQUIRES)) (cedet-utest-batch))'
+
+$(eval $(call PACKAGE_template,common))
+$(foreach pkg,$(PACKAGES),$(eval $(call PACKAGE_template,$(pkg))))
+
+# Require the list of packages given as argument
+require=$(foreach r,$(1),(require (quote $(r))))
+
+
+### Generic rules
+
+%-wy.el: REQUIRES+=semantic/grammar semantic/wisent semantic/wisent/grammar
+%-wy.el: %.wy
+	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))'
+
+%-by.el: REQUIRES+=semantic/grammar semantic/wisent semantic/bovine/grammar
+%-by.el: %.by
+	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))'
+
+%-wy.elc: REQUIRES+=semantic/grammar
+
+%-by.elc: REQUIRES+=semantic/bovine
+%-by.elc: EEXTRA+=(setq max-specpdl-size (max 3000 max-specpdl-size) max-lisp-eval-depth (max 1000 max-lisp-eval-depth))
+
+%.elc: %.el
+	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(EEXTRA) $(call ECOMPILE,$<))'
+
+%/loaddefs.el:
+	$(Q)$(EEVAL) '(progn  $(EEXTRA) $(call EAUTOLOADS,$@,$*))'
+
+%.info: %.texi
+	$(Q)$(MAKEINFO) $< -o $@

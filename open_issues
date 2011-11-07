@@ -1,0 +1,40 @@
+* All explicit requires in the Makefile will lead to execution errors when
+  running a non-compiled CEDET (thus should probably modify code into the proper
+  requires)
+* The 'obsolete' directory contains files that were no longer referenced from
+  the original Project.ede files
+* Should compatibility functions be maintained (cedet-compat)?
+** cedet-called-interactively-p
+** cedet-split-string
+* Speedbar documentation has been stripped out of many details
+** speedbar-stealthy-function-list
+** speedbar-dynamic-tags-function-list
+** Detailed description on how to create new contents (speedbar.el now contains
+   a brief summary)
+* speedbar-sort-tags is described as obsolete, but widely used
+* speedbar-require-version : commented out
+* speedbar-sort-tags : obsolete
+* inversion-upgrade-package : commented out
+* lisp/cedet/mode-local : removed and commented out lots of code
+* seggregated unit tests from lisp/cedet/cedet-files.el into tests/cedet-files-utests.el
+* seggregated unit tests from lisp/cedet/inversion.el into tests/inversion.el
+* seggregated unit tests from lisp/cedet/pulse.el into tests/pulse.el
+* removed integration advices in lisp/cedet/pulse.el
+* removed edebug-setup-hook entry in lisp/cedet/ede/base.el
+* cedet/ede unit tests are not loaded into the test infrastructure
+* ede documentation has been stripped out of many sections, but others were
+  added; someone should check if any useful information has fallen out:
+  substitute all old "@include" in ede.texi for the contents of the included
+  file, then diff with the new version
+* move cedet/ede/proj-skel.el into etc/ or similar
+* synchronize documentation for semantic (doc/semantic/)
+* emacs: cedet/semantic/bovine/scm-by.el <=> cedet: cedet/semantic/bovine/scheme-by.el
+* emacs: cedet/semantic/wisent/javat-wy.el <=> cedet: cedet/semantic/wisent/java-tags-wy.el
+* emacs: cedet/semantic/wisent/js-wy.el => cedet: cedet/semantic/wisent/javascript-jv-wy.el
+* remove (or at least move out of lisp/) cedet build files:
+** lisp/cedet/semantic/ede-grammar.el
+** lisp/cedet/semantic/grammar.el
+* lisp/cedet/semantic/fw.el: deleted lots of compatibility code
+* lisp/cedet/semantic/senator.el: have a close look
+* lisp/cedet/semantic/grammar*: fix generation of meta-grammar
+* lisp/cedet/srecode/fields.el: Deleted overlay compatibility code for xemacs

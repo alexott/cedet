@@ -1,0 +1,50 @@
+#!/bin/bash
+#
+# Poor man's initial cross-project merge:
+#   updates $to with the changes introduced in $from
+#
+# You should call this with something like:
+#   for i in $CEDET_TRUNK/*; do echo $i; ./crude-update $EMACS_TRUNK/`basename $i` $i; done
+#
+# but beware of the changed paths (might need multiple ad-hoc calls to
+# crude-update).
+#
+# The algorithm is as follows
+# - start=date of the oldest revision of $from
+# - floor $date to the 1st day of the month [1]
+# - patch=changes in $to starting at $date
+# - copy $from into $to
+# - apply $patch
+#
+# Note that this will raise spurious patch errors for changes that:
+# - have already been applied both in $from and $to
+# - have a context in $patch ($to) that has been changed by $from
+#
+# Files with the suffix ".not-existant" might indicate that:
+# - $from was moved into another path w.r.t. $to
+# - $to has been removed in $from
+# - $to was never introduced in $from
+#
+# [1] This is a poor man's safeguard for cases where $from started on a version
+#     much earlier in $to than that of its commit date.
+
+from=$1
+to=$2
+
+set -e
+
+if [ ! -f "$from" ]; then
+    touch $to.not-existant
+    exit 0
+fi
+test -f "$to" || exit 1
+
+start=`bzr log --line -n0 $from | tail -1 | sed -e s/".*[^0-9]\\([0-9]*-[0-9]*-\\).*"/"\\101"/`
+
+bzr diff -r date:$start.. $to >/tmp/patch || true
+
+rm -f $to
+cp $from $to
+
+patch -p0 < /tmp/patch
+

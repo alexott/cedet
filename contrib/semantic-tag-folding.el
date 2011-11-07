@@ -1,5 +1,5 @@
 ;;; semantic-tag-folding.el --- semantic decoration style to enable folding of semantic tags
-;; Time-stamp: <2010-03-08 01:32:31 (lluis)>
+;; Time-stamp: <2010-09-15 16:20:59 (lluis)>
 
 ;;; Copyright (C) 2005, 2009, 2010 Suraj Acharya
 
@@ -68,7 +68,7 @@
 
 
 
-(require 'semantic-decorate-mode)
+(require 'semantic/decorate/mode)
 (eval-when-compile (require 'cl))
 
 ;;; Code:

@@ -3,7 +3,6 @@
 ;;; Copyright (C) 2005, 2008, 2009, 2010 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: cedet-update-changelog.el,v 1.16 2010-08-22 16:38:28 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 

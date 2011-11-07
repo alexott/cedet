@@ -53,25 +53,3 @@ what it is for.  To try it out, add this to your .emacs file:
 (add-to-list 'load-path (expand-file-name "~/cedet/srecode"))
 (require 'srecode-load)
 --------
-
-
-
-Obsolete Software:
-=================
-
-The CEDET CVS repository contains some software that has been
-obsoleted with time as newer tools come online.
-
-You can still use some of these tools if you want, but the bit-rot
-will eventually get you.
-
-cedet/quickpeek
----------------
-
-Quick Peek was an attempt to get eldoc like behavior using only etags
-files.  It worked pretty well, but it required a clever parser to
-provide smart output.  Eventually I started writing Semantic so I
-could have a parser to do this work.  It was later obsoleted by an
-eldoc interface, and then the `semantic-idle-scheduler-mode'.
-
-
