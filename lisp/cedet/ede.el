@@ -1241,7 +1241,9 @@ and <root>/doc for doc sources."
 ;; C/C++
 (defun ede-apply-preprocessor-map ()
   "Apply preprocessor tables onto the current buffer."
-  (when (and ede-object (boundp 'semantic-lex-spp-macro-symbol-obarray))
+  (when (and ede-object
+	     (boundp 'semantic-lex-spp-macro-symbol-obarray)
+	     semantic-lex-spp-macro-symbol-obarray)
     (let* ((objs ede-object)
 	   (map (ede-preprocessor-map (if (consp objs)
 					  (car objs)
@@ -1259,6 +1261,10 @@ and <root>/doc for doc sources."
   nil)
 
 (defmethod ede-preprocessor-map ((this ede-project))
+  "Get the pre-processor map for project THIS."
+  nil)
+
+(defmethod ede-preprocessor-map ((this ede-target))
   "Get the pre-processor map for project THIS."
   nil)
 
