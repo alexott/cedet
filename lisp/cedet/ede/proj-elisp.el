@@ -72,15 +72,9 @@ A lisp target may be one general program with many separate lisp files in it.")
    "ede-emacs-compiler"
    :name "emacs"
    :variables '(("EMACS" . "emacs")
-		("EMACSFLAGS" . "-batch --no-site-file"))
+		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'"))
    :commands
-   '("@echo \"(add-to-list 'load-path nil)\" > $@-compile-script"
-     "for loadpath in . ${LOADPATH}; do \\"
-     "   echo \"(add-to-list 'load-path \\\"$$loadpath\\\")\" >> $@-compile-script; \\"
-     "done;"
-     "@echo \"(setq debug-on-error t)\" >> $@-compile-script"
-     "\"$(EMACS)\" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^"
-     )
+   '("\"$(EMACS)\" $(EMACSFLAGS) $(patsubst %,-L %,$(LOADPATH)) -f batch-byte-compile $^")
    :autoconf '("AM_PATH_LISPDIR")
    :sourcetype '(ede-source-emacs)
 ;   :objectextention ".elc"
@@ -332,13 +326,9 @@ Lays claim to all .elc files that match .el files in this target."
    :name "emacs"
    :variables '(("EMACS" . "emacs"))
    :commands
-   '("@echo \"(add-to-list 'load-path nil)\" > $@-compile-script"
-     "for loadpath in . ${LOADPATH}; do \\"
-     "   echo \"(add-to-list 'load-path \\\"$$loadpath\\\")\" >> $@-compile-script; \\"
-     "done;"
-     "@echo \"(require 'cedet-autogen)\" >> $@-compile-script"
-     "\"$(EMACS)\" -batch --no-site-file -l $@-compile-script -f cedet-batch-update-autoloads $(LOADDEFS) $(LOADDIRS)"
-     )
+   '("\"$(EMACS)\" -batch --no-site-file $(patsubst %,-L %,$(LOADPATH)) \
+--eval '(require (quote cedet-autogen))' -f cedet-batch-update-autoloads \
+$(LOADDEFS) $(LOADDIRS)")
    :sourcetype '(ede-source-emacs)
    )
   "Build an autoloads file.")
