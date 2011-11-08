@@ -152,4 +152,9 @@ FUNCTION must be a semantic action symbol that exists in AUTOMATON."
 
 (provide 'semantic/wisent/debug)
 
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/wisent/debug"
+;; End:
+
 ;;; semantic/wisent/debug.el ends here

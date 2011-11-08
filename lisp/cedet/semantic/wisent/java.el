@@ -131,4 +131,9 @@ names in scope."
 
 (provide 'semantic/wisent/java)
 
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/wisent/java"
+;; End:
+
 ;;; semantic/wisent/java.el ends here

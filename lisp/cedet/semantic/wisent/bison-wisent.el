@@ -157,4 +157,9 @@ Return t on success."
 
 (provide 'bison-wisent)
 
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/wisent/bison-wisent"
+;; End:
+
 ;;; bison-wisent.el ends here

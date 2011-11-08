@@ -134,4 +134,9 @@ Return 1 if equal, 0 if not equal."
 
 (provide 'semantic/wisent/calc)
 
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/wisent/calc"
+;; End:
+
 ;;; semantic/wisent/calc.el ends here
