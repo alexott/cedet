@@ -1,4 +1,4 @@
-;;; semantic/f90.el --- Semantic details for f90
+;;; semantic/bovine/f90.el --- Semantic details for f90
 
 ;;; Copyright (C) 2010 David Engster
 
@@ -36,6 +36,7 @@
 ;;
 
 (require 'semantic)
+(require 'semantic/bovine)
 (require 'semantic/bovine/f90-by)
 (require 'backquote)
 
@@ -557,4 +558,9 @@ A Component is a part of TAG which itself may be a TAG."
 
 (provide 'semantic/f90)
 
-;;; semantic-f90.el ends here
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/bovine/f90"
+;; End:
+
+;;; semantic/bovine/f90.el ends here

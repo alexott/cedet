@@ -1,4 +1,4 @@
-;;; semantic/clang.el --- Use 'clang' to provide completions for C/C++
+;;; semantic/bovine/clang.el --- Use 'clang' to provide completions for C/C++
 
 ;; Copyright (C) 2011 David Engster
 
@@ -278,3 +278,10 @@ include directories (-I) and preprocessor symbols (-D)."
 
 
 (provide 'semantic/clang)
+
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/bovine/clang"
+;; End:
+
+;;; semantic/bovine/clang.el ends here

@@ -24,6 +24,7 @@
 ;; Use the Semantic Bovinator for Scheme (guile)
 
 (require 'semantic)
+(require 'semantic/bovine)
 (require 'semantic/bovine/scm-by)
 (require 'semantic/format)
 (require 'semantic/dep)

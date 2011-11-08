@@ -34,6 +34,7 @@
 ;;; Code:
 
 (require 'semantic)
+(require 'semantic/bovine)
 (require 'backquote)
 (require 'semantic/bovine/erlang-by)
 ;;(require 'erlang-edoc)

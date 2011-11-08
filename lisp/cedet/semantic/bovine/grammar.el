@@ -372,4 +372,9 @@ Menu items are appended to the common grammar menu.")
 
 (provide 'semantic/bovine/grammar)
 
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/bovine/grammar"
+;; End:
+
 ;;; semantic/bovine/grammar.el ends here
