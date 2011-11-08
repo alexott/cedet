@@ -329,6 +329,7 @@ Lays claim to all .elc files that match .el files in this target."
    '("\"$(EMACS)\" -batch --no-site-file $(patsubst %,-L %,$(LOADPATH)) \
 --eval '(require (quote cedet-autogen))' -f cedet-batch-update-autoloads \
 $(LOADDEFS) $(LOADDIRS)")
+   :rules (list (ede-makefile-rule "clean-autoloads" :target "clean-autoloads" :phony t :rules '("rm -f $(LOADDEFS)")))
    :sourcetype '(ede-source-emacs)
    )
   "Build an autoloads file.")
