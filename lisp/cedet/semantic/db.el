@@ -35,6 +35,10 @@
 
 (declare-function semantic-lex-spp-save-table "semantic/lex-spp")
 
+;; Use autoload to avoid recursive require of semantic/db-ref
+(autoload 'semanticdb-refresh-references "semantic/db-ref"
+    "Refresh references to DBT in other files.")
+
 ;;; Variables:
 (defgroup semanticdb nil
   "Parser Generator Persistent Database interface."

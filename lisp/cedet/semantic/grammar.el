@@ -30,6 +30,7 @@
 ;;; Code:
 
 (require 'semantic)
+(require 'semantic/wisent)
 (require 'semantic/ctxt)
 (require 'semantic/format)
 (require 'semantic/grammar-wy)
