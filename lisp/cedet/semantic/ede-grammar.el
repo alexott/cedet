@@ -67,14 +67,9 @@ parsing different languages.")
    :variables '(("EMACS" . "emacs"))
    :commands
    '(
-     "@echo \"(add-to-list 'load-path nil)\" > grammar-make-script"
-     "@for loadpath in . ${LOADPATH}; do \\"
-     "   echo \"(add-to-list 'load-path \\\"$$loadpath\\\")\" >> grammar-make-script; \\"
-     "done;"
-     "@echo \"(require 'semantic/load)\" >> grammar-make-script"
-     "@echo \"(require 'semantic/grammar)\" >> grammar-make-script"
-     ;; "@echo \"(setq debug-on-error t)\" >> grammar-make-script"
-     "\"$(EMACS)\" -batch --no-site-file -l grammar-make-script -f semantic-grammar-batch-build-packages $^"
+     "\"$(EMACS)\" $(EMACSFLAGS) $(patsubst %,-L %,$(LOADPATH)) \
+--eval '(require (quote semantic/load)) (require (quote semantic/grammar))' \
+-f semantic-grammar-batch-build-packages $^"
      )
    ;; :autoconf '("AM_PATH_LISPDIR")
    :sourcetype '(semantic-ede-source-grammar-wisent)
@@ -97,14 +92,9 @@ parsing different languages.")
    :variables '(("EMACS" . "emacs"))
    :commands
    '(
-     "@echo \"(add-to-list 'load-path nil)\" > grammar-make-script"
-     "@for loadpath in . ${LOADPATH}; do \\"
-     "   echo \"(add-to-list 'load-path \\\"$$loadpath\\\")\" >> grammar-make-script; \\"
-     "done;"
-     "@echo \"(require 'semantic/load)\" >> grammar-make-script"
-     "@echo \"(require 'semantic/grammar)\" >> grammar-make-script"
-     ;; "@echo \"(setq debug-on-error t)\" >> grammar-make-script"
-     "\"$(EMACS)\" -batch --no-site-file -l grammar-make-script -f semantic-grammar-batch-build-packages $^"
+     "\"$(EMACS)\" $(EMACSFLAGS) $(patsubst %,-L %,$(LOADPATH)) \
+--eval '(require (quote semantic/load)) (require (quote semantic/grammar))' \
+-f semantic-grammar-batch-build-packages $^"
      )
    ;; :autoconf '("AM_PATH_LISPDIR")
    :sourcetype '(semantic-ede-source-grammar-bovine)
