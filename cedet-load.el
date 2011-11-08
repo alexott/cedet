@@ -1,4 +1,4 @@
-;;; cedet-repository-load.el --- Use CEDET from SourceForge, not Emacs
+;;; cedet-load.el --- Use CEDET from SourceForge, not Emacs
 
 ;; Copyright (C) 2011 by Eric M. Ludlam
 
@@ -25,14 +25,14 @@
 ;; repository, replacing the version that comes with Emacs 23.x and greater.
 
 ;;; Code:
-(when (featurep 'cedet-repository-load)
+(when (featurep 'cedet-load)
   (error "CEDET Version %s already loaded." cedet-version))
 
 ;; This file must be in "<INSTALL-DIR>" where 'cedet.el' that
 ;; comes with the associated repository is in: "<INSTALL-DIR>/lisp/cedet/cedet.el".
 (let ((CEDETDIR (file-name-directory
 		 (or load-file-name (buffer-file-name)))))
-
+  (message "Using %s as dir" CEDETDIR)
   ;; SETUP LOAD PATHS
   (add-to-list 'load-path (expand-file-name "lisp/cedet" CEDETDIR))
   (add-to-list 'load-path (expand-file-name "lisp/eieio" CEDETDIR))
@@ -43,17 +43,17 @@
   (require 'ede)
 
   ;; Load in all the loaddefs
-  (load-file (expand-file-name "lisp/eieio/loaddefs.el"))
-  (load-file (expand-file-name "lisp/speedbar/loaddefs.el"))
-  (load-file (expand-file-name "lisp/cedet/ede/loaddefs.el"))
-  (load-file (expand-file-name "lisp/cedet/cogre/loaddefs.el"))
-  (load-file (expand-file-name "lisp/cedet/srecode/loaddefs.el"))
-  (load-file (expand-file-name "lisp/cedet/semantic/loaddefs.el"))
-  (load-file (expand-file-name "lisp/cedet/semantic/bovine/loaddefs.el"))
-  (load-file (expand-file-name "lisp/cedet/semantic/wisent/loaddefs.el"))
-  (load-file (expand-file-name "lisp/cedet/semantic/analyze/loaddefs.el"))
-  (load-file (expand-file-name "lisp/cedet/semantic/decorate/loaddefs.el"))
-  (load-file (expand-file-name "lisp/cedet/semantic/ectags/loaddefs.el"))
+  (load-file (expand-file-name "lisp/eieio/loaddefs.el" CEDETDIR))
+  (load-file (expand-file-name "lisp/speedbar/loaddefs.el" CEDETDIR))
+  (load-file (expand-file-name "lisp/cedet/ede/loaddefs.el" CEDETDIR))
+  (load-file (expand-file-name "lisp/cedet/cogre/loaddefs.el" CEDETDIR))
+  (load-file (expand-file-name "lisp/cedet/srecode/loaddefs.el" CEDETDIR))
+  (load-file (expand-file-name "lisp/cedet/semantic/loaddefs.el"CEDETDIR))
+  (load-file (expand-file-name "lisp/cedet/semantic/bovine/loaddefs.el" CEDETDIR))
+  (load-file (expand-file-name "lisp/cedet/semantic/wisent/loaddefs.el" CEDETDIR))
+  (load-file (expand-file-name "lisp/cedet/semantic/analyze/loaddefs.el" CEDETDIR))
+  (load-file (expand-file-name "lisp/cedet/semantic/decorate/loaddefs.el" CEDETDIR))
+  (load-file (expand-file-name "lisp/cedet/semantic/ectags/loaddefs.el" CEDETDIR))
 
 
   ;; SETUP INFO DIRS
