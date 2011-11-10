@@ -942,6 +942,7 @@ Return non-nil if there were no errors, nil if errors."
     (let ((packagename
            (condition-case err
                (with-current-buffer (find-file-noselect file)
+		 (semantic-mode 1)
                  (semantic-grammar-create-package))
              (error
               (message "%s" (error-message-string err))
@@ -977,6 +978,7 @@ See also the variable `semantic-grammar-file-regexp'."
         ;; Remove vc from find-file-hook.  It causes bad stuff to
         ;; happen in Emacs 20.
         (find-file-hook (delete 'vc-find-file-hook find-file-hook)))
+    (semantic-mode 1)
     (message "Compiling Grammars from: %s" (locate-library "semantic/grammar"))
     (dolist (arg command-line-args-left)
       (unless (and arg (file-exists-p arg))
