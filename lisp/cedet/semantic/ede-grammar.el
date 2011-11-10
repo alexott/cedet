@@ -32,7 +32,7 @@
 (require 'semantic/grammar)
 
 ;;; Code:
-(defclass semantic-ede-proj-target-grammar (ede-proj-target-makefile)
+(defclass semantic-ede-proj-target-grammar (ede-proj-target-elisp)
   ((menu :initform nil)
    (keybindings :initform nil)
    (phony :initform t)
@@ -44,6 +44,8 @@
 		       (semantic-ede-grammar-compiler-wisent
 			semantic-ede-grammar-compiler-bovine
 			))
+   (aux-packages :initform '("cedet-load" "semantic/grammar"))
+   (pre-load-packages :initform '("cedet-load" "semantic/grammar"))
    )
   "This target consists of a group of grammar files.
 A grammar target consists of grammar files that build Emacs Lisp programs for
@@ -53,6 +55,7 @@ parsing different languages.")
   (ede-sourcecode "semantic-ede-grammar-source-wisent"
 		  :name "Wisent Grammar"
 		  :sourcepattern "\\.wy$"
+		  :garbagepattern '("*-wy.el" "*-wy.elc")
 		  )
   "Semantic Grammar source code definition for wisent.")
 
@@ -64,14 +67,9 @@ parsing different languages.")
   (semantic-ede-grammar-compiler-class
    "ede-emacs-wisent-compiler"
    :name "emacs"
-   :variables '(("EMACS" . "emacs"))
-   :commands
-   '(
-     "\"$(EMACS)\" $(EMACSFLAGS) $(patsubst %,-L %,$(LOADPATH)) \
---eval '(progn (require (quote cedet-load)) (require (quote semantic/grammar)) (semantic-mode))' \
--f semantic-grammar-batch-build-packages $^"
-     )
-   ;; :autoconf '("AM_PATH_LISPDIR")
+   :variables '(("EMACS" . "emacs")
+		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'"))
+   :commands '("-f semantic-grammar-batch-build-packages $^")
    :sourcetype '(semantic-ede-source-grammar-wisent)
    :objectextention "-wy.elc"
    )
@@ -82,6 +80,7 @@ parsing different languages.")
   (ede-sourcecode "semantic-ede-grammar-source-bovine"
 		  :name "Bovine Grammar"
 		  :sourcepattern "\\.by$"
+		  :garbagepattern '("*-by.el" "*-by.elc")
 		  )
   "Semantic Grammar source code definition for the bovinator.")
 
@@ -89,14 +88,9 @@ parsing different languages.")
   (semantic-ede-grammar-compiler-class
    "ede-emacs-wisent-compiler"
    :name "emacs"
-   :variables '(("EMACS" . "emacs"))
-   :commands
-   '(
-     "\"$(EMACS)\" $(EMACSFLAGS) $(patsubst %,-L %,$(LOADPATH)) \
---eval '(progn (require (quote cedet-load)) (require (quote semantic/grammar)) (semantic-mode))' \
--f semantic-grammar-batch-build-packages $^"
-     )
-   ;; :autoconf '("AM_PATH_LISPDIR")
+   :variables '(("EMACS" . "emacs")
+		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'"))
+   :commands '("-f semantic-grammar-batch-build-packages $^")
    :sourcetype '(semantic-ede-source-grammar-bovine)
    :objectextention "-by.elc"
    )
