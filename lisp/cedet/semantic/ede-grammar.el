@@ -68,7 +68,7 @@ parsing different languages.")
    :commands
    '(
      "\"$(EMACS)\" $(EMACSFLAGS) $(patsubst %,-L %,$(LOADPATH)) \
---eval '(require (quote semantic/load)) (require (quote semantic/grammar))' \
+--eval '(progn (require (quote cedet-load)) (require (quote semantic/grammar)) (semantic-mode))' \
 -f semantic-grammar-batch-build-packages $^"
      )
    ;; :autoconf '("AM_PATH_LISPDIR")
@@ -93,7 +93,7 @@ parsing different languages.")
    :commands
    '(
      "\"$(EMACS)\" $(EMACSFLAGS) $(patsubst %,-L %,$(LOADPATH)) \
---eval '(require (quote semantic/load)) (require (quote semantic/grammar))' \
+--eval '(progn (require (quote cedet-load)) (require (quote semantic/grammar)) (semantic-mode))' \
 -f semantic-grammar-batch-build-packages $^"
      )
    ;; :autoconf '("AM_PATH_LISPDIR")
