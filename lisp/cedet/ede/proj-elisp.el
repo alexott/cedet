@@ -37,8 +37,7 @@
    (phony :initform t)
    (sourcetype :initform '(ede-source-emacs))
    (availablecompilers :initform '(ede-emacs-compiler 
-				   ede-xemacs-compiler
-				   ede-emacs-preload-compiler))
+				   ede-xemacs-compiler))
    (aux-packages :initarg :aux-packages
 		 :initform nil
 		 :type list
@@ -54,11 +53,22 @@ load path."
 		      :custom (repeat string)
 		      :documentation "Additional packages to pre-load.
 Each package name will be loaded with `require'.
-Each package's directory should also appear in :aux-packages via a package name.
-You must use the `ede-emacs-preload-compiler' if you provide values in this slot.")
+Each package's directory should also appear in :aux-packages via a package name.")
    )
   "This target consists of a group of lisp files.
 A lisp target may be one general program with many separate lisp files in it.")
+
+(defmethod ede-proj-makefile-insert-commands ((this ede-proj-target-elisp))
+  ""
+  (let ((packages (oref this aux-packages))
+	(preloads (oref this pre-load-packages))
+	(targetname (oref this name)))
+    (insert
+     (format "\t\"$(EMACS)\" $(EMACSFLAGS) %s %s -f batch-byte-compile $^\n"
+	     (if packages "$(patsubst %,-L %,$(LOADPATH))" "")
+	     (if preloads
+		 (format "--eval '(progn $(patsubst %%,(require (quote %%)),$(%s_PRELOADS)))'"
+			 targetname))))))
 
 (defvar ede-source-emacs
   (ede-sourcecode "ede-emacs-source"
@@ -73,30 +83,11 @@ A lisp target may be one general program with many separate lisp files in it.")
    :name "emacs"
    :variables '(("EMACS" . "emacs")
 		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'"))
-   :commands
-   '("\"$(EMACS)\" $(EMACSFLAGS) $(patsubst %,-L %,$(LOADPATH)) -f batch-byte-compile $^")
    :autoconf '("AM_PATH_LISPDIR")
    :sourcetype '(ede-source-emacs)
 ;   :objectextention ".elc"
    )
   "Compile Emacs Lisp programs.")
-
-(defvar ede-emacs-preload-compiler
-  (clone
-   ede-emacs-compiler "ede-emacs-preload-compiler"
-   :commands
-   '("@echo \"(add-to-list 'load-path nil)\" > $@-compile-script"
-     "for loadpath in . ${LOADPATH}; do \\"
-     "   echo \"(add-to-list 'load-path \\\"$$loadpath\\\")\" >> $@-compile-script; \\"
-     "done;"
-     "for preload in ${ELISPPRELOAD}; do \\"
-     "   echo \"(load \\\"$$preload\\\")\" >> $@-compile-script; \\"
-     "done;"
-     "@echo \"(setq debug-on-error t)\" >> $@-compile-script"
-     "\"$(EMACS)\" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^"
-     ))
-  "Compile Emacs Lisp programs with preload libraries.")
-	 
 
 (defvar ede-xemacs-compiler
   (clone ede-emacs-compiler "ede-xemacs-compiler"
@@ -203,10 +194,10 @@ is found, such as a `-version' variable, or the standard header."
 	    (setq items (cdr items)))))
       ))
 
-(defun ede-proj-makefile-insert-preload-items (items)
-  "Insert a sequence of ITEMS into the Makefile ELISPPRELOAD variable."
+(defun ede-proj-makefile-insert-preload-items (items targetname)
+  "Insert a sequence of ITEMS into the PRELOADS variable for TARGETNAME."
     (when items
-      (ede-pmake-insert-variable-shared "ELISPPRELOAD"
+      (ede-pmake-insert-variable-once (concat targetname "_PRELOADS")
 	(let ((begin (save-excursion (re-search-backward "\\s-*="))))
 	  (while items
 	    (when (not (save-excursion
@@ -222,8 +213,11 @@ is found, such as a `-version' variable, or the standard header."
   (let ((newitems (if (oref this aux-packages)
 		      (ede-proj-elisp-packages-to-loadpath
 		       (oref this aux-packages))))
+	(newpreload (oref this pre-load-packages))
 	)
-    (ede-proj-makefile-insert-loadpath-items newitems)))
+    (ede-proj-makefile-insert-loadpath-items newitems)
+    (when newpreload
+      (ede-proj-makefile-insert-preload-items newpreload (oref this name)))))
 
 (defun ede-proj-elisp-add-path (path)
   "Add path PATH into the file if it isn't already there."
