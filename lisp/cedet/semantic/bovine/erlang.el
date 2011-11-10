@@ -41,9 +41,7 @@
 
 ;; Depending on what elements you include specialized support for
 (eval-when-compile
-  (require 'semantic/ctxt)
-  (require 'semantic/imenu)
-  (require 'semantic/senator))
+  (require 'semantic/ctxt))
 
 (define-lex-simple-regex-analyzer semantic-erlang-lex-char
   "Detect and create Erlang CHAR tokens."

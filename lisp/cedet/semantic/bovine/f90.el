@@ -42,10 +42,8 @@
 
 (eval-when-compile
   (require 'semantic/ctxt)
-  (require 'semantic/imenu)
   (require 'semantic/decorate)
-  (require 'f90)
-  (require 'semantic/senator))
+  (require 'f90))
 
 ;;; Code:
 
