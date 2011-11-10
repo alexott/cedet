@@ -332,15 +332,16 @@ compiler it decides to use after inserting in the rule."
   (when (slot-boundp this 'commands)
     (with-slots (commands) this
       (mapc
-       (lambda (obj) (insert "\t"
-			     (cond ((stringp obj)
-				    obj)
-				   ((and (listp obj)
-					 (eq (car obj) 'lambda))
-				    (funcall obj))
-				   (t
-				    (format "%S" obj)))
-			     "\n"))
+       (lambda (obj) (insert
+		      (if (bolp) "\t" " ")
+		      (cond ((stringp obj)
+			     obj)
+			    ((and (listp obj)
+				  (eq (car obj) 'lambda))
+			     (funcall obj))
+			    (t
+			     (format "%S" obj)))
+		      "\n"))
        commands))
     (insert "\n")))
 

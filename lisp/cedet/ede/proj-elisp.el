@@ -58,17 +58,18 @@ Each package's directory should also appear in :aux-packages via a package name.
   "This target consists of a group of lisp files.
 A lisp target may be one general program with many separate lisp files in it.")
 
-(defmethod ede-proj-makefile-insert-commands ((this ede-proj-target-elisp))
+(defmethod ede-proj-makefile-insert-commands :before ((this ede-proj-target-elisp))
   ""
   (let ((packages (oref this aux-packages))
 	(preloads (oref this pre-load-packages))
 	(targetname (oref this name)))
     (insert
-     (format "\t\"$(EMACS)\" $(EMACSFLAGS) %s %s -f batch-byte-compile $^\n"
+     (format "\t\"$(EMACS)\" $(EMACSFLAGS) %s %s"
 	     (if packages "$(patsubst %,-L %,$(LOADPATH))" "")
 	     (if preloads
 		 (format "--eval '(progn $(patsubst %%,(require (quote %%)),$(%s_PRELOADS)))'"
-			 targetname))))))
+			 targetname)
+	       "")))))
 
 (defvar ede-source-emacs
   (ede-sourcecode "ede-emacs-source"
@@ -83,6 +84,7 @@ A lisp target may be one general program with many separate lisp files in it.")
    :name "emacs"
    :variables '(("EMACS" . "emacs")
 		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'"))
+   :commands '("-f batch-byte-compile $^")
    :autoconf '("AM_PATH_LISPDIR")
    :sourcetype '(ede-source-emacs)
 ;   :objectextention ".elc"
