@@ -1,4 +1,4 @@
-;;; cedet-load.el --- Use CEDET from SourceForge, not Emacs
+;;; cedet-devel-load.el --- Use CEDET from SourceForge, not Emacs
 
 ;; Copyright (C) 2011 by Eric M. Ludlam
 
@@ -25,7 +25,7 @@
 ;; repository, replacing the version that comes with Emacs 23.x and greater.
 
 ;;; Code:
-(when (featurep 'cedet-load)
+(when (featurep 'cedet-devel-load)
   (error "CEDET Version %s already loaded." cedet-version))
 
 ;; This file must be in "<INSTALL-DIR>" where 'cedet.el' that
@@ -88,6 +88,6 @@
 
   )
 
+(provide 'cedet-devel-load)
 
 ;; End
-(provide 'cedet-load)

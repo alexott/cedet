@@ -1,4 +1,4 @@
-;;; cedet-butil.el --- Utilities for building CEDET via Makefile
+;;; cedet-remove-builtin.el --- Remove CEDET version shipping with Emacs
 ;;
 ;; Copyright (C) 2011 Eric M. Ludlam
 ;;
@@ -19,12 +19,12 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
 
-;;; Commentary:
-;;
-;; Building CEDET is a challenge.  These utilities are needed to provide simple
-;; functions for dealing with different environments for compilation of sources.
-
 ;;; Code:
+
+(defvar cedet-remove-builtin-package-list
+  '(eieio semantic srecode ede)
+  "CEDET packages part of Emacs proper that should be removed.
+  The 'cedet' package itself is implicitly included.")
 
 (defun cedet-remove-builtin ()
   "Force any built-in CEDET to be removed from the load path.
@@ -32,11 +32,12 @@ Force all symbols that belong to CEDET to be unloaded.
 This is a needed first step in getting CEDET installed from outside sources."
   (interactive)
   (when (featurep 'cedet)
-    (error "Cannot unload builtin CEDET if CEDET is already loaded in."))
-  (when (featurep 'eieio)
-    (error "EIEIO is already loaded.  Removing CEDET now would be unwise."))
-  (when (featurep 'semantic)
-    (error "Semantic is already loaded.  Removing CEDET now would be unwise."))
+    (error "Cannot unload builtin CEDET since it is already loaded."))
+
+  (dolist (package cedet-remove-builtin-package-list)
+    (when (featurep package)
+      (error "%s is already loaded.  Removing CEDET now would be unwise."
+	     (symbol-name package))))
 
   ;; Remove from load-path.
   (let* ((clp (locate-library "cedet"))
@@ -45,14 +46,17 @@ This is a needed first step in getting CEDET installed from outside sources."
     (setq load-path (delete root load-path)))
 
   ;; Find ALL autoloaded symbols related to CEDET, and delete them.
-  (dolist (R '("^cedet" "^semantic" "^global-ede-" "^srecode-")) 
-    (dolist (S (apropos R))
+  (dolist (R (append '(cedet) cedet-remove-builtin-package-list))
+    (dolist (S (append (apropos (concat "^" (symbol-name R) "-"))
+		       (apropos (concat "^global-" (symbol-name R) "-"))))
       (when (and (fboundp (car S))
 		 (let ((sf (symbol-function (car S))))
 		   (and (listp sf) (eq (car sf) 'autoload))))
 	(fmakunbound (car S)))))
   )
+
 (cedet-remove-builtin)
-(provide 'cedet-butil)
+
+(provide 'cedet-remove-builtin)
 
 ;;; cedet-butil.el ends here
