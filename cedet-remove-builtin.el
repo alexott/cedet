@@ -47,12 +47,12 @@ This is a needed first step in getting CEDET installed from outside sources."
 
   ;; Find ALL autoloaded symbols related to CEDET, and delete them.
   (dolist (R (append '(cedet) cedet-remove-builtin-package-list))
-    (dolist (S (append (apropos (concat "^" (symbol-name R) "-"))
-		       (apropos (concat "^global-" (symbol-name R) "-"))))
-      (when (and (fboundp (car S))
-		 (let ((sf (symbol-function (car S))))
+    (dolist (S (append (apropos-internal (concat "^" (symbol-name R) "-"))
+		       (apropos-internal (concat "^global-" (symbol-name R) "-"))))
+      (when (and (fboundp S)
+		 (let ((sf (symbol-function S)))
 		   (and (listp sf) (eq (car sf) 'autoload))))
-	(fmakunbound (car S)))))
+	(fmakunbound S))))
   )
 
 (cedet-remove-builtin)

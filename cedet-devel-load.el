@@ -32,7 +32,7 @@
 ;; comes with the associated repository is in: "<INSTALL-DIR>/lisp/cedet/cedet.el".
 (let ((CEDETDIR (file-name-directory
 		 (or load-file-name (buffer-file-name)))))
-  (message "Using %s as dir" CEDETDIR)
+
   ;; SETUP LOAD PATHS
   (add-to-list 'load-path CEDETDIR)
   (add-to-list 'load-path (expand-file-name "lisp/cedet" CEDETDIR))
