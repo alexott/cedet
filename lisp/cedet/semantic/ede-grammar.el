@@ -44,8 +44,8 @@
 		       (semantic-ede-grammar-compiler-wisent
 			semantic-ede-grammar-compiler-bovine
 			))
-   (aux-packages :initform '("cedet-load" "semantic/grammar"))
-   (pre-load-packages :initform '("cedet-load" "semantic/grammar"))
+   (aux-packages :initform '("cedet-devel-load" "semantic/grammar"))
+   (pre-load-packages :initform '("cedet-devel-load" "semantic/grammar"))
    )
   "This target consists of a group of grammar files.
 A grammar target consists of grammar files that build Emacs Lisp programs for
