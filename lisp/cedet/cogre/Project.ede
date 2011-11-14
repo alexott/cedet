@@ -1,73 +1,48 @@
 ;; Object COGRE
 ;; EDE project file.
-(ede-proj-project "COGRE"
-  :name "COGRE"
+(ede-proj-project "cedet/cogre"
+  :name "Cogre"
   :version "1.1beta"
   :file "Project.ede"
   :targets (list 
+   (ede-proj-target-elisp-autoloads "autoloads"
+    :name "autoloads"
+    :path ""
+    :autoload-file "loaddefs.el"
+    )
    (semantic-ede-proj-target-grammar "wy"
     :name "wy"
     :path ""
     :source '("wisent-dot.wy")
     )
-   (ede-proj-target-elisp-autoloads "autoloads"
-    :name "autoloads"
-    :path ""
-    :autoload-file "cogre-loaddefs.el"
-    )
-   (ede-proj-target-elisp "init"
-    :name "init"
-    :path ""
-    :source '("cogre-load.el")
-    :compiler 'ede-emacs-preload-compiler
-    :pre-load-packages '("cedet-compat")
-    )
    (ede-proj-target-elisp "dot"
     :name "dot"
     :path ""
-    :source '("wisent-dot.el" "cogre-dot-mode.el")
-    :compiler 'ede-emacs-preload-compiler
-    :aux-packages '("wisent" "mode-local")
+    :source '("wisent-dot.el" "dot-mode.el")
+    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
     )
    (ede-proj-target-elisp "Mode"
     :name "Mode"
     :path ""
-    :source '("cogre-mode.el")
-    :compiler 'ede-emacs-preload-compiler
-    )
-   (ede-proj-target-makefile-info "info"
-    :name "info"
-    :path ""
-    :source '("cogre.texi")
-    )
-   (ede-proj-target-makefile-miscelaneous "misc"
-    :name "misc"
-    :path ""
-    :source '("INSTALL" "ChangeLog")
+    :source '("mode.el")
+    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
     )
    (ede-proj-target-elisp "hacks"
     :name "hacks"
     :path ""
     :source '("picture-hack.el")
+    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
     )
-   (ede-proj-target-elisp "COGRE"
-    :name "COGRE"
+   (ede-proj-target-elisp "cogre"
+    :name "cogre"
     :path ""
-    :source '("cogre.el" "cogre-uml.el" "cogre-periodic.el" "cogre-ascii.el" "cogre-srecode.el" "cogre-convert.el" "cogre-layout.el" "cogre-semantic.el")
+    :source '("uml.el" "periodic.el" "ascii.el" "srecode.el" "convert.el" "layout.el" "semantic.el")
     :versionsource '("cogre.el")
-    :compiler 'ede-emacs-preload-compiler
-    :aux-packages '("eieio" "semantic" "semantic-el" "inversion" "speedbar" "srecode")
-    )
-   (ede-proj-target-elisp "utests"
-    :name "utests"
-    :path ""
-    :source '("cogre-utest.el")
-    :compiler 'ede-emacs-preload-compiler
-    )
-   (ede-proj-target-makefile-miscelaneous "icons"
-    :name "icons"
-    :path ""
-    :source '("cogre-class.xpm" "cogre-hasa.xpm" "cogre-isa.xpm" "cogre-package.xpm" "cogre-node.xpm" "cogre-instance.xpm" "cogre-arrow.xpm" "cogre-link.xpm" "cogre-note.xpm")
+    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
     )
    )
   :web-site-url "http://cedet.sourceforge.net/cogre.shtml"

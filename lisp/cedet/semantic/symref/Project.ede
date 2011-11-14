@@ -1,0 +1,15 @@
+;; Object Symref
+;; EDE project file.
+(ede-proj-project "semantic/symref"
+  :name "Symref"
+  :file "Project.ede"
+  :targets (list 
+   (ede-proj-target-elisp "symref"
+    :name "symref"
+    :path ""
+    :source '("global.el" "grep.el" "list.el" "idutils.el" "cscope.el" "filter.el")
+    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
+    )
+   )
+  )

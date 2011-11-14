@@ -8,44 +8,18 @@
    (ede-proj-target-elisp-autoloads "autoloads"
     :name "autoloads"
     :path ""
-    :autoload-file "eieio-loaddefs.el"
-    )
-   (ede-proj-target-elisp "init"
-    :name "init"
-    :path ""
-    :source '("eieio-load.el")
+    :autoload-file "loaddefs.el"
     )
    (ede-proj-target-elisp "eieio"
     :name "eieio"
     :path ""
     :source '("eieio.el" "eieio-comp.el" "eieio-opt.el" "eieio-custom.el" "eieio-doc.el" "eieio-base.el" "eieio-datadebug.el")
-    :versionsource '("eieio.el")
-    :compiler 'ede-emacs-preload-compiler
-    :aux-packages '("speedbar" "data-debug")
-    :pre-load-packages '("cedet-compat")
     )
    (ede-proj-target-elisp "examples"
     :name "examples"
     :path ""
-    :source '("chart.el" "eieio-speedbar.el" "linemark.el" "lmcompile.el")
-    :compiler 'ede-emacs-preload-compiler
-    )
-   (ede-proj-target-makefile-info "eieio.info"
-    :name "eieio.info"
-    :path ""
-    :source '("eieio.texi")
-    )
-   (ede-proj-target-elisp "test"
-    :name "test"
-    :path ""
-    :source '("eieio-tests.el" "eieio-test-methodinvoke.el" "eieio-perftest.el" "eieio-test-mro.el")
-    :partofall 'nil
-    )
-   (ede-proj-target-makefile-miscelaneous "Misc"
-    :name "Misc"
-    :path ""
-    :source '("INSTALL" "ChangeLog" "NEWS")
-    :partofall 'nil
+    :aux-packages '("linemark")
+    :source '("chart.el" "eieio-speedbar.el" "linemark.el" "lmcompile.el" "eieio-xml.el")
     )
    )
   :web-site-url "http://cedet.sourceforge.net/eieio.shtml"

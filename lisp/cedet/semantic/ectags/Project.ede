@@ -1,0 +1,15 @@
+;; Object ctags
+;; EDE project file.
+(ede-proj-project "semantic/ectags"
+  :name "ectags"
+  :file "Project.ede"
+  :targets (list 
+   (ede-proj-target-elisp "ectags"
+    :name "ectags"
+    :path ""
+    :source '("util.el" "lang.el" "lang2.el" "parse.el")
+    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
+    )
+   )
+  )

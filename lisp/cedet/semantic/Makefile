@@ -6,209 +6,128 @@
 # http://cedet.sourceforge.net/ede.shtml
 #
 
-top=
+top=../../
 ede_FILES=Project.ede Makefile
 
+require=$(foreach r,$(1),(require (quote $(r))))
+EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
-LOADPATH= ../common/  ctags/ wisent/ bovine/\
-    symref/  ../speedbar/ ../ede/ ../eieio/\
-    ./
-LOADDEFS=semantic-loaddefs.el
-LOADDIRS=. bovine wisent ctags symref
-init_LISP=semantic-load.el
-EMACSFLAGS=-batch --no-site-file
-semantic_LISP=semantic.el semantic-fw.el semantic-lex.el semantic-lex-spp.el semantic-edit.el semantic-util.el semantic-tag.el semantic-tag-ls.el semantic-find.el semantic-sort.el semantic-tag-file.el semantic-tag-write.el semantic-doc.el semantic-idle.el semantic-custom.el
-utils_LISP=semantic-ast.el semantic-ctxt.el semantic-decorate.el semantic-dep.el semantic-format.el semantic-scope.el
-Database_LISP=semanticdb.el semanticdb-mode.el semanticdb-debug.el semanticdb-ebrowse.el semanticdb-el.el semanticdb-file.el semanticdb-find.el semanticdb-mk.el semanticdb-ref.el semanticdb-search.el semanticdb-typecache.el semanticdb-javascript.el semanticdb-global.el semanticdb-cscope.el semanticdb-javap.el
-ELISPPRELOAD= cedet-compat
-tools_LISP=semantic-adebug.el semantic-chart.el semantic-complete.el semantic-debug.el semantic-decorate-mode.el semantic-decorate-include.el semantic-elp.el semantic-grammar.el semantic-ia-sb.el semantic-ia.el semantic-imenu.el semantic-mru-bookmark.el semantic-sb.el semantic-util-modes.el senator.el semantic-m3.el
-Analyzer_LISP=semantic-analyze.el semantic-analyze-complete.el semantic-analyze-fcn.el semantic-analyze-debug.el semantic-analyze-refs.el
-Languages_LISP=semantic-texi.el semantic-html.el
-maintenance_LISP=semantic-ede-grammar.el
-metagrammar_SEMANTIC_GRAMMAR=semantic-grammar.wy
-metagrammar_SEMANTIC_GRAMMAR_EL=semantic-grammar-wy.el
-tests_LISP=semantic-regtest.el semantic-ia-utest.el semantic-utest.el semantic-utest-c.el
-example_MISC=semantic-example.el semanticdb-skel.el
-scripts_MISC=semanticdb.sh
-misc_AUX=INSTALL NEWS ChangeLog AUTHORS ONEWS renamelist.txt
-VERSION=2.1beta
-DISTDIR=$(top)semantic-$(VERSION)
+EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
+LOADPATH= ../../speedbar/ ../../eieio/ ../ ../ ../../../\
+   
+require=$(foreach r,$(1),(require (quote $(r))))
+LOADDEFS=loaddefs.el
+LOADDIRS=. analyze bovine decorate ectags symref wisent
+semantic_LISP=fw.el lex.el lex-spp.el edit.el util.el tag.el tag-ls.el find.el sort.el tag-file.el tag-write.el doc.el idle.el custom.el
+utils_LISP=ast.el ctxt.el decorate.el dep.el format.el scope.el
+Database_LISP=db.el db-mode.el db-debug.el db-ebrowse.el db-el.el db-file.el db-find.el db-mk.el db-ref.el db-search.el db-typecache.el db-javascript.el db-global.el db-cscope.el db-javap.el
+tools_LISP=adebug.el chart.el complete.el debug.el elp.el grammar.el ia-sb.el ia.el imenu.el mru-bookmark.el sb.el util-modes.el senator.el
+subprojects-top_LISP=analyze.el bovine.el decorate.el symref.el wisent.el
+Languages_LISP=texi.el html.el
+maintenance_LISP=ede-grammar.el
+metagrammar_SEMANTIC_GRAMMAR=grammar.wy
+metagrammar_SEMANTIC_GRAMMAR_EL=grammar-wy.el
+VERSION=1.1beta
+DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic
 
 
 
-all: autoloads init semantic utils Database tools Analyzer Languages metagrammar tests example scripts wisent Tests Symref Documentation ctags bovinator
+all: autoloads semantic utils Database tools subprojects-top Languages metagrammar wisent Symref ectags Decorator bovinator Analyzer
+
+.PHONY: clean-autoloads
+clean-autoloads: 
+	rm -f $(LOADDEFS)
 
 .PHONY: autoloads
 autoloads: 
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	@echo "(require 'cedet-autogen)" >> $@-compile-script
-	"$(EMACS)" -batch --no-site-file -l $@-compile-script -f cedet-batch-update-autoloads $(LOADDEFS) $(LOADDIRS)
+	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
 
-.PHONY: init
-init: $(init_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+
+%.elc: %.el
+	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 
 .PHONY: semantic
-semantic: $(semantic_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+semantic: $(addsuffix c, $(semantic_LISP))
+semantic: PRELOADS=cedet-remove-builtin cedet-compat
 
 .PHONY: utils
-utils: $(utils_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+utils: $(addsuffix c, $(utils_LISP))
+utils: PRELOADS=cedet-remove-builtin cedet-compat
 
 .PHONY: Database
-Database: $(Database_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+Database: $(addsuffix c, $(Database_LISP))
+Database: PRELOADS=cedet-remove-builtin cedet-compat
 
 .PHONY: tools
-tools: $(tools_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+tools: $(addsuffix c, $(tools_LISP))
+tools: PRELOADS=cedet-remove-builtin cedet-compat
 
-.PHONY: Analyzer
-Analyzer: $(Analyzer_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+.PHONY: subprojects-top
+subprojects-top: $(addsuffix c, $(subprojects-top_LISP))
+subprojects-top: PRELOADS=cedet-remove-builtin cedet-compat
 
 .PHONY: Languages
-Languages: $(Languages_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+Languages: $(addsuffix c, $(Languages_LISP))
+Languages: PRELOADS=cedet-remove-builtin cedet-compat
 
 .PHONY: maintenance
-maintenance: $(maintenance_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+maintenance: $(addsuffix c, $(maintenance_LISP))
+maintenance: PRELOADS=cedet-remove-builtin cedet-compat
+
+%-wy.el: %.wy
+	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
 
 .PHONY: metagrammar
-metagrammar: $(metagrammar_SEMANTIC_GRAMMAR)
-	@echo "(add-to-list 'load-path nil)" > grammar-make-script
-	@for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> grammar-make-script; \
-	done;
-	@echo "(require 'semantic-load)" >> grammar-make-script
-	@echo "(require 'semantic-grammar)" >> grammar-make-script
-	"$(EMACS)" -batch --no-site-file -l grammar-make-script -f semantic-grammar-batch-build-packages $^
-
-.PHONY: tests
-tests: $(tests_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
-
-example: 
-	@
-
-scripts: 
-	@
+metagrammar: $(addsuffix -wy.el, $(basename $(metagrammar_SEMANTIC_GRAMMAR)))
+metagrammar: PRELOADS=cedet-remove-builtin semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
 .PHONY:wisent
 wisent:
 	$(MAKE) -C wisent
 
-.PHONY:Tests
-Tests:
-	$(MAKE) -C tests
-
 .PHONY:Symref
 Symref:
 	$(MAKE) -C symref
 
-.PHONY:Documentation
-Documentation:
-	$(MAKE) -C doc
+.PHONY:ectags
+ectags:
+	$(MAKE) -C ectags
 
-.PHONY:ctags
-ctags:
-	$(MAKE) -C ctags
+.PHONY:Decorator
+Decorator:
+	$(MAKE) -C decorate
 
 .PHONY:bovinator
 bovinator:
 	$(MAKE) -C bovine
 
+.PHONY:Analyzer
+Analyzer:
+	$(MAKE) -C analyze
+
 tags: 
 	$(MAKE) -C wisent/ $(MFLAGS) $@
-	$(MAKE) -C tests/ $(MFLAGS) $@
 	$(MAKE) -C symref/ $(MFLAGS) $@
-	$(MAKE) -C doc/ $(MFLAGS) $@
-	$(MAKE) -C ctags/ $(MFLAGS) $@
+	$(MAKE) -C ectags/ $(MFLAGS) $@
+	$(MAKE) -C decorate/ $(MFLAGS) $@
 	$(MAKE) -C bovine/ $(MFLAGS) $@
+	$(MAKE) -C analyze/ $(MFLAGS) $@
 
 
 clean:
-	rm -f *.elc
+	rm -f *-by.el *-wy.el *.elc
 
 .PHONY: dist
 
 dist: autoloads $(metagrammar_SEMANTIC_GRAMMAR_EL)
 	mkdir $(DISTDIR)
-	cp semantic-loaddefs.el $(init_LISP) $(semantic_LISP) $(utils_LISP) $(Database_LISP) $(tools_LISP) $(Analyzer_LISP) $(Languages_LISP) $(maintenance_LISP) $(metagrammar_SEMANTIC_GRAMMAR) $(metagrammar_SEMANTIC_GRAMMAR_EL) $(tests_LISP) $(example_MISC) $(scripts_MISC) $(misc_AUX) $(ede_FILES) $(DISTDIR)
+	cp loaddefs.el $(semantic_LISP) $(utils_LISP) $(Database_LISP) $(tools_LISP) $(subprojects-top_LISP) $(Languages_LISP) $(maintenance_LISP) $(metagrammar_SEMANTIC_GRAMMAR) $(metagrammar_SEMANTIC_GRAMMAR_EL) $(ede_FILES) $(DISTDIR)
 	$(MAKE) -C wisent $(MFLAGS) DISTDIR=$(DISTDIR)/wisent dist
-	$(MAKE) -C tests $(MFLAGS) DISTDIR=$(DISTDIR)/tests dist
 	$(MAKE) -C symref $(MFLAGS) DISTDIR=$(DISTDIR)/symref dist
-	$(MAKE) -C doc $(MFLAGS) DISTDIR=$(DISTDIR)/doc dist
-	$(MAKE) -C ctags $(MFLAGS) DISTDIR=$(DISTDIR)/ctags dist
+	$(MAKE) -C ectags $(MFLAGS) DISTDIR=$(DISTDIR)/ectags dist
+	$(MAKE) -C decorate $(MFLAGS) DISTDIR=$(DISTDIR)/decorate dist
 	$(MAKE) -C bovine $(MFLAGS) DISTDIR=$(DISTDIR)/bovine dist
+	$(MAKE) -C analyze $(MFLAGS) DISTDIR=$(DISTDIR)/analyze dist
 
 Makefile: Project.ede
 	@echo Makefile is out of date!  It needs to be regenerated by EDE.

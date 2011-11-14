@@ -6,117 +6,67 @@
 # http://cedet.sourceforge.net/ede.shtml
 #
 
-top=
+top=../../
 ede_FILES=Project.ede Makefile
 
+EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
-LOADPATH= ../common/  ../srecode/ ../speedbar/ ../eieio/\
-    ../semantic/bovine/ ../semantic/
-LOADDEFS=ede-loaddefs.el
+EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
+LOADPATH= ../../speedbar/ ../../eieio/ ../ ../ ../../../\
+   
+require=$(foreach r,$(1),(require (quote $(r))))
+LOADDEFS=loaddefs.el
 LOADDIRS=.
-init_LISP=ede-load.el
-EMACSFLAGS=-batch --no-site-file
-ELISPPRELOAD= cedet-compat
-ede_LISP=ede.el ede-auto.el ede-base.el ede-custom.el ede-dired.el ede-source.el ede-util.el ede-system.el ede-speedbar.el ede-srecode.el ede-files.el ede-locate.el ede-make.el ede-shell.el ede-android.el ede-m3.el
-proj-project_LISP=ede-proj.el ede-pmake.el ede-pconf.el ede-proj-elisp.el ede-proj-misc.el ede-proj-obj.el ede-proj-prog.el ede-proj-archive.el ede-proj-shared.el ede-proj-info.el ede-proj-scheme.el ede-proj-aux.el ede-proj-comp.el
-projects_LISP=project-am.el ede-simple.el ede-cpp-root.el ede-emacs.el ede-linux.el ede-generic.el
+ede_LISP=auto.el base.el custom.el dired.el source.el util.el system.el speedbar.el srecode.el files.el locate.el make.el shell.el android.el m3.el
+proj-project_LISP=proj.el pmake.el pconf.el proj-elisp.el proj-misc.el proj-obj.el proj-prog.el proj-archive.el proj-shared.el proj-info.el proj-scheme.el proj-aux.el proj-comp.el
+projects_LISP=project-am.el simple.el cpp-root.el emacs.el linux.el generic.el
 aux-lisp_LISP=autoconf-edit.el autoconf-compat.el makefile-edit.el
-misc_AUX=README ede-proj-skel.el ChangeLog
-ede_info_TEXINFOS=ede.texi ede-projects.texi ede-targets.texi ede-sourcecode.texi ede-compilers.texi
-MAKEINFO=makeinfo
 VERSION=1.1beta
-DISTDIR=$(top)EDE-$(VERSION)
+DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/ede
 
 
 
-all: autoloads init ede proj-project projects aux-lisp ede.info EDE_Templates
+all: autoloads ede proj-project projects aux-lisp
+
+.PHONY: clean-autoloads
+clean-autoloads: 
+	rm -f $(LOADDEFS)
 
 .PHONY: autoloads
 autoloads: 
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	@echo "(require 'cedet-autogen)" >> $@-compile-script
-	"$(EMACS)" -batch --no-site-file -l $@-compile-script -f cedet-batch-update-autoloads $(LOADDEFS) $(LOADDIRS)
+	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
 
-.PHONY: init
-init: $(init_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+
+%.elc: %.el
+	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 
 .PHONY: ede
-ede: $(ede_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+ede: $(addsuffix c, $(ede_LISP))
+ede: PRELOADS=cedet-remove-builtin cedet-compat
 
 .PHONY: proj-project
-proj-project: $(proj-project_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+proj-project: $(addsuffix c, $(proj-project_LISP))
+proj-project: PRELOADS=cedet-remove-builtin cedet-compat
 
 .PHONY: projects
-projects: $(projects_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+projects: $(addsuffix c, $(projects_LISP))
+projects: PRELOADS=cedet-remove-builtin cedet-compat
 
 .PHONY: aux-lisp
-aux-lisp: $(aux-lisp_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
-
-ede.info: $(ede_info_TEXINFOS)
-	$(MAKEINFO) $<
-
-.PHONY:EDE_Templates
-EDE_Templates:
-	$(MAKE) -C templates
+aux-lisp: $(addsuffix c, $(aux-lisp_LISP))
+aux-lisp: PRELOADS=cedet-remove-builtin cedet-compat
 
 tags: 
-	$(MAKE) -C templates/ $(MFLAGS) $@
 
 
 clean:
-	rm -f *.elc *.html *.info*
+	rm -f *.elc
 
 .PHONY: dist
 
-dist: autoloads ede.info
+dist: autoloads
 	mkdir $(DISTDIR)
-	cp ede-loaddefs.el $(init_LISP) $(ede_LISP) $(proj-project_LISP) $(projects_LISP) $(aux-lisp_LISP) $(misc_AUX) $(ede_info_TEXINFOS) ede.info* $(ede_FILES) $(DISTDIR)
-	$(MAKE) -C templates $(MFLAGS) DISTDIR=$(DISTDIR)/templates dist
+	cp loaddefs.el $(ede_LISP) $(proj-project_LISP) $(projects_LISP) $(aux-lisp_LISP) $(ede_FILES) $(DISTDIR)
 
 Makefile: Project.ede
 	@echo Makefile is out of date!  It needs to be regenerated by EDE.

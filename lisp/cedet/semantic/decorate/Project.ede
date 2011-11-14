@@ -1,0 +1,15 @@
+;; Object ctags
+;; EDE project file.
+(ede-proj-project "semantic/decorate"
+  :name "Decorator"
+  :file "Project.ede"
+  :targets (list 
+   (ede-proj-target-elisp "decorate"
+    :name "ectags"
+    :path ""
+    :source '("include.el" "mode.el")
+    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
+    )
+   )
+  )

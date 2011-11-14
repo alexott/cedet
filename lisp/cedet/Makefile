@@ -6,97 +6,81 @@
 # http://cedet.sourceforge.net/ede.shtml
 #
 
-top=
+top=../
 ede_FILES=Project.ede Makefile
 
-Doc_TEXINFOS=cedet.texi
-MAKEINFO=makeinfo
-misc_AUX=ChangeLog
+EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
-LOADPATH= ./
-LOADDEFS=cedet-loaddefs.el
+EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
+LOADPATH= ../speedbar/ ../eieio/ ./ ./ ../../\
+   
+require=$(foreach r,$(1),(require (quote $(r))))
+LOADDEFS=loaddefs.el
 LOADDIRS=.
-init_LISP=cedet-load.el
-EMACSFLAGS=-batch --no-site-file
-setup_LISP=cedet.el
-common_LISP=cedet-autogen.el cedet-compat.el ezimage.el inversion.el pprint.el fame.el working.el cedet-edebug.el mode-local.el cedet-files.el pulse.el data-debug.el cedet-global.el cedet-idutils.el cedet-cscope.el cedet-graphviz.el cedet-android.el cedet-java.el cedet-m3.el
-ELISPPRELOAD= cedet-compat.el
-tests_LISP=cedet-utests.el
+common_LISP=cedet-android.el cedet-autogen.el cedet-compat.el cedet-cscope.el cedet-edebug.el cedet-files.el cedet-global.el cedet-graphviz.el cedet-idutils.el cedet-java.el cedet-m3.el cedet.el data-debug.el fame.el inversion.el mode-local.el pprint.el pulse.el working.el
+init_LISP=semantic.el srecode.el ede.el cogre.el
 VERSION=1.1beta
-DISTDIR=$(top)common-$(VERSION)
+DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet
 
 
 
-all: cedet.info autoloads init setup common tests icons
+all: autoloads common init srecode semantic EDE Cogre
 
-cedet.info: $(Doc_TEXINFOS)
-	$(MAKEINFO) $<
+.PHONY: clean-autoloads
+clean-autoloads: 
+	rm -f $(LOADDEFS)
 
 .PHONY: autoloads
 autoloads: 
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	@echo "(require 'cedet-autogen)" >> $@-compile-script
-	"$(EMACS)" -batch --no-site-file -l $@-compile-script -f cedet-batch-update-autoloads $(LOADDEFS) $(LOADDIRS)
+	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
 
-.PHONY: init
-init: $(init_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
 
-.PHONY: setup
-setup: $(setup_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+%.elc: %.el
+	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 
 .PHONY: common
-common: $(common_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+common: $(addsuffix c, $(common_LISP))
+common: PRELOADS=cedet-remove-builtin cedet-compat
 
-.PHONY: tests
-tests: $(tests_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+.PHONY: init
+init: $(addsuffix c, $(init_LISP))
+init: PRELOADS=cedet-remove-builtin cedet-compat
 
-.PHONY:icons
-icons:
-	$(MAKE) -C icons
+.PHONY:srecode
+srecode:
+	$(MAKE) -C srecode
+
+.PHONY:semantic
+semantic:
+	$(MAKE) -C semantic
+
+.PHONY:EDE
+EDE:
+	$(MAKE) -C ede
+
+.PHONY:Cogre
+Cogre:
+	$(MAKE) -C cogre
 
 tags: 
-	$(MAKE) -C icons/ $(MFLAGS) $@
+	$(MAKE) -C srecode/ $(MFLAGS) $@
+	$(MAKE) -C semantic/ $(MFLAGS) $@
+	$(MAKE) -C ede/ $(MFLAGS) $@
+	$(MAKE) -C cogre/ $(MFLAGS) $@
 
 
 clean:
-	rm -f *.elc *.html *.info*
+	rm -f *.elc
 
 .PHONY: dist
 
-dist: cedet.info autoloads
+dist: autoloads
 	mkdir $(DISTDIR)
-	cp $(Doc_TEXINFOS) cedet.info* $(misc_AUX) cedet-loaddefs.el $(init_LISP) $(setup_LISP) $(common_LISP) $(tests_LISP) $(ede_FILES) $(DISTDIR)
-	$(MAKE) -C icons $(MFLAGS) DISTDIR=$(DISTDIR)/icons dist
+	cp loaddefs.el $(common_LISP) $(init_LISP) $(ede_FILES) $(DISTDIR)
+	$(MAKE) -C srecode $(MFLAGS) DISTDIR=$(DISTDIR)/srecode dist
+	$(MAKE) -C semantic $(MFLAGS) DISTDIR=$(DISTDIR)/semantic dist
+	$(MAKE) -C ede $(MFLAGS) DISTDIR=$(DISTDIR)/ede dist
+	$(MAKE) -C cogre $(MFLAGS) DISTDIR=$(DISTDIR)/cogre dist
 
 Makefile: Project.ede
 	@echo Makefile is out of date!  It needs to be regenerated by EDE.

@@ -6,106 +6,61 @@
 # http://cedet.sourceforge.net/ede.shtml
 #
 
-top=
+top=../../
 ede_FILES=Project.ede Makefile
 
-Misc_AUX=ChangeLog
+require=$(foreach r,$(1),(require (quote $(r))))
+EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
-LOADPATH= ../common/  ../ede/ ../semantic/ ../eieio/\
-    ../speedbar/ ../semantic/bovine/ ../semantic/wisent/
-LOADDEFS=srecode-loaddefs.el
+EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
+LOADPATH= ../../../ ../  ../../eieio/  ../../speedbar/
+require=$(foreach r,$(1),(require (quote $(r))))
+LOADDEFS=loaddefs.el
 LOADDIRS=.
-lang_SEMANTIC_GRAMMAR=srecode-template.wy
-lang_SEMANTIC_GRAMMAR_EL=srecode-template-wy.el
-srecode_LISP=srecode.el srecode-mode.el srecode-compile.el srecode-insert.el srecode-template-mode.el srecode-semantic.el srecode-load.el srecode-template.el srecode-dictionary.el srecode-args.el srecode-table.el srecode-filters.el srecode-find.el srecode-ctxt.el srecode-getset.el srecode-cpp.el srecode-expandproto.el srecode-el.el srecode-srt.el srecode-texi.el srecode-map.el srecode-extract.el srecode-java.el srecode-fields.el srecode-android.el srecode-m3.el
-EMACSFLAGS=-batch --no-site-file
-ELISPPRELOAD= cedet-compat
-doc_TEXINFOS=srecode.texi
-MAKEINFO=makeinfo
-tests_LISP=srecode-test.el srecode-test-getset.el
-document_LISP=srecode-document.el srecode-document-vars.el
+lang_SEMANTIC_GRAMMAR=srt.wy
+lang_SEMANTIC_GRAMMAR_EL=srt-wy.el
+srecode_LISP=mode.el compile.el insert.el semantic.el template.el dictionary.el args.el table.el filters.el find.el ctxt.el getset.el cpp.el expandproto.el el.el srt.el texi.el map.el extract.el java.el fields.el android.el document.el
 VERSION=1.1beta
-DISTDIR=$(top)srecode-$(VERSION)
+DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/srecode
 
 
 
-all: autoloads lang srecode srecode.info tests document templates
+all: autoloads lang srecode
+
+.PHONY: clean-autoloads
+clean-autoloads: 
+	rm -f $(LOADDEFS)
 
 .PHONY: autoloads
 autoloads: 
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	@echo "(require 'cedet-autogen)" >> $@-compile-script
-	"$(EMACS)" -batch --no-site-file -l $@-compile-script -f cedet-batch-update-autoloads $(LOADDEFS) $(LOADDIRS)
+	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
+
+
+%-wy.el: %.wy
+	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
 
 .PHONY: lang
-lang: $(lang_SEMANTIC_GRAMMAR)
-	@echo "(add-to-list 'load-path nil)" > grammar-make-script
-	@for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> grammar-make-script; \
-	done;
-	@echo "(require 'semantic-load)" >> grammar-make-script
-	@echo "(require 'semantic-grammar)" >> grammar-make-script
-	"$(EMACS)" -batch --no-site-file -l grammar-make-script -f semantic-grammar-batch-build-packages $^
+lang: $(addsuffix -wy.el, $(basename $(lang_SEMANTIC_GRAMMAR)))
+lang: PRELOADS=cedet-remove-builtin semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
+
+%.elc: %.el
+	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 
 .PHONY: srecode
-srecode: $(srecode_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
-
-srecode.info: $(doc_TEXINFOS)
-	$(MAKEINFO) $<
-
-.PHONY: tests
-tests: $(tests_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
-
-.PHONY: document
-document: $(document_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
-
-.PHONY:templates
-templates:
-	$(MAKE) -C templates
+srecode: $(addsuffix c, $(srecode_LISP))
+srecode: PRELOADS=cedet-remove-builtin cedet-compat
 
 tags: 
-	$(MAKE) -C templates/ $(MFLAGS) $@
 
 
 clean:
-	rm -f *.elc *.html *.info*
+	rm -f *-by.el *-wy.el *.elc
 
 .PHONY: dist
 
-dist: autoloads $(lang_SEMANTIC_GRAMMAR_EL) srecode.info
+dist: autoloads $(lang_SEMANTIC_GRAMMAR_EL)
 	mkdir $(DISTDIR)
-	cp $(Misc_AUX) srecode-loaddefs.el $(lang_SEMANTIC_GRAMMAR) $(lang_SEMANTIC_GRAMMAR_EL) $(srecode_LISP) $(doc_TEXINFOS) srecode.info* $(tests_LISP) $(document_LISP) $(ede_FILES) $(DISTDIR)
-	$(MAKE) -C templates $(MFLAGS) DISTDIR=$(DISTDIR)/templates dist
+	cp loaddefs.el $(lang_SEMANTIC_GRAMMAR) $(lang_SEMANTIC_GRAMMAR_EL) $(srecode_LISP) $(ede_FILES) $(DISTDIR)
 
 Makefile: Project.ede
 	@echo Makefile is out of date!  It needs to be regenerated by EDE.

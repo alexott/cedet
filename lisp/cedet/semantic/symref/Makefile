@@ -6,32 +6,27 @@
 # http://cedet.sourceforge.net/ede.shtml
 #
 
-top=../
+top=../../../
 ede_FILES=Project.ede Makefile
 
-symref_LISP=semantic-symref.el semantic-symref-global.el semantic-symref-grep.el semantic-symref-list.el semantic-symref-idutils.el semantic-symref-cscope.el semantic-symref-filter.el
+symref_LISP=global.el grep.el list.el idutils.el cscope.el filter.el
 EMACS=emacs
-EMACSFLAGS=-batch --no-site-file
-LOADPATH= ../../srecode/ ../../speedbar/ ../../ede/ ../../common/ ../bovine/ ../ ../../eieio/
-ELISPPRELOAD= cedet-compat
-VERSION=2.1beta
-DISTDIR=$(top)semantic-$(VERSION)/symref
+EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
+require=$(foreach r,$(1),(require (quote $(r))))
+LOADPATH= ../../../speedbar/ ../../../eieio/ ../../ ../../ /Users/gast/cedet/newtrunk/
+VERSION=1.1beta
+DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic/symref
 
 
 
 all: symref
 
+%.elc: %.el
+	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
+
 .PHONY: symref
-symref: $(symref_LISP)
-	@echo "(add-to-list 'load-path nil)" > $@-compile-script
-	for loadpath in . ${LOADPATH}; do \
-	   echo "(add-to-list 'load-path \"$$loadpath\")" >> $@-compile-script; \
-	done;
-	for preload in ${ELISPPRELOAD}; do \
-	   echo "(load \"$$preload\")" >> $@-compile-script; \
-	done;
-	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+symref: $(addsuffix c, $(symref_LISP))
+symref: PRELOADS=cedet-remove-builtin cedet-compat
 
 tags: 
 
