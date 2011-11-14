@@ -35,6 +35,9 @@
 (require 'cogre/srecode)
 (require 'cogre)
 
+(eval-when-compile
+  (require 'semantic/find))
+
 ;;; Code:
 
 ;;; GRAPH PEERS

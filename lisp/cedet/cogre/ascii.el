@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(require 'cogre/uml)
+
 ;;;###autoload
 (defun cogre-export-ascii ()
   "Export the current diagram into an ASCII buffer."
