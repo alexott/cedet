@@ -44,18 +44,33 @@
 		       (semantic-ede-grammar-compiler-wisent
 			semantic-ede-grammar-compiler-bovine
 			))
-   (aux-packages :initform '("cedet-devel-load" "semantic/grammar"))
-   (pre-load-packages :initform '("cedet-devel-load" "semantic/grammar"))
+   (aux-packages :initform '("semantic" "cedet-remove-builtin"))
+   (pre-load-packages :initform '("cedet-remove-builtin" "semantic/grammar" "semantic/bovine/grammar" "semantic/wisent/grammar"))
    )
   "This target consists of a group of grammar files.
 A grammar target consists of grammar files that build Emacs Lisp programs for
 parsing different languages.")
 
+(defmethod ede-proj-makefile-dependencies ((this semantic-ede-proj-target-grammar))
+  "Return a string representing the dependencies for THIS.
+Some compilers only use the first element in the dependencies, others
+have a list of intermediates (object files), and others don't care.
+This allows customization of how these elements appear.
+For Emacs Lisp, return addsuffix command on source files."
+  (let ((source (car (oref this source))))
+    (cond
+     ((string-match "\\.wy$" source)
+      (format "$(addsuffix -wy.el, $(basename $(%s)))"
+	      (ede-proj-makefile-sourcevar this)))
+     ((string-match "\\.by$" source)
+      (format "$(addsuffix -by.el, $(basename $(%s)))"
+	      (ede-proj-makefile-sourcevar this))))))
+
 (defvar semantic-ede-source-grammar-wisent
   (ede-sourcecode "semantic-ede-grammar-source-wisent"
 		  :name "Wisent Grammar"
 		  :sourcepattern "\\.wy$"
-		  :garbagepattern '("*-wy.el" "*-wy.elc")
+		  :garbagepattern '("*-wy.el")
 		  )
   "Semantic Grammar source code definition for wisent.")
 
@@ -68,10 +83,16 @@ parsing different languages.")
    "ede-emacs-wisent-compiler"
    :name "emacs"
    :variables '(("EMACS" . "emacs")
-		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'"))
-   :commands '("-f semantic-grammar-batch-build-packages $^")
+		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'")
+		("require" . "$(foreach r,$(1),(require (quote $(r))))"))
+   :rules (list (ede-makefile-rule
+		 "elisp-inference-rule"
+		 :target "%-wy.el"
+		 :dependencies "%.wy"
+		 :rules '("\"$(EMACS)\" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
+--eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^")))
    :sourcetype '(semantic-ede-source-grammar-wisent)
-   :objectextention "-wy.elc"
+   :objectextention "-wy.el"
    )
   "Compile Emacs Lisp programs.")
 
@@ -80,7 +101,7 @@ parsing different languages.")
   (ede-sourcecode "semantic-ede-grammar-source-bovine"
 		  :name "Bovine Grammar"
 		  :sourcepattern "\\.by$"
-		  :garbagepattern '("*-by.el" "*-by.elc")
+		  :garbagepattern '("*-by.el")
 		  )
   "Semantic Grammar source code definition for the bovinator.")
 
@@ -89,10 +110,16 @@ parsing different languages.")
    "ede-emacs-wisent-compiler"
    :name "emacs"
    :variables '(("EMACS" . "emacs")
-		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'"))
-   :commands '("-f semantic-grammar-batch-build-packages $^")
+		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'")
+		("require" . "$(foreach r,$(1),(require (quote $(r))))"))
+   :rules (list (ede-makefile-rule
+		 "elisp-inference-rule"
+		 :target "%-by.el"
+		 :dependencies "%.by"
+		 :rules '("\"$(EMACS)\" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
+--eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^")))
    :sourcetype '(semantic-ede-source-grammar-bovine)
-   :objectextention "-by.elc"
+   :objectextention "-by.el"
    )
   "Compile Emacs Lisp programs.")
 
