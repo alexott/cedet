@@ -50,11 +50,6 @@
   (load-file (expand-file-name "lisp/cedet/cogre/loaddefs.el" CEDETDIR))
   (load-file (expand-file-name "lisp/cedet/srecode/loaddefs.el" CEDETDIR))
   (load-file (expand-file-name "lisp/cedet/semantic/loaddefs.el"CEDETDIR))
-  (load-file (expand-file-name "lisp/cedet/semantic/bovine/loaddefs.el" CEDETDIR))
-  (load-file (expand-file-name "lisp/cedet/semantic/wisent/loaddefs.el" CEDETDIR))
-  (load-file (expand-file-name "lisp/cedet/semantic/analyze/loaddefs.el" CEDETDIR))
-  (load-file (expand-file-name "lisp/cedet/semantic/decorate/loaddefs.el" CEDETDIR))
-  (load-file (expand-file-name "lisp/cedet/semantic/ectags/loaddefs.el" CEDETDIR))
 
 
   ;; SETUP INFO DIRS
