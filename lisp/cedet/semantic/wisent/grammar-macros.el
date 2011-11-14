@@ -34,6 +34,8 @@
 
 ;;; Code:
 
+(require 'mode-local)
+
 (defsubst wisent-grammar-region-placeholder (symb)
   "Given a $N placeholder symbol in SYMB, return a $regionN symbol.
 Return nil if $N is not a valid placeholder symbol."

@@ -33,6 +33,9 @@
 (require 'eieio-base)
 (require 'semantic)
 
+(eval-when-compile
+  (require 'semantic/find))
+
 (declare-function semantic-lex-spp-save-table "semantic/lex-spp")
 
 ;; Use autoload to avoid recursive require of semantic/db-ref

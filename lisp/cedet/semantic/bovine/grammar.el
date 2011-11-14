@@ -31,6 +31,9 @@
 ;;; Code:
 (require 'semantic/grammar)
 
+(eval-when-compile
+  (require 'semantic/find))
+
 ;; Note, declare mode before loading macros to solve order dependency.
 
 ;;;###autoload

@@ -34,6 +34,8 @@
 
 ;;; Code:
 
+(require 'mode-local)
+
 (defun bovine-grammar-EXPAND (bounds nonterm)
   "Expand call to EXPAND grammar macro.
 Return the form to parse from within a nonterminal between BOUNDS.
