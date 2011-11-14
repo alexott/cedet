@@ -58,18 +58,24 @@ Each package's directory should also appear in :aux-packages via a package name.
   "This target consists of a group of lisp files.
 A lisp target may be one general program with many separate lisp files in it.")
 
-(defmethod ede-proj-makefile-insert-commands :before ((this ede-proj-target-elisp))
-  ""
-  (let ((packages (oref this aux-packages))
-	(preloads (oref this pre-load-packages))
-	(targetname (oref this name)))
-    (insert
-     (format "\t\"$(EMACS)\" $(EMACSFLAGS) %s %s"
-	     (if packages "$(patsubst %,-L %,$(LOADPATH))" "")
-	     (if preloads
-		 (format "--eval '(progn $(patsubst %%,(require (quote %%)),$(%s_PRELOADS)))'"
-			 targetname)
-	       "")))))
+(defmethod ede-proj-makefile-insert-rules :after ((this ede-proj-target-elisp))
+    "Insert rules needed by THIS target.
+This inserts the PRELOADS target-local variable."
+    (let ((preloads (oref this pre-load-packages)))
+      (when preloads
+	(insert (format "%s: PRELOADS=%s\n"
+			(oref this name)
+			(mapconcat 'identity preloads " ")))))
+    (insert "\n"))
+
+(defmethod ede-proj-makefile-dependencies ((this ede-proj-target-elisp))
+  "Return a string representing the dependencies for THIS.
+Some compilers only use the first element in the dependencies, others
+have a list of intermediates (object files), and others don't care.
+This allows customization of how these elements appear.
+For Emacs Lisp, return addsuffix command on source files."
+  (format "$(addsuffix c, $(%s))"
+	  (ede-proj-makefile-sourcevar this)))
 
 (defvar ede-source-emacs
   (ede-sourcecode "ede-emacs-source"
@@ -83,11 +89,17 @@ A lisp target may be one general program with many separate lisp files in it.")
    "ede-emacs-compiler"
    :name "emacs"
    :variables '(("EMACS" . "emacs")
-		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'"))
-   :commands '("-f batch-byte-compile $^")
+		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'")
+		("require" . "$(foreach r,$(1),(require (quote $(r))))"))
+   :rules (list (ede-makefile-rule
+		 "elisp-inference-rule"
+		 :target "%.elc"
+		 :dependencies "%.el"
+		 :rules '("\"$(EMACS)\" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
+--eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^")))
    :autoconf '("AM_PATH_LISPDIR")
    :sourcetype '(ede-source-emacs)
-;   :objectextention ".elc"
+   :objectextention ".elc"
    )
   "Compile Emacs Lisp programs.")
 
@@ -196,30 +208,12 @@ is found, such as a `-version' variable, or the standard header."
 	    (setq items (cdr items)))))
       ))
 
-(defun ede-proj-makefile-insert-preload-items (items targetname)
-  "Insert a sequence of ITEMS into the PRELOADS variable for TARGETNAME."
-    (when items
-      (ede-pmake-insert-variable-once (concat targetname "_PRELOADS")
-	(let ((begin (save-excursion (re-search-backward "\\s-*="))))
-	  (while items
-	    (when (not (save-excursion
-			 (re-search-backward
-			  (concat "\\s-" (regexp-quote (car items)) "[ \n\t\\]")
-			  begin t)))
-	      (insert " " (car items)))
-	    (setq items (cdr items)))))
-      ))
-
 (defmethod ede-proj-makefile-insert-variables :AFTER ((this ede-proj-target-elisp))
   "Insert variables needed by target THIS."
   (let ((newitems (if (oref this aux-packages)
 		      (ede-proj-elisp-packages-to-loadpath
-		       (oref this aux-packages))))
-	(newpreload (oref this pre-load-packages))
-	)
-    (ede-proj-makefile-insert-loadpath-items newitems)
-    (when newpreload
-      (ede-proj-makefile-insert-preload-items newpreload (oref this name)))))
+		       (oref this aux-packages)))))
+    (ede-proj-makefile-insert-loadpath-items newitems)))
 
 (defun ede-proj-elisp-add-path (path)
   "Add path PATH into the file if it isn't already there."
@@ -284,8 +278,8 @@ is found, such as a `-version' variable, or the standard header."
 ;;
 (defclass ede-proj-target-elisp-autoloads (ede-proj-target-elisp)
   ((availablecompilers :initform '(ede-emacs-cedet-autogen-compiler))
-   (aux-packages :initform ("cedet-autogen"))
    (phony :initform t)
+   (rules :initform nil)
    (autoload-file :initarg :autoload-file
 		  :initform "loaddefs.el"
 		  :type string
@@ -320,11 +314,13 @@ Lays claim to all .elc files that match .el files in this target."
   (ede-compiler
    "ede-emacs-autogen-compiler"
    :name "emacs"
-   :variables '(("EMACS" . "emacs"))
+   :variables '(("EMACS" . "emacs")
+		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'")
+		("require" . "$(foreach r,$(1),(require (quote $(r))))"))
    :commands
-   '("\"$(EMACS)\" -batch --no-site-file $(patsubst %,-L %,$(LOADPATH)) \
---eval '(require (quote cedet-autogen))' -f cedet-batch-update-autoloads \
-$(LOADDEFS) $(LOADDIRS)")
+   '("\"$(EMACS)\" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
+--eval '(setq generated-autoload-file \"$(abspath $(LOADDEFS))\")' \
+-f batch-update-autoloads $(abspath $(LOADDIRS))")
    :rules (list (ede-makefile-rule "clean-autoloads" :target "clean-autoloads" :phony t :rules '("rm -f $(LOADDEFS)")))
    :sourcetype '(ede-source-emacs)
    )
