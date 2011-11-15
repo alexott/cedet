@@ -53,3 +53,14 @@ itest-automake:
 
 itest-android:
 	cd $(CURDIR)/tests;./cit-test.sh Android
+
+itest-batch: itest-make-batch itest-automake-batch
+
+itest-make-batch:
+	cd $(CURDIR)/tests;./cit-test.sh Make --batch
+
+itest-automake-batch:
+	cd $(CURDIR)/tests;./cit-test.sh Automake --batch
+
+itest-android-batch:
+	cd $(CURDIR)/tests;./cit-test.sh Android --batch
