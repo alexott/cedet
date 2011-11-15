@@ -43,13 +43,14 @@
   (require 'eieio)
   (require 'ede)
 
-  ;; Load in all the loaddefs
-  (load-file (expand-file-name "lisp/eieio/loaddefs.el" CEDETDIR))
-  (load-file (expand-file-name "lisp/speedbar/loaddefs.el" CEDETDIR))
-  (load-file (expand-file-name "lisp/cedet/ede/loaddefs.el" CEDETDIR))
-  (load-file (expand-file-name "lisp/cedet/cogre/loaddefs.el" CEDETDIR))
-  (load-file (expand-file-name "lisp/cedet/srecode/loaddefs.el" CEDETDIR))
-  (load-file (expand-file-name "lisp/cedet/semantic/loaddefs.el"CEDETDIR))
+  ;; Load in all the loaddefs unless we're bootstrapping the system
+  (unless (boundp 'cedet-bootstrap-in-progress)
+    (load-file (expand-file-name "lisp/eieio/loaddefs.el" CEDETDIR))
+    (load-file (expand-file-name "lisp/speedbar/loaddefs.el" CEDETDIR))
+    (load-file (expand-file-name "lisp/cedet/ede/loaddefs.el" CEDETDIR))
+    (load-file (expand-file-name "lisp/cedet/cogre/loaddefs.el" CEDETDIR))
+    (load-file (expand-file-name "lisp/cedet/srecode/loaddefs.el" CEDETDIR))
+    (load-file (expand-file-name "lisp/cedet/semantic/loaddefs.el"CEDETDIR)))
 
 
   ;; SETUP INFO DIRS
