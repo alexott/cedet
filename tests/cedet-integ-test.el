@@ -423,7 +423,7 @@ Use COMMAND to run the program."
 	  (while (not (re-search-forward "MOOSE" nil t))
 	    (setq cnt (1+ cnt))
 	    (when (> cnt 10) (error "Program output not detected"))
-	    (sit-for .1))
+	    (sit-for .3))
 	;; Show program output
 	(sit-for .2)
 	)
