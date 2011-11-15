@@ -14,8 +14,8 @@ EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 require=$(foreach r,$(1),(require (quote $(r))))
-LOADPATH= /Users/gast/cedet/newtrunk/ ../../\
-    ../../../eieio/  ../../../speedbar/ 
+LOADPATH= ../../../../ ../../  ../../../eieio/\
+    ../../../speedbar/ 
 by_SEMANTIC_GRAMMAR_EL=c-by.el make-by.el scm-by.el erlang-by.el f90-by.el
 bovinator_LISP=grammar.el debug.el grammar-macros.el
 languages_LISP=c.el el.el make.el scm.el erlang.el gcc.el f90.el clang.el

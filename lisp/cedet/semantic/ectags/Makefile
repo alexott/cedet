@@ -13,7 +13,7 @@ ectags_LISP=util.el lang.el lang2.el parse.el
 EMACS=emacs
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 require=$(foreach r,$(1),(require (quote $(r))))
-LOADPATH= ../../../speedbar/ ../../../eieio/ ../../ ../../ /Users/gast/cedet/newtrunk/
+LOADPATH= ../../../speedbar/ ../../../eieio/ ../../ ../../ ../../../../
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic/ectags
 

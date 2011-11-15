@@ -15,8 +15,8 @@ EMACS=emacs
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 wisent_LISP=wisent.el comp.el expr.el grammar.el debug.el grammar-macros.el
 require=$(foreach r,$(1),(require (quote $(r))))
-LOADPATH= /Users/gast/cedet/newtrunk/ ../../\
-    ../../../eieio/  ../../../speedbar/ 
+LOADPATH= ../../../../ ../../  ../../../eieio/\
+    ../../../speedbar/ 
 wy_SEMANTIC_GRAMMAR_EL=java-tags-wy.el awk-wy.el calc-wy.el cim-wy.el java-wy.el python-wy.el javascript-wy.el
 tools_LISP=bison-wisent.el
 languages_LISP=calc.el java.el java-tags.el python.el javascript.el

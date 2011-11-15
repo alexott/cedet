@@ -16,15 +16,6 @@ DISTDIR=$(top)cedet-topdir-$(VERSION)
 
 all: speedbar eieio cedet
 
-autoloads:
-	$(MAKE) -C speedbar autoloads
-	$(MAKE) -C eieio autoloads
-	$(MAKE) -C cedet autoloads
-	$(MAKE) -C cedet -C ede autoloads
-	$(MAKE) -C cedet -C srecode autoloads
-	$(MAKE) -C cedet -C semantic autoloads
-	$(MAKE) -C cedet -C cogre autoloads
-
 .PHONY:speedbar
 speedbar:
 	$(MAKE) -C speedbar
