@@ -1,7 +1,6 @@
-# Copyright (C) 2010, 2011 by Lluís Vilanova
+# Toplevel Makefile
 #
-# Maintainer: CEDET developers <http://sf.net/projects/cedet>
-# Created: 16 Sep 2010
+# (C) 2011 CEDET Developers
 #
 # This program is free software; you can redistribute it and/or
 # modify it under the terms of the GNU General Public License as
@@ -18,132 +17,39 @@
 # Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA 02110-1301, USA.
 
-###### User-customizable part of the Makefile ##################################
+PROJECTS=lisp lisp/cedet lisp/eieio lisp/speedbar lisp/cedet/cogre lisp/cedet/semantic \
+lisp/cedet/ede lisp/cedet/srecode lisp/cedet/semantic/bovine lisp/cedet/semantic/wisent \
+lisp/cedet/semantic/analyze lisp/cedet/semantic/decorate lisp/cedet/semantic/ectags \
+lisp/cedet/semantic/symref
 
-## Echo commands during compilation (you can set it at call time: "make V=1")
-V=0
+EMACS=emacs
+EMACSFLAGS=-batch --no-site-file -f toggle-debug-on-error
+BOOTSTRAP=(progn (global-ede-mode) (find-file "$(CURDIR)/lisp/Project.ede") (ede-proj-regenerate))
+UTEST=(progn (add-to-list (quote load-path) "$(CURDIR)/tests") (require (quote cedet-utests)) (cedet-utest-batch))
 
-## Paths and flags to common programs
-EMACS=emacs -l cedet-remove-builtin.el
-EMACSFLAGS=-batch --no-site-file
-FIND=find
-RM=rm
-RMFLAGS=-f
-MAKEINFO=makeinfo
+all: makefiles compile
 
-## Which packages to compile, test, etc.
-PACKAGES=eieio speedbar cedet
+compile:
+	$(MAKE) -C lisp
 
-###### Internal part of the Makefile ###########################################
+makefiles: $(addsuffix /Makefile,$(PROJECTS))
+$(addsuffix /Makefile,$(PROJECTS)): $(addsuffix /Project.ede,$(PROJECTS))
+	@echo "Creating Makefiles using EDE"
+	$(EMACS) $(EMACSFLAGS) --eval '(setq cedet-bootstrap-in-progress t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
 
-### Paths
-lispdir=$(CURDIR)/lisp
-docdir=$(CURDIR)/doc
-testdir=$(CURDIR)/tests
+utest:
+	$(EMACS) -Q -l cedet-devel-load.el --eval '$(UTEST)'
 
+utest-batch: 
+	$(EMACS) $(EMACSFLAGS) -l cedet-devel-load.el --eval '$(UTEST)'
 
-### Helpers
-EEVAL=$(EMACS) $(EMACSFLAGS) --eval
-ECOMPILE=(or (byte-compile-file "$(1)") (kill-emacs 1))
-EGRAMMAR=(find-file "$(1)") (semantic-mode) (semantic-grammar-create-package)
-EAUTOLOADS=(setq generated-autoload-file "$(1)") (update-directory-autoloads "$(2)")
-LISP_PATH=$(foreach pkg,$(PACKAGES),(add-to-list (quote load-path) "$(lispdir)/$(pkg)/"))
-ifeq ($(V),1)
-Q=
-else
-Q=@echo "    > $@";
-endif
+itest: itest-make itest-automake
 
-REQUIRES=semantic/bovine/el
+itest-make:
+	cd $(CURDIR)/tests;./cit-test.sh Make
 
-### Top-level rules
+itest-automake:
+	cd $(CURDIR)/tests;./cit-test.sh Automake
 
-all: autoloads generate compile doc
-
-generate: $(patsubst %,generate-%,$(PACKAGES))
-
-compile: REQUIRES+=cedet-compat
-compile: compile-common $(patsubst %,compile-%,$(PACKAGES))
-
-autoloads: $(patsubst %,autoloads-%,$(PACKAGES))
-
-doc: $(patsubst %,doc-%,$(PACKAGES))
-
-test: $(patsubst %,test-%,$(PACKAGES))
-
-clean: clean-common $(patsubst %,clean-%,$(PACKAGES))
-
-
-### Specialized rules
-
-cedet_BOVINE=$(shell $(FIND) $(lispdir)/cedet/ -name \*.by)
-cedet_WISENT=$(shell $(FIND) $(lispdir)/cedet/ -name \*.wy -and -not -path $(lispdir)/cedet/semantic/grammar.wy)
-cedet_GENERATE_LISP=$(patsubst %.by,%-by.el,$(cedet_BOVINE)) $(patsubst %.wy,%-wy.el,$(cedet_WISENT))
-
-%-by.elc: REQUIRES+=semantic/bovine
-
-
-### Dynamic rules
-
-define PACKAGE_template
-$(1)_LISP=$(shell $(FIND) $(lispdir)/$(1)/ -name \*.el)
-$(1)_CODE=$$(patsubst %.el,%.elc,$$($(1)_LISP))
-NO_TEXI=%/tags.texi %/minor-modes.texi %/internals.texi %/glossary.texi %/installation.texi \
-        %/overview.texi
-$(1)_TEXINFO=$(filter-out $(NO_TEXI),$(shell $(FIND) $(docdir) -name $(1).texi) $(shell test ! -d $(docdir)/$(1) || $(FIND) $(docdir)/$(1)/ -name *.texi))
-$(1)_AUTOLOADS=$(foreach d,$(shell $(FIND) $(lispdir)/$(1)/ -type d),$(d)/loaddefs.el)
-$(1)_INFO=$$(patsubst %.texi,%.info,$$($(1)_TEXINFO))
-$(1)_TEST_LISP=$(shell test ! -d $(testdir)/$(1)/ || $(FIND) $(testdir)/$(1)/ -name \*.el)
-$(1)_TEST_CODE=$$(patsubst %.el,%.elc,$$($(1)_TEST_LISP))
-
-generate-$(1): $$($(1)_GENERATE_LISP)
-
-compile-$(1): $$($(1)_CODE)
-
-autoloads-$(1): $$($(1)_AUTOLOADS)
-
-doc-$(1): $$($(1)_INFO)
-
-test-$(1): $$($(1)_TEST_CODE)
-
-clean-$(1):
-	$(RM) $(RMFLAGS) $$($(1)_GENERATE_LISP)
-	$(RM) $(RMFLAGS) $$($(1)_CODE)
-	$(RM) $(RMFLAGS) $$($(1)_AUTOLOADS)
-	$(RM) $(RMFLAGS) $$($(1)_INFO)
-endef
-
-utest: REQUIRES+=cedet-utests
-utest: 
-	$(Q)$(EEVAL) '(progn $(LISP_PATH) (add-to-list (quote load-path) "$(testdir)") $(call require,$(REQUIRES)) (cedet-utest-batch))'
-
-$(eval $(call PACKAGE_template,common))
-$(foreach pkg,$(PACKAGES),$(eval $(call PACKAGE_template,$(pkg))))
-
-# Require the list of packages given as argument
-require=$(foreach r,$(1),(require (quote $(r))))
-
-
-### Generic rules
-
-%-wy.el: REQUIRES+=semantic/grammar semantic/wisent semantic/wisent/grammar
-%-wy.el: %.wy
-	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))'
-
-%-by.el: REQUIRES+=semantic/grammar semantic/wisent semantic/bovine/grammar
-%-by.el: %.by
-	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(call EGRAMMAR,$<))'
-
-%-wy.elc: REQUIRES+=semantic/grammar
-
-%-by.elc: REQUIRES+=semantic/bovine
-%-by.elc: EEXTRA+=(setq max-specpdl-size (max 3000 max-specpdl-size) max-lisp-eval-depth (max 1000 max-lisp-eval-depth))
-
-%.elc: %.el
-	$(Q)$(EEVAL) '(progn $(LISP_PATH) $(call require,$(REQUIRES)) $(EEXTRA) $(call ECOMPILE,$<))'
-
-%/loaddefs.el:
-	$(Q)$(EEVAL) '(progn  $(EEXTRA) $(call EAUTOLOADS,$@,$*))'
-
-%.info: %.texi
-	$(Q)$(MAKEINFO) $< -o $@
+itest-android:
+	cd $(CURDIR)/tests;./cit-test.sh Android
