@@ -139,7 +139,7 @@ Lays claim to all .elc files that match .el files in this target."
 	     (full nil)
 	     )
 	;; Make sure the relative name isn't to far off
-	(when (string-match "^\\.\\./\\.\\./\\.\\./\\.\\." rel)
+	(when (string-match "^\\.\\./\\.\\./\\.\\./\\.\\./\\.\\." rel)
 	  (setq full fnd))
 	;; Do the setup.
 	(setq paths (cons (or full rel) paths)
