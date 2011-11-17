@@ -24,8 +24,10 @@ lisp/cedet/semantic/symref
 
 EMACS=emacs
 EMACSFLAGS=-batch --no-site-file -f toggle-debug-on-error
+LOADDEFS=loaddefs.el
 BOOTSTRAP=(progn (global-ede-mode) (find-file "$(CURDIR)/lisp/Project.ede") (ede-proj-regenerate))
 UTEST=(progn (add-to-list (quote load-path) "$(CURDIR)/tests") (require (quote cedet-utests)) (cedet-utest-batch))
+RM=rm
 
 all: makefiles compile
 
@@ -36,6 +38,12 @@ makefiles: $(addsuffix /Makefile,$(PROJECTS))
 $(addsuffix /Makefile,$(PROJECTS)): $(addsuffix /Project.ede,$(PROJECTS))
 	@echo "Creating Makefiles using EDE"
 	$(EMACS) $(EMACSFLAGS) --eval '(setq cedet-bootstrap-in-progress t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
+
+clean-autoloads:
+	$(foreach proj,$(PROJECTS),cd $(CURDIR)/$(proj) && if [ -f $(LOADDEFS) ];then $(RM) -f $(LOADDEFS);fi;)
+
+clean-all: clean-autoloads
+	$(foreach proj,$(PROJECTS),cd $(CURDIR)/$(proj) && $(MAKE) clean;)
 
 utest:
 	$(EMACS) -Q -l cedet-devel-load.el --eval '$(UTEST)'
