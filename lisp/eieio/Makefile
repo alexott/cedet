@@ -12,12 +12,12 @@ ede_FILES=Project.ede Makefile
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
-examples_LISP=chart.el eieio-speedbar.el linemark.el lmcompile.el eieio-xml.el
+LOADPATH= ../cedet/ ../../  ./
 require=$(foreach r,$(1),(require (quote $(r))))
 LOADDEFS=loaddefs.el
 LOADDIRS=.
 eieio_LISP=eieio.el eieio-comp.el eieio-opt.el eieio-custom.el eieio-doc.el eieio-base.el eieio-datadebug.el
-LOADPATH= ./
+examples_LISP=chart.el eieio-speedbar.el linemark.el lmcompile.el eieio-xml.el
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/eieio
 
@@ -39,9 +39,11 @@ autoloads:
 
 .PHONY: eieio
 eieio: $(addsuffix c, $(eieio_LISP))
+eieio: PRELOADS=cedet-remove-builtin cedet-compat
 
 .PHONY: examples
 examples: $(addsuffix c, $(examples_LISP))
+examples: PRELOADS=cedet-remove-builtin cedet-compat
 
 tags: 
 

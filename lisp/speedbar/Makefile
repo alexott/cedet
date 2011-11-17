@@ -12,12 +12,12 @@ ede_FILES=Project.ede Makefile
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
-opt_LISP=rpm.el sb-gud.el sb-info.el sb-rmail.el sb-w3.el sb-texinfo.el sb-html.el sb-ant.el
+LOADPATH= ../cedet/ ../../  ./
 require=$(foreach r,$(1),(require (quote $(r))))
 LOADDEFS=loaddefs.el
 LOADDIRS=.
 speedbar_LISP=dframe.el speedbar.el
-LOADPATH= ./
+opt_LISP=rpm.el sb-gud.el sb-info.el sb-rmail.el sb-w3.el sb-texinfo.el sb-html.el sb-ant.el
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/speedbar
 
@@ -39,9 +39,11 @@ autoloads:
 
 .PHONY: speedbar
 speedbar: $(addsuffix c, $(speedbar_LISP))
+speedbar: PRELOADS=cedet-remove-builtin cedet-compat
 
 .PHONY: opt
 opt: $(addsuffix c, $(opt_LISP))
+opt: PRELOADS=cedet-remove-builtin cedet-compat
 
 tags: 
 

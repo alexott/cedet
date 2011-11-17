@@ -14,12 +14,15 @@
     :name "eieio"
     :path ""
     :source '("eieio.el" "eieio-comp.el" "eieio-opt.el" "eieio-custom.el" "eieio-doc.el" "eieio-base.el" "eieio-datadebug.el")
+    :aux-packages '("cedet-remove-builtin" "cedet-compat")
+    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
     )
    (ede-proj-target-elisp "examples"
     :name "examples"
     :path ""
-    :aux-packages '("linemark")
     :source '("chart.el" "eieio-speedbar.el" "linemark.el" "lmcompile.el" "eieio-xml.el")
+    :aux-packages '("cedet-remove-builtin" "cedet-compat" "linemark")
+    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
     )
    )
   :web-site-url "http://cedet.sourceforge.net/eieio.shtml"

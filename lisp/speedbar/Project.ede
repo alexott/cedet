@@ -14,12 +14,15 @@
     :name "speedbar"
     :path ""
     :source '("dframe.el" "speedbar.el")
+    :aux-packages '("cedet-remove-builtin" "cedet-compat")
+    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
     )
    (ede-proj-target-elisp "opt"
     :name "opt"
     :path ""
     :source '("rpm.el" "sb-gud.el" "sb-info.el" "sb-rmail.el" "sb-w3.el" "sb-texinfo.el" "sb-html.el" "sb-ant.el")
-    :aux-packages '("sb-texinfo")
+    :aux-packages '("cedet-remove-builtin" "cedet-compat" "sb-texinfo")
+    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
     )
    )
   :web-site-url "http://cedet.sourceforge.net/speedbar.shtml"
