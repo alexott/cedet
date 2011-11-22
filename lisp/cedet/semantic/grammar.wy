@@ -24,11 +24,14 @@
 ;; Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
 
+%package semantic-grammar-wy
+%provide semantic/grammar-wy
+
 %{
   ;; Current parsed nonterminal name.
-  (defvar semantic/grammar-wy--nterm nil)
+  (defvar semantic-grammar-wy--nterm nil)
   ;; Index of rule in a nonterminal clause.
-  (defvar semantic/grammar-wy--rindx nil)
+  (defvar semantic-grammar-wy--rindx nil)
   }
 
 ;;%package semantic/grammar-wy

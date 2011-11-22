@@ -33,8 +33,12 @@
 (require 'semantic/wisent)
 (require 'semantic/ctxt)
 (require 'semantic/format)
-(require 'semantic/grammar-wy)
 (require 'semantic/idle)
+
+;; If CEDET wasn't compiled yet, we need to load the fallback grammar.
+(or (require 'semantic/grammar-wy nil t)
+    (require 'semantic/gram-wy-fallback))
+
 (declare-function semantic-momentary-highlight-tag "semantic/decorate")
 (declare-function semantic-analyze-context "semantic/analyze")
 (declare-function semantic-analyze-tags-of-class-list
@@ -43,7 +47,9 @@
 (eval-when-compile
   (require 'eldoc)
   (require 'semantic/edit)
-  (require 'semantic/find))
+  (require 'semantic/find)
+  (or (require 'semantic/grammar-wy nil t)
+      (require 'semantic/gram-wy-fallback)))
 
 
 ;;;;
@@ -89,8 +95,29 @@
     (semantic-lex-push-token
      (semantic-lex-token class start end))))
 
-;; Provide auto-generated analyzers and the lexer.
-(require 'semantic/grammar-wy)
+(define-lex semantic-grammar-lexer
+  "Lexical analyzer that handles Semantic grammar buffers.
+It ignores whitespaces, newlines and comments."
+  semantic-lex-ignore-newline
+  semantic-lex-ignore-whitespace
+  ;; Must detect prologue/epilogue before other symbols/keywords!
+  semantic-grammar-lex-prologue
+  semantic-grammar-lex-epilogue
+  semantic-grammar-wy--<keyword>-keyword-analyzer
+  semantic-grammar-wy--<symbol>-regexp-analyzer
+  semantic-grammar-wy--<char>-regexp-analyzer
+  semantic-grammar-wy--<string>-sexp-analyzer
+  ;; Must detect comments after strings because `comment-start-skip'
+  ;; regexp match semicolons inside strings!
+  semantic-lex-ignore-comments
+  ;; Must detect prefixed list before punctuation because prefix chars
+  ;; are also punctuations!
+  semantic-grammar-wy--<qlist>-sexp-analyzer
+  ;; Must detect punctuations after comments because the semicolon can
+  ;; be a punctuation or a comment start!
+  semantic-grammar-wy--<punctuation>-string-analyzer
+  semantic-grammar-wy--<block>-block-analyzer
+  semantic-grammar-wy--<sexp>-sexp-analyzer)
 
 ;;; Test the lexer
 ;;
@@ -1273,7 +1300,7 @@ the change bounds to encompass the whole nonterminal tag."
          ;; simplifying our keywords significantly
          ((?_ . "w") (?- . "w"))))
   ;; Setup Semantic to parse grammar
-  (semantic/grammar-wy--install-parser)
+  (semantic-grammar-wy--install-parser)
   (setq semantic-lex-comment-regex ";;"
         semantic-lex-analyzer 'semantic-grammar-lexer
         semantic-type-relation-separator-character '(":")
