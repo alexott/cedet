@@ -22,14 +22,17 @@ lisp/cedet/ede lisp/cedet/srecode lisp/cedet/semantic/bovine lisp/cedet/semantic
 lisp/cedet/semantic/analyze lisp/cedet/semantic/decorate lisp/cedet/semantic/ectags \
 lisp/cedet/semantic/symref
 
+PROJECTS_AUTOLOADS=lisp lisp/cedet lisp/eieio lisp/speedbar lisp/cedet/cogre lisp/cedet/semantic \
+lisp/cedet/ede lisp/cedet/srecode
+
 EMACS=emacs
-EMACSFLAGS=-batch --no-site-file -f toggle-debug-on-error
+EMACSFLAGS=-batch --no-site-file -l cedet-remove-builtin.el
 LOADDEFS=loaddefs.el
 BOOTSTRAP=(progn (global-ede-mode) (find-file "$(CURDIR)/lisp/Project.ede") (ede-proj-regenerate))
 UTEST=(progn (add-to-list (quote load-path) "$(CURDIR)/tests") (require (quote cedet-utests)) (cedet-utest-batch))
 RM=rm
 
-all: makefiles compile
+all: autoloads makefiles compile
 
 compile:
 	$(MAKE) -C lisp
@@ -39,8 +42,11 @@ $(addsuffix /Makefile,$(PROJECTS)): $(addsuffix /Project.ede,$(PROJECTS))
 	@echo "Creating Makefiles using EDE"
 	$(EMACS) $(EMACSFLAGS) --eval '(setq cedet-bootstrap-in-progress t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
 
+autoloads:
+	$(foreach proj,$(PROJECTS_AUTOLOADS),cd $(CURDIR)/$(proj) && $(MAKE) autoloads;)
+
 clean-autoloads:
-	$(foreach proj,$(PROJECTS),cd $(CURDIR)/$(proj) && if [ -f $(LOADDEFS) ];then $(RM) -f $(LOADDEFS);fi;)
+	$(foreach proj,$(PROJECTS_AUTOLOADS),cd $(CURDIR)/$(proj) && if [ -f $(LOADDEFS) ];then $(RM) -f $(LOADDEFS);fi;)
 
 clean-all: clean-autoloads
 	$(foreach proj,$(PROJECTS),cd $(CURDIR)/$(proj) && $(MAKE) clean;)
