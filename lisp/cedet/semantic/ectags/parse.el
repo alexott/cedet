@@ -30,6 +30,10 @@
 ;; other tags in the list will be parented appropriately.
 
 (require 'mode-local)
+(require 'semantic)
+(require 'semantic/tag)
+(require 'semantic/analyze)
+(require 'data-debug)
 (require 'semantic/ectags/util)
 
 ;;; Code:
@@ -41,9 +45,27 @@
   "The kinds of tags fetched by Exuberant CTags for the current language.")
 (defvar semantic-ectags-lang-extra-flags nil
   "Extra flags to pass to Exuberant CTags for a particular language.")
-
 (defvar semantic-ectags-collect-errors nil
   "When non-nil, collect errors.")
+
+(define-overloadable-function semantic-ectags-split-signature-summary (summary)
+  "Split SUMMARY into Semantic tag compatible attributes.
+SUMMARY is part of the output from Exuberant CTags that shows the
+text from a file where the tag was found.")
+
+(defun semantic-ectags-split-signature-summary-default (summary)
+  "Default behavior for splitting a Exuberant CTags SUMMARY.
+Assume comma separated list."
+  (split-string summary "[(), ]" t))
+
+(define-overloadable-function semantic-ectags-set-language-attributes (tag parents)
+  "Augment TAG with additional attributes based on language.
+PARENTS is the list of parent names for TAG.")
+
+(defun semantic-ectags-set-language-attributes-default (tag parents)
+  "Default behavior does nothing.
+TAG and PARENTS are ignored."
+  nil)
 
 ;;;###autoload
 (defun semantic-ectags-parse-buffer ()
@@ -106,6 +128,90 @@ Convert the output tags into Semantic tags."
       (semantic-ectags-parse-tags))
     ))
 
+(defun semantic-ectags-parse-one-tag (line)
+  "Split the Exuberant CTags LINE into a new tag.
+Returns the list ( TAG P1 P2 Pn...)
+where TAG is the new tag, P1, P2, and Pn is the list of
+parents running forward, such as namespace/namespace/class"
+  (let* ((elements (split-string line "\t"))
+         (ect-class (nth 3 elements))
+         (class-split (split-string ect-class " " t))
+         (class (intern (car class-split)))
+         (prototype nil)
+         (const nil)
+         (type nil)
+
+         (class-sym (cond
+                     ((member class '(function variable label program value))
+                      class)
+                     ((eq class 'prototype)
+                      (setq prototype t)
+                      'function)
+                     ((member class '(namespace class trait struct union enum typedef))
+                      (setq type (symbol-name class))
+                      'type)
+                     ((eq class 'member)
+                      'variable)
+                     ((member class '(include import))
+                      'include)
+                     ((or (eq class 'macro) (eq class 'define))
+                      (setq const t)
+                      'variable)
+                     ((eq class 'enumerator)
+                      (setq const t)
+                      'variable)
+                     ((eq class 'declaration)
+                      'variable)
+                     ((or (eq class 'subroutine) (eq class 'procedure))
+                      ;; @todo - functions (the plural) for pascal?
+                      'function)
+                     ((eq class 'local)
+                      ;; @TODO - local variables??
+                      ;; These get assigned into other tags, and should
+                      ;; be accessed via semantic-get-local-variables
+                      'variable)
+                     (t
+                      (message "CTAG: Unknown output kind %s" class)
+                      (when semantic-ectags-collect-errors
+                        (let ((msg (format "Unknown class: %S" class)))
+                          (if (eq semantic-ectags-collect-errors t)
+                              (setq semantic-ectags-collect-errors (list msg))
+                            (add-to-list 'semantic-ectags-collect-errors msg ))))
+                      'unknown
+                      )))
+
+         (attr (semantic-ectags-split-fields (nthcdr 4 elements)))
+         (line (string-to-number (nth 2 elements)))
+
+         (tag (semantic-tag (nth 0 elements)
+                            class-sym
+                            ;; Leave filename for some other time
+                            ;; :filename (nth 1 elements)
+                            :line line
+                            :prototype-flag prototype
+                            :constant-flag const
+                            :type (if (eq class-sym 'type) type nil) ;; Nil alows override later
+                            ))
+         (parents nil)
+         )
+    (if (eq class-sym 'unknown)
+        ;; Unknown type.. let it through nicely.
+        nil
+      ;; Else, keep parsing.
+      (while attr
+        ;; Loop over each attribute, adding it into the tag.
+        (cond ((eq (car attr) :parent)
+               (setq parents (semantic-analyze-split-name (car (cdr attr))))
+               (when (stringp parents)
+                 (setq parents (list parents))))
+              (t
+               (semantic-tag-put-attribute tag (car attr) (car (cdr attr)))))
+        (setq attr (cdr (cdr attr)))
+        )
+      ;; Now return the new tag.
+      (cons tag parents)
+      )))
+
 (defun semantic-ectags-parse-tags ()
   "Parse the Exuberant CTags output in the current buffer."
   (goto-char (point-min))
@@ -114,7 +220,7 @@ Convert the output tags into Semantic tags."
         (pname nil)      ; parent names.
         )
     (while (not (eobp))
-      (let* ((ptag (semantic-ectag-parse-one-tag
+      (let* ((ptag (semantic-ectags-parse-one-tag
                     (buffer-substring-no-properties (point) (point-at-eol))))
              (tag (car ptag))
              (parents (cdr ptag))
@@ -222,90 +328,6 @@ Convert the output tags into Semantic tags."
       (semantic-tag-put-attribute tag :parent pstring)
       )))
 
-(defun semantic-ectags-parse-one-tag (line)
-  "Split the Exuberant CTags LINE into a new tag.
-Returns the list ( TAG P1 P2 Pn...)
-where TAG is the new tag, P1, P2, and Pn is the list of
-parents running forward, such as namespace/namespace/class"
-  (let* ((elements (split-string line "\t"))
-         (ect-class (nth 3 elements))
-         (class-split (split-string ect-class " " t))
-         (class (intern (car class-split)))
-         (prototype nil)
-         (const nil)
-         (type nil)
-
-         (class-sym (cond
-                     ((member class '(function variable label program value))
-                      class)
-                     ((eq class 'prototype)
-                      (setq prototype t)
-                      'function)
-                     ((member class '(namespace class trait struct union enum typedef))
-                      (setq type (symbol-name class))
-                      'type)
-                     ((eq class 'member)
-                      'variable)
-                     ((member class '(include import))
-                      'include)
-                     ((or (eq class 'macro) (eq class 'define))
-                      (setq const t)
-                      'variable)
-                     ((eq class 'enumerator)
-                      (setq const t)
-                      'variable)
-                     ((eq class 'declaration)
-                      'variable)
-                     ((or (eq class 'subroutine) (eq class 'procedure))
-                      ;; @todo - functions (the plural) for pascal?
-                      'function)
-                     ((eq class 'local)
-                      ;; @TODO - local variables??
-                      ;; These get assigned into other tags, and should
-                      ;; be accessed via semantic-get-local-variables
-                      'variable)
-                     (t
-                      (message "CTAG: Unknown output kind %s" class)
-                      (when semantic-ectags-collect-errors
-                        (let ((msg (format "Unknown class: %S" class)))
-                          (if (eq semantic-ectags-collect-errors t)
-                              (setq semantic-ectags-collect-errors (list msg))
-                            (add-to-list 'semantic-ectags-collect-errors msg ))))
-                      'unknown
-                      )))
-
-         (attr (semantic-ectags-split-fields (nthcdr 4 elements)))
-         (line (string-to-number (nth 2 elements)))
-
-         (tag (semantic-tag (nth 0 elements)
-                            class-sym
-                            ;; Leave filename for some other time
-                            ;; :filename (nth 1 elements)
-                            :line line
-                            :prototype-flag prototype
-                            :constant-flag const
-                            :type (if (eq class-sym 'type) type nil) ;; Nil alows override later
-                            ))
-         (parents nil)
-         )
-    (if (eq class-sym 'unknown)
-        ;; Unknown type.. let it through nicely.
-        nil
-      ;; Else, keep parsing.
-      (while attr
-        ;; Loop over each attribute, adding it into the tag.
-        (cond ((eq (car attr) :parent)
-               (setq parents (semantic-analyze-split-name (car (cdr attr))))
-               (when (stringp parents)
-                 (setq parents (list parents))))
-              (t
-               (semantic-tag-put-attribute tag (car attr) (car (cdr attr)))))
-        (setq attr (cdr (cdr attr)))
-        )
-      ;; Now return the new tag.
-      (cons tag parents)
-      )))
-
 (defun semantic-ectags-split-fields (fields)
   "Convert FIELDS into a list of Semantic tag attributes."
   (let ((attr nil))
@@ -351,24 +373,6 @@ parents running forward, such as namespace/namespace/class"
       )
     attr))
 
-(define-overloadable-function semantic-ectags-split-signature-summary (summary)
-  "Split SUMMARY into Semantic tag compatible attributes.
-SUMMARY is part of the output from Exuberant CTags that shows the
-text from a file where the tag was found.")
-
-(defun semantic-ectags-split-signature-summary-default (summary)
-  "Default behavior for splitting a Exuberant CTags SUMMARY.
-Assume comma separated list."
-  (split-string summary "[(), ]" t))
-
-(define-overloadable-function semantic-ectags-set-language-attributes (tag parents)
-  "Augment TAG with additional attributes based on language.
-PARENTS is the list of parent names for TAG.")
-
-(defun semantic-ectags-set-language-attributes-default (tag parents)
-  "Default behavior does nothing.
-TAG and PARENTS are ignored."
-  nil)
 
 ;;; MAIN PARSER SUPPORT
 ;;
@@ -427,12 +431,15 @@ NOTE: Currently this only supports a flat-list style tag."
         (push (car attr) newattr))
       (setq attr (cdr (cdr attr))))
     (save-excursion
-      (goto-line line)
+      (goto-char (point-min))
+      (forward-line (1- line))
       (setq start (point-at-bol)
             end
             (progn
               (if nexttag
-                  (goto-line (semantic-tag-get-attribute nexttag :line))
+                  (progn
+		    (goto-char (point-min))
+		    (forward-line (1- (semantic-tag-get-attribute nexttag :line))))
                 (goto-char (point-max))
                 )
               (while (forward-comment -1) nil)
