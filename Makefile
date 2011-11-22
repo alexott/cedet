@@ -29,7 +29,7 @@ EMACS=emacs
 EMACSFLAGS=-batch --no-site-file -l cedet-remove-builtin.el
 LOADDEFS=loaddefs.el
 BOOTSTRAP=(progn (global-ede-mode) (find-file "$(CURDIR)/lisp/Project.ede") (ede-proj-regenerate))
-UTEST=(progn (add-to-list (quote load-path) "$(CURDIR)/tests") (require (quote cedet-utests)) (cedet-utest-batch))
+UTEST=(progn (add-to-list (quote load-path) "$(CURDIR)/tests") (require (quote cedet-utests)) (semantic-mode))
 RM=rm
 
 all: autoloads makefiles compile
@@ -51,11 +51,11 @@ clean-autoloads:
 clean-all: clean-autoloads
 	$(foreach proj,$(PROJECTS),cd $(CURDIR)/$(proj) && $(MAKE) clean;)
 
-utest:
-	$(EMACS) -Q -l cedet-devel-load.el --eval '$(UTEST)'
+utest: 
+	$(EMACS) -Q -l cedet-devel-load.el --eval '$(UTEST)' -f cedet-utest
 
-utest-batch: 
-	$(EMACS) $(EMACSFLAGS) -l cedet-devel-load.el --eval '$(UTEST)'
+utest-batch:
+	$(EMACS) $(EMACSFLAGS) -l cedet-devel-load.el --eval '$(UTEST)' -f cedet-utest-batch
 
 itest: itest-make itest-automake
 
