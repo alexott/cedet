@@ -64,8 +64,7 @@ ARGS are the arguments to pass to Exuberant CTags.
 The returned buffer will be recycled in future calls to this function."
   (let ((b (get-buffer-create " *Semantic ECTags*"))
 	(dd default-directory))
-    (save-excursion
-      (set-buffer b)
+    (with-current-buffer b
       (erase-buffer)
       (setq default-directory dd)
       (condition-case nil
@@ -85,8 +84,7 @@ The returned buffer will be recycled in future calls to this function."
   (let* ((b (semantic-ectags-run "--list-kinds=all"))
 	 (lang nil)
 	 (kinds nil))
-    (save-excursion
-      (set-buffer b)
+    (with-current-buffer b
       (goto-char (point-min))
       (while (not (eobp))
 	(setq lang (buffer-substring (point) (point-at-eol)))
@@ -137,23 +135,20 @@ The returned buffer will be recycled in future calls to this function."
 	  (message "Could not find program %s"
 		   semantic-ectags-program)
 	  nil)
-      (setq str (save-excursion
-		  (set-buffer b)
+      (setq str (with-current-buffer b
 		  (goto-char (point-min))
 		  (if (re-search-forward "Exuberant Ctags \\([0-9.]+\\)\\(~svn[0-9]+\\)?," nil t)
 		      (match-string 1)
 		    nil)
 		  )
-	    ropt (save-excursion
-		   (set-buffer b)
+	    ropt (with-current-buffer b
 		   (goto-char (point-min))
 		   (if (re-search-forward "\\+regex\\>" nil t)
 		       t
 		     nil)))
       (if (not str)
 	  (let ((whatver
-		 (save-excursion
-		   (set-buffer b)
+		 (with-current-buffer b
 		   (goto-char (point-min))
 		   (cond ((looking-at "ctags (?GNU Emacs")
 			  "ectags that comes with Emacs")

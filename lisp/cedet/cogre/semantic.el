@@ -228,8 +228,7 @@ while creating the tags."
 
 (defmethod cogre-export-semantic-method ((g cogre-base-graph))
   "Convert G into Semantic Tag for a typed language."
-  (save-excursion
-    (set-buffer (oref g buffer))
+  (with-current-buffer (oref g buffer)
     ;; Sort the graph into a nested a tree.
     (let ((tree (cogre-uml-sort-for-lineage g))
 	  (out nil))
@@ -264,7 +263,7 @@ Uses `cogre-export-semantic' to convert into Semantic tags.
 Uses `cogre-srecode-setup' to setup SRecode for code generation."
   (interactive "FOutput File: ")
   (let* ((newfilebuff (find-file-noselect file))
-	 (mode (save-excursion (set-buffer newfilebuff)
+	 (mode (with-current-buffer newfilebuff
 			       major-mode))
 	 (tags (cogre-export-semantic mode))
 	 )

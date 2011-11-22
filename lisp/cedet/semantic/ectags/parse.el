@@ -98,8 +98,7 @@ Convert the output tags into Semantic tags."
          (buff (apply 'semantic-ectags-run arg-list))
 
          )
-    (save-excursion
-      (set-buffer buff)
+    (with-current-buffer buff
       (condition-case nil
           ;; Sometimes this might throw an error.  Be safe.
           (funcall mode)

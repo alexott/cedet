@@ -148,8 +148,7 @@ DOT is a part of GraphVis."
     (cogre-export-dot)
 
     ;; Convert from dot to postscript
-    (save-excursion
-      (set-buffer
+    (with-current-buffer
        (if keeplayout
 	   (cedet-graphviz-translate-file (current-buffer)
 					  nil
@@ -157,7 +156,7 @@ DOT is a part of GraphVis."
 					  "-n")
 	 (cedet-graphviz-translate-file (current-buffer)
 					nil
-					"ps")))
+					"ps"))
 
       (require 'ps-print)
       (let ((ps-spool-buffer (current-buffer)))
@@ -166,8 +165,7 @@ DOT is a part of GraphVis."
 
 (defmethod cogre-export-dot-method ((g cogre-base-graph))
   "Convert G into DOT syntax of semantic tags."
-  (save-excursion
-    (set-buffer (oref g buffer))
+  (with-current-buffer (oref g buffer)
     (let ((cogre-export-max-y (count-lines (point-min) (point-max))))
       (semantic-tag (oref g :name)
 		    'digraph

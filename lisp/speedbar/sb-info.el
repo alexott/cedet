@@ -204,9 +204,8 @@ INDENT is the current indentation depth."
   "Fetch the subnodes from the info NODESPEC.
 NODESPEC is a string of the form: (file)node.
 Optional THISFILE represends the filename of"
-  (save-excursion
-    ;; Set up a buffer we can use to fake-out Info.
-    (set-buffer (get-buffer-create "*info-browse-tmp*"))
+  ;; Set up a buffer we can use to fake-out Info.
+  (with-current-buffer (get-buffer-create "*info-browse-tmp*")
     (if (not (equal major-mode 'Info-mode))
 	(Info-mode))
     ;; Get the node into this buffer

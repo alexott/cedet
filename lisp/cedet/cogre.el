@@ -501,15 +501,13 @@ customizing the object, or performing some complex task."
 (defmethod eieio-done-customizing ((element cogre-graph-element))
   "Finish customizing a graph element."
   (cogre-set-dirty element t)
-  (save-excursion
-    (set-buffer cogre-custom-originating-graph-buffer)
+  (with-current-buffer cogre-custom-originating-graph-buffer
     (cogre-render-buffer cogre-graph t))
   )
 
 (defmethod eieio-done-customizing ((g cogre-base-graph))
   "Finish customizing a graph element."
-  (save-excursion
-    (set-buffer cogre-custom-originating-graph-buffer)
+  (with-current-buffer cogre-custom-originating-graph-buffer
     (cogre-render-buffer g t))
   )
 

@@ -291,8 +291,7 @@ Call the new entrie's activate method."
                 (setq buffer (get-file-buffer file))
               (setq buffer (get-buffer file)))
             (if buffer
-		(save-excursion
-                  (set-buffer buffer)
+		(with-current-buffer buffer
                   (save-excursion
                     (goto-line (oref e line))
                     (beginning-of-line)

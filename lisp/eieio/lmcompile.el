@@ -129,8 +129,7 @@ Works on grep, compile, or other type mode."
   (lmcompile-reinitialize-errors nil)
   
   (let ((marks
-	 (save-excursion
-	   (set-buffer compilation-last-buffer)
+	 (with-current-buffer compilation-last-buffer
 	   compilation-error-list))
 	)
     (while marks
@@ -159,8 +158,7 @@ Works on grep, compile, or other type mode."
           (progn ; Otherwise we assume that we have a marker, which works also on buffers which have no file associated.
             (setq file (buffer-name (marker-buffer (cdr (car marks)))))
 
-            (setq line (save-excursion
-                         (set-buffer (marker-buffer (cdr (car marks))))
+            (setq line (with-current-buffer (marker-buffer (cdr (car marks)))
                          (save-excursion
                            (goto-char (cdr (car marks)))
                            (count-lines 1 (1+ (point))))))))
@@ -171,8 +169,7 @@ Works on grep, compile, or other type mode."
 	(when (or (file-exists-p file) (bufferp (marker-buffer (cdr (car marks)))))
 
 	  (condition-case nil
-	      (save-excursion
-		(set-buffer (marker-buffer errmark))
+	      (with-current-buffer (marker-buffer errmark)
 		(save-excursion
 		  (goto-char errmark)
 	  
@@ -186,8 +183,7 @@ Works on grep, compile, or other type mode."
 	    (error nil))
 
 	  (condition-case nil
-	      (save-excursion
-		(set-buffer (marker-buffer errmark))
+	      (with-current-buffer (marker-buffer errmark)
 		(save-excursion
 		  (goto-char errmark)
 		  (setq txt (buffer-substring-no-properties

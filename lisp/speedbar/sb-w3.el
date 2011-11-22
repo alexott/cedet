@@ -83,10 +83,8 @@
 	nil
       (setq w3-speedbar-last-buffer buffer)
       (erase-buffer)
-      (let ((links (save-excursion (set-buffer buffer)
-                                   (w3-only-links)))
-            (toc (save-excursion
-                   (set-buffer buffer) imenu--index-alist))
+      (let ((links (with-current-buffer buffer (w3-only-links)))
+            (toc (with-current-buffer buffer imenu--index-alist))
 	    (part nil))
 	(insert "History:\n")
 	;; This taken out of w3 which was used to create the history list,

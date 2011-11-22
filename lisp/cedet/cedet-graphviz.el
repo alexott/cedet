@@ -49,8 +49,7 @@
   (let ((b (get-buffer-create "*CEDET graphviz dot*"))
 	(cd default-directory)
 	)
-    (save-excursion
-      (set-buffer b)
+    (with-current-buffer b
       (setq default-directory cd)
       (erase-buffer))
     (apply 'call-process cedet-graphviz-dot-command
@@ -62,8 +61,7 @@
   (let ((b (get-buffer-create "*CEDET graphviz neato*"))
 	(cd default-directory)
 	)
-    (save-excursion
-      (set-buffer b)
+    (with-current-buffer b
       (setq default-directory cd)
       (erase-buffer))
     (apply 'call-process cedet-graphviz-neato-command
@@ -97,8 +95,7 @@ return nil."
   (interactive)
   (let ((b (cedet-graphviz-dot-call (list "-V")))
 	(rev nil))
-    (save-excursion
-      (set-buffer b)
+    (with-current-buffer b
       (goto-char (point-min))
       (re-search-forward "dot \\(?:- graphviz \\)?version \\([0-9.]+\\)" nil t)
       (setq rev (match-string 1))

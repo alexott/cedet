@@ -105,7 +105,7 @@ Return the contents as a list of paths to files.
 Exclude empty directories."
   (let* ((b (cedet-jar-call (list "-tf" jarfile)))
 	 (strs (split-string
-		(save-excursion (set-buffer b) (buffer-string))
+		(with-current-buffer b (buffer-string))
 		"\n" t))
 	 (ans nil))
     (dolist (C strs)

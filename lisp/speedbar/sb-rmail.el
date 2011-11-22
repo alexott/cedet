@@ -89,8 +89,7 @@ Click on the address under Reply to: to reply to this person.
 Under Folders: Click a name to read it, or on the <M> to move the
 current message into that RMAIL folder."
   (let ((from nil))
-    (save-excursion
-      (set-buffer buffer)
+    (with-current-buffer buffer
       (goto-char (point-min))
       (if (not (re-search-forward "^Reply-To: " nil t))
 	  (if (not (re-search-forward "^From:? " nil t))
@@ -112,8 +111,7 @@ current message into that RMAIL folder."
 				  'rmail-speedbar-button 'rmail-reply))
       (speedbar-insert-separator "Folders")
       (let* ((case-fold-search nil)
-	     (df (directory-files (save-excursion (set-buffer buffer)
-						  default-directory)
+	     (df (directory-files (with-current-buffer buffer default-directory)
 				  nil rmail-speedbar-match-folder-regexp)))
 	(while df
 	  (speedbar-insert-button "<M>" 'speedbar-button-face 'highlight

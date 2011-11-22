@@ -158,8 +158,7 @@ TEXT is the name of the package.  TOKEN and INDENT are ignored."
   "Fetch the system by executing rpm."
   (if rpm-system
       nil
-    (save-excursion
-      (set-buffer (get-buffer-create "*rpm output*"))
+    (with-current-buffer (get-buffer-create "*rpm output*")
       ;; Get the database information here
       (if (= (point-min) (point-max))
 	  (progn

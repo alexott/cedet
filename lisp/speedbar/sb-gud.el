@@ -89,7 +89,7 @@ off the specialized speedbar mode."
 	   (equal gud-last-last-frame gud-last-speedbar-stackframe))
       nil
     (setq gud-last-speedbar-buffer buffer)
-    (let* ((ff (save-excursion (set-buffer buffer) gud-find-file))
+    (let* ((ff (with-current-buffer buffer gud-find-file))
 	   ;;(lf (save-excursion (set-buffer buffer) gud-last-last-frame))
 	   (frames
 	    (cond ((eq ff 'gud-gdb-find-file)
@@ -199,8 +199,7 @@ off the specialized speedbar mode."
 (defun gud-gdb-run-command-fetch-lines (command buffer)
   "Run COMMAND, and return when `gud-gdb-fetched-stack-frame-list' is full.
 BUFFER is the GUD buffer in which to run the command."
-  (save-excursion
-    (set-buffer buffer)
+  (with-current-buffer buffer
     (if (save-excursion
 	  (goto-char (point-max))
 	  (beginning-of-line)
