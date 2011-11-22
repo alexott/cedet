@@ -7,7 +7,7 @@
    (semantic-ede-proj-target-grammar "wy"
     :name "wy"
     :path ""
-    :source '("java-tags.wy" "calc.wy" "cim.wy" "java.wy" "python.wy" "javascript.wy")
+    :source '("java-tags.wy" "calc.wy" "java.wy" "python.wy" "javascript.wy")
     )
    (ede-proj-target-elisp "tools"
     :name "tools"
