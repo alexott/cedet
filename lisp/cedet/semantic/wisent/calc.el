@@ -80,7 +80,7 @@ Parse INPUT string and output the result of computation."
     (insert input)
     (let* ((wisent-lex-istream (semantic-lex-buffer))
 	   (answer (wisent-parse semantic--parse-table 'wisent-lex)))
-      (if (cedet-called-interactively-p)
+      (if (cedet-called-interactively-p 'interactive)
 	  (message "%s -> %s" input answer))
       answer)))
 

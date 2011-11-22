@@ -221,7 +221,7 @@ while creating the tags."
 	    ;; Else, no mode, use whatever...
 	    (cogre-export-semantic-method g)))
 
-    (if (cedet-called-interactively-p)
+    (if (cedet-called-interactively-p 'interactive)
 	;; Dump the output.
 	(data-debug-show-stuff tags "CogreSemanticTagExport")
       tags)))

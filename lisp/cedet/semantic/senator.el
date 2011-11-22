@@ -1035,14 +1035,14 @@ Use semantic tags to navigate."
 (defadvice beginning-of-defun (around senator activate)
   "Move backward to the beginning of a defun.
 If semantic tags are available, use them to navigate."
-  (if (and senator-minor-mode (cedet-called-interactively-p))
+  (if (and senator-minor-mode (cedet-called-interactively-p 'any))
       (senator-beginning-of-defun (ad-get-arg 0))
     ad-do-it))
 
 (defadvice end-of-defun (around senator activate)
   "Move forward to next end of defun.
 If semantic tags are available, use them to navigate."
-  (if (and senator-minor-mode (cedet-called-interactively-p))
+  (if (and senator-minor-mode (cedet-called-interactively-p 'any))
       (senator-end-of-defun (ad-get-arg 0))
     ad-do-it))
 
@@ -1050,7 +1050,7 @@ If semantic tags are available, use them to navigate."
   "Make text outside current defun invisible.
 The defun visible is the one that contains point or follows point.
 If semantic tags are available, use them to navigate."
-  (if (and senator-minor-mode (cedet-called-interactively-p))
+  (if (and senator-minor-mode (cedet-called-interactively-p 'any))
       (senator-narrow-to-defun)
     ad-do-it))
 
@@ -1058,7 +1058,7 @@ If semantic tags are available, use them to navigate."
   "Put mark at end of this defun, point at beginning.
 The defun marked is the one that contains point or follows point.
 If semantic tags are available, use them to navigate."
-  (if (and senator-minor-mode (cedet-called-interactively-p))
+  (if (and senator-minor-mode (cedet-called-interactively-p 'any))
       (senator-mark-defun)
     ad-do-it))
 
@@ -1066,7 +1066,7 @@ If semantic tags are available, use them to navigate."
   "Put mark at end of this defun, point at beginning.
 The defun marked is the one that contains point or follows point.
 If semantic tags are available, use them to navigate."
-  (if (and senator-minor-mode (cedet-called-interactively-p))
+  (if (and senator-minor-mode (cedet-called-interactively-p 'any))
       (senator-mark-defun)
     ad-do-it))
 

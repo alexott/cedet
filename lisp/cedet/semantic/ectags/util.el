@@ -162,7 +162,7 @@ The returned buffer will be recycled in future calls to this function."
 		   )))
 	    (message "Exuberant CTags not found.  Found %s" whatver)
 	    nil)
-	(when (cedet-called-interactively-p)
+	(when (cedet-called-interactively-p 'interactive)
 	  (message "Detected Exuberant CTags version : %s %s"
 		   str
 		   (if ropt
