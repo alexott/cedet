@@ -315,7 +315,7 @@
 	 (list $1)))
        (nonterminal
 	((SYMBOL
-	  (setq semantic/grammar-wy--nterm $1 semantic/grammar-wy--rindx 0)
+	  (setq semantic-grammar-wy--nterm $1 semantic-grammar-wy--rindx 0)
 	  COLON rules SEMI)
 	 (wisent-raw-tag
 	  (semantic-tag $1 'nonterminal :children $4))))
@@ -331,12 +331,12 @@
        (rule
 	((rhs)
 	 (let*
-	     ((nterm semantic/grammar-wy--nterm)
-	      (rindx semantic/grammar-wy--rindx)
+	     ((nterm semantic-grammar-wy--nterm)
+	      (rindx semantic-grammar-wy--rindx)
 	      (rhs $1)
 	      comps prec action elt)
-	   (setq semantic/grammar-wy--rindx
-		 (1+ semantic/grammar-wy--rindx))
+	   (setq semantic-grammar-wy--rindx
+		 (1+ semantic-grammar-wy--rindx))
 	   (while rhs
 	     (setq elt
 		   (car rhs)
@@ -353,8 +353,8 @@
 		   (or action comps)
 		   (setq comps
 			 (cons elt comps)
-			 semantic/grammar-wy--rindx
-			 (1+ semantic/grammar-wy--rindx))
+			 semantic-grammar-wy--rindx
+			 (1+ semantic-grammar-wy--rindx))
 		 (setq action
 		       (car elt))))
 	      (t
