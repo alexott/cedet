@@ -5,16 +5,15 @@
 # EDE is the Emacs Development Environment.
 # http://cedet.sourceforge.net/ede.shtml
 #
+wisent_LISP=wisent.el comp.el expr.el grammar.el debug.el grammar-macros.el
+require=$(foreach r,$(1),(require (quote $(r))))
+EMACSFLAGS=-batch --no-site-file -f toggle-debug-on-error -l "../../../../cedet-remove-builtin.el"
 
 top=../../../
 ede_FILES=Project.ede Makefile
 
 wy_SEMANTIC_GRAMMAR=java-tags.wy awk.wy calc.wy cim.wy java.wy python.wy javascript.wy
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
-wisent_LISP=wisent.el comp.el expr.el grammar.el debug.el grammar-macros.el
-require=$(foreach r,$(1),(require (quote $(r))))
 LOADPATH= ../../../../ ../../  ../../../eieio/\
     ../../../speedbar/ 
 wy_SEMANTIC_GRAMMAR_EL=java-tags-wy.el awk-wy.el calc-wy.el cim-wy.el java-wy.el python-wy.el javascript-wy.el
@@ -42,11 +41,11 @@ tools: $(addsuffix c, $(tools_LISP))
 
 .PHONY: wisent
 wisent: $(addsuffix c, $(wisent_LISP))
-wisent: PRELOADS=cedet-remove-builtin cedet-compat
+wisent: PRELOADS=cedet-compat
 
 .PHONY: languages
 languages: $(addsuffix c, $(languages_LISP))
-languages: PRELOADS=cedet-remove-builtin cedet-compat
+languages: PRELOADS=cedet-compat
 
 tags: 
 

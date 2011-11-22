@@ -5,16 +5,15 @@
 # EDE is the Emacs Development Environment.
 # http://cedet.sourceforge.net/ede.shtml
 #
+LOADPATH= ../../speedbar/ ../../eieio/ ../ ../\
+   
+require=$(foreach r,$(1),(require (quote $(r))))
+EMACSFLAGS=-batch --no-site-file -f toggle-debug-on-error -l "../../../cedet-remove-builtin.el"
 
 top=../../
 ede_FILES=Project.ede Makefile
 
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
-LOADPATH= ../../speedbar/ ../../eieio/ ../ ../ ../../../\
-   
-require=$(foreach r,$(1),(require (quote $(r))))
 LOADDEFS=loaddefs.el
 LOADDIRS=.
 ede_LISP=auto.el base.el custom.el dired.el source.el util.el system.el speedbar.el srecode.el files.el locate.el make.el shell.el android.el m3.el
@@ -42,19 +41,19 @@ autoloads:
 
 .PHONY: ede
 ede: $(addsuffix c, $(ede_LISP))
-ede: PRELOADS=cedet-remove-builtin cedet-compat
+ede: PRELOADS=cedet-compat
 
 .PHONY: proj-project
 proj-project: $(addsuffix c, $(proj-project_LISP))
-proj-project: PRELOADS=cedet-remove-builtin cedet-compat
+proj-project: PRELOADS=cedet-compat
 
 .PHONY: projects
 projects: $(addsuffix c, $(projects_LISP))
-projects: PRELOADS=cedet-remove-builtin cedet-compat
+projects: PRELOADS=cedet-compat
 
 .PHONY: aux-lisp
 aux-lisp: $(addsuffix c, $(aux-lisp_LISP))
-aux-lisp: PRELOADS=cedet-remove-builtin cedet-compat
+aux-lisp: PRELOADS=cedet-compat
 
 tags: 
 

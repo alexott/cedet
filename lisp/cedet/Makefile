@@ -5,16 +5,14 @@
 # EDE is the Emacs Development Environment.
 # http://cedet.sourceforge.net/ede.shtml
 #
+LOADPATH= ../speedbar/ ../eieio/ ./ ./ 
+require=$(foreach r,$(1),(require (quote $(r))))
+EMACSFLAGS=-batch --no-site-file -f toggle-debug-on-error -l "../../cedet-remove-builtin.el"
 
 top=../
 ede_FILES=Project.ede Makefile
 
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
-LOADPATH= ../speedbar/ ../eieio/ ./ ./ ../../\
-   
-require=$(foreach r,$(1),(require (quote $(r))))
 LOADDEFS=loaddefs.el
 LOADDIRS=.
 common_LISP=cedet-android.el cedet-autogen.el cedet-compat.el cedet-cscope.el cedet-edebug.el cedet-files.el cedet-global.el cedet-graphviz.el cedet-idutils.el cedet-java.el cedet-m3.el cedet.el data-debug.el fame.el inversion.el mode-local.el pprint.el pulse.el working.el
@@ -40,11 +38,11 @@ autoloads:
 
 .PHONY: common
 common: $(addsuffix c, $(common_LISP))
-common: PRELOADS=cedet-remove-builtin cedet-compat
+common: PRELOADS=cedet-compat
 
 .PHONY: init
 init: $(addsuffix c, $(init_LISP))
-init: PRELOADS=cedet-remove-builtin cedet-compat
+init: PRELOADS=cedet-compat
 
 .PHONY:srecode
 srecode:

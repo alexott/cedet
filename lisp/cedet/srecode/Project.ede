@@ -19,9 +19,10 @@
     :name "srecode"
     :path ""
     :source '("mode.el" "compile.el" "insert.el" "semantic.el" "template.el" "dictionary.el" "args.el" "table.el" "filters.el" "find.el" "ctxt.el" "getset.el" "cpp.el" "expandproto.el" "el.el" "srt.el" "texi.el" "map.el" "extract.el" "java.el" "fields.el" "android.el" "document.el")
-    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
-    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
+    :aux-packages '("cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-compat")
     )
    )
   :metasubproject 't
+  :variables '(("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)' -l \"../../../cedet-remove-builtin.el\""))
   )

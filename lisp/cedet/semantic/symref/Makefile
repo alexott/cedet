@@ -5,15 +5,15 @@
 # EDE is the Emacs Development Environment.
 # http://cedet.sourceforge.net/ede.shtml
 #
+require=$(foreach r,$(1),(require (quote $(r))))
+EMACSFLAGS=-batch --no-site-file -f toggle-debug-on-error -l "../../../../cedet-remove-builtin.el"
 
 top=../../../
 ede_FILES=Project.ede Makefile
 
 symref_LISP=global.el grep.el list.el idutils.el cscope.el filter.el
 EMACS=emacs
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
-require=$(foreach r,$(1),(require (quote $(r))))
-LOADPATH= ../../../speedbar/ ../../../eieio/ ../../ ../../ ../../../../
+LOADPATH= ../../../speedbar/ ../../../eieio/ ../../ ../../
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic/symref
 
@@ -26,7 +26,7 @@ all: symref
 
 .PHONY: symref
 symref: $(addsuffix c, $(symref_LISP))
-symref: PRELOADS=cedet-remove-builtin cedet-compat
+symref: PRELOADS=cedet-compat
 
 tags: 
 

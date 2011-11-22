@@ -18,16 +18,17 @@
     :name "wisent"
     :path ""
     :source '("wisent.el" "comp.el" "expr.el" "grammar.el" "debug.el" "grammar-macros.el")
-    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
-    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
+    :aux-packages '("cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-compat")
     )
    (ede-proj-target-elisp "languages"
     :name "languages"
     :path ""
     :source '("calc.el" "java.el" "java-tags.el" "python.el" "javascript.el")
-    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
-    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
+    :aux-packages '("cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-compat")
     )
    )
   :configuration-variables 'nil
+  :variables '(("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)' -l \"../../../../cedet-remove-builtin.el\""))
   )

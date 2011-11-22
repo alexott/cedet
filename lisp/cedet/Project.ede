@@ -17,20 +17,21 @@
 	      "cedet-files.el" "cedet-global.el" "cedet-graphviz.el" "cedet-idutils.el" "cedet-java.el"
 	      "cedet-m3.el" "cedet.el" "data-debug.el" "fame.el" "inversion.el"
 	      "mode-local.el" "pprint.el" "pulse.el" "working.el")
-    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
-    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
+    :aux-packages '("cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-compat")
     )
    (ede-proj-target-elisp "subproj-top"
     :name "init"
     :path ""
     :source '("semantic.el" "srecode.el" "ede.el" "cogre.el")
-    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
-    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
+    :aux-packages '("cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-compat")
     )
    )
   :web-site-url "http://cedet.sourceforge.net/"
   :web-site-directory "/r@scp:shell.sourceforge.net:cedet/htdocs"
   :ftp-upload-site "/ftp@upload.sourceforge.net:/incoming"
+  :variables '(("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)' -l \"../../cedet-remove-builtin.el\""))
   :configuration-variables 'nil
   :metasubproject 't
   )

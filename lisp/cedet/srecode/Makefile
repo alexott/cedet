@@ -5,16 +5,14 @@
 # EDE is the Emacs Development Environment.
 # http://cedet.sourceforge.net/ede.shtml
 #
+LOADPATH= ../../../ ../  ../../eieio/  ../../speedbar/
+require=$(foreach r,$(1),(require (quote $(r))))
+EMACSFLAGS=-batch --no-site-file -f toggle-debug-on-error -l "../../../cedet-remove-builtin.el"
 
 top=../../
 ede_FILES=Project.ede Makefile
 
-require=$(foreach r,$(1),(require (quote $(r))))
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
-LOADPATH= ../../../ ../  ../../eieio/  ../../speedbar/
-require=$(foreach r,$(1),(require (quote $(r))))
 LOADDEFS=loaddefs.el
 LOADDIRS=.
 lang_SEMANTIC_GRAMMAR=srt.wy
@@ -48,7 +46,7 @@ lang: PRELOADS=cedet-remove-builtin semantic/grammar semantic/bovine/grammar sem
 
 .PHONY: srecode
 srecode: $(addsuffix c, $(srecode_LISP))
-srecode: PRELOADS=cedet-remove-builtin cedet-compat
+srecode: PRELOADS=cedet-compat
 
 tags: 
 

@@ -8,8 +8,9 @@
     :name "ectags"
     :path ""
     :source '("include.el" "mode.el")
-    :aux-packages '("cedet-remove-builtin" "cedet-compat" "cedet" "eieio" "speedbar")
-    :pre-load-packages '("cedet-remove-builtin" "cedet-compat")
+    :aux-packages '("cedet-compat" "cedet" "eieio" "speedbar")
+    :pre-load-packages '("cedet-compat")
     )
    )
+  :variables '(("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)' -l \"../../../../cedet-remove-builtin.el\""))
   )

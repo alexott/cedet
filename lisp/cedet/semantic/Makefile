@@ -5,23 +5,21 @@
 # EDE is the Emacs Development Environment.
 # http://cedet.sourceforge.net/ede.shtml
 #
+LOADPATH= ../../speedbar/ ../../eieio/ ../ ../\
+    ../../../ 
+require=$(foreach r,$(1),(require (quote $(r))))
+EMACSFLAGS=-batch --no-site-file -f toggle-debug-on-error -l "../../../cedet-remove-builtin.el"
 
 top=../../
 ede_FILES=Project.ede Makefile
 
-require=$(foreach r,$(1),(require (quote $(r))))
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
-LOADPATH= ../../speedbar/ ../../eieio/ ../ ../ ../../../\
-   
-require=$(foreach r,$(1),(require (quote $(r))))
 LOADDEFS=loaddefs.el
 LOADDIRS=. analyze bovine decorate ectags symref wisent
 semantic_LISP=fw.el lex.el lex-spp.el edit.el util.el tag.el tag-ls.el find.el sort.el tag-file.el tag-write.el doc.el idle.el custom.el
 utils_LISP=ast.el ctxt.el decorate.el dep.el format.el scope.el
 Database_LISP=db.el db-mode.el db-debug.el db-ebrowse.el db-el.el db-file.el db-find.el db-mk.el db-ref.el db-search.el db-typecache.el db-javascript.el db-global.el db-cscope.el db-javap.el
-tools_LISP=adebug.el chart.el complete.el debug.el elp.el grammar.el ia-sb.el ia.el imenu.el mru-bookmark.el sb.el util-modes.el senator.el
+tools_LISP=adebug.el chart.el complete.el debug.el elp.el grammar.el gram-wy-fallback.el ia-sb.el ia.el imenu.el mru-bookmark.el sb.el util-modes.el senator.el
 subprojects-top_LISP=analyze.el bovine.el decorate.el symref.el wisent.el
 Languages_LISP=texi.el html.el
 maintenance_LISP=ede-grammar.el
@@ -48,31 +46,31 @@ autoloads:
 
 .PHONY: semantic
 semantic: $(addsuffix c, $(semantic_LISP))
-semantic: PRELOADS=cedet-remove-builtin cedet-compat
+semantic: PRELOADS=cedet-compat
 
 .PHONY: utils
 utils: $(addsuffix c, $(utils_LISP))
-utils: PRELOADS=cedet-remove-builtin cedet-compat
+utils: PRELOADS=cedet-compat
 
 .PHONY: Database
 Database: $(addsuffix c, $(Database_LISP))
-Database: PRELOADS=cedet-remove-builtin cedet-compat
+Database: PRELOADS=cedet-compat
 
 .PHONY: tools
 tools: $(addsuffix c, $(tools_LISP))
-tools: PRELOADS=cedet-remove-builtin cedet-compat
+tools: PRELOADS=cedet-compat
 
 .PHONY: subprojects-top
 subprojects-top: $(addsuffix c, $(subprojects-top_LISP))
-subprojects-top: PRELOADS=cedet-remove-builtin cedet-compat
+subprojects-top: PRELOADS=cedet-compat
 
 .PHONY: Languages
 Languages: $(addsuffix c, $(Languages_LISP))
-Languages: PRELOADS=cedet-remove-builtin cedet-compat
+Languages: PRELOADS=cedet-compat
 
 .PHONY: maintenance
 maintenance: $(addsuffix c, $(maintenance_LISP))
-maintenance: PRELOADS=cedet-remove-builtin cedet-compat
+maintenance: PRELOADS=cedet-compat
 
 %-wy.el: %.wy
 	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^

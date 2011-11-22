@@ -5,15 +5,14 @@
 # EDE is the Emacs Development Environment.
 # http://cedet.sourceforge.net/ede.shtml
 #
+require=$(foreach r,$(1),(require (quote $(r))))
+EMACSFLAGS=-batch --no-site-file -f toggle-debug-on-error -l "../../../../cedet-remove-builtin.el"
 
 top=../../../
 ede_FILES=Project.ede Makefile
 
 by_SEMANTIC_GRAMMAR=c.by make.by scm.by erlang.by f90.by
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
-require=$(foreach r,$(1),(require (quote $(r))))
 LOADPATH= ../../../../ ../../  ../../../eieio/\
     ../../../speedbar/ 
 by_SEMANTIC_GRAMMAR_EL=c-by.el make-by.el scm-by.el erlang-by.el f90-by.el
@@ -38,11 +37,11 @@ by: PRELOADS=cedet-remove-builtin semantic/grammar semantic/bovine/grammar seman
 
 .PHONY: bovinator
 bovinator: $(addsuffix c, $(bovinator_LISP))
-bovinator: PRELOADS=cedet-remove-builtin cedet-compat
+bovinator: PRELOADS=cedet-compat
 
 .PHONY: languages
 languages: $(addsuffix c, $(languages_LISP))
-languages: PRELOADS=cedet-remove-builtin cedet-compat
+languages: PRELOADS=cedet-compat
 
 tags: 
 

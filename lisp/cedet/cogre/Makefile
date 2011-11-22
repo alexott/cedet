@@ -5,17 +5,15 @@
 # EDE is the Emacs Development Environment.
 # http://cedet.sourceforge.net/ede.shtml
 #
+LOADPATH= ../../../ ../  ../../eieio/  ../../speedbar/\
+   
+require=$(foreach r,$(1),(require (quote $(r))))
+EMACSFLAGS=-batch --no-site-file -f toggle-debug-on-error -l "../../../cedet-remove-builtin.el"
 
 top=../../
 ede_FILES=Project.ede Makefile
 
-require=$(foreach r,$(1),(require (quote $(r))))
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
 EMACS=emacs
-EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)'
-LOADPATH= ../../../ ../  ../../eieio/  ../../speedbar/\
-   
-require=$(foreach r,$(1),(require (quote $(r))))
 LOADDEFS=loaddefs.el
 LOADDIRS=.
 wy_SEMANTIC_GRAMMAR=wisent-dot.wy
@@ -52,19 +50,19 @@ wy: PRELOADS=cedet-remove-builtin semantic/grammar semantic/bovine/grammar seman
 
 .PHONY: dot
 dot: $(addsuffix c, $(dot_LISP))
-dot: PRELOADS=cedet-remove-builtin cedet-compat
+dot: PRELOADS=cedet-compat
 
 .PHONY: Mode
 Mode: $(addsuffix c, $(Mode_LISP))
-Mode: PRELOADS=cedet-remove-builtin cedet-compat
+Mode: PRELOADS=cedet-compat
 
 .PHONY: hacks
 hacks: $(addsuffix c, $(hacks_LISP))
-hacks: PRELOADS=cedet-remove-builtin cedet-compat
+hacks: PRELOADS=cedet-compat
 
 .PHONY: cogre
 cogre: $(addsuffix c, $(cogre_LISP))
-cogre: PRELOADS=cedet-remove-builtin cedet-compat
+cogre: PRELOADS=cedet-compat
 
 tags: 
 
