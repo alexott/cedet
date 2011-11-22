@@ -51,6 +51,13 @@
 
 (require 'cedet-java)
 
+(eval-when-compile
+  (require 'mode-local)
+  (require 'eieio)
+  (require 'semantic/find)
+  (require 'semantic/db)
+  (require 'semantic/db-find))
+
 ;;; CLASSPATH and PATH EXPANSION
 ;;
 (defcustom semanticdb-javap-classpath '()

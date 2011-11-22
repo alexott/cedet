@@ -36,6 +36,8 @@
 
 ;;; Code:
 
+(require 'eieio)
+
 ;;; WRITER
 ;;
 (defun eieio-xml-override-prin1 (thing)
@@ -54,7 +56,7 @@
       (eieio-list-prin1 list)
     (princ "\n")
     (while list
-      (eieio-xml-override-prin1 thing)
+      (eieio-xml-override-prin1 list)
       (setq list (cdr list)))
     ))
 

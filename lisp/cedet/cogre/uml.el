@@ -30,7 +30,13 @@
 ;; ASCII to draw UML diagrams.
 
 (require 'cogre)
-(eval-when-compile (require 'cogre/semantic))
+(require 'semantic/find)
+(require 'semantic/format)
+(require 'data-debug)
+
+(eval-when-compile
+  (require 'cogre/semantic)
+  (require 'picture))
 
 ;;; Code:
 (defclass cogre-package (cogre-node)

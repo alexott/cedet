@@ -34,112 +34,114 @@
 
 ;;; Compatibility
 ;;
-(if (featurep 'xemacs)
-    (progn
-      (defalias 'semantic-buffer-local-value 'symbol-value-in-buffer)
-      (defalias 'semantic-overlay-live-p
-        (lambda (o)
-          (and (extent-live-p o)
-               (not (extent-detached-p o))
-               (bufferp (extent-buffer o)))))
-      (defalias 'semantic-make-overlay
-	(lambda (beg end &optional buffer &rest rest)
-	  "Xemacs `make-extent', supporting the front/rear advance options."
-	  (let ((ol (make-extent beg end buffer)))
-	    (when rest
-	      (set-extent-property ol 'start-open (car rest))
-	      (setq rest (cdr rest)))
-	    (when rest
-	      (set-extent-property ol 'end-open (car rest)))
-	    ol)))
-      (defalias 'semantic-overlay-put             'set-extent-property)
-      (defalias 'semantic-overlay-get             'extent-property)
-      (defalias 'semantic-overlay-properties      'extent-properties)
-      (defalias 'semantic-overlay-move            'set-extent-endpoints)
-      (defalias 'semantic-overlay-delete          'delete-extent)
-      (defalias 'semantic-overlays-at
-        (lambda (pos)
-	  (condition-case nil
-	      (extent-list nil pos pos)
-	    (error nil))
-	  ))
-      (defalias 'semantic-overlays-in
-        (lambda (beg end) (extent-list nil beg end)))
-      (defalias 'semantic-overlay-buffer          'extent-buffer)
-      (defalias 'semantic-overlay-start           'extent-start-position)
-      (defalias 'semantic-overlay-end             'extent-end-position)
-      (defalias 'semantic-overlay-size            'extent-length)
-      (defalias 'semantic-overlay-next-change     'next-extent-change)
-      (defalias 'semantic-overlay-previous-change 'previous-extent-change)
-      (defalias 'semantic-overlay-lists
-        (lambda () (list (extent-list))))
-      (defalias 'semantic-overlay-p               'extentp)
-      (defalias 'semantic-event-window        'event-window)
-      (defun semantic-read-event ()
-        (let ((event (next-command-event)))
-          (if (key-press-event-p event)
-              (let ((c (event-to-character event)))
-                (if (char-equal c (quit-char))
-                    (keyboard-quit)
-                  c)))
-          event))
-      (defun semantic-popup-menu (menu)
-	"Blockinig version of `popup-menu'"
-	(popup-menu menu)
-	;; Wait...
-	(while (popup-up-p) (dispatch-event (next-event))))
-      )
-  ;; Emacs Bindings
-  (defalias 'semantic-overlay-live-p          'overlay-buffer)
-  (defalias 'semantic-make-overlay            'make-overlay)
-  (defalias 'semantic-overlay-put             'overlay-put)
-  (defalias 'semantic-overlay-get             'overlay-get)
-  (defalias 'semantic-overlay-properties      'overlay-properties)
-  (defalias 'semantic-overlay-move            'move-overlay)
-  (defalias 'semantic-overlay-delete          'delete-overlay)
-  (defalias 'semantic-overlays-at             'overlays-at)
-  (defalias 'semantic-overlays-in             'overlays-in)
-  (defalias 'semantic-overlay-buffer          'overlay-buffer)
-  (defalias 'semantic-overlay-start           'overlay-start)
-  (defalias 'semantic-overlay-end             'overlay-end)
-  (defalias 'semantic-overlay-next-change     'next-overlay-change)
-  (defalias 'semantic-overlay-previous-change 'previous-overlay-change)
-  (defalias 'semantic-overlay-lists           'overlay-lists)
-  (defalias 'semantic-overlay-p               'overlayp)
-  (defalias 'semantic-read-event              'read-event)
-  (defalias 'semantic-popup-menu              'popup-menu)
-  (defun semantic-event-window (event)
-    "Extract the window from EVENT."
-    (car (car (cdr event))))
+(eval-and-compile
+  (if (featurep 'xemacs)
+      (progn
+	(defalias 'semantic-buffer-local-value 'symbol-value-in-buffer)
+	(defalias 'semantic-overlay-live-p
+	  (lambda (o)
+	    (and (extent-live-p o)
+		 (not (extent-detached-p o))
+		 (bufferp (extent-buffer o)))))
+	(defalias 'semantic-make-overlay
+	  (lambda (beg end &optional buffer &rest rest)
+	    "Xemacs `make-extent', supporting the front/rear advance options."
+	    (let ((ol (make-extent beg end buffer)))
+	      (when rest
+		(set-extent-property ol 'start-open (car rest))
+		(setq rest (cdr rest)))
+	      (when rest
+		(set-extent-property ol 'end-open (car rest)))
+	      ol)))
+	(defalias 'semantic-overlay-put             'set-extent-property)
+	(defalias 'semantic-overlay-get             'extent-property)
+	(defalias 'semantic-overlay-properties      'extent-properties)
+	(defalias 'semantic-overlay-move            'set-extent-endpoints)
+	(defalias 'semantic-overlay-delete          'delete-extent)
+	(defalias 'semantic-overlays-at
+	  (lambda (pos)
+	    (condition-case nil
+		(extent-list nil pos pos)
+	      (error nil))
+	    ))
+	(defalias 'semantic-overlays-in
+	  (lambda (beg end) (extent-list nil beg end)))
+	(defalias 'semantic-overlay-buffer          'extent-buffer)
+	(defalias 'semantic-overlay-start           'extent-start-position)
+	(defalias 'semantic-overlay-end             'extent-end-position)
+	(defalias 'semantic-overlay-size            'extent-length)
+	(defalias 'semantic-overlay-next-change     'next-extent-change)
+	(defalias 'semantic-overlay-previous-change 'previous-extent-change)
+	(defalias 'semantic-overlay-lists
+	  (lambda () (list (extent-list))))
+	(defalias 'semantic-overlay-p               'extentp)
+	(defalias 'semantic-event-window        'event-window)
+	(defun semantic-read-event ()
+	  (let ((event (next-command-event)))
+	    (if (key-press-event-p event)
+		(let ((c (event-to-character event)))
+		  (if (char-equal c (quit-char))
+		      (keyboard-quit)
+		    c)))
+	    event))
+	(defun semantic-popup-menu (menu)
+	  "Blockinig version of `popup-menu'"
+	  (popup-menu menu)
+	  ;; Wait...
+	  (while (popup-up-p) (dispatch-event (next-event))))
+	)
+    ;; Emacs Bindings
+    (defalias 'semantic-overlay-live-p          'overlay-buffer)
+    (defalias 'semantic-make-overlay            'make-overlay)
+    (defalias 'semantic-overlay-put             'overlay-put)
+    (defalias 'semantic-overlay-get             'overlay-get)
+    (defalias 'semantic-overlay-properties      'overlay-properties)
+    (defalias 'semantic-overlay-move            'move-overlay)
+    (defalias 'semantic-overlay-delete          'delete-overlay)
+    (defalias 'semantic-overlays-at             'overlays-at)
+    (defalias 'semantic-overlays-in             'overlays-in)
+    (defalias 'semantic-overlay-buffer          'overlay-buffer)
+    (defalias 'semantic-overlay-start           'overlay-start)
+    (defalias 'semantic-overlay-end             'overlay-end)
+    (defalias 'semantic-overlay-next-change     'next-overlay-change)
+    (defalias 'semantic-overlay-previous-change 'previous-overlay-change)
+    (defalias 'semantic-overlay-lists           'overlay-lists)
+    (defalias 'semantic-overlay-p               'overlayp)
+    (defalias 'semantic-read-event              'read-event)
+    (defalias 'semantic-popup-menu              'popup-menu)
+    (defun semantic-event-window (event)
+      "Extract the window from EVENT."
+      (car (car (cdr event))))
 
-  (if (> emacs-major-version 21)
-      (defalias 'semantic-buffer-local-value 'buffer-local-value)
+    (if (> emacs-major-version 21)
+	(defalias 'semantic-buffer-local-value 'buffer-local-value)
 
-    (defun semantic-buffer-local-value (sym &optional buf)
-      "Get the value of SYM from buffer local variable in BUF."
-      (cdr (assoc sym (buffer-local-variables buf)))))
+      (defun semantic-buffer-local-value (sym &optional buf)
+	"Get the value of SYM from buffer local variable in BUF."
+	(cdr (assoc sym (buffer-local-variables buf)))))
+    )
+
+
+  (if (and (not (featurep 'xemacs))
+	   (>= emacs-major-version 21))
+      (defalias 'semantic-make-local-hook 'identity)
+    (defalias 'semantic-make-local-hook 'make-local-hook)
+    )
+
+  (if (featurep 'xemacs)
+      (defalias 'semantic-mode-line-update 'redraw-modeline)
+    (defalias 'semantic-mode-line-update 'force-mode-line-update))
+
+  ;; Since Emacs 22 major mode functions should use `run-mode-hooks' to
+  ;; run major mode hooks.
+  (defalias 'semantic-run-mode-hooks
+    (if (fboundp 'run-mode-hooks)
+	'run-mode-hooks
+      'run-hooks))
+
+  ;; Fancy compat useage now handled in cedet-compat
+  (defalias 'semantic-subst-char-in-string 'subst-char-in-string)
   )
-
-(if (and (not (featurep 'xemacs))
-	 (>= emacs-major-version 21))
-    (defalias 'semantic-make-local-hook 'identity)
-  (defalias 'semantic-make-local-hook 'make-local-hook)
-  )
-
-(if (featurep 'xemacs)
-    (defalias 'semantic-mode-line-update 'redraw-modeline)
-  (defalias 'semantic-mode-line-update 'force-mode-line-update))
-
-;; Since Emacs 22 major mode functions should use `run-mode-hooks' to
-;; run major mode hooks.
-(defalias 'semantic-run-mode-hooks
-  (if (fboundp 'run-mode-hooks)
-      'run-mode-hooks
-    'run-hooks))
-
-;; Fancy compat useage now handled in cedet-compat
-(defalias 'semantic-subst-char-in-string 'subst-char-in-string)
-
 
 (defun semantic-delete-overlay-maybe (overlay)
   "Delete OVERLAY if it is a semantic token overlay."
@@ -257,7 +259,7 @@ will throw a warning when it encounters this symbol."
 	     (not (string-match "cedet" byte-compile-current-file))
 	     )
     (make-obsolete-overload oldfnalias newfn when)
-    (semantic-compile-warn
+    (byte-compile-warn
      "%s: `%s' obsoletes overload `%s'"
      byte-compile-current-file
      newfn
@@ -275,7 +277,7 @@ will throw a warning when it encounters this symbol."
      ;; Only throw this warning when byte compiling things.
      (when (and (boundp 'byte-compile-current-file)
                 byte-compile-current-file)
-       (semantic-compile-warn
+       (byte-compile-warn
         "variable `%s' obsoletes, but isn't alias of `%s'"
         newvar oldvaralias)
      ))))

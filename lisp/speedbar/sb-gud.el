@@ -47,6 +47,7 @@
 ;; 0.1.2 - Changed to handle keymap feature.
 
 (require 'speedbar)
+(eval-when-compile (require 'gud))
 
 ;;; Code:
 (defvar gud-last-speedbar-buffer nil

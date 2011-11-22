@@ -127,7 +127,7 @@ Return a list ((DB-TABLE . TOKEN-LIST) ...)."
    ignore-system
    find-file-match))
 (make-obsolete 'semanticdb-find-nonterminal-by-token
-	       "Please don't use this function")
+	       "Please don't use this function" nil)
 
 ;;;###autoload
 (defun semanticdb-find-nonterminal-by-name
@@ -145,7 +145,7 @@ Return a list ((DB-TABLE . TOKEN) ...)."
    ignore-system
    find-file-match))
 (make-obsolete 'semanticdb-find-nonterminal-by-name
-	       "Please don't use this function")
+	       "Please don't use this function" nil)
 
 ;;;###autoload
 (defun semanticdb-find-nonterminal-by-name-regexp
@@ -163,7 +163,7 @@ Return a list ((DB-TABLE . TOKEN-LIST) ...)."
    ignore-system
    find-file-match))
 (make-obsolete 'semanticdb-find-nonterminal-by-name-regexp
-	       "Please don't use this function")
+	       "Please don't use this function" nil)
 
 
 ;;;###autoload
@@ -182,7 +182,7 @@ Return a list ((DB-TABLE . TOKEN-LIST) ...)."
    ignore-system
    find-file-match))
 (make-obsolete 'semanticdb-find-nonterminal-by-type
-	       "Please don't use this function")
+	       "Please don't use this function" nil)
 
 
 ;;;###autoload
@@ -201,7 +201,7 @@ Return a list ((DB-TABLE . TOKEN-LIST) ...)."
    ignore-system
    find-file-match))
 (make-obsolete 'semanticdb-find-nonterminal-by-property
-	       "Please don't use this function")
+	       "Please don't use this function" nil)
 
 ;;;###autoload
 (defun semanticdb-find-nonterminal-by-extra-spec
@@ -219,7 +219,7 @@ Return a list ((DB-TABLE . TOKEN-LIST) ...)."
    ignore-system
    find-file-match))
 (make-obsolete 'semanticdb-find-nonterminal-by-extra-spec
-	       "Please don't use this function")
+	       "Please don't use this function" nil)
 
 ;;;###autoload
 (defun semanticdb-find-nonterminal-by-extra-spec-value
@@ -237,7 +237,7 @@ Return a list ((DB-TABLE . TOKEN-LIST) ...)."
    ignore-system
    find-file-match))
 (make-obsolete 'semanticdb-find-nonterminal-by-extra-spec-value
-	       "Please don't use this function")
+	       "Please don't use this function" nil)
 
 ;;; Advanced Search Routines
 ;;
