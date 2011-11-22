@@ -12,11 +12,11 @@ EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../.
 top=../../../
 ede_FILES=Project.ede Makefile
 
-wy_SEMANTIC_GRAMMAR=java-tags.wy awk.wy calc.wy cim.wy java.wy python.wy javascript.wy
+wy_SEMANTIC_GRAMMAR=java-tags.wy calc.wy java.wy python.wy javascript.wy
 EMACS=emacs
 LOADPATH= ../../../../ ../../  ../../../eieio/\
     ../../../speedbar/ 
-wy_SEMANTIC_GRAMMAR_EL=java-tags-wy.el awk-wy.el calc-wy.el cim-wy.el java-wy.el python-wy.el javascript-wy.el
+wy_SEMANTIC_GRAMMAR_EL=java-tags-wy.el calc-wy.el java-wy.el python-wy.el javascript-wy.el
 tools_LISP=bison-wisent.el
 languages_LISP=calc.el java.el java-tags.el python.el javascript.el
 VERSION=1.1beta
