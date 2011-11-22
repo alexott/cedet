@@ -207,7 +207,7 @@ If TAG is not provided, then the tag under point is used."
   (when (not tag) (setq tag (semantic-current-tag)))
   ;; Create the buffer for editing.
   (switch-to-buffer (get-buffer-create "*CUSTOMIZE TAG*"))
-  (toggle-read-only -1)
+  (setq buffer-read-only nil)
   (kill-all-local-variables)
   (erase-buffer)
   (let ((all (semantic-overlay-lists)))
