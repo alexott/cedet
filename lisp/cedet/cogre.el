@@ -383,7 +383,8 @@ If there is a PREFIX argument, then force a query for one."
 		;; The prefix
 		current-prefix-arg))
 
-  (when (and (not (cedet-called-interactively-p)) (not node) (symbolp last-command-event))
+  (when (and (not (cedet-called-interactively-p 'any))
+	     (not node) (symbolp last-command-event))
     ;; Check the last key.  Fake keys from toolbar/menu-bar can
     ;; force our hand for some node types.
     (let ((sym (cogre-last-event-element-type cogre-node)))
@@ -427,7 +428,8 @@ If there is a PREFIX argument, then force a query for one."
 					 t))
 		current-prefix-arg))
 
-  (when (and (not (cedet-called-interactively-p)) (not link) (symbolp last-command-event))
+  (when (and (not (cedet-called-interactively-p 'any))
+	     (not link) (symbolp last-command-event))
     ;; Check the last key.  Fake keys from toolbar/menu-bar can
     ;; force our hand for some link types.
     (let ((sym (cogre-last-event-element-type cogre-link)))
