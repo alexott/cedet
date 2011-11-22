@@ -3542,4 +3542,12 @@ See also `wisent-compile-grammar' for more details on AUTOMATON."
 
 (provide 'semantic/wisent/comp)
 
+;; Disable messages with regards to lexical scoping, since this will
+;; produce a bunch of 'lacks a prefix' warnings with the
+;; `wisent-defcontext' trickery above.
+
+;; Local variables:
+;; byte-compile-warnings: (not lexical)
+;; End:
+
 ;;; semantic/wisent/comp.el ends here
