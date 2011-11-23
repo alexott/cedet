@@ -20,7 +20,7 @@
    (ede-proj-target-elisp "opt"
     :name "opt"
     :path ""
-    :source '("rpm.el" "sb-gud.el" "sb-info.el" "sb-rmail.el" "sb-w3.el" "sb-texinfo.el" "sb-html.el" "sb-ant.el")
+    :source '("rpm.el" "sb-info.el" "sb-rmail.el" "sb-texinfo.el" "sb-html.el" "sb-ant.el")
     :aux-packages '("cedet-compat" "sb-texinfo")
     :pre-load-packages '("cedet-compat")
     )

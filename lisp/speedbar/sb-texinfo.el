@@ -195,15 +195,15 @@ of each section are grouped together."
 
     ;; Start recursion.
     (setq level (1+ level))
-    (mapcar '(lambda (x)
-	       (if (eq (length x) 1)
-		   ;;(cons (car (car x)) x)
-		   (car x)
-		 (let ((head (car x)))
-		   (cons (car head)
-			 (cons (cdr head)
-			       (speedbar-format-texinfo-list
-				(cdr x) level))))))
+    (mapcar #'(lambda (x)
+		(if (eq (length x) 1)
+		    ;;(cons (car (car x)) x)
+		    (car x)
+		  (let ((head (car x)))
+		    (cons (car head)
+			  (cons (cdr head)
+				(speedbar-format-texinfo-list
+				 (cdr x) level))))))
 	    new-list)))
 
 (defun speedbar-insert-texinfo-list (indent lst)

@@ -47,6 +47,10 @@
 ;; 0.1.2 - Changed to handle new keymap feature.
 
 ;;; Code:
+
+(require 'speedbar)
+(require 'rmail)
+
 (defvar rmail-speedbar-match-folder-regexp "^[A-Z0-9]+\\(\\.[A-Z0-9]+\\)?$"
   "*This regex is used to match folder names to be displayed in speedbar.
 Enabling this will permit speedbar to display your folders for easy
@@ -146,9 +150,11 @@ TOKEN and INDENT are not used."
 (defun rmail-speedbar-move-message (text token indent)
   "From button TEXT, copy current message to the rmail file specified by TOKEN.
 TEXT and INDENT are not used."
-  (speedbar-with-attached-buffer
-   (message "Moving message to %s" token)
-   (rmail-output-to-rmail-file token)))
+  (if (fboundp 'rmail-output-to-rmail-file)
+      (speedbar-with-attached-buffer
+       (message "Moving message to %s" token)
+       (rmail-output-to-rmail-file token))
+    (error "This Emacs does not have `rmail-output-to-rmail-file'.")))
 
 (provide 'sb-rmail)
 ;;; sb-rmail.el ends here

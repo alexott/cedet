@@ -129,6 +129,8 @@ this version is not backward compatible to 0.14 or earlier.")
 (require 'easymenu)
 (require 'dframe)
 (require 'sb-image)
+  ;; Try to load pulse.  If we can't find it, that's ok.
+(require 'pulse nil t)
 
 ;; customization stuff
 (defgroup speedbar nil
@@ -4001,12 +4003,10 @@ TEXT is the buffer's name, TOKEN and INDENT are unused."
 (defun speedbar-highlight-one-tag-line ()
   "Highlight the current line, unhighlighting a previously jumped to line.
 When available, use `pulse' package."
-  ;; Try to load pulse.  If we can't find it, that's ok.
-  (condition-case nil (require 'pulse) (error nil))
   (if (featurep 'pulse)
       (pulse-momentary-highlight-one-line (point)
 					  'speedbar-highlight-face)
-    (speedbar-highlight-on-tag-line-internal))
+    (speedbar-highlight-one-tag-line-internal))
   )
 
 (defvar speedbar-highlight-one-tag-line nil

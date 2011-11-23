@@ -98,7 +98,7 @@
 	    (nreverse alist)))
       (error t))))
 
-(fset 'speedbar-format-ant-project-list 'speedbar-format-texinfo-list)
+(defalias 'speedbar-format-ant-project-list 'speedbar-format-texinfo-list)
 
 (defun speedbar-insert-ant-project-list (indent lst)
   (speedbar-insert-generic-list indent (speedbar-format-ant-project-list lst indent)

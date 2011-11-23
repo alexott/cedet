@@ -106,7 +106,7 @@
 	    (nreverse alist)))
       (error t))))
 
-(fset 'speedbar-format-html-list 'speedbar-format-texinfo-list)
+(defalias 'speedbar-format-html-list 'speedbar-format-texinfo-list)
 
 (defun speedbar-insert-html-list (indent lst)
   (speedbar-insert-generic-list indent (speedbar-format-html-list lst 0)
