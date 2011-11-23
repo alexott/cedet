@@ -27,6 +27,11 @@
 (require 'ede)
 (require 'semantic/analyze)
 
+(eval-when-compile
+  (require 'sgml-mode)
+  ;; Not available in Emacs 22
+  (require 'nxml-mode nil t))
+
 ;;; Code:
 (defvar ede-android-project-list nil
   "List of projects created by option `ede-android-project'.")
@@ -345,6 +350,8 @@ Argument COMMAND is the command to use when compiling."
   "Start debugging the current project."
   (ede-android-debug-project (ede-project-root-directory (ede-current-project))))
 
+(defvar android-jdb-port-history)
+(declare-function android-jdb "android")
 (defun ede-android-debug-project (startdir)
   "Start the android JDB debugger in a buffer.
 STARTDIR is the directory to start jdb in.

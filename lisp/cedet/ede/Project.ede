@@ -35,7 +35,7 @@
    (ede-proj-target-elisp "aux-lisp"
     :name "aux-lisp"
     :path ""
-    :source '("autoconf-edit.el" "autoconf-compat.el" "makefile-edit.el")
+    :source '("autoconf-edit.el" "makefile-edit.el")
     :aux-packages '("cedet-compat" "cedet" "eieio" "speedbar")
     :pre-load-packages '("cedet-compat")
     )

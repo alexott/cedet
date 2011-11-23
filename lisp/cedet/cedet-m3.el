@@ -27,6 +27,8 @@
 ;; by figuring out what the "best thing to do" might be, and collecting
 ;; those concepts together in the menu.
 
+(require 'semantic/util-modes)
+
 ;;; Code:
 (if (featurep 'xemacs)
     (progn

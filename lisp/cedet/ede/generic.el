@@ -79,6 +79,7 @@
 
 (require 'eieio-opt)
 (require 'ede)
+(require 'ede/shell)
 (require 'semantic/db)
 
 ;;; Code:

@@ -25,6 +25,8 @@
 
 ;;; Code:
 
+(require 'ede)
+(require 'cedet-m3)
 
 ;;;###autoload
 (defun ede-m3-ede-items ()
