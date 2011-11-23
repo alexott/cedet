@@ -40,6 +40,7 @@
 (require 'eieio-base)
 (require 'semantic)
 (require 'cogre/mode)
+
 (eval-when-compile
   (require 'cogre/picture-hack))
 

@@ -38,11 +38,15 @@
 (require 'semantic)
 (require 'semantic/bovine)
 (require 'semantic/bovine/f90-by)
+(require 'semantic/find)
+(require 'semantic/decorate/mode)
 (require 'backquote)
 
 (eval-when-compile
+  (require 'mode-local)
   (require 'semantic/ctxt)
   (require 'semantic/decorate)
+  (require 'semantic/dep)
   (require 'f90))
 
 ;;; Code:
@@ -392,9 +396,7 @@ TAG has to be of class 'program, 'function or 'subroutine."
     (beginning-of-line)
     (let ((start (point)))
       (semantic-f90-skip-specs)
-      (setq honk (semantic-parse-region start (point) 'bovine-inner-scope nil t))))
-  )
-
+      (semantic-parse-region start (point) 'bovine-inner-scope nil t))))
 
 (defun semantic-f90-get-type-members (tag)
   "Get type members of dervived type given in TAG."

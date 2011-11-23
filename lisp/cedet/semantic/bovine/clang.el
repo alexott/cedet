@@ -46,6 +46,14 @@
 ;;; Code:
 
 (require 'inversion)
+(require 'ede)
+(require 'ede/proj)
+(require 'ede/cpp-root)
+(require 'semantic/analyze)
+(require 'semantic/analyze/complete)
+
+(eval-when-compile
+  (require 'mode-local))
 
 (defvar semantic-clang-binary "/usr/bin/clang"
   "Binary for clang.")
