@@ -51,7 +51,10 @@
 (require 'cogre)
 (require 'cogre/srecode)
 (require 'cogre/uml)
+(require 'cogre/dot-mode)
+(require 'srecode/semantic)
 (require 'cedet-graphviz)
+
 (eval-when-compile (require 'ps-print))
 ;;; Code:
 (defvar cogre-export-max-y nil

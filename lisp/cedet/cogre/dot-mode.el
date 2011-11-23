@@ -29,6 +29,10 @@
 (require 'mode-local)
 ;;; Code:
 
+;; Silence the byte compiler
+(declare-function graphviz-dot-mode "graphviz-dot-mode")
+(defvar graphviz-dot-mode-syntax-table)
+
 ;;; Syntax table
 (defcustom cogre-dot-mode-hook nil
   "Hook called when cogre-dot mode starts.

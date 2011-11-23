@@ -34,8 +34,9 @@
 (require 'semantic/format)
 (require 'data-debug)
 
+(declare-function cogre-peer-semantic-child-p "cogre/semantic")
+
 (eval-when-compile
-  (require 'cogre/semantic)
   (require 'picture))
 
 ;;; Code:

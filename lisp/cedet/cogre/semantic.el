@@ -32,11 +32,20 @@
 ;; To convert nodes into tags, see `cogre/convert.el'.
 
 (require 'semantic)
-(require 'cogre/srecode)
+(require 'semantic/tag-ls)
+(require 'semantic/sort)
+(require 'semantic/db-find)
+(require 'semantic/analyze)
 (require 'cogre)
+(require 'cogre/srecode)
+(require 'cogre/layout)
+(require 'srecode/find)
+(require 'srecode/semantic)
 
 (eval-when-compile
-  (require 'semantic/find))
+  (require 'eieio)
+  (require 'semantic/find)
+  (require 'cl))
 
 ;;; Code:
 

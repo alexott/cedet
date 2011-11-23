@@ -35,6 +35,12 @@
 (require 'eieio-opt)
 (require 'eieio-base)
 (require 'cogre)
+(require 'cogre/convert)
+(require 'cogre/semantic)
+(require 'semantic/senator)
+
+(eval-when-compile
+  (require 'cl))
 
 ;;; Code:
 (defface cogre-box-face  '((((class color) (background dark))

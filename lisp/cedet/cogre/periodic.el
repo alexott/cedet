@@ -28,6 +28,8 @@
 
 ;;; Code:
 (require 'cogre/uml)
+(require 'cogre/picture-hack)
+(require 'cogre/mode)
 
 ;;;###autoload
 (defun cogre-periodic ()

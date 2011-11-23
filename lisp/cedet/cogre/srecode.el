@@ -25,6 +25,11 @@
 
 (require 'srecode)
 (require 'srecode/dictionary)
+(require 'srecode/map)
+(require 'srecode/find)
+(require 'semantic)
+(require 'semantic/find)
+(require 'cogre)
 
 ;;; Code:
 ;;;###autoload

@@ -26,6 +26,7 @@
 ;;; Code:
 
 (require 'cogre/uml)
+(require 'picture)
 
 ;;;###autoload
 (defun cogre-export-ascii ()

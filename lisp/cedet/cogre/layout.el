@@ -26,6 +26,7 @@
 ;; Calls out to graphviz for node position information.
 
 (require 'cogre/convert)
+(require 'cogre/dot-mode)
 
 ;;; Code:
 ;;;###autoload

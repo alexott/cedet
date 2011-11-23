@@ -40,6 +40,7 @@
 ;;; Code:
 (require 'semantic/wisent)
 (require 'semantic)
+(require 'semantic/ctxt)
 (require 'cogre/wisent-dot-wy)
 
 (define-mode-local-override semantic-tag-components
