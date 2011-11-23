@@ -37,10 +37,11 @@
 (require 'semantic/bovine)
 (require 'backquote)
 (require 'semantic/bovine/erlang-by)
-;;(require 'erlang-edoc)
 
 ;; Depending on what elements you include specialized support for
 (eval-when-compile
+  (require 'mode-local)
+  (require 'semantic/dep)
   (require 'semantic/ctxt))
 
 (define-lex-simple-regex-analyzer semantic-erlang-lex-char

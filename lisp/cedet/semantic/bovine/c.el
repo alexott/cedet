@@ -32,6 +32,7 @@
 (require 'semantic/idle)
 (require 'semantic/lex-spp)
 (require 'semantic/bovine/c-by)
+(require 'semantic/db-find)
 (require 'hideif)
 
 (eval-when-compile

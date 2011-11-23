@@ -34,6 +34,13 @@
 (eval-when-compile
   (require 'semantic/find))
 
+
+(defvar bovine-grammar-menu
+  '("BY Grammar"
+    )
+  "BY mode specific grammar menu.
+Menu items are appended to the common grammar menu.")
+
 ;; Note, declare mode before loading macros to solve order dependency.
 
 ;;;###autoload
@@ -51,10 +58,12 @@
 (defvar bovine--grammar-macros nil)
 
 ;; Detect if we have an Emacs with newstyle unquotes allowed outside
-;; of backquote.
-;; This should probably be changed to a test to (= emacs-major-version 24)
-;; when it is released, but at the moment it might be possible that people
-;; are using an older snapshot.
+;; of backquote.  This should probably be changed to a test to (>=
+;; emacs-major-version 24) when it is released, but at the moment it
+;; might be possible that people are using an older snapshot.
+;; This test will generate an 'old-style backquote' warning, but this
+;; is intentional.
+(eval-when-compile (message "\nIgnore the following backquote warning."))
 (defvar bovine--grammar-newstyle-unquote
   (equal '(, test) (read ",test")))
 
@@ -360,11 +369,6 @@ manual."
          (format "semantic-equivalent-major-modes '%S\n" mode)
        ""))))
 
-(defvar bovine-grammar-menu
-  '("BY Grammar"
-    )
-  "BY mode specific grammar menu.
-Menu items are appended to the common grammar menu.")
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.by$" . bovine-grammar-mode))

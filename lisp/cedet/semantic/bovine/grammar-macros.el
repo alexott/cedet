@@ -34,7 +34,8 @@
 
 ;;; Code:
 
-(require 'mode-local)
+(eval-when-compile
+  (require 'mode-local))
 
 (defun bovine-grammar-EXPAND (bounds nonterm)
   "Expand call to EXPAND grammar macro.
@@ -106,6 +107,7 @@ See the function `semantic-tag-new-alias' for the meaning of arguments
 NAME, ALIASCLASS, DEFINITION and ATTRIBUTES."
   `(semantic-tag-new-alias ,name ,aliasclass ,definition ,@attributes))
 
+(defvar semantic-grammar-macros)
 (defvar-mode-local bovine-grammar-mode semantic-grammar-macros
   '(
     (ASSOC          . semantic-grammar-ASSOC)
