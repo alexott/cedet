@@ -7,12 +7,12 @@
 #
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../../cedet-remove-builtin.el"
+EMACS=@echo "    > $@";emacs
 
 top=../../../
 ede_FILES=Project.ede Makefile
 
 by_SEMANTIC_GRAMMAR=c.by make.by scm.by erlang.by f90.by
-EMACS=emacs
 LOADPATH= ../../../../ ../../  ../../../eieio/\
     ../../../speedbar/ 
 by_SEMANTIC_GRAMMAR_EL=c-by.el make-by.el scm-by.el erlang-by.el f90-by.el
@@ -26,14 +26,14 @@ DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic/bovine
 all: by bovinator languages
 
 %-by.el: %.by
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
 
 .PHONY: by
 by: $(addsuffix -by.el, $(basename $(by_SEMANTIC_GRAMMAR)))
 by: PRELOADS=cedet-remove-builtin semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
 %.elc: %.el
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 
 .PHONY: bovinator
 bovinator: $(addsuffix c, $(bovinator_LISP))

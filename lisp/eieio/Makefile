@@ -8,11 +8,11 @@
 LOADPATH= ../cedet/  ./
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../cedet-remove-builtin.el"
+EMACS=@echo "    > $@";emacs
 
 top=../
 ede_FILES=Project.ede Makefile
 
-EMACS=emacs
 LOADDEFS=loaddefs.el
 LOADDIRS=.
 eieio_LISP=eieio.el eieio-comp.el eieio-opt.el eieio-custom.el eieio-doc.el eieio-base.el eieio-datadebug.el
@@ -30,11 +30,11 @@ clean-autoloads:
 
 .PHONY: autoloads
 autoloads: 
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
 
 
 %.elc: %.el
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 
 .PHONY: eieio
 eieio: $(addsuffix c, $(eieio_LISP))

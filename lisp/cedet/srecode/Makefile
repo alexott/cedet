@@ -8,11 +8,11 @@
 LOADPATH= ../../../ ../  ../../eieio/  ../../speedbar/
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../cedet-remove-builtin.el"
+EMACS=@echo "    > $@";emacs
 
 top=../../
 ede_FILES=Project.ede Makefile
 
-EMACS=emacs
 LOADDEFS=loaddefs.el
 LOADDIRS=.
 lang_SEMANTIC_GRAMMAR=srt.wy
@@ -31,18 +31,18 @@ clean-autoloads:
 
 .PHONY: autoloads
 autoloads: 
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
 
 
 %-wy.el: %.wy
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
 
 .PHONY: lang
 lang: $(addsuffix -wy.el, $(basename $(lang_SEMANTIC_GRAMMAR)))
 lang: PRELOADS=cedet-remove-builtin semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
 %.elc: %.el
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 
 .PHONY: srecode
 srecode: $(addsuffix c, $(srecode_LISP))

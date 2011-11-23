@@ -8,12 +8,12 @@
 wisent_LISP=wisent.el comp.el expr.el grammar.el debug.el grammar-macros.el
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../../cedet-remove-builtin.el"
+EMACS=@echo "    > $@";emacs
 
 top=../../../
 ede_FILES=Project.ede Makefile
 
 wy_SEMANTIC_GRAMMAR=java-tags.wy calc.wy java.wy python.wy javascript.wy
-EMACS=emacs
 LOADPATH= ../../../../ ../../  ../../../eieio/\
     ../../../speedbar/ 
 wy_SEMANTIC_GRAMMAR_EL=java-tags-wy.el calc-wy.el java-wy.el python-wy.el javascript-wy.el
@@ -27,14 +27,14 @@ DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic/wisent
 all: wy tools wisent languages
 
 %-wy.el: %.wy
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
 
 .PHONY: wy
 wy: $(addsuffix -wy.el, $(basename $(wy_SEMANTIC_GRAMMAR)))
 wy: PRELOADS=cedet-remove-builtin semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
 %.elc: %.el
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 
 .PHONY: tools
 tools: $(addsuffix c, $(tools_LISP))

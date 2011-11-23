@@ -7,12 +7,12 @@
 #
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../../cedet-remove-builtin.el"
+EMACS=@echo "    > $@";emacs
 
 top=../../../
 ede_FILES=Project.ede Makefile
 
 symref_LISP=global.el grep.el list.el idutils.el cscope.el filter.el
-EMACS=emacs
 LOADPATH= ../../../speedbar/ ../../../eieio/ ../../ ../../
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic/symref
@@ -22,7 +22,7 @@ DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic/symref
 all: symref
 
 %.elc: %.el
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 
 .PHONY: symref
 symref: $(addsuffix c, $(symref_LISP))

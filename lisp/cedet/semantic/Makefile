@@ -9,11 +9,11 @@ LOADPATH= ../../speedbar/ ../../eieio/ ../ ../\
     ../../../ 
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../cedet-remove-builtin.el"
+EMACS=@echo "    > $@";emacs
 
 top=../../
 ede_FILES=Project.ede Makefile
 
-EMACS=emacs
 LOADDEFS=loaddefs.el
 LOADDIRS=. analyze bovine decorate ectags symref wisent
 semantic_LISP=fw.el lex.el lex-spp.el edit.el util.el tag.el tag-ls.el find.el sort.el tag-file.el tag-write.el doc.el idle.el custom.el
@@ -38,11 +38,11 @@ clean-autoloads:
 
 .PHONY: autoloads
 autoloads: 
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
 
 
 %.elc: %.el
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 
 .PHONY: semantic
 semantic: $(addsuffix c, $(semantic_LISP))
@@ -73,7 +73,7 @@ maintenance: $(addsuffix c, $(maintenance_LISP))
 maintenance: PRELOADS=cedet-compat
 
 %-wy.el: %.wy
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
 
 .PHONY: metagrammar
 metagrammar: $(addsuffix -wy.el, $(basename $(metagrammar_SEMANTIC_GRAMMAR)))

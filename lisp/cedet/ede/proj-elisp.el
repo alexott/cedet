@@ -95,7 +95,7 @@ For Emacs Lisp, return addsuffix command on source files."
 		 "elisp-inference-rule"
 		 :target "%.elc"
 		 :dependencies "%.el"
-		 :rules '("\"$(EMACS)\" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
+		 :rules '("$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
 --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^")))
    :autoconf '("AM_PATH_LISPDIR")
    :sourcetype '(ede-source-emacs)
@@ -318,7 +318,7 @@ Lays claim to all .elc files that match .el files in this target."
 		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'")
 		("require" . "$(foreach r,$(1),(require (quote $(r))))"))
    :commands
-   '("\"$(EMACS)\" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
+   '("$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
 --eval '(setq generated-autoload-file \"$(abspath $(LOADDEFS))\")' \
 -f batch-update-autoloads $(abspath $(LOADDIRS))")
    :rules (list (ede-makefile-rule "clean-autoloads" :target "clean-autoloads" :phony t :rules '("rm -f $(LOADDEFS)")))

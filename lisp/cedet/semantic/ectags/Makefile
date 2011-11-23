@@ -7,12 +7,12 @@
 #
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../../cedet-remove-builtin.el"
+EMACS=@echo "    > $@";emacs
 
 top=../../../
 ede_FILES=Project.ede Makefile
 
 ectags_LISP=util.el lang.el lang2.el parse.el
-EMACS=emacs
 LOADPATH= ../../../speedbar/ ../../../eieio/ ../../ ../../
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic/ectags
@@ -22,7 +22,7 @@ DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic/ectags
 all: ectags
 
 %.elc: %.el
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 
 .PHONY: ectags
 ectags: $(addsuffix c, $(ectags_LISP))

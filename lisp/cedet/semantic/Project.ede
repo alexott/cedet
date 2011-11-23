@@ -66,5 +66,6 @@
     :source '("grammar.wy")
     )
   )
-  :variables '(("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)' -l \"../../../cedet-remove-builtin.el\""))
+  :variables '(("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)' -l \"../../../cedet-remove-builtin.el\"")
+	       ("EMACS" . "@echo \"    > $@\";emacs"))
 )

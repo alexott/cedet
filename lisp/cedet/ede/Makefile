@@ -9,11 +9,11 @@ LOADPATH= ../../speedbar/ ../../eieio/ ../ ../\
    
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../cedet-remove-builtin.el"
+EMACS=@echo "    > $@";emacs
 
 top=../../
 ede_FILES=Project.ede Makefile
 
-EMACS=emacs
 LOADDEFS=loaddefs.el
 LOADDIRS=.
 ede_LISP=auto.el base.el custom.el dired.el source.el util.el system.el speedbar.el srecode.el files.el locate.el make.el shell.el android.el m3.el
@@ -33,11 +33,11 @@ clean-autoloads:
 
 .PHONY: autoloads
 autoloads: 
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
 
 
 %.elc: %.el
-	"$(EMACS)" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 
 .PHONY: ede
 ede: $(addsuffix c, $(ede_LISP))

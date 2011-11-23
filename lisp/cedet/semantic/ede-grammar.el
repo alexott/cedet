@@ -89,7 +89,7 @@ For Emacs Lisp, return addsuffix command on source files."
 		 "elisp-inference-rule"
 		 :target "%-wy.el"
 		 :dependencies "%.wy"
-		 :rules '("\"$(EMACS)\" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
+		 :rules '("$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
 --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^")))
    :sourcetype '(semantic-ede-source-grammar-wisent)
    :objectextention "-wy.el"
@@ -116,7 +116,7 @@ For Emacs Lisp, return addsuffix command on source files."
 		 "elisp-inference-rule"
 		 :target "%-by.el"
 		 :dependencies "%.by"
-		 :rules '("\"$(EMACS)\" $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
+		 :rules '("$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
 --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^")))
    :sourcetype '(semantic-ede-source-grammar-bovine)
    :objectextention "-by.el"

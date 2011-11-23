@@ -625,16 +625,18 @@ was marked unparseable, then do nothing, and return the cache."
 
 ;;;; Parse the whole system.
      ((semantic-parse-tree-needs-rebuild-p)
-      ;; Use Emacs' built-in progress-reporter
-      (let ((semantic--progress-reporter
-	     (and (>= (point-max) semantic-minimum-working-buffer-size)
-		  (eq semantic-working-type 'percent)
-		  (make-progress-reporter
-		   (semantic-parser-working-message (buffer-name))
-		   0 100))))
-	(setq res (semantic-parse-region (point-min) (point-max)))
-	(if semantic--progress-reporter
-	    (progress-reporter-done semantic--progress-reporter)))
+      ;; Use Emacs' built-in progress-reporter (only interactive).
+      (if (cedet-called-interactively-p 'interactive)
+	  (let ((semantic--progress-reporter
+		 (and (>= (point-max) semantic-minimum-working-buffer-size)
+		      (eq semantic-working-type 'percent)
+		      (make-progress-reporter
+		       (semantic-parser-working-message (buffer-name))
+		       0 100))))
+	    (setq res (semantic-parse-region (point-min) (point-max)))
+	    (if semantic--progress-reporter
+		(progress-reporter-done semantic--progress-reporter)))
+	(setq res (semantic-parse-region (point-min) (point-max))))
 
       ;; Clear the caches when we see there were no errors.
       ;; But preserve the unmatched syntax cache and warnings!

@@ -31,7 +31,8 @@
   :web-site-url "http://cedet.sourceforge.net/"
   :web-site-directory "/r@scp:shell.sourceforge.net:cedet/htdocs"
   :ftp-upload-site "/ftp@upload.sourceforge.net:/incoming"
-  :variables '(("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)' -l \"../../cedet-remove-builtin.el\""))
+  :variables '(("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)' -l \"../../cedet-remove-builtin.el\"")
+	       ("EMACS" . "@echo \"    > $@\";emacs"))
   :configuration-variables 'nil
   :metasubproject 't
   )
