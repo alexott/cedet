@@ -13,7 +13,7 @@ top=../../../
 ede_FILES=Project.ede Makefile
 
 by_SEMANTIC_GRAMMAR=c.by make.by scm.by erlang.by f90.by
-LOADPATH= ../../../../ ../../  ../../../eieio/\
+LOADPATH= ../../ ../../  ../../../eieio/\
     ../../../speedbar/ 
 by_SEMANTIC_GRAMMAR_EL=c-by.el make-by.el scm-by.el erlang-by.el f90-by.el
 bovinator_LISP=grammar.el debug.el grammar-macros.el
@@ -30,7 +30,7 @@ all: by bovinator languages
 
 .PHONY: by
 by: $(addsuffix -by.el, $(basename $(by_SEMANTIC_GRAMMAR)))
-by: PRELOADS=cedet-remove-builtin semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
+by: PRELOADS=cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
 %.elc: %.el
 	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^

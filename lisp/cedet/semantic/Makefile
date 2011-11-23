@@ -6,7 +6,7 @@
 # http://cedet.sourceforge.net/ede.shtml
 #
 LOADPATH= ../../speedbar/ ../../eieio/ ../ ../\
-    ../../../ 
+   
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../cedet-remove-builtin.el"
 EMACS=@echo "    > $@";emacs
@@ -30,7 +30,7 @@ DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic
 
 
 
-all: autoloads semantic utils Database tools subprojects-top Languages metagrammar wisent Symref ectags Decorator bovinator Analyzer
+all: semantic utils Database tools subprojects-top Languages metagrammar wisent Symref ectags Decorator bovinator Analyzer
 
 .PHONY: clean-autoloads
 clean-autoloads: 
@@ -77,7 +77,7 @@ maintenance: PRELOADS=cedet-compat
 
 .PHONY: metagrammar
 metagrammar: $(addsuffix -wy.el, $(basename $(metagrammar_SEMANTIC_GRAMMAR)))
-metagrammar: PRELOADS=cedet-remove-builtin semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
+metagrammar: PRELOADS=cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
 .PHONY:wisent
 wisent:

@@ -7,6 +7,7 @@
    (ede-proj-target-elisp-autoloads "autoloads"
     :name "autoloads"
     :path ""
+    :partofall nil
     :autoload-file "loaddefs.el"
     :autoload-dirs '("." "analyze" "bovine" "decorate" "ectags" "symref" "wisent")
     )

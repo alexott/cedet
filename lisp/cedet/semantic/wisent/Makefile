@@ -14,7 +14,7 @@ top=../../../
 ede_FILES=Project.ede Makefile
 
 wy_SEMANTIC_GRAMMAR=java-tags.wy calc.wy java.wy python.wy javascript.wy
-LOADPATH= ../../../../ ../../  ../../../eieio/\
+LOADPATH= ../../ ../../  ../../../eieio/\
     ../../../speedbar/ 
 wy_SEMANTIC_GRAMMAR_EL=java-tags-wy.el calc-wy.el java-wy.el python-wy.el javascript-wy.el
 tools_LISP=bison-wisent.el
@@ -31,7 +31,7 @@ all: wy tools wisent languages
 
 .PHONY: wy
 wy: $(addsuffix -wy.el, $(basename $(wy_SEMANTIC_GRAMMAR)))
-wy: PRELOADS=cedet-remove-builtin semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
+wy: PRELOADS=cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
 %.elc: %.el
 	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^

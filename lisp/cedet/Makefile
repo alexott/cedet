@@ -22,7 +22,7 @@ DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet
 
 
 
-all: autoloads common init srecode semantic EDE Cogre
+all: common init srecode semantic EDE Cogre
 
 .PHONY: clean-autoloads
 clean-autoloads: 

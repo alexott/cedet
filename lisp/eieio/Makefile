@@ -22,7 +22,7 @@ DISTDIR=$(top)cedet-topdir-$(VERSION)/eieio
 
 
 
-all: autoloads eieio examples
+all: eieio examples
 
 .PHONY: clean-autoloads
 clean-autoloads: 

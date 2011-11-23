@@ -22,7 +22,7 @@ DISTDIR=$(top)cedet-topdir-$(VERSION)/speedbar
 
 
 
-all: autoloads speedbar opt
+all: speedbar opt
 
 .PHONY: clean-autoloads
 clean-autoloads: 

@@ -25,7 +25,7 @@ DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/ede
 
 
 
-all: autoloads ede proj-project projects aux-lisp
+all: ede proj-project projects aux-lisp
 
 .PHONY: clean-autoloads
 clean-autoloads: 
