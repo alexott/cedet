@@ -32,6 +32,7 @@
 (require 'eieio)
 (require 'button)
 (require 'help-mode)
+(require 'find-func)
 
 ;;; Code:
 ;;;###autoload

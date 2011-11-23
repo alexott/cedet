@@ -103,6 +103,12 @@ SKIPLIST is a list of objects to skip"
 		nil skiplist)
   (insert "@end menu\n"))
 
+;; Silence the byte compiler
+(eval-when-compile
+  (defvar indexstring)
+  (defvar root-class)
+  (defvar rclass))
+
 (defun eieiodoc-one-node (class level)
   "Create a node for CLASS, and for all subclasses of CLASS in order.
 This function should only be called by `eieiodoc-class'
@@ -362,5 +368,11 @@ that class.
   string)
 
 (provide 'eieio-doc)
+
+;; Disable messages with regards to lexical scoping (see `eieiodoc-one-node').
+
+;; Local variables:
+;; byte-compile-warnings: (not lexical)
+;; End:
 
 ;;; eieio-doc.el ends here

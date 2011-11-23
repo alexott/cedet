@@ -35,6 +35,9 @@
 
 (require 'eieio)
 
+(eval-when-compile
+  (require 'cl))
+
 ;;; Code:
 ;; Compatibility
 (eval-and-compile
@@ -293,8 +296,8 @@ Call the new entrie's activate method."
             (if buffer
 		(with-current-buffer buffer
                   (save-excursion
-                    (goto-line (oref e line))
-                    (beginning-of-line)
+		    (goto-char (point-min))
+                    (forward-line (1- (oref e line)))
                     (oset e overlay
                           (linemark-make-overlay (point)
                                                  (save-excursion
@@ -376,13 +379,21 @@ Call the new entrie's activate method."
   "Move to the next bookmark in this buffer."
   (interactive)
   (let ((n (linemark-next-in-buffer viss-bookmark-group 1 t)))
-    (if n (goto-line (oref n line)) (ding))))
+    (if n
+	(progn
+	  (goto-char (point-min))
+	  (forward-line (1- (oref n line))))
+      (ding))))
 
 (defun viss-bookmark-prev-buffer ()
   "Move to the next bookmark in this buffer."
   (interactive)
   (let ((n (linemark-next-in-buffer viss-bookmark-group -1 t)))
-    (if n (goto-line (oref n line)) (ding))))
+    (if n
+	(progn
+	  (goto-char (point-min))
+	  (forward-line (1- (oref n line))))
+      (ding))))
 
 (defun viss-bookmark-clear-all-buffer ()
   "Clear all bookmarks in this buffer."
