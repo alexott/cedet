@@ -691,20 +691,6 @@ Return the overlay."
     (semantic-overlay-put o 'face 'highlight)
     o))
 
-(defsubst semantic-lex-debug-break (token)
-  "Break during lexical analysis at TOKEN."
-  (when semantic-lex-debug
-    (let ((o nil))
-      (unwind-protect
-	  (progn
-	    (when token
-	      (setq o (semantic-lex-highlight-token token)))
-	    (semantic-read-event
-	     (format "%S :: Depth: %d :: SPC - continue" token semantic-lex-current-depth))
-	    )
-	(when o
-	  (semantic-overlay-delete o))))))
-
 ;;; Lexical analyzer creation
 ;;
 ;; Code for creating a lex function from lists of analyzers.
@@ -753,6 +739,20 @@ a LOCAL option.")
 (defvar semantic-lex-block-stack nil)
 ;;(defvar semantic-lex-timeout 5
 ;;  "*Number of sections of lexing before giving up.")
+
+(defsubst semantic-lex-debug-break (token)
+  "Break during lexical analysis at TOKEN."
+  (when semantic-lex-debug
+    (let ((o nil))
+      (unwind-protect
+	  (progn
+	    (when token
+	      (setq o (semantic-lex-highlight-token token)))
+	    (semantic-read-event
+	     (format "%S :: Depth: %d :: SPC - continue" token semantic-lex-current-depth))
+	    )
+	(when o
+	  (semantic-overlay-delete o))))))
 
 (defmacro define-lex (name doc &rest analyzers)
   "Create a new lexical analyzer with NAME.

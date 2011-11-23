@@ -26,7 +26,9 @@
 ;; the upstream CEDET repository.
 
 ;;; Code:
-
+
+(require 'semantic/lex)
+
 ;;; Prologue
 ;;
 ;; Current parsed nonterminal name.
@@ -428,7 +430,6 @@
 
 ;;; Analyzers
 ;;
-(require 'semantic/lex)
 
 (define-lex-block-type-analyzer semantic-grammar-wy--<block>-block-analyzer
   "block analyzer for <block> tokens."
@@ -449,6 +450,7 @@
     (COLON . ":"))
   'punctuation)
 
+(defvar semantic-grammar-lex-c-char-re)
 (define-lex-regex-type-analyzer semantic-grammar-wy--<char>-regexp-analyzer
   "regexp analyzer for <char> tokens."
   semantic-grammar-lex-c-char-re

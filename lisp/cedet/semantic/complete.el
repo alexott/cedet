@@ -113,6 +113,7 @@
 (require 'semantic/ctxt)
 (require 'semantic/decorate)
 (require 'semantic/format)
+(require 'semantic/idle)
 
 (eval-when-compile
   ;; For the semantic-find-tags-for-completion macro.
@@ -904,6 +905,37 @@ a completion displayor object, and tracking the current progress
 of a completion."
   :abstract t)
 
+;;; Smart completion collector
+(defclass semantic-collector-analyze-completions (semantic-collector-abstract)
+  ((context :initarg :context
+	    :type semantic-analyze-context
+	    :documentation "An analysis context.
+Specifies some context location from whence completion lists will be drawn."
+	    )
+   (first-pass-completions :type list
+			   :documentation "List of valid completion tags.
+This list of tags is generated when completion starts.  All searches
+derive from this list.")
+   )
+  "Completion engine that uses the context analyzer to provide options.
+The only options available for completion are those which can be logically
+inserted into the current context.")
+
+(defmethod semantic-collector-calculate-completions-raw
+  ((obj semantic-collector-analyze-completions) prefix completionlist)
+  "calculate the completions for prefix from completionlist."
+  ;; if there are no completions yet, calculate them.
+  (if (not (slot-boundp obj 'first-pass-completions))
+      (oset obj first-pass-completions
+	    (semantic-analyze-possible-completions (oref obj context))))
+  ;; search our cached completion list.  make it look like a semanticdb
+  ;; results type.
+  (list (cons (with-current-buffer (oref (oref obj context) buffer)
+		semanticdb-current-table)
+	      (semantic-find-tags-for-completion
+	       prefix
+	       (oref obj first-pass-completions)))))
+
 (defmethod semantic-collector-cleanup ((obj semantic-collector-abstract))
   "Clean up any mess this collector may have."
   nil)
@@ -1240,37 +1272,6 @@ Uses semanticdb for searching all tags in the current project."
       (oref scope :table)
       (semantic-find-tags-for-completion prefix localstuff)))))
     ;(semanticdb-brute-deep-find-tags-for-completion prefix (oref obj path))))
-
-;;; Smart completion collector
-(defclass semantic-collector-analyze-completions (semantic-collector-abstract)
-  ((context :initarg :context
-	    :type semantic-analyze-context
-	    :documentation "An analysis context.
-Specifies some context location from whence completion lists will be drawn."
-	    )
-   (first-pass-completions :type list
-			   :documentation "List of valid completion tags.
-This list of tags is generated when completion starts.  All searches
-derive from this list.")
-   )
-  "Completion engine that uses the context analyzer to provide options.
-The only options available for completion are those which can be logically
-inserted into the current context.")
-
-(defmethod semantic-collector-calculate-completions-raw
-  ((obj semantic-collector-analyze-completions) prefix completionlist)
-  "calculate the completions for prefix from completionlist."
-  ;; if there are no completions yet, calculate them.
-  (if (not (slot-boundp obj 'first-pass-completions))
-      (oset obj first-pass-completions
-	    (semantic-analyze-possible-completions (oref obj context))))
-  ;; search our cached completion list.  make it look like a semanticdb
-  ;; results type.
-  (list (cons (with-current-buffer (oref (oref obj context) buffer)
-		semanticdb-current-table)
-	      (semantic-find-tags-for-completion
-	       prefix
-	       (oref obj first-pass-completions)))))
 
 
 ;;; ------------------------------------------------------------

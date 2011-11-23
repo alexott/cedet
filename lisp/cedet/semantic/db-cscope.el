@@ -27,6 +27,7 @@
 ;;
 (require 'semantic/symref/cscope)
 (require 'semantic/db)
+(require 'data-debug)
 
 (eval-when-compile
   ;; For generic function searching.

@@ -36,6 +36,8 @@
 (require 'semantic/analyze/fcn)
 (require 'semantic/analyze)
 (require 'semantic/analyze/complete)
+(require 'semantic/idle)
+(require 'semantic/symref/filter)
 
 ;;; Code:
 (defvar semantic.elp-emacs-core-list

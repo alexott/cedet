@@ -32,10 +32,14 @@
 ;;; Code:
 
 (require 'ring)
+(require 'working)
 (require 'semantic)
 (require 'semantic/ctxt)
 (require 'semantic/decorate)
 (require 'semantic/format)
+(require 'semantic/db)
+(require 'semantic/db-find)
+
 
 (eval-when-compile (require 'semantic/find))
 
@@ -167,6 +171,218 @@ Return nil otherwise."
             (setq tag nil
                   ol (cdr ol))))))
     (or (senator-step-at-parent tag) tag)))
+
+(defun senator-full-tag-name (tag parent)
+  "Compose a full name from TAG name and PARENT names.
+That is append to TAG name PARENT names each one separated by
+`semantic-type-relation-separator-character'.  The PARENT list is in
+reverse order."
+  (let ((sep  (car semantic-type-relation-separator-character))
+        (name ""))
+    (while parent
+      (setq name (concat name sep
+                         (semantic-tag-name (car parent)))
+            parent (cdr parent)))
+    (concat (semantic-tag-name tag) name)))
+(semantic-alias-obsolete 'senator-full-token-name
+                         'senator-full-tag-name nil)
+
+(defvar senator-completion-cache nil
+  "The latest full completion list is cached here.")
+(make-variable-buffer-local 'senator-completion-cache)
+
+(defun senator-completion-cache-flush-fcn (&optional ignore)
+  "Hook run to clear the completion list cache.
+It is called each time the semantic cache is changed.
+IGNORE arguments."
+  (setq senator-completion-cache nil))
+
+(defun senator-completion-flatten-stream (stream parents &optional top-level)
+  "Return a flat list of all tags available in STREAM.
+PARENTS is the list of parent tags.  Each element of the list is a
+pair (TAG . PARENTS) where PARENTS is the list of TAG parent
+tags or nil.  If TOP-LEVEL is non-nil the completion list will
+contain only tags at top level.  Otherwise all component tags are
+included too."
+  (let (fs e tag components)
+    (while stream
+      (setq tag  (car stream)
+            stream (cdr stream)
+            e      (cons tag parents)
+            fs     (cons e fs))
+      (and (not top-level)
+           ;; Not include function arguments
+           (not (semantic-tag-of-class-p tag 'function))
+           (setq components (semantic-tag-components tag))
+           (setq fs (append fs (senator-completion-flatten-stream
+                                components e)))))
+    fs))
+
+(defun senator-completion-function-args (tag)
+  "Return a string of argument names from function TAG."
+  (mapconcat #'(lambda (arg)
+                 (if (semantic-tag-p arg)
+                     (semantic-tag-name arg)
+                   (format "%s" arg)))
+             (semantic-tag-function-arguments tag)
+             semantic-function-argument-separation-character))
+
+(defun senator-completion-refine-name (elt)
+  "Refine the name part of ELT.
+ELT has the form (NAME . (TAG . PARENTS)).  The NAME refinement is
+done in the following incremental way:
+
+- If TAG is a function, append the list of argument names to NAME.
+
+- If TAG is a type, append \"{}\" to NAME.
+
+- If TAG is an include, append \"#\" to NAME.
+
+- If TAG is a package, append \"=\" to NAME.
+
+- If TAG has PARENTS append to NAME, the first separator in
+  `semantic-type-relation-separator-character', followed by the next
+  parent name.
+
+- Otherwise NAME is set to \"tag-name@tag-start-position\"."
+  (let* ((sep     (car semantic-type-relation-separator-character))
+         (name    (car elt))
+         (tag     (car (cdr elt)))
+         (parents (cdr (cdr elt)))
+         (oname   (semantic-tag-name tag))
+         (class   (semantic-tag-class tag)))
+    (cond
+     ((and (eq class 'function) (string-equal name oname))
+      (setq name (format "%s(%s)" name
+                         (senator-completion-function-args tag))))
+     ((and (eq class 'type) (string-equal name oname))
+      (setq name (format "%s{}" name)))
+     ((and (eq class 'include) (string-equal name oname))
+      (setq name (format "%s#" name)))
+     ((and (eq class 'package) (string-equal name oname))
+      (setq name (format "%s=" name)))
+     (parents
+      (setq name (format "%s%s%s" name
+                         (if (semantic-tag-of-class-p
+                              (car parents) 'function)
+                             ")" sep)
+                         (semantic-tag-name (car parents)))
+            parents (cdr parents)))
+     (t
+      (setq name (format "%s@%d" oname
+                         (semantic-tag-start tag)))))
+    (setcar elt name)
+    (setcdr elt (cons tag parents))))
+
+(defun senator-completion-uniquify-names (completion-stream)
+  "Uniquify names in COMPLETION-STREAM.
+That is refine the name part of each COMPLETION-STREAM element until
+there is no duplicated names.  Each element of COMPLETION-STREAM has
+the form (NAME . (TAG . PARENTS)).  See also the function
+`senator-completion-refine-name'."
+  (let ((completion-stream (sort completion-stream
+                                 #'(lambda (e1 e2)
+                                     (string-lessp (car e1)
+                                                   (car e2)))))
+        (dupp t)
+        clst elt dup name)
+    (while dupp
+      (setq dupp nil
+            clst completion-stream)
+      (while clst
+        (setq elt  (car clst)
+              name (car elt)
+              clst (cdr clst)
+              dup  (and clst
+                        (string-equal name (car (car clst)))
+                        elt)
+              dupp (or dupp dup))
+        (while dup
+          (senator-completion-refine-name dup)
+          (setq elt (car clst)
+                dup (and elt (string-equal name (car elt)) elt))
+          (and dup (setq clst (cdr clst))))))
+    ;; Return a usable completion alist where each element has the
+    ;; form (NAME . TAG).
+    (setq clst completion-stream)
+    (while clst
+      (setq elt  (car clst)
+            clst (cdr clst))
+      (setcdr elt (car (cdr elt))))
+    completion-stream))
+
+(defun senator-completion-stream (stream &optional top-level)
+  "Return a useful completion list from tags in STREAM.
+That is an alist of all (COMPLETION-NAME . TAG) available.
+COMPLETION-NAME is an unique tag name (see also the function
+`senator-completion-uniquify-names').  If TOP-LEVEL is non-nil the
+completion list will contain only tags at top level.  Otherwise all
+sub tags are included too."
+  (let* ((fs (senator-completion-flatten-stream stream nil top-level))
+         cs elt tag)
+    ;; Transform each FS element from (TAG . PARENTS)
+    ;; to (NAME . (TAG . PARENT)).
+    (while fs
+      (setq elt (car fs)
+            tag (car elt)
+            fs  (cdr fs)
+            cs  (cons (cons (semantic-tag-name tag) elt) cs)))
+    ;; Return a completion list with unique COMPLETION-NAMEs.
+    (senator-completion-uniquify-names cs)))
+
+(defun senator-current-type-context ()
+  "Return tags in the type context at point or nil if not found."
+  (let ((context (semantic-find-tags-by-class
+                  'type (semantic-find-tag-by-overlay))))
+    (if context
+        (semantic-tag-type-members
+         (nth (1- (length context)) context)))))
+
+(defun senator-completion-list (&optional in-context)
+  "Return a useful completion list from tags in current buffer.
+If IN-CONTEXT is non-nil return only the top level tags in the type
+context at point or the top level tags in the current buffer if no
+type context exists at point."
+  (let (stream)
+    (if in-context
+        (setq stream (senator-current-type-context)))
+    (or stream (setq stream (semantic-fetch-tags)))
+    ;; IN-CONTEXT completion doesn't use nor set the cache.
+    (or (and (not in-context) senator-completion-cache)
+        (let ((clst (senator-completion-stream stream in-context)))
+          (or in-context
+              (setq senator-completion-cache clst))
+          clst))))
+
+(defun senator-find-tag-for-completion (prefix)
+  "Find all tags with a name starting with PREFIX.
+Uses `semanticdb' when available."
+  (let ((tagsa nil))
+    (when (and (featurep 'semantic-analyze))
+      (let ((ctxt (semantic-analyze-current-context)))
+        (when ctxt
+          (condition-case nil
+              (setq tagsa (semantic-analyze-possible-completions
+                           ctxt))
+            (error nil)))))
+
+    (if tagsa
+        tagsa
+      ;; If the analyzer fails, then go into boring completion
+      (if (and (featurep 'semanticdb) (semanticdb-minor-mode-p))
+	  (semanticdb-fast-strip-find-results
+	   ;; semanticdb version returns a list of (DB-TABLE . TAG-LIST)
+	   (semanticdb-deep-find-tags-for-completion prefix))
+	;; semantic version returns a TAG-LIST
+	(semantic-deep-find-tags-for-completion prefix (current-buffer))))))
+
+;;; Senator stream searching functions: no more supported.
+;;
+(defun senator-find-nonterminal-by-name (&rest ignore)
+  (error "Use the semantic and semanticdb find API instead"))
+
+(defun senator-find-nonterminal-by-name-regexp (&rest ignore)
+  (error "Use the semantic and semanticdb find API instead"))
 
 ;;; Search functions
 

@@ -394,7 +394,7 @@ into `mode-local-init-hook'." file filename)
 	 (ede-auto-add-method 'never)
 	 ;; Ask font-lock to not colorize these buffers, nor to
 	 ;; whine about it either.
-	 (font-lock-maximum-size 0)
+	 (global-font-lock-mode nil)
 	 (font-lock-verbose nil)
 	 ;; Disable revision control
 	 (vc-handled-backends nil)

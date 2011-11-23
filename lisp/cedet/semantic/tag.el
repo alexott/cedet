@@ -51,6 +51,7 @@
 (declare-function semantic-analyze-split-name "semantic/analyze/fcn")
 (declare-function semantic-fetch-tags "semantic")
 (declare-function semantic-clear-toplevel-cache "semantic")
+(declare-function semantic-tag-similar-p "semantic/tag-ls")
 
 (defconst semantic-tag-version "2.0"
   "Version string of semantic tags made with this code.")

@@ -39,6 +39,7 @@
   (require 'eieio-base))
 
 (declare-function semantic-elisp-desymbolify "semantic/bovine/el")
+(declare-function semantic-tag-similar-p "semantic/tag-ls")
 
 ;;; Code:
 

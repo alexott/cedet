@@ -41,6 +41,7 @@
 (require 'semantic/format)
 (require 'semantic/tag)
 (require 'timer)
+(require 'working)
 
 ;; For the semantic-find-tags-by-name macro.
 (eval-when-compile (require 'semantic/find))

@@ -50,13 +50,16 @@
 ;; never return results directly from this table.
 
 (require 'cedet-java)
+(require 'ede)
+(require 'semantic/find)
+(require 'semantic/db)
+(require 'semantic/analyze)
+(require 'semantic/db-find)
+(require 'semantic/db-typecache)
 
 (eval-when-compile
   (require 'mode-local)
-  (require 'eieio)
-  (require 'semantic/find)
-  (require 'semantic/db)
-  (require 'semantic/db-find))
+  (require 'eieio))
 
 ;;; CLASSPATH and PATH EXPANSION
 ;;
@@ -85,210 +88,6 @@ including the current package onto the path.  See
 	(setq similarpath (remq javapath similarpath))
 	(append defaultpath (list javapath) similarpath)
 	))))
-
-(defun semanticdb-javap-classpath-objects (buffer)
-  "Return the classpath for BUFFER as a list of semanticdb objects and strings.
-Strings are directories which can be searched.  Database objects
-represent jar files."
-  (save-current-buffer
-    (set-buffer buffer)
-    (let* (;; Try EDE to see if it responds.
-	   (edepaths (when ede-object-project
-		       (ede-source-paths ede-object-project 'java-mode)))
-	   ;; Try EDE's classpath feature
-	   (edeclasspath (when ede-object-project
-			   (ede-java-classpath ede-object-project)))
-
-	   ;; Try JDEE to see if it knows
-	   ;; (jdeep - what to put here??)
-	   ;; Try our classpath
-	   ;; (classp - what to put here??)
-	   ;; Convert to a path
-	   (cpaths nil)
-	   (ans nil)
-	   )
-      ;; Get a list of paths together
-      (dolist (P (append edepaths edeclasspath))
-	(cond
-	 ;; Somtimes a null gets in.  Ignore it.
-	 ((null P)
-	  nil)
-	 ;; A directory can be returned as a string.  Should we make a
-	 ;; special dir for this???  @TODO
-	 ((file-directory-p P)
-	  (push P cpaths))
-	 ;; Jar files need a special database
-	 ((and (string= "jar" (file-name-extension P))
-	       (file-exists-p P))
-	  (push
-	   (semanticdb-create-database semanticdb-java-jar-database P)
-	   cpaths))
-	 ;; What else?  Ignore.
-	 (t
-	  (message "Classpath: %S not found" P))))
-      cpaths)))
-
-(defun semanticdb-javap-paths-for-package (buffer)
-  "Return a list of database tables representing a path for tags the package in BUFFER.
-In Java the current package is accissible as if you imported the whole thing.
-This will look across the classpath for all occurances of your package."
-  (save-current-buffer
-    (set-buffer buffer)
-    (let ((pk (car-safe (semantic-find-tags-by-class 'package buffer))))
-      (when pk
-	(let* (;; I know it isn't an include, but the work is the same for java
-	       (pkfile (file-name-sans-extension (semantic-tag-include-filename pk)))
-	       ;; Get this buffer's classpath strings and objects
-	       (cpo (semanticdb-javap-classpath-objects buffer))
-	       (ans nil)
-	       )
-
-	  ;; Loop over the classpath files and objects, and and those next
-	  (dolist (P cpo)
-	    (cond
-	     ;; Strings are just compound tables, like the EDE paths above.
-	     ;; We need to add the pkfile to the packdir P to see if
-	     ;; our package is in there.
-	     ((stringp P)
-	      (let ((pksub (expand-file-name pkfile P))
-		    (tab nil))
-		(when (file-exists-p pksub)
-		  (setq tab (semanticdb-javap-dir-to-compound-table pksub))
-		  (push tab ans))))
-
-	     ;; If it is a jar file, then extract a table for pkfile here.
-	     ((semanticdb-java-jar-database-child-p P)
-	      (let ((tab (semanticdb-create-table P pkfile)))
-		(when tab (push tab ans))))
-	      
-	     (t (error "Unknown object in classpath: %S" P))))
-
-	  ans)))))
-
-(defun semanticdb-javap-dir-to-compound-table (packagedir &optional classpath)
-  "Convert the PACKAGEDIRORJAR into a compound table for PACKAGEDIR.
-Represents all the files thereunder which can contain tags of interest.
-If a CLASSPATH is provided, and if packagedir doesn't exist, search CLASSPATH
-for PACKAGEDIR.  The CLASSPATH can contain strings or javap database objects."
-  (let ((finddir (file-name-as-directory packagedir))) ;; force / at end every time
-    (let ((found (eieio-instance-tracker-find
-		  finddir 'directory
-		  'semanticdb-javap-directory-tracker)))
-      (cond
-       ;; Return something from the cache.
-       (found found)
-       ;; Not found by default.  Does this thing exist at all?  Make one.
-       ((and (file-exists-p packagedir) (file-directory-p packagedir))
-	(semanticdb-table-java-directory
-	 (file-name-nondirectory (directory-file-name finddir))
-	 :directory finddir))
-       ;; Should we search the classpath?
-       ))))
-
-(define-mode-local-override semanticdb-find-table-for-include
-  java-mode (importtag &optional table)
-  "For an IMPORTTAG in Java, return a table object that contains its tags.
-See `semanticdb-find-table-for-include' for details.
-Note that for an import of *, this function will return an unusual table
-that just points to a database, and must redirect all its calls to its decendents."
-  ;; Remove the extension.  The java version of semantic-tag-include-filename
-  ;; will glom the .java extension on it.
-  (let* ((fname (file-name-sans-extension (semantic-tag-include-filename importtag)))
-	 (def (semanticdb-find-table-for-include-default importtag table))
-	 (starry (string-match "\\*$" fname)))
-    ;; If the default implementation returns something, go with it.
-    (if def def
-      (let ((cpo (semanticdb-javap-classpath-objects (current-buffer))))
-	;; Loop over the classpath, see if we can find it anywhere.
-	(catch 'foo
-	  (dolist (P cpo)
-	    (let ((expanded (expand-file-name fname P)))
-	      (cond
-	       ((stringp P)
-		(if starry
-		    (progn
-		      (setq def (semanticdb-javap-dir-to-compound-table (file-name-directory expanded)))
-		      (when def
-			(throw 'foo nil)))
-		  ;; If it is a string, just glom the two together.
-		  (let ((java  (concat expanded ".java"))
-			(class (concat expanded ".class")))
-		    (cond 
-		     ((file-exists-p java)
-		      (setq def (semanticdb-file-table-object java))
-		      (throw 'foo nil))
-		     ((file-exists-p class)
-		      ;; need to javap the thing, but w/out the db...
-		      nil)))))
-	       
-	       ;; For jar databases, we need to extract a table of classes first.
-	       ((semanticdb-java-jar-database-child-p P)
-		(let ((tab (semanticdb-create-table
-			    P (if starry (file-name-directory fname) fname))))
-		  (when tab
-		    ;; We have a table, now we need to extract the tags from it.
-		    ;; TODO - just return the table normally for now.  Fix later.
-		    (setq def tab)
-		    (throw 'foo nil))))
-	       
-	       ;; Default - do ntohing
-	       (t nil)))))
-	def))))
-
-;;; TYPECACHE Overrides
-;;
-;; In order to expand a string like com.java.object.THING from a jar
-;; file, we'll need to override the default typecache methods.  This
-;; is because those depend on a complex typecache, whereas javap can
-;; just do the expansion of the package for us w/out that.
-(define-mode-local-override semanticdb-typecache-find 
-  java-mode (type &optional path find-file-match)
-  "For Java, try the default.  If nothing, look in our JAR files.
-This is because a string such as com.java.pgk.Class doesn't show up
-as a hierarchy from the JAR files in the regular typecache, but we
-can find it as a string directly from our directory and jar files."
-  (if (not (and (featurep 'semanticdb) semanticdb-current-database))
-      nil ;; No DB, no search
-    ;; Else, try a few things.
-    (or (semanticdb-typecache-find-default type path find-file-match)
-	(semanticdb-javap-typecache-find-by-include-hack
-	 type (or path semanticdb-current-table) find-file-match))))
-
-(defun semanticdb-javap-typecache-find-by-include-hack (type &optional path find-file-match)
-  "Search through java DIRECTORY databases for TYPE based on PATH.
-PATH is a database for the buffer from which the references should be derived.
-For each, ask if TYPE is found.  If TYPE is a fully qualified name, leave it alone.
-If it is a list, glom it back into a string for the search.
-Uses `semanticdb-find-table-for-include' to find the TYPE by fully qualified name
-using the same utility as looking for includes which are also fully qualified names."
-  (let* ((tname (cond ((stringp type) type)
-		      ((listp type) (mapconcat #'identity type "."))))
-	 (fauxtag (semantic-tag-new-include tname nil :faux t))
-	 (table (semanticdb-find-table-for-include fauxtag path))
-	 (ans nil))
-    ;; Look the answer up in TABLE from include search.
-    (if table
-	(let* ((tlist (cond ((listp type) type)
-			    ((stringp type) (semantic-analyze-split-name type))))
-	       (searchname (if (listp tlist) (car (last tlist))
-			     tlist))
-	       ;; Get the typecache version of the tags from the table.
-	       ;; That will allow us to do a typecache like search
-	       (tabletags (semanticdb-typecache-file-tags table))
-	       )
-	  (setq ans (semantic-find-first-tag-by-name searchname tabletags))
-	  )
-      ;; If there was no table, then perhaps it is just a package name.
-      ;; We can look up "java.com.*" instead of just "java.com.".
-      (semantic-tag-set-name fauxtag (concat tname "*"))
-      (setq table (semanticdb-find-table-for-include fauxtag path))
-
-      (when (semanticdb-table-jar-directory-child-p table)
-	(setq ans (semanticdb-table-javap-table-as-faux-tag table))
-	)
-      )
-    ;; Return what we found.
-    ans))
 
 ;;; ANALYZER HACKS
 ;;
@@ -600,7 +399,6 @@ and returning that tag instead."
     ;; so the typecache can fix them.
     tags))
 
-
 (defmethod semanticdb-table-javap-table-as-faux-tag ((table semanticdb-table-jar-directory))
   "Convert a database into a faux tag which child tags.
 The child tags will NOT have additional child tags.  This is solely to solve
@@ -702,7 +500,6 @@ Returns a list of all files in this table's directory that matches REGEXP."
    )
   "Table which represents the classes found in files in series of diretories.")
 
-
 (defmethod semanticdb-table-java-package ((table semanticdb-table-jar-file))
   "Get the package name to use for this database as a directory."
   (file-name-directory (oref table filename)))
@@ -728,6 +525,61 @@ local variable."
   ;; @TODO - FIX - only match java & jdee
   t
   )
+
+;;; TYPECACHE Overrides
+;;
+;; In order to expand a string like com.java.object.THING from a jar
+;; file, we'll need to override the default typecache methods.  This
+;; is because those depend on a complex typecache, whereas javap can
+;; just do the expansion of the package for us w/out that.
+(define-mode-local-override semanticdb-typecache-find 
+  java-mode (type &optional path find-file-match)
+  "For Java, try the default.  If nothing, look in our JAR files.
+This is because a string such as com.java.pgk.Class doesn't show up
+as a hierarchy from the JAR files in the regular typecache, but we
+can find it as a string directly from our directory and jar files."
+  (if (not (and (featurep 'semanticdb) semanticdb-current-database))
+      nil ;; No DB, no search
+    ;; Else, try a few things.
+    (or (semanticdb-typecache-find-default type path find-file-match)
+	(semanticdb-javap-typecache-find-by-include-hack
+	 type (or path semanticdb-current-table) find-file-match))))
+
+(defun semanticdb-javap-typecache-find-by-include-hack (type &optional path find-file-match)
+  "Search through java DIRECTORY databases for TYPE based on PATH.
+PATH is a database for the buffer from which the references should be derived.
+For each, ask if TYPE is found.  If TYPE is a fully qualified name, leave it alone.
+If it is a list, glom it back into a string for the search.
+Uses `semanticdb-find-table-for-include' to find the TYPE by fully qualified name
+using the same utility as looking for includes which are also fully qualified names."
+  (let* ((tname (cond ((stringp type) type)
+		      ((listp type) (mapconcat #'identity type "."))))
+	 (fauxtag (semantic-tag-new-include tname nil :faux t))
+	 (table (semanticdb-find-table-for-include fauxtag path))
+	 (ans nil))
+    ;; Look the answer up in TABLE from include search.
+    (if table
+	(let* ((tlist (cond ((listp type) type)
+			    ((stringp type) (semantic-analyze-split-name type))))
+	       (searchname (if (listp tlist) (car (last tlist))
+			     tlist))
+	       ;; Get the typecache version of the tags from the table.
+	       ;; That will allow us to do a typecache like search
+	       (tabletags (semanticdb-typecache-file-tags table))
+	       )
+	  (setq ans (semantic-find-first-tag-by-name searchname tabletags))
+	  )
+      ;; If there was no table, then perhaps it is just a package name.
+      ;; We can look up "java.com.*" instead of just "java.com.".
+      (semantic-tag-set-name fauxtag (concat tname "*"))
+      (setq table (semanticdb-find-table-for-include fauxtag path))
+
+      (when (semanticdb-table-jar-directory-child-p table)
+	(setq ans (semanticdb-table-javap-table-as-faux-tag table))
+	)
+      )
+    ;; Return what we found.
+    ans))
 
 ;;; Typecache support
 ;;
@@ -908,6 +760,154 @@ to some class in JARFILE."
 	;; Return the tag table
 	tagsout))))
 
+(defun semanticdb-javap-paths-for-package (buffer)
+  "Return a list of database tables representing a path for tags the package in BUFFER.
+In Java the current package is accissible as if you imported the whole thing.
+This will look across the classpath for all occurances of your package."
+  (save-current-buffer
+    (set-buffer buffer)
+    (let ((pk (car-safe (semantic-find-tags-by-class 'package buffer))))
+      (when pk
+	(let* (;; I know it isn't an include, but the work is the same for java
+	       (pkfile (file-name-sans-extension (semantic-tag-include-filename pk)))
+	       ;; Get this buffer's classpath strings and objects
+	       (cpo (semanticdb-javap-classpath-objects buffer))
+	       (ans nil)
+	       )
+
+	  ;; Loop over the classpath files and objects, and and those next
+	  (dolist (P cpo)
+	    (cond
+	     ;; Strings are just compound tables, like the EDE paths above.
+	     ;; We need to add the pkfile to the packdir P to see if
+	     ;; our package is in there.
+	     ((stringp P)
+	      (let ((pksub (expand-file-name pkfile P))
+		    (tab nil))
+		(when (file-exists-p pksub)
+		  (setq tab (semanticdb-javap-dir-to-compound-table pksub))
+		  (push tab ans))))
+
+	     ;; If it is a jar file, then extract a table for pkfile here.
+	     ((semanticdb-java-jar-database-child-p P)
+	      (let ((tab (semanticdb-create-table P pkfile)))
+		(when tab (push tab ans))))
+	      
+	     (t (error "Unknown object in classpath: %S" P))))
+
+	  ans)))))
+
+(defun semanticdb-javap-classpath-objects (buffer)
+  "Return the classpath for BUFFER as a list of semanticdb objects and strings.
+Strings are directories which can be searched.  Database objects
+represent jar files."
+  (save-current-buffer
+    (set-buffer buffer)
+    (let* (;; Try EDE to see if it responds.
+	   (edepaths (when ede-object-project
+		       (ede-source-paths ede-object-project 'java-mode)))
+	   ;; Try EDE's classpath feature
+	   (edeclasspath (when ede-object-project
+			   (ede-java-classpath ede-object-project)))
+
+	   ;; Try JDEE to see if it knows
+	   ;; (jdeep - what to put here??)
+	   ;; Try our classpath
+	   ;; (classp - what to put here??)
+	   ;; Convert to a path
+	   (cpaths nil)
+	   (ans nil)
+	   )
+      ;; Get a list of paths together
+      (dolist (P (append edepaths edeclasspath))
+	(cond
+	 ;; Somtimes a null gets in.  Ignore it.
+	 ((null P)
+	  nil)
+	 ;; A directory can be returned as a string.  Should we make a
+	 ;; special dir for this???  @TODO
+	 ((file-directory-p P)
+	  (push P cpaths))
+	 ;; Jar files need a special database
+	 ((and (string= "jar" (file-name-extension P))
+	       (file-exists-p P))
+	  (push
+	   (semanticdb-create-database semanticdb-java-jar-database P)
+	   cpaths))
+	 ;; What else?  Ignore.
+	 (t
+	  (message "Classpath: %S not found" P))))
+      cpaths)))
+
+(define-mode-local-override semanticdb-find-table-for-include
+  java-mode (importtag &optional table)
+  "For an IMPORTTAG in Java, return a table object that contains its tags.
+See `semanticdb-find-table-for-include' for details.
+Note that for an import of *, this function will return an unusual table
+that just points to a database, and must redirect all its calls to its decendents."
+  ;; Remove the extension.  The java version of semantic-tag-include-filename
+  ;; will glom the .java extension on it.
+  (let* ((fname (file-name-sans-extension (semantic-tag-include-filename importtag)))
+	 (def (semanticdb-find-table-for-include-default importtag table))
+	 (starry (string-match "\\*$" fname)))
+    ;; If the default implementation returns something, go with it.
+    (if def def
+      (let ((cpo (semanticdb-javap-classpath-objects (current-buffer))))
+	;; Loop over the classpath, see if we can find it anywhere.
+	(catch 'foo
+	  (dolist (P cpo)
+	    (let ((expanded (expand-file-name fname P)))
+	      (cond
+	       ((stringp P)
+		(if starry
+		    (progn
+		      (setq def (semanticdb-javap-dir-to-compound-table (file-name-directory expanded)))
+		      (when def
+			(throw 'foo nil)))
+		  ;; If it is a string, just glom the two together.
+		  (let ((java  (concat expanded ".java"))
+			(class (concat expanded ".class")))
+		    (cond 
+		     ((file-exists-p java)
+		      (setq def (semanticdb-file-table-object java))
+		      (throw 'foo nil))
+		     ((file-exists-p class)
+		      ;; need to javap the thing, but w/out the db...
+		      nil)))))
+	       
+	       ;; For jar databases, we need to extract a table of classes first.
+	       ((semanticdb-java-jar-database-child-p P)
+		(let ((tab (semanticdb-create-table
+			    P (if starry (file-name-directory fname) fname))))
+		  (when tab
+		    ;; We have a table, now we need to extract the tags from it.
+		    ;; TODO - just return the table normally for now.  Fix later.
+		    (setq def tab)
+		    (throw 'foo nil))))
+	       
+	       ;; Default - do ntohing
+	       (t nil)))))
+	def))))
+
+(defun semanticdb-javap-dir-to-compound-table (packagedir &optional classpath)
+  "Convert the PACKAGEDIRORJAR into a compound table for PACKAGEDIR.
+Represents all the files thereunder which can contain tags of interest.
+If a CLASSPATH is provided, and if packagedir doesn't exist, search CLASSPATH
+for PACKAGEDIR.  The CLASSPATH can contain strings or javap database objects."
+  (let ((finddir (file-name-as-directory packagedir))) ;; force / at end every time
+    (let ((found (eieio-instance-tracker-find
+		  finddir 'directory
+		  'semanticdb-javap-directory-tracker)))
+      (cond
+       ;; Return something from the cache.
+       (found found)
+       ;; Not found by default.  Does this thing exist at all?  Make one.
+       ((and (file-exists-p packagedir) (file-directory-p packagedir))
+	(semanticdb-table-java-directory
+	 (file-name-nondirectory (directory-file-name finddir))
+	 :directory finddir))
+       ;; Should we search the classpath?
+       ))))
 
 (provide 'semantic/db-javap)
 

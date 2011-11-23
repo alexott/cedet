@@ -56,6 +56,7 @@
 (declare-function semantic-analyze-princ-sequence "semantic/analyze")
 (declare-function semanticdb-typecache-merge-streams "semantic/db-typecache")
 (declare-function semanticdb-typecache-add-dependant "semantic/db-typecache")
+(declare-function semantic-tag-similar-p "semantic/tag-ls")
 
 ;;; Code:
 
