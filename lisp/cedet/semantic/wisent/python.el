@@ -40,6 +40,9 @@
 (require 'semantic/dep)
 (require 'semantic/ctxt)
 
+(eval-when-compile
+  (require 'cl))
+
 ;;; Customization
 ;;
 
@@ -216,17 +219,18 @@ the indentation of the current line."
        ;; Loop lexer to handle tokens in current line.
        t)
       ;; Indentation decreased
-      (t
-       ;; Pop items from indentation stack
-       (while (< curr-indent last-indent)
-         (pop wisent-python-indent-stack)
-         (setq semantic-lex-current-depth (1- semantic-lex-current-depth)
-               last-indent (car wisent-python-indent-stack))
-         (semantic-lex-push-token
-          (semantic-lex-token 'DEDENT last-pos (point))))
+      ((progn
+	 ;; Pop items from indentation stack
+	 (while (< curr-indent last-indent)
+	   (pop wisent-python-indent-stack)
+	   (setq semantic-lex-current-depth (1- semantic-lex-current-depth)
+		 last-indent (car wisent-python-indent-stack))
+	   (semantic-lex-push-token
+	    (semantic-lex-token 'DEDENT last-pos (point))))
+	 (= last-pos (point)))
        ;; If pos did not change, then we must return nil so that
        ;; other lexical analyzers can be run.
-       (/= last-pos (point))))))
+       nil))))
   ;; All the work was done in the above analyzer matching condition.
   )
 

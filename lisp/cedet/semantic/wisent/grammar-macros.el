@@ -35,6 +35,7 @@
 ;;; Code:
 
 (require 'mode-local)
+(require 'semantic/grammar)
 
 (defsubst wisent-grammar-region-placeholder (symb)
   "Given a $N placeholder symbol in SYMB, return a $regionN symbol.
@@ -199,6 +200,7 @@ Return the form to skip the lookahead token.
 See also the function `wisent-skip-token'."
   `(wisent-skip-token))
 
+(defvar semantic-grammar-macros)
 (defvar-mode-local wisent-grammar-mode semantic-grammar-macros
   '(
     (ASSOC          . semantic-grammar-ASSOC)

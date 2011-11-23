@@ -45,12 +45,12 @@
   "Initialize context of the LR parser engine.
 Used as a local `wisent-pre-parse-hook' to cleanup the stack of enum
 names in scope."
-  (setq wisent-java.wy--enums nil))
+  (setq wisent-java-wy--enums nil))
 
 (defun wisent-java-default-setup ()
   "Hook run to setup Semantic in `java-mode'."
   ;; Use the Wisent LALR(1) parser to analyze Java sources.
-  (wisent-java.wy--install-parser)
+  (wisent-java-wy--install-parser)
   (semantic-make-local-hook 'wisent-pre-parse-hook)
   (add-hook 'wisent-pre-parse-hook
             'wisent-java-init-parser-context nil t)

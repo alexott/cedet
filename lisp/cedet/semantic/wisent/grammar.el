@@ -28,6 +28,16 @@
 ;;; Code:
 (require 'semantic/grammar)
 
+(defvar wisent-grammar-menu
+  '("WY Grammar"
+    ["LALR Compiler Verbose" wisent-toggle-verbose-flag
+     :style toggle :active (boundp 'wisent-verbose-flag)
+     :selected (and (boundp 'wisent-verbose-flag)
+                    wisent-verbose-flag)]
+    )
+  "WY mode specific grammar menu.
+Menu items are appended to the common grammar menu.")
+
 ;; Note, declare mode before loading macros to solve order dependency.
 
 ;;;###autoload
@@ -56,15 +66,15 @@
   "Return the list of terminal symbols.
 Keep order of declaration in the WY file without duplicates."
   (let (terms)
-    (mapcar
+    (mapc
      #'(lambda (tag)
-         (mapcar #'(lambda (name)
-                     (add-to-list 'terms (intern name)))
-                 (cons (semantic-tag-name tag)
-                       (semantic-tag-get-attribute tag :rest))))
+	 (mapcar #'(lambda (name)
+		     (add-to-list 'terms (intern name)))
+		 (cons (semantic-tag-name tag)
+		       (semantic-tag-get-attribute tag :rest))))
      (semantic--find-tags-by-function
       #'(lambda (tag)
-          (memq (semantic-tag-class tag) '(token keyword)))
+	  (memq (semantic-tag-class tag) '(token keyword)))
       (current-buffer)))
     (nreverse terms)))
 
@@ -159,16 +169,6 @@ Return the expanded expression."
    (buffer-name)
    (semantic-grammar-keywordtable)
    (semantic-grammar-tokentable)))
-
-(defvar wisent-grammar-menu
-  '("WY Grammar"
-    ["LALR Compiler Verbose" wisent-toggle-verbose-flag
-     :style toggle :active (boundp 'wisent-verbose-flag)
-     :selected (and (boundp 'wisent-verbose-flag)
-                    wisent-verbose-flag)]
-    )
-  "WY mode specific grammar menu.
-Menu items are appended to the common grammar menu.")
 
 ;;;###autoload
 (add-to-list 'auto-mode-alist '("\\.wy$" . wisent-grammar-mode))
