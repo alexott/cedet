@@ -39,7 +39,8 @@
 (require 'eieio-opt)
 (require 'eieio-base)
 (require 'semantic)
-(require 'cogre/mode)
+
+(declare-function cogre-mode "cogre/mode")
 
 (eval-when-compile
   (require 'cogre/picture-hack))
