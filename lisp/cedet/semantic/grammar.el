@@ -980,6 +980,7 @@ Return non-nil if there were no errors, nil if errors."
            (condition-case err
                (with-current-buffer (find-file-noselect file)
 		 (let ((semantic-new-buffer-setup-functions nil))
+		   (setq semanticdb-new-database-class 'semanticdb-project-database)
 		   (semantic-mode 1)
 		   (semantic-grammar-create-package)))
              (error
