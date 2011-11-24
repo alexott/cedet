@@ -1019,7 +1019,6 @@ See also the variable `semantic-grammar-file-regexp'."
         ;; Remove vc from find-file-hook.  It causes bad stuff to
         ;; happen in Emacs 20.
         (find-file-hook (delete 'vc-find-file-hook find-file-hook)))
-    (message "Compiling Grammars from: %s" (locate-library "semantic/grammar"))
     (dolist (arg command-line-args-left)
       (unless (and arg (file-exists-p arg))
         (error "Argument %s is not a valid file name" arg))
