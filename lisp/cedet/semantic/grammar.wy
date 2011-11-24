@@ -34,8 +34,6 @@
   (defvar semantic-grammar-wy--rindx nil)
   }
 
-;;%package semantic/grammar-wy
-
 %languagemode wy-mode
 
 ;; Main
@@ -437,32 +435,5 @@ item:
     SYMBOL
   | CHARACTER
   ;
-
-%%
-
-(define-lex semantic-grammar-lexer
-  "Lexical analyzer that handles Semantic grammar buffers.
-It ignores whitespaces, newlines and comments."
-  semantic-lex-ignore-newline
-  semantic-lex-ignore-whitespace
-  ;; Must detect prologue/epilogue before other symbols/keywords!
-  semantic-grammar-lex-prologue
-  semantic-grammar-lex-epilogue
-  semantic/grammar-wy--<keyword>-keyword-analyzer
-  semantic/grammar-wy--<symbol>-regexp-analyzer
-  semantic/grammar-wy--<char>-regexp-analyzer
-  semantic/grammar-wy--<string>-sexp-analyzer
-  ;; Must detect comments after strings because `comment-start-skip'
-  ;; regexp match semicolons inside strings!
-  semantic-lex-ignore-comments
-  ;; Must detect prefixed list before punctuation because prefix chars
-  ;; are also punctuations!
-  semantic/grammar-wy--<qlist>-sexp-analyzer
-  ;; Must detect punctuations after comments because the semicolon can
-  ;; be a punctuation or a comment start!
-  semantic/grammar-wy--<punctuation>-string-analyzer
-  semantic/grammar-wy--<block>-block-analyzer
-  semantic/grammar-wy--<sexp>-sexp-analyzer
-  )
 
 ;;; semantic/grammar.wy ends here
