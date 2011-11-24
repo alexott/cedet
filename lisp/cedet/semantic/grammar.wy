@@ -341,8 +341,8 @@ lifo_symbols:
 ;;
 nonterminal:
     SYMBOL
-    (setq semantic/grammar-wy--nterm $1
-          semantic/grammar-wy--rindx 0)
+    (setq semantic-grammar-wy--nterm $1
+          semantic-grammar-wy--rindx 0)
     COLON rules SEMI
     (TAG $1 'nonterminal :children $4)
   ;
@@ -361,11 +361,11 @@ lifo_rules:
 
 rule:
     rhs
-    (let* ((nterm semantic/grammar-wy--nterm)
-           (rindx semantic/grammar-wy--rindx)
+    (let* ((nterm semantic-grammar-wy--nterm)
+           (rindx semantic-grammar-wy--rindx)
            (rhs   $1)
            comps prec action elt)
-      (setq semantic/grammar-wy--rindx (1+ semantic/grammar-wy--rindx))
+      (setq semantic-grammar-wy--rindx (1+ semantic-grammar-wy--rindx))
       (while rhs
         (setq elt (car rhs)
               rhs (cdr rhs))
@@ -383,8 +383,8 @@ rule:
               ;; a mid-rule action
               (setq comps (cons elt comps)
                     ;; keep rule and action index synchronized
-                    semantic/grammar-wy--rindx
-                    (1+ semantic/grammar-wy--rindx))
+                    semantic-grammar-wy--rindx
+                    (1+ semantic-grammar-wy--rindx))
             ;; the end-of-rule action
             (setq action (car elt))))
          ;; item
