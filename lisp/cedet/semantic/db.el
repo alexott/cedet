@@ -682,9 +682,11 @@ form."
 (defun semanticdb-save-current-db ()
   "Save the current tag database."
   (interactive)
-  (message "Saving current tag summaries...")
+  (unless noninteractive
+    (message "Saving current tag summaries..."))
   (semanticdb-save-db semanticdb-current-database)
-  (message "Saving current tag summaries...done"))
+  (unless noninteractive
+    (message "Saving current tag summaries...done")))
 
 ;; This prevents Semanticdb from querying multiple times if the users
 ;; answers "no" to creating the Semanticdb directory.
@@ -693,10 +695,12 @@ form."
 (defun semanticdb-save-all-db ()
   "Save all semantic tag databases."
   (interactive)
-  (message "Saving tag summaries...")
+  (unless noninteractive
+    (message "Saving tag summaries..."))
   (let ((semanticdb--inhibit-make-directory nil))
     (mapc 'semanticdb-save-db semanticdb-database-list))
-  (message "Saving tag summaries...done"))
+  (unless noninteractive
+    (message "Saving tag summaries...done")))
 
 (defun semanticdb-save-all-db-idle ()
   "Save all semantic tag databases from idle time.
