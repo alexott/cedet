@@ -26,6 +26,10 @@
 ;;; Code:
 
 (require 'srecode/dictionary)
+(require 'semantic/tag)
+
+(eval-when-compile
+  (require 'semantic/find))
 
 ;;;###autoload
 (defun srecode-semantic-handle-:java (dict)

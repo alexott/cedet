@@ -159,9 +159,7 @@ Exclude empty directories."
   "Dump out a Java signatures for CLASS.
 Display in a javap output buffer."
   (interactive "sClass: ")
-  (switch-to-buffer (cedet-javap-get-class class)))
-
-
+  (switch-to-buffer (cedet-javap-get-class nil class)))
 
 (provide 'cedet-java)
 

@@ -15,7 +15,7 @@ ede_FILES=Project.ede Makefile
 
 LOADDEFS=loaddefs.el
 LOADDIRS=.
-common_LISP=cedet-android.el cedet-autogen.el cedet-compat.el cedet-cscope.el cedet-edebug.el cedet-files.el cedet-global.el cedet-graphviz.el cedet-idutils.el cedet-java.el cedet-m3.el cedet.el data-debug.el fame.el inversion.el mode-local.el pprint.el pulse.el working.el
+common_LISP=cedet-android.el cedet-compat.el cedet-cscope.el cedet-edebug.el cedet-files.el cedet-global.el cedet-graphviz.el cedet-idutils.el cedet-java.el cedet-m3.el cedet.el data-debug.el fame.el inversion.el mode-local.el pprint.el pulse.el working.el
 init_LISP=semantic.el srecode.el ede.el cogre.el
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet

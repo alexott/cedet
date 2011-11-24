@@ -38,6 +38,7 @@
 (require 'eieio)
 (require 'eieio-opt)
 (require 'eieio-base)
+(require 'eieio-custom)
 (require 'semantic)
 
 (declare-function cogre-mode "cogre/mode")

@@ -636,4 +636,11 @@ is t to display the done string, or the number to display."
 
 (provide 'working)
 
+;; Disable messages with regards to lexical scoping because of
+;; `noninteractive' function definition.
+
+;; Local variables:
+;; byte-compile-warnings: (not lexical)
+;; End:
+
 ;;; working.el ends here

@@ -34,6 +34,7 @@
 (require 'eieio)
 (require 'eieio-opt)
 (require 'eieio-base)
+(require 'eieio-custom)
 (require 'cogre)
 (require 'cogre/convert)
 (require 'cogre/semantic)

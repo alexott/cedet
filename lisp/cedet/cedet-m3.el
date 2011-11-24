@@ -28,19 +28,17 @@
 ;; those concepts together in the menu.
 
 (require 'semantic/util-modes)
+(require 'semantic/senator)
 
 ;;; Code:
-(if (featurep 'xemacs)
-    (progn
+(eval-and-compile
+  (if (featurep 'xemacs)
       ;; XEmacs support
       (defalias 'cedet-event-window 'event-window)
-      )
-
-  ;; Emacs
-  (defun cedet-event-window (event)
-    "Extract the window from EVENT."
-    (car (car (cdr event))))
-  )
+    ;; Emacs
+    (defun cedet-event-window (event)
+      "Extract the window from EVENT."
+      (car (car (cdr event))))))
 
 (defcustom global-cedet-m3-minor-mode nil
   "Non-nil in buffers with CEDET-Mouse3 menu enabled keybindings."

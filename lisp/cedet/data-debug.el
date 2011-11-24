@@ -819,22 +819,6 @@ FCN is a function that will display stuff in the data debug buffer."
   (when (not (member entry data-debug-thing-alist))
     (setcdr first (cons entry second)))))
 
-;; An augmentation function for the thing alist.
-(defun data-debug-add-specialized-thing (predicate fcn)
-  "Add a new specialized thing to display with data-debug.
-PREDICATE is a function that returns t if a thing is this new type.
-FCN is a function that will display stuff in the data debug buffer."
-  (let ((entry (cons predicate fcn))
-	;; Specialized entries show up AFTER nil,
-	;; but before listp, vectorp, symbolp, and
-	;; other general things.  Splice it into
-	;; the beginning.
-	(first (nthcdr 0 data-debug-thing-alist))
-	(second (nthcdr 1 data-debug-thing-alist))
-      )
-  (when (not (member entry data-debug-thing-alist))
-    (setcdr first (cons entry second)))))
-
 ;; uber insert method
 (defun data-debug-insert-thing (thing prefix prebuttontext &optional parent)
   "Insert THING with PREFIX.

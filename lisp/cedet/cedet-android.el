@@ -30,6 +30,10 @@
 
 (require 'inversion)
 
+(eval-when-compile
+  (require 'cedet-java)
+  (require 'shell))
+
 (defvar cedet-android-sdk-adb-min-version "1.0.26"
   "Minimum version of the Android SDB ADB program required.")
 

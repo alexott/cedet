@@ -30,6 +30,10 @@
 ;; a variety of [X]Emacs versions.
 
 (require 'inversion)
+
+(eval-when-compile
+  (require 'cl))
+
 ;;; Code:
 
 (when (not (fboundp 'compare-strings))
@@ -139,7 +143,7 @@ Copied verbatim from Emacs 23 CVS version subr.el."
 		    list)))
     (nreverse list)))
 
-(when (not (fboundp 'find-coding-systems-region))
+(when (featurep 'xemacs)
 ;; XEmacs does not currently have `find-coding-systems-region'. Here
 ;; is an emulation, which seems sufficient for CEDET's purposes.
   (defun find-coding-systems-region (begin end)
