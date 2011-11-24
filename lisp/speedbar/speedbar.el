@@ -1650,18 +1650,21 @@ Files can be renamed to new names or moved to new directories."
   "Delete the item under the cursor.  Files are removed from disk."
   (interactive)
   (let ((f (speedbar-line-file)))
-    (if (not f) (error "Not a file"))
-    (if (speedbar-y-or-n-p (format "Delete %s? " f) t)
-	(progn
+    (when (not f) (error "Not a file"))
+    (when (speedbar-y-or-n-p (format "Delete %s? " f) t)
+      (with-no-warnings
+	(if (< emacs-major-version 24)
+	    (if (file-directory-p f)
+		(delete-directory f t)
+	      (delete-file f))
 	  (if (file-directory-p f)
 	      (delete-directory f t t)
-	    (delete-file f t))
-	  (speedbar-message "Okie dokie.")
-	  (let ((p (point)))
-	    (speedbar-refresh)
-	    (goto-char p))
-	  ))
-    ))
+	    (delete-file f t))))
+      (speedbar-message "Okie dokie.")
+      (let ((p (point)))
+	(speedbar-refresh)
+	(goto-char p))
+      )))
 
 (defun speedbar-item-object-delete ()
   "Delete the object associated from the item under the cursor.
