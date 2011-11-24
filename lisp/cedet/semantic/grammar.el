@@ -593,6 +593,8 @@ Typically a DEFINE expression should look like this:
 ;;
 
 ;;; Code:
+
+(eval-when-compile (require 'semantic/bovine))
 ")
   "Generated header template.
 The symbols in the template are local variables in
@@ -602,6 +604,14 @@ The symbols in the template are local variables in
   '("\
 
 \(provide '" libr ")
+
+;; We cannot require the corresponding Lisp implementation, since
+;; this would lead to a recursion.  Thus we blindly assume that
+;; everything's available there.
+
+;; Local variables:
+;; byte-compile-warnings: (not unresolved)
+;; End:
 
 ;;; " file " ends here
 ")

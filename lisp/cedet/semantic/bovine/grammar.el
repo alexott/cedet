@@ -57,16 +57,6 @@ Menu items are appended to the common grammar menu.")
 ;; Cache of macro definitions currently in use.
 (defvar bovine--grammar-macros nil)
 
-;; Detect if we have an Emacs with newstyle unquotes allowed outside
-;; of backquote.  This should probably be changed to a test to (>=
-;; emacs-major-version 24) when it is released, but at the moment it
-;; might be possible that people are using an older snapshot.
-;; This test will generate an 'old-style backquote' warning, but this
-;; is intentional.
-(eval-when-compile (message "\nIgnore the following backquote warning."))
-(defvar bovine--grammar-newstyle-unquote
-  (equal '(, test) (read ",test")))
-
 (defun bovine-grammar-expand-form (form quotemode &optional inplace)
   "Expand FORM into a new one suitable to the bovine parser.
 FORM is a list in which we are substituting.
@@ -102,7 +92,7 @@ expanded from elsewhere."
               form  (cdr form))
 	;; Hack for dealing with new reading of unquotes outside of
 	;; backquote (introduced in rev. 102591 in emacs-bzr).
-	(when (and bovine--grammar-newstyle-unquote
+	(when (and (>= emacs-major-version 24)
 		   (listp first)
 		   (or (equal (car first) '\,)
 		       (equal (car first) '\,@)))

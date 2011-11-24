@@ -76,7 +76,7 @@ maintenance: PRELOADS=cedet-compat
 	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
 
 .PHONY: metagrammar
-metagrammar: $(addsuffix -wy.el, $(basename $(metagrammar_SEMANTIC_GRAMMAR)))
+metagrammar: $(addsuffix -wy.elc, $(basename $(metagrammar_SEMANTIC_GRAMMAR)))
 metagrammar: PRELOADS=cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
 .PHONY:wisent

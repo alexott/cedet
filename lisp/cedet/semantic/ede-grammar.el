@@ -60,10 +60,10 @@ For Emacs Lisp, return addsuffix command on source files."
   (let ((source (car (oref this source))))
     (cond
      ((string-match "\\.wy$" source)
-      (format "$(addsuffix -wy.el, $(basename $(%s)))"
+      (format "$(addsuffix -wy.elc, $(basename $(%s)))"
 	      (ede-proj-makefile-sourcevar this)))
      ((string-match "\\.by$" source)
-      (format "$(addsuffix -by.el, $(basename $(%s)))"
+      (format "$(addsuffix -by.elc, $(basename $(%s)))"
 	      (ede-proj-makefile-sourcevar this))))))
 
 (defvar semantic-ede-source-grammar-wisent

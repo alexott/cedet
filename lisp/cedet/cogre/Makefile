@@ -42,7 +42,7 @@ autoloads:
 	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
 
 .PHONY: wy
-wy: $(addsuffix -wy.el, $(basename $(wy_SEMANTIC_GRAMMAR)))
+wy: $(addsuffix -wy.elc, $(basename $(wy_SEMANTIC_GRAMMAR)))
 wy: PRELOADS=cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
 %.elc: %.el

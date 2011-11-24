@@ -29,7 +29,7 @@ all: by bovinator languages
 	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require,$(PRELOADS)))' -f semantic-grammar-batch-build-packages $^
 
 .PHONY: by
-by: $(addsuffix -by.el, $(basename $(by_SEMANTIC_GRAMMAR)))
+by: $(addsuffix -by.elc, $(basename $(by_SEMANTIC_GRAMMAR)))
 by: PRELOADS=cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
 %.elc: %.el
