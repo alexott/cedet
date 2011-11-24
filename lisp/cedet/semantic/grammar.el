@@ -48,6 +48,7 @@
   (require 'eldoc)
   (require 'semantic/edit)
   (require 'semantic/find)
+  (require 'semantic/db)
   (or (require 'semantic/grammar-wy nil t)
       (require 'semantic/gram-wy-fallback)))
 
@@ -979,7 +980,8 @@ Return non-nil if there were no errors, nil if errors."
     (let ((packagename
            (condition-case err
                (with-current-buffer (find-file-noselect file)
-		 (let ((semantic-new-buffer-setup-functions nil))
+		 (let ((semantic-new-buffer-setup-functions nil)
+		       (vc-handled-backends nil))
 		   (setq semanticdb-new-database-class 'semanticdb-project-database)
 		   (semantic-mode 1)
 		   (semantic-grammar-create-package)))
