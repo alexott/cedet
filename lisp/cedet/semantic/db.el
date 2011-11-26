@@ -431,7 +431,7 @@ If FILENAME exists in the database already, return that.
 If there is no database for the table to live in, create one."
   (let ((cdb nil)
 	(tbl nil)
-	(dd (file-name-directory filename))
+	(dd (file-name-directory (file-truename filename)))
 	)
     ;; Allow a database override function
     (setq cdb (semanticdb-create-database semanticdb-new-database-class
