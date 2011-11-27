@@ -912,6 +912,7 @@ and variable state from the current buffer."
 	 (fresh-toks nil)
 	 (toks nil)
 	 (origbuff (current-buffer))
+	 (analyzer semantic-lex-analyzer)
 	 (important-vars '(semantic-lex-spp-macro-symbol-obarray
 			   semantic-lex-spp-project-macro-symbol-obarray
 			   semantic-lex-spp-dynamic-macro-symbol-obarray
@@ -934,6 +935,9 @@ and variable state from the current buffer."
 
 	    ;; Hack in mode-local
 	    (activate-mode-local-bindings)
+
+	    ;; Set the lexical analyzer
+	    (setq semantic-lex-analyzer analyzer)
 
 	    ;; CHEATER!  The following 3 lines are from
 	    ;; `semantic-new-buffer-fcn', but we don't want to turn
