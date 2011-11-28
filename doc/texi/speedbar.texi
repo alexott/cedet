@@ -1,5 +1,5 @@
 \input texinfo   @c -*-texinfo-*-
-@setfilename ../../info/speedbar
+@setfilename speedbar.info
 @settitle Speedbar: File/Tag summarizing utility
 @syncodeindex fn cp
 

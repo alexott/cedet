@@ -1,7 +1,7 @@
 ;; Object ede-proj-project
 ;; EDE project file.
-(ede-proj-project "semantic/doc"
-  :name "Documentation"
+(ede-proj-project "Semantic Documentation"
+  :name "semantic-doc"
   :file "Project.ede"
   :targets (list 
    (ede-proj-target-makefile-miscelaneous "images"

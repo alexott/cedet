@@ -20,7 +20,7 @@
 PROJECTS=lisp lisp/cedet lisp/eieio lisp/speedbar lisp/cedet/cogre lisp/cedet/semantic \
 lisp/cedet/ede lisp/cedet/srecode lisp/cedet/semantic/bovine lisp/cedet/semantic/wisent \
 lisp/cedet/semantic/analyze lisp/cedet/semantic/decorate lisp/cedet/semantic/ectags \
-lisp/cedet/semantic/symref
+lisp/cedet/semantic/symref doc/texi doc/texi/semantic
 
 PROJECTS_AUTOLOADS=lisp lisp/cedet lisp/eieio lisp/speedbar lisp/cedet/cogre lisp/cedet/semantic \
 lisp/cedet/ede lisp/cedet/srecode
@@ -28,11 +28,15 @@ lisp/cedet/ede lisp/cedet/srecode
 EMACS=emacs
 EMACSFLAGS=-batch --no-site-file -l cedet-remove-builtin.el
 LOADDEFS=loaddefs.el
-BOOTSTRAP=(progn (global-ede-mode) (find-file "$(CURDIR)/lisp/Project.ede") (ede-proj-regenerate))
+BOOTSTRAP=(progn (global-ede-mode) (find-file "$(CURDIR)/lisp/Project.ede") (ede-proj-regenerate) (find-file "$(CURDIR)/doc/texi/Project.ede") (ede-proj-regenerate))
 UTEST=(progn (add-to-list (quote load-path) "$(CURDIR)/tests") (require (quote cedet-utests)) (semantic-mode))
 RM=rm
+FIND=find
+INSTALL-INFO=install-info
+INFO_FILES=$(shell $(FIND) $(CURDIR)/doc/texi -type f -name '*.info')
+INFODIR=$(CURDIR)/doc/info
 
-all: autoloads makefiles compile
+all: clean-autoloads autoloads makefiles compile info
 
 compile:
 	$(MAKE) -C lisp
@@ -48,6 +52,14 @@ makefiles-bootstrap:
 
 autoloads:
 	$(foreach proj,$(PROJECTS_AUTOLOADS),cd $(CURDIR)/$(proj) && $(MAKE) autoloads;)
+
+info:
+	$(MAKE) -C doc -C texi
+	@echo Run \"$(MAKE) install-info\" to install info files in $(INFODIR)
+
+install-info:
+	@echo Installing info files under $(INFODIR)
+	@$(foreach infofile,$(INFO_FILES),cp $(infofile) $(INFODIR);$(INSTALL-INFO) --info-dir=$(INFODIR) $(infofile);)
 
 clean-autoloads:
 	$(foreach proj,$(PROJECTS_AUTOLOADS),cd $(CURDIR)/$(proj) && if [ -f $(LOADDEFS) ];then $(RM) -f $(LOADDEFS);fi;)

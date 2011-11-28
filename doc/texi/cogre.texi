@@ -8,6 +8,7 @@
 @settitle @value{TITLE}
 
 @ifinfo
+@dircategory Emacs
 @format
 START-INFO-DIR-ENTRY
 * cogre: (cogre).       Graphs & UML for Emacs

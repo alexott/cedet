@@ -53,15 +53,12 @@
     (load-file (expand-file-name "lisp/cedet/ede/loaddefs.el" CEDETDIR))
     (load-file (expand-file-name "lisp/cedet/cogre/loaddefs.el" CEDETDIR))
     (load-file (expand-file-name "lisp/cedet/srecode/loaddefs.el" CEDETDIR))
-    (load-file (expand-file-name "lisp/cedet/semantic/loaddefs.el"CEDETDIR)))
+    (load-file (expand-file-name "lisp/cedet/semantic/loaddefs.el"CEDETDIR))
 
-
-  ;; SETUP INFO DIRS
-  ;; @TODO
-  
+    (setq Info-directory-list
+	  (cons (expand-file-name "doc/info" CEDETDIR)
+		Info-default-directory-list)))
   )
-
-
 
 (require 'cedet) ;; Get standard CEDET variables loaded.
 

@@ -10,6 +10,7 @@
 @c %**end of header
 
 @ifinfo
+@dircategory Emacs
 @format
 START-INFO-DIR-ENTRY
 * srecode: (srecode).       Template code generator

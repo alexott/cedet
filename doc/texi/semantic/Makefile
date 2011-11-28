@@ -18,8 +18,8 @@ semantic-appdev_info_TEXINFOS=app-dev-guide.texi tags.texi
 semantic-langdev_info_TEXINFOS=lang-support-guide.texi
 bovine_info_TEXINFOS=bovine.texi
 wisent_info_TEXINFOS=wisent.texi
-VERSION=2.1beta
-DISTDIR=$(top)semantic-$(VERSION)/doc
+VERSION=1.0
+DISTDIR=$(top)CEDET-doc-$(VERSION)/semantic
 
 
 
