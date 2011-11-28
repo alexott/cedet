@@ -29,6 +29,9 @@
 (require 'semantic/db)
 (require 'cedet-files)
 
+(eval-when-compile
+  (require 'data-debug))
+
 (defvar semanticdb-file-version semantic-version
   "Version of semanticdb we are writing files to disk with.")
 (defvar semanticdb-file-incompatible-version "1.4"
