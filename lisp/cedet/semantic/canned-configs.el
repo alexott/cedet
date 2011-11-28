@@ -1,9 +1,8 @@
-;;; semantic-load.el --- Autoload definitions for Semantic
+;;; semantic/canned-configs.el --- Canned configurations for Semantic
 
 ;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: semantic-load.el,v 1.72 2010-04-20 00:42:31 zappo Exp $
 
 ;; Semantic is free software; you can redistribute it and/or modify
 ;; it under the terms of the GNU General Public License as published by
@@ -22,40 +21,36 @@
 
 ;;; Commentary:
 ;;
-;; Initialize semantic for all supported conditions.
+;; These are some helper functions which setup Semantic with some
+;; canned configurations.  This file is only used for compatibility
+;; with The Olde CEDET Ways.  New users are encouraged to frob
+;; `semantic-submode-list' and simply enable `semantic-mode'.
 
 ;;; Code:
 ;;
 
-(require 'semantic/fw)
+(eval-when-compile
+  (require 'semantic/idle)
+  (require 'semantic/edit))
 
-;;; Add parser and doc directories
-;;
-(let ((dir (file-name-directory (locate-library "semantic"))))
-  (add-to-list 'load-path (expand-file-name "bovine" dir))
-  (add-to-list 'load-path (expand-file-name "wisent" dir))
-  (add-to-list 'load-path (expand-file-name "symref" dir))
-  (add-to-list 'load-path (expand-file-name "ctags" dir))
-  (add-to-list 'Info-default-directory-list (expand-file-name "doc" dir))
-  )
+(declare-function semantic-mode "semantic")
+(declare-function semantic-m3-install "semantic/m3")
+(declare-function semantic-toggle-decoration-style "semantic/decorate/mode")
+(declare-function global-semantic-highlight-edits-mode "semantic/util-modes")
+(declare-function global-semantic-show-unmatched-syntax-mode "semantic/util-modes")
+(declare-function global-semantic-show-parser-state-mode "semantic/util-modes")
+(declare-function semantic-load-enable-primary-ectags-support "semantic/ectags/lang")
+(declare-function semantic-load-enable-secondary-ectags-support "semantic/ectags/lang2")
 
 ;;; Some speedbar major modes
 (eval-after-load "speedbar"
   '(progn
-     (require 'semantic-ia-sb)))
-
+     (require 'semantic/ia-sb)))
+
 ;;; Useful predefined setup
 ;;
 (defvar semantic-load-imenu-string "TAGS"
-  "String used in `semantic-load' startup for the Imenu menu item.")
-
-(defvar semantic-load-turn-everything-on nil
-  "Non-nil means turn on all features in the semantic package.")
-
-(defvar semantic-load-turn-useful-things-on nil
-  "Non-nil means turn on all `useful' features.
-Sadly `useful' here means things Eric wants on as opposed to some
-other criteria.")
+  "String used in `semantic/canned-configs' startup for the Imenu menu item.")
 
 (defvar semantic-load-system-cache-loaded nil
   "Non nil when the system caches have been loaded.
@@ -69,28 +64,10 @@ This includes:
  `semanticdb-load-ebrowse-caches' - Loads any ebrowse dbs created earlier."
   (interactive)
 
-  (global-semantic-idle-scheduler-mode 1)
-
-  (global-semanticdb-minor-mode 1)
-
-  ;; @todo - Enable this
-  ;; (semanticdb-cleanup-cache-files t)
-
-  ;; Don't do the loads from semantic-load twice.
-  (when (null semantic-load-system-cache-loaded)
-
-    ;; This loads any created system databases which get linked into
-    ;; any searches performed.
-    (setq semantic-load-system-cache-loaded t)
-
-    ;; This loads any created ebrowse databases which get linked into
-    ;; any searches performed.
-    (when (and (not (featurep 'xemacs))
-	       (boundp 'semanticdb-default-system-save-directory)
-	       (stringp semanticdb-default-system-save-directory)
-	       (file-exists-p semanticdb-default-system-save-directory))
-      (semanticdb-load-ebrowse-caches))
-    )
+  (let ((semantic-submode-list
+	 '(global-semantic-idle-scheduler-mode
+	   global-semanticdb-minor-mode)))
+    (semantic-mode 1))
   )
 
 (defun semantic-load-enable-code-helpers ()
@@ -109,8 +86,18 @@ pre-build your database of header files in idle time for features
 such as idle summary mode."
   (interactive)
 
-  (semantic-load-enable-minimum-features)
+  (let ((semantic-submode-list
+	 '(global-semantic-idle-scheduler-mode
+	   global-semanticdb-minor-mode
+	   global-semantic-idle-summary-mode
+	   global-semantic-mru-bookmark-mode
+	   global-senator-minor-mode
+	   )))
+    (semantic-mode 1))
 
+  (semantic-load-code-helpers-1))
+
+(defun semantic-load-code-helpers-1 ()
   ;; This enables parsing of header files.
   (setq semantic-idle-work-update-headers-flag t)
 
@@ -122,15 +109,7 @@ such as idle summary mode."
 					 semantic-load-imenu-string)
 				      (error nil)))))
 
-  (global-semantic-idle-summary-mode 1)
-
-  (global-semantic-mru-bookmark-mode 1)
-
-  ;; Do this last.  This allows other minor modes to get loaded
-  ;; in so they appear in the menu properly.
-  (global-senator-minor-mode 1)
-
-  (semantic-m3-install)
+;;  (semantic-m3-install)
   )
 
 (defun semantic-load-enable-gaudy-code-helpers ()
@@ -147,25 +126,25 @@ This also sets `semantic-idle-work-parse-neighboring-files-flag' to t
 to pre-build your databases in idle time."
   (interactive)
 
-  (semantic-load-enable-code-helpers)
+  (let ((semantic-submode-list
+	 '(global-semantic-idle-scheduler-mode
+	   global-semanticdb-minor-mode
+	   global-semantic-idle-summary-mode
+	   global-semantic-mru-bookmark-mode
+	   global-senator-minor-mode
+	   global-semantic-decoration-mode
+	   global-semantic-stickyfunc-mode
+	   global-semantic-idle-completions-mode
+	   )))
+    (semantic-mode 1))
 
-  (global-semantic-decoration-mode 1)
-  (require 'semantic-decorate-include)
+  (semantic-load-code-helpers-1)
+  (semantic-load-enable-gaudy-code-helpers-1))
 
-  (when (boundp 'header-line-format)
-    (global-semantic-stickyfunc-mode 1))
-
-  (condition-case nil
-      (progn
-	(global-semantic-idle-completions-mode 1)
-	;; Enable preparsing many neighboring files.
-	(setq semantic-idle-work-parse-neighboring-files-flag t)
-	)
-    (error nil))
+(defun semantic-load-enable-gaudy-code-helpers-1 ()
+  ;; Enable preparsing many neighboring files.
+  (setq semantic-idle-work-parse-neighboring-files-flag t)
   )
-
-(semantic-alias-obsolete 'semantic-load-enable-guady-code-helpers
-                         'semantic-load-enable-gaudy-code-helpers)
 
 (defun semantic-load-enable-excessive-code-helpers ()
   "Enable all semantic features that provide coding assistance.
@@ -177,12 +156,29 @@ This includes all features of `semantic-load-enable-gaudy-code-helpers' plus:
   `which-func-mode' - Display the current function in the mode line."
   (interactive)
 
-  (semantic-load-enable-gaudy-code-helpers)
+  (let ((semantic-submode-list
+	 '(global-semantic-idle-scheduler-mode
+	   global-semanticdb-minor-mode
+	   global-semantic-idle-summary-mode
+	   global-semantic-mru-bookmark-mode
+	   global-senator-minor-mode
+	   global-semantic-decoration-mode
+	   global-semantic-stickyfunc-mode
+	   global-semantic-idle-completions-mode
+	   global-semantic-highlight-func-mode
+	   global-semantic-idle-local-symbol-highlight-mode
+	   )))
+    (semantic-mode 1))
 
-  (global-semantic-highlight-func-mode 1)
+  (semantic-load-code-helpers-1)
+  (semantic-load-enable-gaudy-code-helpers-1)
+  (semantic-load-enable-excessive-code-helpers-1)
+)
 
-  (global-semantic-idle-local-symbol-highlight-mode 1)
-
+(defun semantic-load-enable-excessive-code-helpers-1 ()
+  ;; Enable preparsing many neighboring files.
+  (setq semantic-idle-work-parse-neighboring-files-flag t)
+  (require 'semantic/decorate/mode)
   (semantic-toggle-decoration-style "semantic-decoration-on-private-members" t)
   (semantic-toggle-decoration-style "semantic-decoration-on-protected-members" t)
 
@@ -203,6 +199,8 @@ These modes include:
                             small indicators in the mode line."
   (interactive)
 
+  (require 'semantic/edit)
+
   (global-semantic-highlight-edits-mode 1)
 
   ;; This ought to be a code helper, but it is still
@@ -218,28 +216,23 @@ These modes include:
 
   )
 
-;;;###autoload
-(defun semantic-load-enable-all-exuberent-ctags-support ()
+(defun semantic-load-enable-all-ectags-support ()
   "Enable all exuberent ctags extensions.
 See the functions:
-   `semantic-load-enable-primary-exuberent-ctags-support'
-   `semantic-load-enable-secondary-exuberent-ctags-support'
+   `semantic-load-enable-primary-ectags-support'
+   `semantic-load-enable-secondary-ectags-support'
 If you just want to add new languages, use
-   `semantic-load-enable-primary-exuberent-ctags-support'."
+   `semantic-load-enable-primary-ectags-support'."
   (interactive)
-  (semantic-load-enable-primary-exuberent-ctags-support)
-  (semantic-load-enable-secondary-exuberent-ctags-support)
+  (semantic-load-enable-primary-ectags-support)
+  (semantic-load-enable-secondary-ectags-support)
   )
 
-;; Old style variables.  Use only if we are not in batch mode.
-(when (not noninteractive)
-  (cond
-   (semantic-load-turn-everything-on
-    (semantic-load-enable-excessive-code-helpers))
-   (semantic-load-turn-useful-things-on
-    (semantic-load-enable-code-helpers))
-   ))
+(semantic-alias-obsolete
+ 'semantic-load-enable-all-exuberent-ctags-support
+ 'semantic-load-enable-all-ectags-support
+ "CEDET 1.2")
 
-(provide 'semantic-load)
+(provide 'semantic/canned-configs)
 
-;;; semantic-load.el ends here
+;;; semantic/canned-configs.el ends here
