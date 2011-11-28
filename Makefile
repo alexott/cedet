@@ -17,7 +17,7 @@
 # Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 # Boston, MA 02110-1301, USA.
 
-PROJECTS=lisp lisp/cedet lisp/eieio lisp/speedbar lisp/cedet/cogre lisp/cedet/semantic \
+PROJECTS=lisp/cedet lisp/eieio lisp/speedbar lisp/cedet/cogre lisp/cedet/semantic \
 lisp/cedet/ede lisp/cedet/srecode lisp/cedet/semantic/bovine lisp/cedet/semantic/wisent \
 lisp/cedet/semantic/analyze lisp/cedet/semantic/decorate lisp/cedet/semantic/ectags \
 lisp/cedet/semantic/symref doc/texi doc/texi/semantic
@@ -44,11 +44,11 @@ compile:
 makefiles: $(addsuffix /Makefile,$(PROJECTS))
 $(addsuffix /Makefile,$(PROJECTS)): $(addsuffix /Project.ede,$(PROJECTS))
 	@echo "Creating Makefiles using EDE."
-	$(EMACS) $(EMACSFLAGS) --eval '(setq cedet-bootstrap-in-progress t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
+	@$(EMACS) $(EMACSFLAGS) --eval '(setq cedet-bootstrap-in-progress t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
 
 makefiles-bootstrap:
 	@echo "Creating Makefiles using EDE and builtin Emacs-CEDET as fallback."
-	$(EMACS) -batch --no-site-file --eval '(setq cedet-bootstrap-in-progress t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
+	@$(EMACS) -batch --no-site-file --eval '(setq cedet-bootstrap-in-progress t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
 
 autoloads:
 	$(foreach proj,$(PROJECTS_AUTOLOADS),cd $(CURDIR)/$(proj) && $(MAKE) autoloads;)
@@ -62,10 +62,12 @@ install-info:
 	@$(foreach infofile,$(INFO_FILES),cp $(infofile) $(INFODIR);$(INSTALL-INFO) --info-dir=$(INFODIR) $(infofile);)
 
 clean-autoloads:
-	$(foreach proj,$(PROJECTS_AUTOLOADS),cd $(CURDIR)/$(proj) && if [ -f $(LOADDEFS) ];then $(RM) -f $(LOADDEFS);fi;)
+	@echo Removing loaddefs.el files from subprojects.
+	@$(foreach proj,$(PROJECTS_AUTOLOADS),cd $(CURDIR)/$(proj) && if [ -f $(LOADDEFS) ];then $(RM) -f $(LOADDEFS);fi;)
 
 clean-all: clean-autoloads
-	$(foreach proj,$(PROJECTS),cd $(CURDIR)/$(proj) && $(MAKE) clean;)
+	@echo Calling \"$(MAKE) clean\" in all projects.
+	@$(foreach proj,$(PROJECTS),echo "  > $(proj)";cd $(CURDIR)/$(proj) && $(MAKE) clean;)
 
 utest: 
 	$(EMACS) -Q -l cedet-devel-load.el --eval '$(UTEST)' -f cedet-utest
