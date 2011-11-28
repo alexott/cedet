@@ -123,6 +123,7 @@
 
 (defvar data-debug-thing-alist)
 (declare-function data-debug-insert-stuff-list "data-debug")
+(declare-function data-debug-new-buffer "data-debug")
 ;;;(declare-function data-debug-insert-tag-list "adebug")
 (declare-function semantic-scope-reset-cache "semantic/scope")
 (declare-function semanticdb-typecache-notify-reset "semantic/db-typecache")

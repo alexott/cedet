@@ -22,7 +22,7 @@ lisp/cedet/ede lisp/cedet/srecode lisp/cedet/semantic/bovine lisp/cedet/semantic
 lisp/cedet/semantic/analyze lisp/cedet/semantic/decorate lisp/cedet/semantic/ectags \
 lisp/cedet/semantic/symref doc/texi doc/texi/semantic
 
-PROJECTS_AUTOLOADS=lisp lisp/cedet lisp/eieio lisp/speedbar lisp/cedet/cogre lisp/cedet/semantic \
+PROJECTS_AUTOLOADS=lisp/cedet lisp/eieio lisp/speedbar lisp/cedet/cogre lisp/cedet/semantic \
 lisp/cedet/ede lisp/cedet/srecode
 
 EMACS=emacs
@@ -51,7 +51,8 @@ makefiles-bootstrap:
 	@$(EMACS) -batch --no-site-file --eval '(setq cedet-bootstrap-in-progress t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
 
 autoloads:
-	$(foreach proj,$(PROJECTS_AUTOLOADS),cd $(CURDIR)/$(proj) && $(MAKE) autoloads;)
+	@echo "Generating autoloads."
+	@$(foreach proj,$(PROJECTS_AUTOLOADS),cd $(CURDIR)/$(proj) && $(MAKE) autoloads;)
 
 info:
 	$(MAKE) -C doc -C texi
