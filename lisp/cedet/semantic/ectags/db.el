@@ -87,6 +87,11 @@ if FILENAME were loaded."
     ;; Return the table
     table))
 
-
 (provide 'semantic/ectags/db)
+
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/ectags/db"
+;; End:
+
 ;;; semantic/ectags/db.el ends here

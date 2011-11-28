@@ -103,5 +103,16 @@ semantic parser."
   ;;(add-hook 'verilog-mode-hook 'semantic-ectags-simple-setup)
   )
 
+(semantic-alias-obsolete
+ 'semantic-load-enable-primary-exuberent-ctags-support
+ 'semantic-load-enable-primary-ectags-support
+ "CEDET 1.2")
+
 (provide 'semantic/ectags/lang)
+
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/ectags/lang"
+;; End:
+
 ;;; semantic/ectags/lang.el ends here

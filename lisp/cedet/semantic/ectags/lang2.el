@@ -127,7 +127,16 @@ Any mode that has been tested to work will be added to this function."
   (semanticdb-enable-ectags 'emacs-lisp-mode)
 
   )
-
+(semantic-alias-obsolete
+ 'semantic-load-enable-secondary-exuberent-ctags-support
+ 'semantic-load-enable-secondary-ectags-support
+ "CEDET 1.2")
 
 (provide 'semantic/ectags/lang2)
+
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/ectags/lang2"
+;; End:
+
 ;;; semantic/ectags/lang2.el ends here

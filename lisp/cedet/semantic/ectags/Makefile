@@ -12,7 +12,7 @@ EMACS=@echo "    > $@";emacs
 top=../../../
 ede_FILES=Project.ede Makefile
 
-ectags_LISP=util.el lang.el lang2.el parse.el
+ectags_LISP=db.el util.el lang.el lang2.el parse.el
 LOADPATH= ../../../speedbar/ ../../../eieio/ ../../ ../../
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic/ectags
