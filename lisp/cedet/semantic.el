@@ -1035,7 +1035,8 @@ Prevent this load system from loading files in twice.")
     global-semantic-idle-scheduler-mode
     global-semanticdb-minor-mode
     global-semantic-idle-summary-mode
-    global-semantic-mru-bookmark-mode)
+    global-semantic-mru-bookmark-mode
+    global-semantic-idle-local-symbol-highlight-mode)
   "List of auxiliary minor modes in the Semantic package.")
 
 ;;;###autoload

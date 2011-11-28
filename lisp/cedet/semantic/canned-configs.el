@@ -24,7 +24,7 @@
 ;; These are some helper functions which setup Semantic with some
 ;; canned configurations.  This file is only used for compatibility
 ;; with The Olde CEDET Ways.  New users are encouraged to frob
-;; `semantic-submode-list' and simply enable `semantic-mode'.
+;; `semantic-default-submodes' and simply enable `semantic-mode'.
 
 ;;; Code:
 ;;
@@ -64,7 +64,7 @@ This includes:
  `semanticdb-load-ebrowse-caches' - Loads any ebrowse dbs created earlier."
   (interactive)
 
-  (let ((semantic-submode-list
+  (let ((semantic-default-submodes
 	 '(global-semantic-idle-scheduler-mode
 	   global-semanticdb-minor-mode)))
     (semantic-mode 1))
@@ -76,8 +76,6 @@ This includes `semantic-load-enable-minimum-features' plus:
   `imenu' - Lists Semantic generated tags in the menubar.
   `semantic-idle-summary-mode' - Show a summary for the tag indicated by
                                  code under point.  (intellisense)
-  `senator-minor-mode' - Semantic Navigator, and global menu for all
-                         features Semantic.
   `semantic-mru-bookmark-mode' - Provides a `switch-to-buffer' like
                        keybinding for tag names.
 
@@ -86,12 +84,11 @@ pre-build your database of header files in idle time for features
 such as idle summary mode."
   (interactive)
 
-  (let ((semantic-submode-list
+  (let ((semantic-default-submodes
 	 '(global-semantic-idle-scheduler-mode
 	   global-semanticdb-minor-mode
 	   global-semantic-idle-summary-mode
 	   global-semantic-mru-bookmark-mode
-	   global-senator-minor-mode
 	   )))
     (semantic-mode 1))
 
@@ -126,12 +123,11 @@ This also sets `semantic-idle-work-parse-neighboring-files-flag' to t
 to pre-build your databases in idle time."
   (interactive)
 
-  (let ((semantic-submode-list
+  (let ((semantic-default-submodes
 	 '(global-semantic-idle-scheduler-mode
 	   global-semanticdb-minor-mode
 	   global-semantic-idle-summary-mode
 	   global-semantic-mru-bookmark-mode
-	   global-senator-minor-mode
 	   global-semantic-decoration-mode
 	   global-semantic-stickyfunc-mode
 	   global-semantic-idle-completions-mode
@@ -156,12 +152,11 @@ This includes all features of `semantic-load-enable-gaudy-code-helpers' plus:
   `which-func-mode' - Display the current function in the mode line."
   (interactive)
 
-  (let ((semantic-submode-list
+  (let ((semantic-default-submodes
 	 '(global-semantic-idle-scheduler-mode
 	   global-semanticdb-minor-mode
 	   global-semantic-idle-summary-mode
 	   global-semantic-mru-bookmark-mode
-	   global-senator-minor-mode
 	   global-semantic-decoration-mode
 	   global-semantic-stickyfunc-mode
 	   global-semantic-idle-completions-mode
