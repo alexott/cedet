@@ -33,6 +33,9 @@
 (let ((CEDETDIR (file-name-directory
 		 (or load-file-name (buffer-file-name)))))
 
+  ;; Remove builtin CEDET from load path and autoloaded symbols
+  (load-file (expand-file-name "cedet-remove-builtin.el" CEDETDIR))
+
   ;; SETUP LOAD PATHS
   (add-to-list 'load-path CEDETDIR)
   (add-to-list 'load-path (expand-file-name "lisp/cedet" CEDETDIR))
@@ -65,6 +68,9 @@
 ;; Load in COMPAT code - This is because NEW CEDET code may use this
 ;; for compatibility reasons, but Emacs integrated code removes it.
 (require 'cedet-compat)
+
+;; Load the canned configurations
+(require 'semantic/canned-configs)
 
 ;; Add some autoloads by hand due to:
 ;;  New code

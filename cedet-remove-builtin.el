@@ -22,7 +22,7 @@
 ;;; Code:
 
 (defvar cedet-remove-builtin-package-list
-  '(eieio semantic srecode ede)
+  '(eieio semantic srecode ede data-debug speedbar)
   "CEDET packages part of Emacs proper that should be removed.
   The 'cedet' package itself is implicitly included.")
 
@@ -59,4 +59,4 @@ This is a needed first step in getting CEDET installed from outside sources."
 
 (provide 'cedet-remove-builtin)
 
-;;; cedet-butil.el ends here
+;;; cedet-remove-builtin.el ends here
