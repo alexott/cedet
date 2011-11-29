@@ -552,10 +552,6 @@ A Component is a part of TAG which itself may be a TAG."
   (semantic-toggle-decoration-style "semantic-tag-f90-boundary" t)
   )
 
-;; Install the parser in the f90-mode-hook
-;;;###autoload
-(add-hook 'f90-mode-hook 'semantic-default-f90-setup)
-
 (provide 'semantic/f90)
 
 ;; Local variables:
