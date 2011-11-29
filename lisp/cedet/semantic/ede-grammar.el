@@ -151,8 +151,9 @@ Lays claim to all -by.el, and -wy.el files."
 			    (file-newer-than-file-p src cf))
 			(byte-compile-file cf)))
 		;; Emacs 24 and newer
-		(byte-recompile-file (concat (semantic-grammar-package) ".el")
-				     nil 0))))
+		(with-no-warnings
+		  (byte-recompile-file (concat (semantic-grammar-package) ".el")
+				       nil 0)))))
 	  (oref obj source)))
   (message "All Semantic Grammar sources are up to date in %s" (object-name obj)))
 
