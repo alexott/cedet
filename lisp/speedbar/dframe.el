@@ -431,7 +431,10 @@ a cons cell indicating a position of the form (LEFT . TOP)."
   (unless (or (not window-system) (eq window-system 'pc))
     (let* ((pfx (dframe-frame-parameter parent-frame 'left))
 	   (pfy (dframe-frame-parameter parent-frame 'top))
-	   (pfw (+ (tool-bar-pixel-width parent-frame)
+	   (pfw (+ (if (>= emacs-major-version 24)
+		       (with-no-warnings
+			 (tool-bar-pixel-width parent-frame))
+		     0)
 		   (frame-pixel-width parent-frame)))
 	   (pfh (frame-pixel-height parent-frame))
 	   (nfw (frame-pixel-width new-frame))
