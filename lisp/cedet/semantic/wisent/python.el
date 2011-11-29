@@ -358,24 +358,19 @@ attribute."
   ;; Try to find the constructor, determine the name of the instance
   ;; parameter, find assignments to instance variables and add
   ;; corresponding variable tags to the list of members.
-  (dolist (member (remove-if-not
-		   #'semantic-tag-function-constructor-p
-		   (semantic-tag-type-members tag)))
-    (let ((self (semantic-tag-name
-		 (car (semantic-tag-function-arguments member)))))
-      (dolist (statement (remove-if-not
-			  (lambda (s)
-			    (semantic-python-instance-variable-p s self))
-			  (semantic-tag-get-attribute member :suite)))
-	(let ((variable (semantic-tag-clone
-			 statement
-			 (substring (semantic-tag-name statement) 5)))
-	      (members  (semantic-tag-get-attribute tag :members)))
-
-	  (when (semantic-python-private-p variable)
-	    (semantic-tag-put-attribute variable :protection "private"))
-
-	  (setcdr (last members) (list variable))))))
+  (dolist (member (semantic-tag-type-members tag))
+    (when (semantic-tag-function-constructor-p member)
+      (let ((self (semantic-tag-name
+		   (car (semantic-tag-function-arguments member)))))
+	(dolist (statement (semantic-tag-get-attribute member :suite))
+	  (when (semantic-python-instance-variable-p statement self)
+	    (let ((variable (semantic-tag-clone
+			     statement
+			     (substring (semantic-tag-name statement) 5)))
+		  (members  (semantic-tag-get-attribute tag :members)))
+	      (when (semantic-python-private-p variable)
+		(semantic-tag-put-attribute variable :protection "private"))
+	      (setcdr (last members) (list variable))))))))
 
   ;; TODO remove the :suite attribute
   tag)
