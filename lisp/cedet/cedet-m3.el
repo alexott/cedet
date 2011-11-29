@@ -75,36 +75,33 @@
   "Keymap where we hide our context menu.")
 
 ;;;###autoload
-(defun cedet-m3-minor-mode (&optional arg)
+(define-minor-mode cedet-m3-minor-mode
   "Toggle cedet-m3 minor mode, a mouse 3 context menu.
 With prefix argument ARG, turn on if positive, otherwise off.
 Return non-nil if the minor mode is enabled.
 
 \\{cedet-m3-mode-map}"
-  (interactive
-   (list (or current-prefix-arg
-             (if cedet-m3-minor-mode 0 1))))
-  ;; Flip the bits.
-  (setq cedet-m3-minor-mode
-        (if arg
-            (>
-             (prefix-numeric-value arg)
-             0)
-          (not cedet-m3-minor-mode)))
-  ;; Run hooks if we are turning this on.
+  :keymap cedet-m3-mode-map
   (when cedet-m3-minor-mode
-    (run-hooks 'cedet-m3-minor-mode-hook))
-  cedet-m3-minor-mode)
+      (progn
+	(when (and (featurep 'semantic) (semantic-active-p))
+	  (semantic-m3-install))
+	(with-no-warnings
+	  (when (and (featurep 'ede) ede-minor-mode)
+	    (ede-m3-install)))
+	(run-hooks 'cedet-m3-minor-mode-hook))))
+
+(semantic-add-minor-mode 'cedet-m3-minor-mode "m3")
 
 ;;;###autoload
-(defun global-cedet-m3-minor-mode (&optional arg)
+(define-minor-mode global-cedet-m3-minor-mode
   "Toggle global use of cedet-m3 minor mode.
 If ARG is positive, enable, if it is negative, disable.
 If ARG is nil, then toggle."
-  (interactive "P")
-  (setq global-cedet-m3-minor-mode
-        (semantic-toggle-minor-mode-globally
-         'cedet-m3-minor-mode arg)))
+  :global t :group 'cedet :group 'cedet-modes
+  (semantic-toggle-minor-mode-globally
+   'cedet-m3-minor-mode
+   (if global-cedet-m3-minor-mode 1 -1)))
 
 ;;; KEYBINDING COMMANDS
 ;;
@@ -202,9 +199,6 @@ ATTRIBUTES are easymenu compatible attributes."
       "Cedet-M3 Minor Mode Menu"
       easy)
     ))
-
-;; Use the semantic minor mode magic stuff.
-(semantic-add-minor-mode 'cedet-m3-minor-mode "")
 
 (provide 'cedet-m3)
 

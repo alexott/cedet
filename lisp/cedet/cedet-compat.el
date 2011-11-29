@@ -178,26 +178,6 @@ Return a coding system between BEGIN and END."
   )
 
 
-;;;###autoload
-(if (or (featurep 'xemacs) (inversion-test 'emacs "22.0"))
-    ;; For XEmacs, or older Emacs, we need a new split string.
-    (defalias 'cedet-split-string 'cedet-split-string-1)
-  ;; For newer emacs, then the cedet-split-string is the same
-  ;; as the built-in one.
-  (defalias 'cedet-split-string 'split-string))
-
-
-;;;###autoload
-(when (not (fboundp 'with-no-warnings))
-  (put 'with-no-warnings 'lisp-indent-function 0)
-  (defun with-no-warnings (&rest body)
-    "Copied from `with-no-warnings' in Emacs 23.
-Like `progn', but prevents compiler warnings in the body.
-Note: Doesn't work if this version is being loaded."
-    ;; The implementation for the interpreter is basically trivial.
-    (car (last body))))
-
-
 (if (not (fboundp 'called-interactively-p))
     (defmacro cedet-called-interactively-p (&optional arg)
       "Compat function.  Calls `interactive-p'"

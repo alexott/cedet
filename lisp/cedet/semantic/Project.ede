@@ -35,7 +35,7 @@
    (ede-proj-target-elisp "tools"
     :name "tools"
     :path ""
-    :source '("adebug.el" "canned-configs.el" "chart.el" "complete.el" "debug.el" "elp.el" "grammar.el" "gram-wy-fallback.el" "ia-sb.el" "ia.el" "imenu.el" "mru-bookmark.el" "sb.el" "util-modes.el" "senator.el")
+    :source '("adebug.el" "canned-configs.el" "chart.el" "complete.el" "debug.el" "elp.el" "grammar.el" "gram-wy-fallback.el" "ia-sb.el" "ia.el" "imenu.el" "mru-bookmark.el" "sb.el" "util-modes.el" "senator.el" "m3.el")
     :aux-packages '("cedet-compat" "cedet" "eieio" "speedbar")
     :pre-load-packages '("cedet-compat")
      )
@@ -49,7 +49,7 @@
    (ede-proj-target-elisp "Languages"
     :name "Languages"
     :path ""
-    :source '("texi.el" "html.el")
+    :source '("texi.el" "html.el" "java.el")
    :aux-packages '("cedet-compat" "cedet" "eieio" "speedbar")
     :pre-load-packages '("cedet-compat")
     )

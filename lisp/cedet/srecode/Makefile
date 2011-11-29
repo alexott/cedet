@@ -17,7 +17,7 @@ LOADDEFS=loaddefs.el
 LOADDIRS=.
 lang_SEMANTIC_GRAMMAR=srt.wy
 lang_SEMANTIC_GRAMMAR_EL=srt-wy.el
-srecode_LISP=mode.el compile.el insert.el semantic.el template.el dictionary.el args.el table.el filters.el find.el ctxt.el getset.el cpp.el expandproto.el el.el srt.el texi.el map.el extract.el java.el fields.el android.el document.el
+srecode_LISP=mode.el compile.el insert.el semantic.el template.el dictionary.el args.el table.el filters.el find.el ctxt.el getset.el cpp.el expandproto.el el.el srt.el texi.el map.el extract.el java.el fields.el android.el document.el m3.el srt-mode.el
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/srecode
 

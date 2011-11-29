@@ -89,6 +89,7 @@ such as idle summary mode."
 	   global-semanticdb-minor-mode
 	   global-semantic-idle-summary-mode
 	   global-semantic-mru-bookmark-mode
+	   global-cedet-m3-minor-mode
 	   )))
     (semantic-mode 1))
 
@@ -105,8 +106,6 @@ such as idle summary mode."
 					(imenu-add-to-menubar
 					 semantic-load-imenu-string)
 				      (error nil)))))
-
-;;  (semantic-m3-install)
   )
 
 (defun semantic-load-enable-gaudy-code-helpers ()
@@ -128,6 +127,7 @@ to pre-build your databases in idle time."
 	   global-semanticdb-minor-mode
 	   global-semantic-idle-summary-mode
 	   global-semantic-mru-bookmark-mode
+	   global-cedet-m3-minor-mode
 	   global-semantic-decoration-mode
 	   global-semantic-stickyfunc-mode
 	   global-semantic-idle-completions-mode
@@ -157,6 +157,7 @@ This includes all features of `semantic-load-enable-gaudy-code-helpers' plus:
 	   global-semanticdb-minor-mode
 	   global-semantic-idle-summary-mode
 	   global-semantic-mru-bookmark-mode
+	   global-cedet-m3-minor-mode
 	   global-semantic-decoration-mode
 	   global-semantic-stickyfunc-mode
 	   global-semantic-idle-completions-mode

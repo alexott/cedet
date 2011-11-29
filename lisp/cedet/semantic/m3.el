@@ -29,6 +29,7 @@
 (require 'cedet-m3)
 (require 'semantic/analyze)
 (require 'semantic/analyze/refs)
+(require 'semantic/idle)
 
 ;;; Code:
 
@@ -262,5 +263,10 @@ The what is under the cursor."
 
 
 (provide 'semantic/m3)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/m3"
+;; End:
 
 ;;; semantic-m3.el ends here

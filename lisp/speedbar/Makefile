@@ -16,7 +16,7 @@ ede_FILES=Project.ede Makefile
 LOADDEFS=loaddefs.el
 LOADDIRS=.
 speedbar_LISP=dframe.el speedbar.el
-opt_LISP=rpm.el sb-info.el sb-rmail.el sb-texinfo.el sb-html.el sb-ant.el
+opt_LISP=rpm.el sb-info.el sb-rmail.el sb-texinfo.el sb-html.el sb-ant.el sb-image.el
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/speedbar
 

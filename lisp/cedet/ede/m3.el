@@ -28,7 +28,6 @@
 (require 'ede)
 (require 'cedet-m3)
 
-;;;###autoload
 (defun ede-m3-ede-items ()
   "Return a list of menu items based on EDE project stats."
   ;; Only create items if EDE is active.
@@ -58,6 +57,15 @@
 		      items))))
       items)))
 
+;;;###autoload
+(defun ede-m3-install ()
+  (add-hook 'cedet-m3-menu-query-hooks 'ede-m3-ede-items))
+
 (provide 'ede/m3)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/m3"
+;; End:
 
 ;;; ede-m3.el ends here

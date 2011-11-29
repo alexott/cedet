@@ -51,6 +51,7 @@
   (unless (boundp 'cedet-bootstrap-in-progress)
     (load-file (expand-file-name "lisp/eieio/loaddefs.el" CEDETDIR))
     (load-file (expand-file-name "lisp/speedbar/loaddefs.el" CEDETDIR))
+    (load-file (expand-file-name "lisp/cedet/loaddefs.el" CEDETDIR))
     (load-file (expand-file-name "lisp/cedet/ede/loaddefs.el" CEDETDIR))
     (load-file (expand-file-name "lisp/cedet/cogre/loaddefs.el" CEDETDIR))
     (load-file (expand-file-name "lisp/cedet/srecode/loaddefs.el" CEDETDIR))

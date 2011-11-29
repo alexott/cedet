@@ -1037,6 +1037,7 @@ Prevent this load system from loading files in twice.")
     global-semanticdb-minor-mode
     global-semantic-idle-summary-mode
     global-semantic-mru-bookmark-mode
+    global-cedet-m3-minor-mode
     global-semantic-idle-local-symbol-highlight-mode)
   "List of auxiliary minor modes in the Semantic package.")
 
@@ -1054,7 +1055,10 @@ The possible elements of this list include the following:
  `global-semantic-highlight-func-mode' - Highlight the current tag.
  `global-semantic-stickyfunc-mode'     - Show current fun in header line.
  `global-semantic-mru-bookmark-mode'   - Provide `switch-to-buffer'-like
-                                         keybinding for tag names."
+                                         keybinding for tag names.
+ `global-cedet-m3-minor-mode'          - A mouse 3 context menu.
+ `global-semantic-idle-local-symbol-highlight-mode' - Highlight references
+                                         of the symbol under point."
   :group 'semantic
   :type `(set ,@(mapcar (lambda (c) (list 'const c))
 			semantic-submode-list)))
@@ -1146,6 +1150,11 @@ With prefix argument ARG, turn on if positive, otherwise off.  The
 minor mode can be turned on only if semantic feature is available and
 the current buffer was set up for parsing.  Return non-nil if the
 minor mode is enabled." t nil)
+
+(autoload 'global-semantic-idle-local-symbol-highlight-mode "semantic/idle"
+  "Highlight the tag and symbol references of the symbol under point.
+Call `semantic-analyze-current-context' to find the reference tag.
+Call `semantic-symref-hits-in-region' to identify local references." t nil)
 
 (autoload 'srecode-template-setup-parser "srecode/srecode-template"
   "Set up buffer for parsing SRecode template files." t nil)
