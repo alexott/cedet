@@ -41,6 +41,7 @@ autoloads:
 lang: $(addsuffix -wy.elc, $(basename $(lang_SEMANTIC_GRAMMAR)))
 lang: PRELOADS=cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
+lang: EMACSFLAGS+= --eval '(setq max-specpdl-size 1500 max-lisp-eval-depth 700)'
 %.elc: %.el
 	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 

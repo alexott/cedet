@@ -57,7 +57,6 @@
     :name "maintenance"
     :path ""
     :source '("ede-grammar.el")
-    :partofall 'nil
     :aux-packages '("cedet-compat" "cedet" "eieio" "speedbar")
     :pre-load-packages '("cedet-compat")
     )

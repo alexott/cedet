@@ -30,7 +30,7 @@ DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic
 
 
 
-all: semantic utils Database tools subprojects-top Languages metagrammar wisent Symref ectags Decorator bovinator Analyzer
+all: semantic utils Database tools subprojects-top Languages maintenance metagrammar wisent Symref ectags Decorator bovinator Analyzer
 
 .PHONY: clean-autoloads
 clean-autoloads: 
@@ -79,6 +79,7 @@ maintenance: PRELOADS=cedet-compat
 metagrammar: $(addsuffix -wy.elc, $(basename $(metagrammar_SEMANTIC_GRAMMAR)))
 metagrammar: PRELOADS=cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
+metagrammar: EMACSFLAGS+= --eval '(setq max-specpdl-size 1500 max-lisp-eval-depth 700)'
 .PHONY:wisent
 wisent:
 	$(MAKE) -C wisent
