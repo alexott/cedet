@@ -33,8 +33,9 @@
 (let ((CEDETDIR (file-name-directory
 		 (or load-file-name (buffer-file-name)))))
 
+  (unless (boundp 'cedet-bootstrap-in-progress)
   ;; Remove builtin CEDET from load path and autoloaded symbols
-  (load-file (expand-file-name "cedet-remove-builtin.el" CEDETDIR))
+    (load-file (expand-file-name "cedet-remove-builtin.el" CEDETDIR)))
 
   ;; SETUP LOAD PATHS
   (add-to-list 'load-path CEDETDIR)
