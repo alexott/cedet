@@ -144,7 +144,15 @@ Lays claim to all -by.el, and -wy.el files."
 	      (save-excursion
 		(semantic-grammar-create-package))
 	      (save-buffer)
-              (byte-recompile-file (concat (semantic-grammar-package) ".el") nil 0)))
+	      (if (< emacs-major-version 24)
+		  ;; Does not have `byte-recompile-file'
+		  (let ((cf (concat (semantic-grammar-package) ".el")))
+		    (if (or (not (file-exists-p cf))
+			    (file-newer-than-file-p src cf))
+			(byte-compile-file cf)))
+		;; Emacs 24 and newer
+		(byte-recompile-file (concat (semantic-grammar-package) ".el")
+				     nil 0))))
 	  (oref obj source)))
   (message "All Semantic Grammar sources are up to date in %s" (object-name obj)))
 
@@ -175,18 +183,13 @@ Lays claim to all -by.el, and -wy.el files."
 		" ")))
   )
 
-(defmethod ede-proj-makefile-insert-rules ((this semantic-ede-proj-target-grammar))
-  "Insert rules needed by THIS target."
-  ;; Add in some dependencies.
-;;  (mapc (lambda (src)
-;;	  (let ((nm (file-name-sans-extension src)))
-;;	    (insert nm "-wy.el: " src "\n"
-;;		    nm "-wy.elc: " nm "-wy.el\n\n")
-;;	    ))
-;;	(oref this source))
-  ;; Call the normal insertion of rules.
-  (call-next-method)
-  )
+(defmethod ede-proj-makefile-insert-rules :after ((this semantic-ede-proj-target-grammar))
+    "Insert rules needed by THIS target.
+This raises `max-specpdl-size' and `max-lisp-eval-depth', which can be
+needed for the compilation of the resulting parsers."
+    (insert (format "%s: EMACSFLAGS+= --eval '(setq max-specpdl-size 1500 \
+max-lisp-eval-depth 700)'\n"
+		    (oref this name))))
 
 (defmethod ede-proj-makefile-insert-dist-dependencies ((this semantic-ede-proj-target-grammar))
   "Insert dist dependencies, or intermediate targets.
