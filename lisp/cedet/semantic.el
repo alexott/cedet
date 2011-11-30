@@ -1038,7 +1038,10 @@ Prevent this load system from loading files in twice.")
     global-semantic-idle-summary-mode
     global-semantic-mru-bookmark-mode
     global-cedet-m3-minor-mode
-    global-semantic-idle-local-symbol-highlight-mode)
+    global-semantic-idle-local-symbol-highlight-mode
+    global-semantic-highlight-edits-mode
+    global-semantic-show-unmatched-syntax-mode
+    global-semantic-show-parser-state-mode)
   "List of auxiliary minor modes in the Semantic package.")
 
 ;;;###autoload
@@ -1058,7 +1061,14 @@ The possible elements of this list include the following:
                                          keybinding for tag names.
  `global-cedet-m3-minor-mode'          - A mouse 3 context menu.
  `global-semantic-idle-local-symbol-highlight-mode' - Highlight references
-                                         of the symbol under point."
+                                         of the symbol under point.
+The following modes are more targeted at people who want to see
+ some internal information of the semantic parser in action:
+ `global-semantic-highlight-edits-mode' - Visualize incremental parser by
+                                         highlighting not-yet parsed changes.
+ `global-semantic-show-unmatched-syntax-mode' - Highlight unmatched lexical
+                                         syntax tokens.
+ `global-semantic-show-parser-state-mode' - Display the parser cache state."
   :group 'semantic
   :type `(set ,@(mapcar (lambda (c) (list 'const c))
 			semantic-submode-list)))

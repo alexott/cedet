@@ -64,11 +64,10 @@ This includes:
  `semanticdb-load-ebrowse-caches' - Loads any ebrowse dbs created earlier."
   (interactive)
 
-  (let ((semantic-default-submodes
-	 '(global-semantic-idle-scheduler-mode
-	   global-semanticdb-minor-mode)))
-    (semantic-mode 1))
-  )
+  (setq semantic-default-submodes
+	'(global-semantic-idle-scheduler-mode
+	  global-semanticdb-minor-mode))
+  (semantic-mode 1))
 
 (defun semantic-load-enable-code-helpers ()
   "Enable some semantic features that provide basic coding assistance.
@@ -78,21 +77,21 @@ This includes `semantic-load-enable-minimum-features' plus:
                                  code under point.  (intellisense)
   `semantic-mru-bookmark-mode' - Provides a `switch-to-buffer' like
                        keybinding for tag names.
+  `global-cedet-m3-minor-mode' - A mouse-3 (right-click) context menu.
 
 This also sets `semantic-idle-work-update-headers-flag' to t to
 pre-build your database of header files in idle time for features
 such as idle summary mode."
   (interactive)
 
-  (let ((semantic-default-submodes
-	 '(global-semantic-idle-scheduler-mode
-	   global-semanticdb-minor-mode
-	   global-semantic-idle-summary-mode
-	   global-semantic-mru-bookmark-mode
-	   global-cedet-m3-minor-mode
-	   )))
-    (semantic-mode 1))
-
+  (setq semantic-default-submodes
+	'(global-semantic-idle-scheduler-mode
+	  global-semanticdb-minor-mode
+	  global-semantic-idle-summary-mode
+	  global-semantic-mru-bookmark-mode
+	  global-cedet-m3-minor-mode))
+  
+  (semantic-mode 1)
   (semantic-load-code-helpers-1))
 
 (defun semantic-load-code-helpers-1 ()
@@ -122,18 +121,17 @@ This also sets `semantic-idle-work-parse-neighboring-files-flag' to t
 to pre-build your databases in idle time."
   (interactive)
 
-  (let ((semantic-default-submodes
-	 '(global-semantic-idle-scheduler-mode
-	   global-semanticdb-minor-mode
-	   global-semantic-idle-summary-mode
-	   global-semantic-mru-bookmark-mode
-	   global-cedet-m3-minor-mode
-	   global-semantic-decoration-mode
-	   global-semantic-stickyfunc-mode
-	   global-semantic-idle-completions-mode
-	   )))
-    (semantic-mode 1))
+  (setq semantic-default-submodes
+	'(global-semantic-idle-scheduler-mode
+	  global-semanticdb-minor-mode
+	  global-semantic-idle-summary-mode
+	  global-semantic-mru-bookmark-mode
+	  global-cedet-m3-minor-mode
+	  global-semantic-decoration-mode
+	  global-semantic-stickyfunc-mode
+	  global-semantic-idle-completions-mode))
 
+  (semantic-mode 1)
   (semantic-load-code-helpers-1)
   (semantic-load-enable-gaudy-code-helpers-1))
 
@@ -146,42 +144,37 @@ to pre-build your databases in idle time."
   "Enable all semantic features that provide coding assistance.
 This includes all features of `semantic-load-enable-gaudy-code-helpers' plus:
   `semantic-highlight-func-mode' - Highlight the current tag.
-  `semantic-idle-local-symbol-highlight-mode' - Highlight the tag for symbol at pt.
+
   `semantic-decoration-on-*-members' - Two decoration modes that
-                    color the background of private and protected methods.
-  `which-func-mode' - Display the current function in the mode line."
+                     color the background of private and protected methods.
+
+  `semantic-idle-local-symbol-highlight-mode' - Highlight references of the
+                     symbol under point."
   (interactive)
 
-  (let ((semantic-default-submodes
-	 '(global-semantic-idle-scheduler-mode
-	   global-semanticdb-minor-mode
-	   global-semantic-idle-summary-mode
-	   global-semantic-mru-bookmark-mode
-	   global-cedet-m3-minor-mode
-	   global-semantic-decoration-mode
-	   global-semantic-stickyfunc-mode
-	   global-semantic-idle-completions-mode
-	   global-semantic-highlight-func-mode
-	   global-semantic-idle-local-symbol-highlight-mode
-	   )))
-    (semantic-mode 1))
+  (setq semantic-default-submodes
+	'(global-semantic-idle-scheduler-mode
+	  global-semanticdb-minor-mode
+	  global-semantic-idle-summary-mode
+	  global-semantic-mru-bookmark-mode
+	  global-cedet-m3-minor-mode
+	  global-semantic-decoration-mode
+	  global-semantic-stickyfunc-mode
+	  global-semantic-idle-completions-mode
+	  global-semantic-highlight-func-mode
+	  global-semantic-idle-local-symbol-highlight-mode))
 
+  (semantic-mode 1)
   (semantic-load-code-helpers-1)
   (semantic-load-enable-gaudy-code-helpers-1)
-  (semantic-load-enable-excessive-code-helpers-1)
-)
+  (semantic-load-enable-excessive-code-helpers-1))
 
 (defun semantic-load-enable-excessive-code-helpers-1 ()
   ;; Enable preparsing many neighboring files.
   (setq semantic-idle-work-parse-neighboring-files-flag t)
   (require 'semantic/decorate/mode)
   (semantic-toggle-decoration-style "semantic-decoration-on-private-members" t)
-  (semantic-toggle-decoration-style "semantic-decoration-on-protected-members" t)
-
-  (if (fboundp #'which-func-mode)
-      (add-hook 'semantic-init-hook (lambda ()
-				      (which-func-mode 1))))
-  )
+  (semantic-toggle-decoration-style "semantic-decoration-on-protected-members" t))
 
 (defun semantic-load-enable-semantic-debugging-helpers ()
   "Enable all semantic features that assist with debugging semantic.
@@ -196,20 +189,19 @@ These modes include:
   (interactive)
 
   (require 'semantic/edit)
-
-  (global-semantic-highlight-edits-mode 1)
-
-  ;; This ought to be a code helper, but it is still
-  ;; a bit on the lame side.  Opinions?
-  (global-semantic-show-unmatched-syntax-mode 1)
-
-  (global-semantic-show-parser-state-mode 1)
+  (setq semantic-default-submodes
+	(append semantic-default-submodes
+		'(global-semantic-highlight-edits-mode
+		  ;; This ought to be a code helper, but it is still
+		  ;; a bit on the lame side.  Opinions?
+		  global-semantic-show-unmatched-syntax-mode
+		  global-semantic-show-parser-state-mode)))
+  (semantic-mode 1)
 
   ;; This enables debug output from the incremental parser.
   ;; Perhaps a mode for that dumps stuff in a `messages' like buffer
   ;; would be better?
   (setq semantic-edits-verbose-flag t)
-
   )
 
 (defun semantic-load-enable-all-ectags-support ()
