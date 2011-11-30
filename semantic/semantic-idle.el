@@ -149,11 +149,17 @@ all buffers regardless of their size."
   "Return non-nil if idle-scheduler is enabled for this buffer.
 idle-scheduler is disabled when debugging or if the buffer size
 exceeds the `semantic-idle-scheduler-max-buffer-size' threshold."
-  (and semantic-idle-scheduler-mode
-       (not semantic-debug-enabled)
-       (not semantic-lex-debug)
-       (or (<= semantic-idle-scheduler-max-buffer-size 0)
-	   (< (buffer-size) semantic-idle-scheduler-max-buffer-size))))
+  (let* ((remote-file? (when (stringp buffer-file-name) (file-remote-p buffer-file-name))))
+    (and semantic-idle-scheduler-mode
+	 (not semantic-debug-enabled)
+	 (not semantic-lex-debug)
+	 ;; local file should exist on disk
+	 ;; remote file should have active connection
+	 (or (and (null remote-file?) (stringp buffer-file-name)
+		  (file-exists-p buffer-file-name))
+	     (and remote-file? (file-remote-p buffer-file-name nil t)))
+	 (or (<= semantic-idle-scheduler-max-buffer-size 0)
+	     (< (buffer-size) semantic-idle-scheduler-max-buffer-size)))))
 
 (defun semantic-idle-scheduler-mode-setup ()
   "Setup option `semantic-idle-scheduler-mode'.
