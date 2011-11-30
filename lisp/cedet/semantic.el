@@ -1115,16 +1115,27 @@ Semantic mode.
 	(dolist (b (buffer-list))
 	  (with-current-buffer b
 	    (semantic-new-buffer-fcn))))
-    ;; Disable all Semantic features.
+    ;; Disable Semantic features.  Removing everything Semantic has
+    ;; introduced in the buffer is pretty much futile, but we have to
+    ;; clean the hooks and delete Semantic-related overlays, so that
+    ;; Semantic can be re-activated cleanly.
     (remove-hook 'mode-local-init-hook 'semantic-new-buffer-fcn)
     (remove-hook 'completion-at-point-functions
 		 'semantic-completion-at-point-function)
+    (remove-hook 'after-change-functions
+		 'semantic-change-function)
     (define-key cedet-menu-map [cedet-menu-separator] nil)
     (define-key cedet-menu-map [semantic-options-separator] nil)
     ;; FIXME: handle semanticdb-load-ebrowse-caches
     (dolist (mode semantic-submode-list)
       (if (and (boundp mode) (eval mode))
-	  (funcall mode -1)))))
+	  (funcall mode -1)))
+    ;; Unlink buffer and clear cache
+    (semantic--tag-unlink-cache-from-buffer)
+    (setq semantic--buffer-cache nil)
+    ;; Make sure we run the setup function if Semantic gets
+    ;; re-activated.
+    (setq semantic-new-buffer-fcn-was-run nil)))
 
 (defun semantic-completion-at-point-function ()
   'semantic-ia-complete-symbol)
