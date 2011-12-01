@@ -920,6 +920,8 @@ the regular parser."
 
 	  ;; Hack in mode-local
 	  (activate-mode-local-bindings)
+	  ;; Setup C parser
+	  (semantic-default-c-setup)
 	  ;; CHEATER!  The following 3 lines are from
 	  ;; `semantic-new-buffer-fcn', but we don't want to turn
 	  ;; on all the other annoying modes for this little task.
