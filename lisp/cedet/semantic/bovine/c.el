@@ -337,10 +337,149 @@ Moves completely over balanced #if blocks."
 	;; We found an elif.  Stop here.
 	(setq done t))))))
 
+;;; HIDEIF USAGE:
+;; NOTE: All hideif using code was contributed by Brian Carlson as
+;;       copies from hideif plus modifications and additions.
+;;       Eric then converted things to use hideif functions directly,
+;;       deleting most of that code, and added the advice.
+
+;;; SPP SYM EVAL
+;;
+;; Convert SPP symbols into values usable by hideif.
+;;
+;; @TODO - can these conversion fcns be a part of semantic-lex-spp.el?
+;;       -- TRY semantic-lex-spp-one-token-to-txt
+(defun semantic-c-convert-spp-value-to-hideif-value (symbol macrovalue)
+  "Convert an spp macro SYMBOL MACROVALUE, to something that hideif can use.
+Take the first interesting thing and convert it."
+  ;; Just warn for complex macros.
+  (when (> (length macrovalue) 1)
+    (semantic-push-parser-warning
+     (format "Complex macro value (%s) may be improperly evaluated. "
+	     symbol) 0 0))
+
+  (let* ((lextoken (car macrovalue))
+	 (key (semantic-lex-token-class lextoken))
+	 (value (semantic-lex-token-text lextoken)))
+    (cond
+     ((eq key 'number) (string-to-number value))
+     ((eq key 'symbol) (semantic-c-evaluate-symbol-for-hideif value))
+     ((eq key 'string)
+      (if (string-match "^[0-9]+L?$" value)
+	  ;; If it matches a number expression, then
+	  ;; convert to a number.
+	  (string-to-number value)
+	value))
+     (t (semantic-push-parser-warning
+	 (format "Unknown macro value. Token class = %s value = %s. " key value)
+	 0 0)
+      nil)
+     )))
+
+(defun semantic-c-evaluate-symbol-for-hideif (spp-symbol)
+  "Lookup the symbol SPP-SYMBOL (a string) to something hideif can use.
+Pulls out the symbol list, and call `semantic-c-convert-spp-value-to-hideif-value'."
+  (interactive "sSymbol name: ")
+  (when (symbolp spp-symbol) (setq spp-symbol (symbol-name spp-symbol)))
+
+  (if (semantic-lex-spp-symbol-p spp-symbol )
+      ;; Convert the symbol into a stream of tokens from the macro which we
+      ;; can then interpret.
+      (let ((stream (semantic-lex-spp-symbol-stream spp-symbol)))
+	(cond
+	 ;; Empyt string means defined, so t.
+	 ((null stream) t)
+	 ;; A list means a parsed macro stream.
+	 ((listp stream)
+	  ;; Convert the macro to something we can return.
+	  (semantic-c-convert-spp-value-to-hideif-value spp-symbol stream))
+
+	 ;; Strings might need to be turned into numbers
+	 ((stringp stream)
+	  (if (string-match "^[0-9]+L?$" stream)
+	      ;; If it matches a number expression, then convert to a
+	      ;; number.
+	      (string-to-number stream)
+	    stream))
+
+	 ;; Just return the stream.  A user might have just stuck some
+	 ;; value in it directly.
+	 (t stream)
+	 ))
+    ;; Else, store an error, return nil.
+    (progn
+      (semantic-push-parser-warning
+       (format "SPP Symbol %s not available" spp-symbol)
+       (point) (point))
+      nil)))
+
+;;; HIDEIF HACK support fcns
+;;
+;; These fcns can replace the impl of some hideif features.
+;;
+;; @TODO - Should hideif and semantic-c merge?
+;;       I picture a grammar just for CPP that expands into
+;;       a second token stream for the parser.
+(defun semantic-c-hideif-lookup (var)
+  "Replacement for `hif-lookup'.
+I think it just gets the value for some CPP variable VAR."
+  (let ((val (semantic-c-evaluate-symbol-for-hideif
+              (cond
+               ((stringp var) var)
+               ((symbolp var) (symbol-name var))
+               (t "Unable to determine var")))))
+    (if val
+	val
+      ;; Real hideif will return the right undefined symbol.
+      nil)))
+
+(defun semantic-c-hideif-defined (var)
+  "Replacement for `hif-defined'.
+I think it just returns t/nil dependent on if VAR has been defined."
+  (let ((var-symbol-name
+          (cond
+           ((symbolp var) (symbol-name var))
+           ((stringp var) var)
+           (t "Not A Symbol"))))
+    (if (not (semantic-lex-spp-symbol-p var-symbol-name))
+        (progn
+          (semantic-push-parser-warning
+	   (format "Skip %s" (buffer-substring-no-properties
+			      (point-at-bol) (point-at-eol)))
+	   (point-at-bol) (point-at-eol))
+          nil)
+      t)))
+
+;;; HIDEIF ADVICE
+;;
+;; Advise hideif functions to use our lexical tables instead.
+(defvar semantic-c-takeover-hideif nil
+  "Non-nil when Semantic is taking over hideif features.")
+
+(defadvice hif-defined (around semantic-c activate)
+  "Is the variable defined?"
+  (if semantic-c-takeover-hideif
+      (setq ad-return-value
+	    (semantic-c-hideif-defined (ad-get-arg 0)))
+    ad-do-it))
+
+(defadvice hif-lookup (around semantic-c activate)
+  "Is the argument defined?  Return true or false."
+  (let ((ans nil))
+    (when semantic-c-takeover-hideif
+      (setq ans (semantic-c-hideif-lookup (ad-get-arg 0))))
+    (if (null ans)
+	ad-do-it
+      (setq ad-return-value ans))))
+
+;;; #if macros
+;;
+;; Support #if macros by evaluating the values via use of hideif
+;; logic.  See above for hacks to make this work.
 (define-lex-regex-analyzer semantic-lex-c-if
   "Code blocks wrapped up in #if, or #ifdef.
 Uses known macro tables in SPP to determine what block to skip."
-  "^\\s-*#\\s-*\\(if\\|ifndef\\|ifdef\\|elif\\)\\s-+\\(!?defined(\\|\\)\\s-*\\(\\(\\sw\\|\\s_\\)+\\)\\(\\s-*)\\)?\\s-*$"
+  "^\\s-*#\\s-*\\(if\\|elif\\).*$"
   (semantic-c-do-lex-if))
 
 (defun semantic-c-do-lex-if ()
@@ -392,25 +531,13 @@ Uses known macro tables in SPP to determine what block to skip."
 (defun semantic-c-do-lex-ifdef ()
   "Handle lexical CPP if statements."
   (let* ((sym (buffer-substring-no-properties
-	       (match-beginning 3) (match-end 3)))
-	 (defstr (buffer-substring-no-properties
-		  (match-beginning 2) (match-end 2)))
-	 (defined (string= defstr "defined("))
-	 (notdefined (string= defstr "!defined("))
+	       (match-beginning 2) (match-end 2)))
 	 (ift (buffer-substring-no-properties
 	       (match-beginning 1) (match-end 1)))
-	 (ifdef (or (string= ift "ifdef")
-		    (and (string= ift "if") defined)
-		    (and (string= ift "elif") defined)
-		    ))
-	 (ifndef (or (string= ift "ifndef")
-		     (and (string= ift "if") notdefined)
-		     (and (string= ift "elif") notdefined)
-		     ))
+	 (ifdef (string= ift "ifdef"))
+	 (ifndef (string= ift "ifndef"))
 	 )
-    (if (or (and (or (string= ift "if") (string= ift "elif"))
-		 (string= sym "0"))
-	    (and ifdef (not (semantic-lex-spp-symbol-p sym)))
+    (if (or (and ifdef (not (semantic-lex-spp-symbol-p sym)))
 	    (and ifndef (semantic-lex-spp-symbol-p sym)))
 	;; The if indecates to skip this preprocessor section
 	(let ((pt nil))
@@ -624,6 +751,7 @@ Use semantic-cpp-lexer for parsing text inside a CPP macro."
   ;; C preprocessor features
   semantic-lex-cpp-define
   semantic-lex-cpp-undef
+  semantic-lex-c-ifdef
   semantic-lex-c-if
   semantic-lex-c-macro-else
   semantic-lex-c-macrobits
