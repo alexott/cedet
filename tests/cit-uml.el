@@ -50,7 +50,9 @@
   
   ;; 5 a) Read in the cogre UML file.
   ;; It should automatically switch to cogre mode.
-  (find-file (locate-library "cit-uml.cgr"))
+  (let ((ll (or (locate-library "cit-uml.cgr")
+		(error "Could not locate 'cit-uml.cgr'."))))
+    (find-file ll))
   (sit-for 0)
 
   ;; 5 b) Generate code for the graph.
