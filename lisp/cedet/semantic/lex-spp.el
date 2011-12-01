@@ -936,8 +936,10 @@ and variable state from the current buffer."
 	    ;; Hack in mode-local
 	    (activate-mode-local-bindings)
 
-	    ;; Set the lexical analyzer
-	    (setq semantic-lex-analyzer analyzer)
+	    ;; Call the major mode's setup function
+	    (let ((entry (assq major-mode semantic-new-buffer-setup-functions)))
+	      (when entry
+		(funcall (cdr entry))))
 
 	    ;; CHEATER!  The following 3 lines are from
 	    ;; `semantic-new-buffer-fcn', but we don't want to turn
