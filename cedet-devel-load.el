@@ -89,6 +89,32 @@
 
   )
 
+;; Currently, Emacs proper doesn't track EIEIO methods.  Until it
+;; does, we have to advice `describe-variable' and `describe-function'
+;; for EIEIO methods to get better help buffers.
+
+(require 'advice)
+(require 'eieio-opt)
+
+(defadvice describe-variable (around eieio-describe activate)
+  "Display the full documentation of FUNCTION (a symbol).
+Returns the documentation as a string, also."
+  (if (class-p (ad-get-arg 0))
+      (eieio-describe-class (ad-get-arg 0))
+    ad-do-it))
+
+(defadvice describe-function (around eieio-describe activate)
+  "Display the full documentation of VARIABLE (a symbol).
+Returns the documentation as a string, also."
+  (if (generic-p (ad-get-arg 0))
+      (eieio-describe-generic (ad-get-arg 0))
+    (if (class-p (ad-get-arg 0))
+	(eieio-describe-constructor (ad-get-arg 0))
+      ad-do-it)))
+
+;; This adds further formatting and hyperlinks.
+(add-hook 'temp-buffer-show-hook 'eieio-help-mode-augmentation-maybee t)
+
 (provide 'cedet-devel-load)
 
 ;; End
