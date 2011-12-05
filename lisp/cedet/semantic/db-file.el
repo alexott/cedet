@@ -143,7 +143,7 @@ If DIRECTORY doesn't exist, create a new one."
 			  directory))
 			"/")
 		:file fn :tables nil
-		:semantic-tag-version semantic-version
+		:semantic-tag-version semantic-tag-version
 		:semanticdb-version semanticdb-file-version)))
     ;; Set this up here.   We can't put it in the constructor because it
     ;; would be saved, and we want DB files to be portable.
