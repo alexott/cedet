@@ -125,7 +125,8 @@ part of the preprocessor map.")
 
 (defun semantic-c-reset-preprocessor-symbol-map ()
   "Reset the C preprocessor symbol map based on all input variables."
-  (when (featurep 'semantic/bovine/c)
+  (when (and semantic-mode
+	     (featurep 'semantic/bovine/c))
     (remove-hook 'mode-local-init-hook 'semantic-c-reset-preprocessor-symbol-map)
     ;; Initialize semantic-lex-spp-macro-symbol-obarray with symbols.
     (setq-mode-local c-mode
