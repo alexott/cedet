@@ -1019,11 +1019,12 @@ Output must be in semanticdb Find result format."
 		   ;; Perform a full search to pull in additional
 		   ;; matches.
 		 (let ((context (semantic-analyze-current-context (point))))
-		   (setq semantic-completion-collector-engine
-			 (semantic-collector-analyze-completions
-			  "inline" :buffer (oref context buffer) :context context))
-		   (setq obj semantic-completion-collector-engine))
-		 (semantic-collector-get-cache obj))))
+		   ;; Set new context and make first-pass-completions
+		   ;; unbound so that they are newly calculated.
+		   (oset obj context context)
+		   (when (slot-boundp obj 'first-pass-completions)
+		     (slot-makeunbound obj 'first-pass-completions)))
+		 nil)))
 	 ;; Get the result
 	 (answer (if same-prefix-p
 		     completionlist
