@@ -686,7 +686,7 @@ a reasonable distance."
 	  (cond
 	   ;; EXIT when we are no longer in a good place.
 	   ((or (not (eq b (current-buffer)))
-		(< (point) s)
+		(<= (point) s)
 		(> (point) e))
 	    ;;(message "Exit: %S %S %S" s e (point))
 	    (semantic-complete-inline-exit)
