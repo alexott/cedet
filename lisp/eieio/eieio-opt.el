@@ -284,8 +284,9 @@ are not abstract, otherwise allow all classes.
 Optional argument BUILDLIST is more list to attach and is used internally."
   (let* ((cc (or class eieio-default-superclass))
 	 (sublst (aref (class-v cc) class-children)))
-    (if (or (not instantiable-only) (not (class-abstract-p cc)))
-	(setq buildlist (cons (cons (symbol-name cc) 1) buildlist)))
+    (unless (assoc (symbol-name cc) buildlist)
+      (when (or (not instantiable-only) (not (class-abstract-p cc)))
+	(setq buildlist (cons (cons (symbol-name cc) 1) buildlist))))
     (while sublst
       (setq buildlist (eieio-build-class-alist
 		       (car sublst) instantiable-only buildlist))
