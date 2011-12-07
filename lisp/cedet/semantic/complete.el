@@ -1496,7 +1496,7 @@ one in the source buffer."
 	 (nt (semanticdb-normalize-one-tag rtable rtag))
 	 (tag (cdr nt))
 	 (table (car nt))
-	)
+	 (curwin (selected-window)))
     ;; If we fail to normalize, resete.
     (when (not tag) (setq table rtable tag rtag))
     ;; Do the focus.
@@ -1521,17 +1521,14 @@ one in the source buffer."
 	(switch-to-buffer-other-window buf t)
 	(select-window (get-buffer-window buf)))
       ;; Now do some positioning
-      (unwind-protect
-	  (if (semantic-tag-with-position-p tag)
-	      ;; Full tag positional information available
-	      (progn
-		(goto-char (semantic-tag-start tag))
-		;; This avoids a dangerous problem if we just loaded a tag
-		;; from a file, but the original position was not updated
-		;; in the TAG variable we are currently using.
-		(semantic-momentary-highlight-tag (semantic-current-tag))
-		))
-	(select-window (minibuffer-window)))
+      (when (semantic-tag-with-position-p tag)
+	;; Full tag positional information available
+	(goto-char (semantic-tag-start tag))
+	;; This avoids a dangerous problem if we just loaded a tag
+	;; from a file, but the original position was not updated
+	;; in the TAG variable we are currently using.
+	(semantic-momentary-highlight-tag (semantic-current-tag)))
+      (select-window curwin)
       ;; Calculate text difference between contents and the focus item.
       (let* ((mbc (semantic-completion-text))
 	     (ftn (semantic-tag-name tag))
