@@ -1584,14 +1584,16 @@ Maximum number of completions where we have activated the
 extended completion list through typing TAB or SPACE multiple
 times.  This limit needs to fit on your screen!
 
-Note: Customizing this variable increases 'x-max-tooltip-size' to
-force over-sized tooltips if necessary.  This will not happen if
-you directly set this variable via `setq'."
+Note: If available, customizing this variable increases
+'x-max-tooltip-size' to force over-sized tooltips when necessary.
+This will not happen if you directly set this variable via
+`setq'."
  :group 'semantic
  :type 'integer
  :set '(lambda (sym var)
-            (set-default sym var)
-	    (setcdr x-max-tooltip-size (max (1+ var) (cdr x-max-tooltip-size)))))
+	 (set-default sym var)
+	 (when (boundp 'x-max-tooltip-size)
+	   (setcdr x-max-tooltip-size (max (1+ var) (cdr x-max-tooltip-size))))))
 
 
 (defclass semantic-displayor-tooltip (semantic-displayor-traditional)
