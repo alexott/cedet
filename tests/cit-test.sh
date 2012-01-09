@@ -12,7 +12,7 @@ OPTIONS=$2
 
 rm -r /tmp/CEDET_INTEG*
 
-$EMACS $OPTIONS -q -l ../common/cedet.el -l cit-load.el -f toggle-debug-on-error  -f toggle-debug-on-quit -f cedet-integ-test-${STYLE}
+$EMACS $OPTIONS -q -l ../common/cedet.el -l cit-load.el -f toggle-debug-on-error  -f toggle-debug-on-quit --eval '(setq ede-project-directories t)' -f cedet-integ-test-${STYLE}
 EXITCODE=$?
 
 if [ $EXITCODE -eq 0 ]; then
