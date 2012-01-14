@@ -1,6 +1,6 @@
 ;;; semantic-fw.el --- Framework for Semantic
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Eric M. Ludlam
 
 ;; X-CVS: $Id: semantic-fw.el,v 1.85 2010-05-04 23:25:34 zappo Exp $
 
@@ -249,17 +249,18 @@ Remove self from `post-command-hook' if it is empty."
   "Test the data cache."
   (interactive)
   (let ((data '(a b c)))
-    (save-excursion
+    (save-current-buffer
       (set-buffer (get-buffer-create " *semantic-test-data-cache*"))
-      (erase-buffer)
-      (insert "The Moose is Loose")
-      (goto-char (point-min))
-      (semantic-cache-data-to-buffer (current-buffer) (point) (+ (point) 5)
-				     data 'moose 'exit-cache-zone)
-      (if (equal (semantic-get-cache-data 'moose) data)
-	  (message "Successfully retrieved cached data.")
-	(error "Failed to retrieve cached data"))
-      )))
+      (save-excursion
+	(erase-buffer)
+	(insert "The Moose is Loose")
+	(goto-char (point-min))
+	(semantic-cache-data-to-buffer (current-buffer) (point) (+ (point) 5)
+				       data 'moose 'exit-cache-zone)
+	(if (equal (semantic-get-cache-data 'moose) data)
+	    (message "Successfully retrieved cached data.")
+	  (error "Failed to retrieve cached data"))
+	))))
 
 ;;; Obsoleting various functions & variables
 ;;
@@ -455,6 +456,9 @@ into `mode-local-init-hook'." file filename)
 	 ;; whine about it either.
 	 (font-lock-maximum-size 0)
 	 (font-lock-verbose nil)
+	 ;; This forces flymake to ignore this buffer on find-file, and
+	 ;; prevents flymake processes from being started.
+	 (flymake-start-syntax-check-on-find-file nil)
 	 ;; Disable revision control
 	 (vc-handled-backends nil)
 	 ;; Don't prompt to insert a template if we visit an empty file
