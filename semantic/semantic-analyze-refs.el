@@ -1,6 +1,6 @@
 ;;; semantic-analyze-refs.el --- Analysis of the references between tags.
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010, 2011 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; X-RCS: $Id: semantic-analyze-refs.el,v 1.10 2010-08-05 03:00:29 zappo Exp $
@@ -80,7 +80,7 @@ Use `semantic-analyze-current-tag' to debug this fcn."
       (semantic-go-to-tag tag db)
       (setq scope (semantic-calculate-scope))
 
-      (setq allhits (semantic--analyze-refs-full-lookup tag scope))
+      (setq allhits (semantic--analyze-refs-full-lookup tag scope t))
 
       (semantic-analyze-references (semantic-tag-name tag)
 				    :tag tag
@@ -142,14 +142,15 @@ Optional argument IN-BUFFER indicates that the returned tag should be in an acti
 
 ;;; LOOKUP
 ;;
-(defun semantic--analyze-refs-full-lookup (tag scope)
+(defun semantic--analyze-refs-full-lookup (tag scope &optional noerror)
   "Perform a full lookup for all occurrences of TAG in the current project.
 TAG should be the tag currently under point.
 SCOPE is the scope the cursor is in.  From this a list of parents is
-derived.  If SCOPE does not have parents, then only a simple lookup is done."
+derived.  If SCOPE does not have parents, then only a simple lookup is done.
+Optional argument NOERROR means don't error if the lookup fails."
   (if (not (oref scope parents))
       ;; If this tag has some named parent, but is not
-      (semantic--analyze-refs-full-lookup-simple tag)
+      (semantic--analyze-refs-full-lookup-simple tag noerror)
 
     ;; We have some sort of lineage we need to consider when we do
     ;; our side lookup of tags.
