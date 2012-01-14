@@ -1,6 +1,6 @@
 ;;; srecode-dictionary.el --- Dictionary code for the semantic recoder.
 
-;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; X-RCS: $Id: srecode-dictionary.el,v 1.21 2010-05-14 01:26:13 scymtym Exp $
@@ -107,8 +107,8 @@ Makes sure that :value is compiled."
 			      (cons (car fields) newfields))))
       (setq fields (cdr (cdr fields))))
 
-    (when (not state)
-      (error "Cannot create compound variable without :state"))
+    ;;(when (not state)
+    ;;  (error "Cannot create compound variable outside of sectiondictionary"))
 
     (call-next-method this (nreverse newfields))
     (when (not (slot-boundp this 'compiled))
@@ -533,40 +533,6 @@ inserted with a new editable field.")
 
 ;;; Higher level dictionary functions
 ;;
-(defun srecode-create-section-dictionary (sectiondicts STATE)
-  "Create a dictionary with section entries for a template.
-The format for SECTIONDICTS is what is emitted from the template parsers.
-STATE is the current compiler state."
-  (when sectiondicts
-    (let ((new (srecode-create-dictionary t)))
-      ;; Loop over each section.  The section is a macro w/in the
-      ;; template.
-      (while sectiondicts
-	(let* ((sect (car (car sectiondicts)))
-	       (entries (cdr (car sectiondicts)))
-	       (subdict (srecode-dictionary-add-section-dictionary new sect))
-	       )
-	  ;; Loop over each entry.  This is one variable in the
-	  ;; section dictionary.
-	  (while entries
-	    (let ((tname (semantic-tag-name (car entries)))
-		  (val (semantic-tag-variable-default (car entries))))
-	      (if (eq val t)
-		  (srecode-dictionary-show-section subdict tname)
-		(cond
-		 ((and (stringp (car val))
-		       (= (length val) 1))
-		  (setq val (car val)))
-		 (t
-		  (setq val (srecode-dictionary-compound-variable
-			     tname :value val :state STATE))))
-		(srecode-dictionary-set-value
-		 subdict tname val))
-	      (setq entries (cdr entries))))
-	  )
-	(setq sectiondicts (cdr sectiondicts)))
-      new)))
-
 (defun srecode-create-dictionaries-from-tags (tags state)
   "Create a dictionary with entries according to TAGS.
 
