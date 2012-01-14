@@ -1,6 +1,6 @@
 ;;; ede.el --- Emacs Development Environment gloss
 
-;;;  Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010, 2011  Eric M. Ludlam
+;;;  Copyright (C) 1998, 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010, 2011, 2012  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
@@ -100,8 +100,9 @@ Any other value disables searching for EDE project files."
 		 (repeat :tag "List of directories"
 			 (directory))
 		 (function :tag "Predicate"))
-  :version "23.4"
-  :risky t)
+  :version "23.4")
+
+(put 'ede-project-directories 'risky-local-variable t)
 
 (defun ede-directory-safe-p (dir)
   "Return non-nil if DIR is a safe directory to load projects from.
