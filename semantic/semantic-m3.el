@@ -55,12 +55,36 @@
 			    'semantic-m3-whatisit
 			    :active t)))
 
+(defun semantic-m3-print-tagstack (tagstack)
+  "Print out the current tag stack.
+Argument TAGSTACK is the list of tags under point."
+  (let* ((prevtag nil))
+    (if (not tagstack)
+	(princ "\nThere are no tags under point.\n")
+      
+      (princ "\nPoint is in the following tag")
+      (when (> (length tagstack) 1) (princ "s"))
+      (princ "\n")
+
+      (while tagstack
+	(princ "\n")
+	(princ (semantic-format-tag-summarize  (car tagstack) prevtag t))
+	(princ "\nRaw: ")
+	(prin1 (car tagstack))
+	(princ "\n")
+
+	;; Increment.
+	(setq prevtag (car tagstack)
+	      tagstack (cdr tagstack)
+	      )))))
+
 (defun semantic-m3-whatisit ()
   "Try and explain what this is.
 The what is under the cursor."
   (interactive)
   (semanticdb-without-unloaded-file-searches
-      (let* ((ctxt (semantic-analyze-current-context))
+      (let* ((tagstack (semantic-find-tag-by-overlay))
+	     (ctxt (semantic-analyze-current-context))
 	     (pf (when ctxt (oref ctxt prefix)))
 	     (rpf (reverse pf))
 	     )
@@ -70,7 +94,8 @@ The what is under the cursor."
 		(progn
 		  ;; @TODO - what might we say about that location?
 		  (princ "You have selected some uninteresting location:\n")
-		  (princ "   whitespace, punctuation, comment, or string content.")
+		  (princ "   whitespace, punctuation, comment, or string content.\n")
+		  (semantic-m3-print-tagstack tagstack)
 		  )
 
 	      ;; Found something
@@ -131,6 +156,8 @@ The what is under the cursor."
 		;; Raw Tag Data
 		(princ "The Raw Tag Data Structure is:\n\n")
 		(prin1 (car rpf))
+		(princ "\n")
+		(semantic-m3-print-tagstack tagstack)
 		)
 
 	       ;; Something else?
