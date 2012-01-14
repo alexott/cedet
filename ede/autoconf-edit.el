@@ -1,6 +1,6 @@
 ;;; autoconf-edit.el --- Keymap for autoconf
 
-;;  Copyright (C) 1998, 1999, 2000, 2009, 2010, 2011  Eric M. Ludlam
+;;  Copyright (C) 1998, 1999, 2000, 2009, 2010, 2011, 2012  Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project
@@ -173,6 +173,9 @@ items such as CHECK_HEADERS."
     (setq param (substring param (match-end 0))))
   (when (string-match "\\s-*\\]?\\s-*\\'" param)
     (setq param (substring param 0  (match-beginning 0))))
+  ;; Look for occurances of backslash newline
+  (while (string-match "\\s-*\\\\\\s-*\n\\s-*" param)
+    (setq param (replace-match " " t t param)))
   param)
 
 ;;;###autoload
