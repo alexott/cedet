@@ -35,7 +35,7 @@
    (ede-proj-target-elisp "projects"
     :name "projects"
     :path ""
-    :source '("project-am.el" "ede-simple.el" "ede-cpp-root.el" "ede-emacs.el" "ede-linux.el" "ede-generic.el")
+    :source '("project-am.el" "ede-cpp-root.el" "ede-emacs.el" "ede-linux.el" "ede-generic.el")
     :compiler 'ede-emacs-preload-compiler
     :aux-packages '("eieio" "cedet-files" "semantic" "semantic-el")
     )
