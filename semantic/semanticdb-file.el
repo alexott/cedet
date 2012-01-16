@@ -1,6 +1,6 @@
 ;;; semanticdb-file.el --- Save a semanticdb to a cache file.
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2009, 2010, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
@@ -157,7 +157,7 @@ If DIRECTORY doesn't exist, create a new one."
 (defun semanticdb-load-database (filename)
   "Load the database FILENAME."
   (condition-case foo
-      (let* ((r (eieio-persistent-read filename))
+      (let* ((r (eieio-persistent-read filename semanticdb-project-database-file))
 	     (c (semanticdb-get-database-tables r))
 	     (tv (oref r semantic-tag-version))
 	     (fv (oref r semanticdb-version))
