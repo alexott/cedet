@@ -1,6 +1,6 @@
 ;;; ede-files.el --- Associate projects with files and directories.
 
-;; Copyright (C) 2008, 2009, 2010, 2011 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; X-RCS: $Id: ede-files.el,v 1.25 2010-08-15 17:05:50 zappo Exp $
@@ -102,7 +102,7 @@ of the anchor file for the project."
 	 (when (not ans)
 	   (if (equal (ede--project-inode SP) inode)
 	       (setq ans SP)
-	     (ede-find-subproject-for-directory SP dir)))))
+	     (setq ans (ede-find-subproject-for-directory SP dir))))))
       ans)))
 
 ;;; DIRECTORY IN OPEN PROJECT
