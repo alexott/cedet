@@ -1,6 +1,6 @@
 ;;; cedet-utests.el --- Run all unit tests in the CEDET suite.
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; X-RCS: $Id: cedet-utests.el,v 1.24 2010-04-23 00:14:21 zappo Exp $
@@ -62,9 +62,7 @@
     ;;
     ;; EIEIO
     ;;
-    ("eieio" . (lambda () (let ((lib (locate-library "eieio-tests.el"
-						     t)))
-			    (load-file lib))))
+    ("eieio" . cedet-utest-eieio-classloader)
     ("eieio: browser" . eieio-browse)
     ("eieio: custom" . (lambda ()
 			 (require 'eieio-custom)
@@ -199,6 +197,32 @@ of just logging the error."
     (error
      (error "Error in unit test harness:\n  %S" err))
     )
+  )
+
+;;; HELPER FUNCTIONS FOR SOME TESTS
+(defun cedet-utest-eieio-classloader ()
+  "Try out the EIEIO tests, which just requires loading the test file."
+  (let ((lib (locate-library "eieio-tests.el" t)))
+    (unless lib
+      (error "Could not locate 'eieio-tests.el'"))
+    (message "EIEIO Base tests loading from: %S" lib)
+    (load-file lib)
+    )
+  
+  (let ((lib (locate-library "eieio-test-methodinvoke.el" t)))
+    (unless lib
+      (error "Could not locate 'eieio-test-methodinvoke.el'"))
+    (message "EIEIO MethodInvoke tests loading from: %S" lib)
+    (load-file lib)
+    )
+
+  (let ((lib (locate-library "eieio-test-persist.el" t)))
+    (unless lib
+      (error "Could not locate 'eieio-test-persist.el'"))
+    (message "EIEIO Persistence tests loading from: %S" lib)
+    (load-file lib)
+    )
+
   )
 
 ;;; Logging utility.
