@@ -1,6 +1,6 @@
 ;;; ede-auto.el --- Autoload features for EDE.
 ;;
-;; Copyright (C) 2010 Eric M. Ludlam
+;; Copyright (C) 2010, 2012 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; X-RCS: $Id: ede-auto.el,v 1.3 2010-03-15 13:40:54 xscript Exp $
@@ -89,7 +89,8 @@ type is required and the load function used.")
 			 :proj-file "Makefile.am"
 			 :load-type 'project-am-load
 			 :class-sym 'project-am-makefile
-			 :new-p nil)
+			 :new-p nil
+			 :safe-p t)
    )
   "List of vectors defining how to determine what type of projects exist.")
 
