@@ -8,5 +8,6 @@ contrib/wisent-*-wy.el
 *-compile-script
 *-make-script
 *-loaddefs.el
+*-ps*.pt
 test-p.el
 cogre/tests/Subclass.dot
