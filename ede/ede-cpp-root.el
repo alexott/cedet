@@ -136,7 +136,7 @@
 ;; 	      :proj-file 'MY-FILE-FOR-DIR
 ;;            :proj-root 'MY-ROOT-FCN
 ;; 	      :load-type 'MY-LOAD
-;; 	      :class-sym 'ede-cpp-root
+;; 	      :class-sym 'ede-cpp-root-project
 ;;	      :safe-p t)
 ;; 	     t)
 ;; 
