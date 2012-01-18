@@ -195,10 +195,11 @@ OVERRIDE-CHECK to override cedet short-cicuit."
       ;; and run a build on them.
       (cedet-build-msg "Building project %s\n" d)
 
-      (let ((Tproj (ede-current-project (file-name-as-directory
-					 (expand-file-name
-					  d cedet-build-location))))
-	    )
+      (let* ((ede-project-directories t)
+	     (Tproj (ede-load-project-file (file-name-as-directory
+					    (expand-file-name
+					     d cedet-build-location))))
+	     )
 	(dolist (proj (cons Tproj (oref Tproj subproj)))
 	  (cedet-build-msg "  Project: %s\n" (object-name-string proj))
 	  (dolist (targ (oref proj targets))
