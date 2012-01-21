@@ -144,17 +144,18 @@ ROOTPROJ is nil, since there is only one project."
 	(ede-add-project-to-global-list proj))))
 
 ;;;###autoload
-(add-to-list 'ede-project-class-files
-	     (ede-project-autoload "emacs"
-	      :name "EMACS ROOT"
-	      :file 'ede-emacs
-	      :proj-file "src/emacs.c"
-	      :proj-root 'ede-emacs-project-root
-	      :load-type 'ede-emacs-load
-	      :class-sym 'ede-emacs-project
-	      :new-p nil
-	      :safe-p t)
-	     t)
+(ede-add-project-autoload
+ (ede-project-autoload "emacs"
+		       :name "EMACS ROOT"
+		       :file 'ede-emacs
+		       :proj-file "src/emacs.c"
+		       :proj-root-dirmatch "emacs[^/]*"
+		       :proj-root 'ede-emacs-project-root
+		       :load-type 'ede-emacs-load
+		       :class-sym 'ede-emacs-project
+		       :new-p nil
+		       :safe-p t)
+ 'unique)
 
 (defclass ede-emacs-target-c (ede-target)
   ()
