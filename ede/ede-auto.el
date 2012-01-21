@@ -37,6 +37,12 @@
 	 :documentation "The lisp file belonging to this class.")
    (proj-file :initarg :proj-file
 	      :documentation "Name of a project file of this type.")
+   (proj-root-dirmatch :initarg :proj-root-dirmatch
+		       :type string
+		       :documentation
+		       "To avoid loading a project, check if the directory matches this.
+For projects that use directory name matches, a function would load that project.
+Specifying this matcher will allow EDE to check without loading the project.")
    (proj-root :initarg :proj-root
 	      :type function
 	      :documentation "A function symbol to call for the project root.
@@ -53,6 +59,11 @@ associated with a single object class, based on the initilizeres used.")
 	      :documentation "Fn symbol used to load this project file.")
    (class-sym :initarg :class-sym
 	      :documentation "Symbol representing the project class to use.")
+   (generic-p :initform nil
+	      :documentation
+	      "Generic projects are added to the project list at the end.
+The add routine will set this to non-nil so that future non-generic placement will
+be successful.")
    (new-p :initarg :new-p
 	  :initform t
 	  :documentation
@@ -96,6 +107,49 @@ type is required and the load function used.")
 
 (put 'ede-project-class-files 'risky-local-variable t)
 
+(defun ede-add-project-autoload (projauto &optional flag)
+  "Add PROJAUTO, an EDE autoload definition to `ede-project-class-files'.
+Optional argument FLAG indicates how this autoload should be
+added.  Possible values are:
+  'generic - A generic project type.  Keep this at the very end.
+  'unique - A unique project type for a specific project.  Keep at the very
+            front of the list so more generic projects don't get priority."
+  ;; First, can we identify PROJAUTO as already in the list?  If so, replace.
+  (let ((projlist ede-project-class-files)
+	(projname (object-name-string projauto)))
+    (while (and projlist (not (string= (object-name-string (car projlist)) projname)))
+      (setq projlist (cdr projlist)))
+
+    (if projlist
+	;; Stick the new one into the old slot.
+	(setcar projlist projauto)
+
+      ;; Else, see where to insert it.
+      (cond ((and flag (eq flag 'unique))
+	     ;; Unique items get stuck right onto the front.
+	     (setq ede-project-class-files
+		   (cons projauto ede-project-class-files)))
+
+	    ;; Generic Projects go at the very end of the list.
+	    ((and flag (eq flag 'generic))
+	     (oset projauto generic-p t)
+	     (setq ede-project-class-files
+		   (append ede-project-class-files
+			   (list projauto))))
+
+	    ;; Normal projects go at the end of the list, but
+	    ;; before the generic projects.
+	    (t
+	     (let ((prev nil)
+		   (next ede-project-class-files))
+	       (while (and next (not (oref (car next) generic-p)))
+		 (setq prev next
+		       next (cdr next)))
+	       (when (not prev)
+		 (error "ede-project-class-files not initialized"))
+	       ;; Splice into the list.
+	       (setcdr prev (cons projauto next))))))))
+
 ;;; EDE project-autoload methods
 ;;
 (defmethod ede-project-root ((this ede-project-autoload))
@@ -112,12 +166,18 @@ the current buffer."
   (when (not file)
     (setq file default-directory))
   (when (slot-boundp this :proj-root)
-    (let ((rootfcn (oref this proj-root)))
+    (let ((dirmatch (oref this proj-root-dirmatch))
+	  (rootfcn (oref this proj-root))
+	  (callfcn t))
       (when rootfcn
-	(condition-case nil
-	    (funcall rootfcn file)
-	  (error 
-	   (funcall rootfcn)))
+	(when (and (not (featurep (oref this file))) dirmatch)
+	  (unless (string-match dirmatch file)
+	    (setq callfcn nil)))
+	(when callfcn
+	  (condition-case nil
+	      (funcall rootfcn file)
+	    (error 
+	     (funcall rootfcn))))
 	))))
 
 (defmethod ede-dir-to-projectfile ((this ede-project-autoload) dir)

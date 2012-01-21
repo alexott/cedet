@@ -130,17 +130,18 @@ ROOTPROJ is nil, since there is only one project."
       ))
 
 ;;;###autoload
-(add-to-list 'ede-project-class-files
-	     (ede-project-autoload "linux"
-	      :name "LINUX ROOT"
-	      :file 'ede-linux
-	      :proj-file "scripts/ver_linux"
-	      :proj-root 'ede-linux-project-root
-	      :load-type 'ede-linux-load
-	      :class-sym 'ede-linux-project
-	      :new-p nil
-	      :safe-p t)
-	     t)
+(ede-add-project-autoload
+ (ede-project-autoload "linux"
+		       :name "LINUX ROOT"
+		       :file 'ede-linux
+		       :proj-file "scripts/ver_linux"
+		       :proj-root-dirmatch "linux[^/]*"
+		       :proj-root 'ede-linux-project-root
+		       :load-type 'ede-linux-load
+		       :class-sym 'ede-linux-project
+		       :new-p nil
+		       :safe-p t)
+ 'unique)
 
 (defclass ede-linux-target-c (ede-target)
   ()

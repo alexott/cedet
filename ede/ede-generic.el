@@ -79,6 +79,8 @@
 ;; the above described support features.
 
 (require 'ede)
+(require 'ede-auto)
+(require 'eieio-opt)
 
 ;;; Code:
 ;;
@@ -410,31 +412,31 @@ PROJECTFILE is a file name that identifies a project of this type to EDE, such a
 a Makefile, or SConstruct file.
 CLASS is the EIEIO class that is used to track this project.  It should subclass
 the class `ede-generic-project' project."
-  (add-to-list 'ede-project-class-files
-	       (ede-project-autoload internal-name
-				     :name external-name
-				     :file 'ede-generic
-				     :proj-file projectfile
-				     :load-type 'ede-generic-load
-				     :class-sym class
-				     :new-p nil
-				     :safe-p nil) ; @todo - could be
+  (ede-add-project-autoload
+   (ede-project-autoload internal-name
+			 :name external-name
+			 :file 'ede-generic
+			 :proj-file projectfile
+			 :load-type 'ede-generic-load
+			 :class-sym class
+			 :new-p nil
+			 :safe-p nil)	; @todo - could be
 					; safe if we do something
 					; about the loading of the
 					; generic config file.
-	       ;; Generics must go at the end, since more specific types
-	       ;; can create Makefiles also.
-	       t))
+   ;; Generics must go at the end, since more specific types
+   ;; can create Makefiles also.
+   'generic))
 
 ;;;###autoload
 (defun ede-enable-generic-projects ()
   "Enable generic project loaders."
   (interactive)
-  (ede-generic-new-autoloader "edeproject-makefile" "Make"
+  (ede-generic-new-autoloader "generic-makefile" "Make"
 			      "Makefile" 'ede-generic-makefile-project)
-  (ede-generic-new-autoloader "edeproject-scons" "SCons"
+  (ede-generic-new-autoloader "generic-scons" "SCons"
 			      "SConstruct" 'ede-generic-scons-project)
-  (ede-generic-new-autoloader "edeproject-cmake" "CMake"
+  (ede-generic-new-autoloader "generic-cmake" "CMake"
 			      "CMakeLists" 'ede-generic-cmake-project)
   )
 
