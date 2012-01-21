@@ -1,6 +1,6 @@
 ;;; semanticdb-javap.el --- Java include path management and symbol database via javap.
 ;;
-;; Copyright (C) 2011 Eric M. Ludlam
+;; Copyright (C) 2011, 2012 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;;
@@ -101,7 +101,7 @@ represent jar files."
 	   (ans nil)
 	   )
       ;; Get a list of paths together
-      (dolist (P (append edepaths edeclasspath))
+      (dolist (P (append edepaths edeclasspath semanticdb-javap-classpath))
 	(cond
 	 ;; Somtimes a null gets in.  Ignore it.
 	 ((null P)
