@@ -235,18 +235,22 @@ ROOTPROJ is nil, since there is only one project."
   ;; Snoop through our master list.
   (ede-cpp-root-file-existing dir))
 
-;;;###autoload
-(add-to-list 'ede-project-class-files
-	     (ede-project-autoload "cpp-root"
-	      :name "CPP ROOT"
-	      :file 'ede-cpp-root
-	      :proj-file 'ede-cpp-root-project-file-for-dir
-	      :proj-root 'ede-cpp-root-project-root
-	      :load-type 'ede-cpp-root-load
-	      :class-sym 'ede-cpp-root
-	      :new-p nil
-	      :safe-p t)
-	     t)
+;; No autoload - unless a user creates one, there will never be
+;; a match.
+(ede-add-project-autoload
+ (ede-project-autoload "cpp-root"
+		       :name "CPP ROOT"
+		       :file 'ede-cpp-root
+		       :proj-file 'ede-cpp-root-project-file-for-dir
+		       :proj-root 'ede-cpp-root-project-root
+		       :load-type 'ede-cpp-root-load
+		       :class-sym 'ede-cpp-root
+		       :new-p nil
+		       :safe-p t)
+ ;; When a user creates one of these, it should override any other project
+ ;; type that might happen to be in this directory, so force this to the
+ ;; very front.
+ 'unique)
 
 ;;; CLASSES
 ;;
