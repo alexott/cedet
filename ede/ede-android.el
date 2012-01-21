@@ -86,16 +86,15 @@ ROOTPROJ is nil, since there is only one project."
 	)))
 
 ;;;###autoload
-(add-to-list 'ede-project-class-files
-	     (ede-project-autoload "android"
-	      :name "ANDROID ROOT"
-	      :file 'ede-android
-	      :proj-file "AndroidManifest.xml"
-	      :load-type 'ede-android-load
-	      :class-sym 'ede-android-project
-	      :new-p t
-	      :safe-p t)
-	     t)
+(ede-add-project-autoload
+ (ede-project-autoload "android"
+		       :name "ANDROID ROOT"
+		       :file 'ede-android
+		       :proj-file "AndroidManifest.xml"
+		       :load-type 'ede-android-load
+		       :class-sym 'ede-android-project
+		       :new-p t
+		       :safe-p t))
 
 ;;; CLASSES
 ;;
