@@ -1,4 +1,4 @@
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; Joakim Verona <joakim@verona.se>
@@ -279,16 +279,15 @@ If one doesn't exist, create a new one for this directory."
 ;;
 
 ;;;###autoloa d
-(add-to-list 'ede-project-class-files
-             (ede-project-autoload "maven2"
-              :name "MAVEN2"
-              :file 'ede-proj-maven2
-              :proj-file "pom.xml"
-              :proj-root 'ede-maven2-project-root
-              :load-type 'ede-maven2-load
-              :class-sym 'ede-maven2-project
-              :new-p nil)
-             t)
+(ede-add-project-autoload
+ (ede-project-autoload "maven2"
+		       :name "MAVEN2"
+		       :file 'ede-proj-maven2
+		       :proj-file "pom.xml"
+		       :proj-root 'ede-maven2-project-root
+		       :load-type 'ede-maven2-load
+		       :class-sym 'ede-maven2-project
+		       :new-p nil))
 
 (provide 'ede-proj-maven2)
 
