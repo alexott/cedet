@@ -29,30 +29,32 @@
 ;;; Code:
 
 (defun semantic-gcc-query (gcc-cmd &rest gcc-options)
-  "Return program output to both standard output and standard error.
+  "Return program output or error code in case error happens.
 GCC-CMD is the program to execute and GCC-OPTIONS are the options
 to give to the program."
   ;; $ gcc -v
   ;;
-  (let ((buff (get-buffer-create " *gcc-query*"))
-        (old-lc-messages (getenv "LC_ALL")))
+  (let* ((buff (get-buffer-create " *gcc-query*"))
+         (old-lc-messages (getenv "LC_ALL"))
+         (options `(,nil ,(cons buff t) ,nil ,@gcc-options))
+         (err 0))
     (with-current-buffer buff
       (erase-buffer)
       (setenv "LC_ALL" "C")
       (condition-case nil
-          (apply 'call-process gcc-cmd nil (cons buff t) nil gcc-options)
+          (setq err (apply 'call-process gcc-cmd options))
         (error ;; Some bogus directory for the first time perhaps?
          (let ((default-directory (expand-file-name "~/")))
            (condition-case nil
-               (apply 'call-process gcc-cmd nil (cons buff t) nil gcc-options)
+               (setq err (apply 'call-process gcc-cmd options))
              (error ;; gcc doesn't exist???
               nil)))))
       (setenv "LC_ALL" old-lc-messages)
       (prog1
-          (buffer-string)
-        (kill-buffer buff)
-        )
-      )))
+          (if (zerop err)
+              (buffer-string)
+            err)
+        (kill-buffer buff)))))
 
 ;;(semantic-gcc-get-include-paths "c")
 ;;(semantic-gcc-get-include-paths "c++")
@@ -144,7 +146,14 @@ It should also include other symbols GCC was compiled with.")
   (interactive)
   (let* ((fields (or semantic-gcc-setup-data
                      (semantic-gcc-fields (semantic-gcc-query "gcc" "-v"))))
-         (defines (semantic-cpp-defs (semantic-gcc-query "cpp" "-E" "-dM" "-x" "c++" null-device)))
+         (cpp-options `("-E" "-dM" "-x" "c++" ,null-device))
+         (query (let ((q (apply 'semantic-gcc-query "cpp" cpp-options)))
+                  (if (stringp q)
+                      q
+                    ;; `cpp' command in `semantic-gcc-setup' doesn't work on
+                    ;; Mac, try `gcc'.
+                    (apply 'semantic-gcc-query "gcc" cpp-options))))
+         (defines (semantic-cpp-defs query))
          (ver (cdr (assoc 'version fields)))
          (host (or (cdr (assoc 'target fields))
                    (cdr (assoc '--target fields))
