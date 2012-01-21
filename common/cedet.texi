@@ -15,7 +15,7 @@
 @copying
 This manual documents @cedet{}, a collection of other tools.
 
-Copyright @copyright{} 2007, 2008, 2009, 2010, 2011 Eric M. Ludlam
+Copyright @copyright{} 2007, 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -855,12 +855,12 @@ android projects:
 
 @table @key
 @item C-c . e
-This will always jump to the AndroidManifest.xml file, which doubles
-as the 
+This will always jump to the AndroidManifest.xml file.
 @item C-c . c
 @itemx C-c . C
 This will compile your project using ant.  To change what type of
-build you do, you will need to change the current configuration.
+build you do, you will need to change the current configuration.  You
+can select a configuration such as install or release from the Project menu.
 @item C-c . D
 Debug your project.  This will also start ddms, the debug proxy for
 your android emulator or device.
@@ -925,7 +925,7 @@ Visit @var{SAMPLE} code in the Android @var{SDK} samples directory.
 @section Android support for SRecode
 
 You can create macros for use with android.  Add the :android argument
-to your templates to get some android specific features.  See 
+to your templates to get some android specific features.
 
 @node GNU Global
 @chapter GNU Global
