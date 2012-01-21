@@ -36,18 +36,26 @@
 
 ;;; Code:
 ;;;###autoload
-(defun semanticdb-enable-cscope-databases ()
+(defun semanticdb-enable-cscope-databases (&optional noerror)
   "Enable the use of the CScope back end for all files in C/C++.
 This will add an instance of a CScope database to each buffer in a
-CScope supported hierarchy."
-  ;; First, make sure the version is ok.
-  (cedet-cscope-version-check)
+CScope supported hierarchy.
 
-  (dolist (mode '(c-mode c++-mode))
-    (let ((ih (mode-local-value mode 'semantic-init-mode-hook)))
-      (eval `(setq-mode-local
-	      ,mode semantic-init-mode-hook
-	      (cons 'semanticdb-enable-cscope-hook ih))))))
+Two sanity checks are performed to assure (a) that cscope program exists
+and (b) that the cscope program version is compatibility with the database
+version.  If optional NOERROR is nil, then an error may be signalled on version
+mismatch.  If NOERROR is not nil, then no error will be signlled.  Instead
+return value will indicate success or failure with non-nil or nil respective
+values."
+  ;; First, make sure the version is ok.
+  (if (not (cedet-cscope-version-check noerror))
+      nil
+    (dolist (mode '(c-mode c++-mode))
+      (let ((ih (mode-local-value mode 'semantic-init-mode-hook)))
+        (eval `(setq-mode-local
+                ,mode semantic-init-mode-hook
+                (cons 'semanticdb-enable-cscope-hook ih)))))
+    t))
 
 (defun semanticdb-enable-cscope-hook ()
   "Add support for CScope in the current buffer via `semantic-init-hook'."
