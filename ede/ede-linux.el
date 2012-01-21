@@ -34,8 +34,25 @@
 ;; * Add website
 
 (require 'ede)
+(require 'ede-make)
 
 ;;; Code:
+(defgroup project-linux nil
+  "File and tag browser frame."
+  :group 'tools
+  :group 'ede
+  )
+
+(defcustom project-linux-compile-target-command (concat ede-make-command " -k -C %s SUBDIRS=%s")
+  "*Default command used to compile a target."
+  :group 'project-linux
+  :type 'string)
+
+(defcustom project-linux-compile-project-command (concat ede-make-command " -k -C %s")
+  "*Default command used to compile a project."
+  :group 'project-linux
+  :type 'string)
+
 (defvar ede-linux-project-list nil
   "List of projects created by option `ede-linux-project'.")
 
@@ -238,6 +255,41 @@ Knows about how the Linux source tree is organized."
 	 )
     (or F (call-next-method))))
 
+(defmethod project-compile-project ((proj ede-linux-project)
+				    &optional command)
+  "Compile the entire current project.
+Argument COMMAND is the command to use when compiling."
+  (let* ((dir (ede-project-root-directory proj)))
+
+    (require 'compile)
+    (if (not project-linux-compile-project-command)
+	(setq project-linux-compile-project-command compile-command))
+    (if (not command)
+	(setq command
+	      (format
+	       project-linux-compile-project-command
+	       dir)))
+
+    (compile command)))
+
+(defmethod project-compile-target ((obj ede-linux-target-c) &optional command)
+  "Compile the current target.
+Argument COMMAND is the command to use for compiling the target."
+  (let* ((proj (ede-target-parent obj))
+	 (root (ede-project-root proj))
+	 (dir (ede-project-root-directory root))
+	 (subdir (oref obj path)))
+
+    (require 'compile)
+    (if (not project-linux-compile-project-command)
+	(setq project-linux-compile-project-command compile-command))
+    (if (not command)
+	(setq command
+	      (format
+	       project-linux-compile-target-command
+	       dir subdir)))
+
+    (compile command)))
 
 (provide 'ede-linux)
 ;;; ede-linux.el ends here
