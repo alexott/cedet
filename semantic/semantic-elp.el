@@ -1,6 +1,6 @@
 ;;; semantic-elp.el --- Bind ELP to measure Semantic
 
-;; Copyright (C) 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; X-RCS: $Id: semantic-elp.el,v 1.17 2009-09-11 23:38:25 zappo Exp $
@@ -767,7 +767,7 @@ The expectation is that you will edit this fcn with different
   "Load an old run from FILE, and show it."
   (interactive "fLast Run File: ")
   (setq semantic-elp-last-run
-	(eieio-persistent-read file))
+	(eieio-persistent-read file semantic-elp-object-base t))
   (data-debug-show semantic-elp-last-run))
 
 (provide 'semantic-elp)

@@ -105,12 +105,11 @@ Any other value disables searching for EDE project files."
 (put 'ede-project-directories 'risky-local-variable t)
 
 (defun ede-directory-safe-p (dir)
-  "Return non-nil if DIR is a safe directory to load projects from.
-Projects that do not load a project definition as Emacs Lisp code
-are safe, and can be loaded automatically.  Other project types,
-such as those created with Project.ede files, are safe only if
-specified by `ede-project-directories'."
-  (setq dir (directory-file-name (expand-file-name dir)))
+  "Is DIR a safe directory to load Emacs Lisp based projects from.
+Many projects that do not load a project definition saved as Emacs
+Lisp code are safe, and can be safely loaded automatically.  Other
+project types, such as those created with Project.ede files, are not."
+  (setq dir (directory-file-name (expand-file-name dir))) ; strip trailing /
   ;; Load only if allowed by `ede-project-directories'.
   (or (eq ede-project-directories t)
       (and (functionp ede-project-directories)
@@ -191,7 +190,6 @@ Argument LIST-O-O is the list of objects to choose from."
     (define-key pmap "t" 'ede-new-target)
     (define-key pmap "g" 'ede-rescan-toplevel)
     (define-key pmap "s" 'ede-speedbar)
-    (define-key pmap "l" 'ede-load-project-file)
     (define-key pmap "f" 'ede-find-file)
     (define-key pmap "C" 'ede-compile-project)
     (define-key pmap "c" 'ede-compile-target)
@@ -523,14 +521,13 @@ Sets buffer local variables for EDE."
 
 	(ede-apply-target-options)))))
 
-(defun ede-reset-all-buffers (onoff)
-  "Reset all the buffers due to change in EDE.
-ONOFF indicates enabling or disabling the mode."
+(defun ede-reset-all-buffers ()
+  "Reset all the buffers due to change in EDE."
+  (interactive)
   (let ((b (buffer-list)))
     (while b
       (when (buffer-file-name (car b))
-	(save-current-buffer
-	  (set-buffer (car b))
+	(with-current-buffer (car b)
 	  ;; Reset all state variables
 	  (setq ede-object nil
 		ede-object-project nil
@@ -566,7 +563,7 @@ If ARG is negative, disable.  Toggle otherwise."
       (remove-hook 'dired-mode-hook 'ede-turn-on-hook)
 
       (remove-hook 'cedet-m3-menu-do-hooks 'ede-m3-ede-items))
-    (ede-reset-all-buffers arg)))
+    (ede-reset-all-buffers)))
 
 (defvar ede-ignored-file-alist
   '( "\\.cvsignore$"
@@ -655,18 +652,20 @@ Otherwise, create a new project for DIR."
   ;; the user chooses.
   (if (ede-check-project-directory dir)
       (progn
-	;; If there is a project in DIR, load it, otherwise do
-	;; nothing.
+	;; Load the project in DIR, or make one.
 	(ede-load-project-file dir)
 
 	;; Check if we loaded anything on the previous line.
 	(if (ede-current-project dir)
+	    ;; Open buffers may be refering the the project we just forced
+	    ;; to load.  This is a brutal load, but will make things work.
+	    (ede-reset-all-buffers)
 
 	    ;; We successfully opened an existing project.  Some open
 	    ;; buffers may also be referring to this project.
 	    ;; Resetting all the buffers will get them to also point
 	    ;; at this new open project.
-	    (ede-reset-all-buffers 1)
+	    (ede-reset-all-buffers)
 
 	  ;; ELSE
 	  ;; There was no project, so switch to `ede-new' which is how
@@ -807,7 +806,8 @@ ARGS are additional arguments to pass to method sym."
 	  (ede-deep-rescan t))
 
       (project-rescan (ede-load-project-file toppath))
-      (ede-reset-all-buffers 1))))
+      (ede-reset-all-buffers)
+      )))
 
 (defun ede-new-target (&rest args)
   "Create a new target specific to this type of project file.

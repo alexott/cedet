@@ -1,6 +1,6 @@
 ;;; semanticdb.el --- Semantic tag database manager
 
-;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011 Eric M. Ludlam
+;;; Copyright (C) 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
@@ -323,7 +323,7 @@ so your cache will need to be recalculated at runtime.
 
 Note: This index will not be saved in a persistent file.")
    (tables :initarg :tables
-	   :type list
+	   :type semanticdb-abstract-table-list
 	   ;; Need this protection so apps don't try to access
 	   ;; the tables without using the accessor.
 	   :accessor semanticdb-get-database-tables
@@ -415,7 +415,7 @@ If FILENAME exists in the database already, return that.
 If there is no database for the table to live in, create one."
   (let ((cdb nil)
 	(tbl nil)
-	(dd (file-name-directory filename))
+	(dd (file-name-directory (file-truename filename)))
 	)
     ;; Allow a database override function
     (setq cdb (semanticdb-create-database semanticdb-new-database-class

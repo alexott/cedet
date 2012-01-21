@@ -1,6 +1,6 @@
 ;;; ede-cpp-root.el --- A simple way to wrap a C++ project with a single root
 
-;; Copyright (C) 2007, 2008, 2009, 2010, 2011 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; X-RCS: $Id: ede-cpp-root.el,v 1.24 2010-08-19 23:29:09 zappo Exp $
@@ -136,7 +136,8 @@
 ;; 	      :proj-file 'MY-FILE-FOR-DIR
 ;;            :proj-root 'MY-ROOT-FCN
 ;; 	      :load-type 'MY-LOAD
-;; 	      :class-sym 'ede-cpp-root)
+;; 	      :class-sym 'ede-cpp-root-project
+;;	      :safe-p t)
 ;; 	     t)
 ;; 
 ;;; TODO
@@ -243,7 +244,8 @@ ROOTPROJ is nil, since there is only one project."
 	      :proj-root 'ede-cpp-root-project-root
 	      :load-type 'ede-cpp-root-load
 	      :class-sym 'ede-cpp-root
-	      :new-p nil)
+	      :new-p nil
+	      :safe-p t)
 	     t)
 
 ;;; CLASSES

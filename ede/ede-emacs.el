@@ -1,6 +1,6 @@
 ;;; ede-emacs.el --- Special project for Emacs
 
-;; Copyright (C) 2008, 2009, 2010, 2011 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; X-RCS: $Id: ede-emacs.el,v 1.12 2010-05-18 00:42:14 zappo Exp $
@@ -119,6 +119,13 @@ m4_define(\\[SXEM4CS_BETA_VERSION\\], \\[\\([0-9]+\\)\\])")
       (cons emacs ver))))
 
 ;;;###autoload
+(defclass ede-emacs-project (ede-project eieio-instance-tracker)
+  ((tracking-symbol :initform 'ede-emacs-project-list)
+   )
+  "Project Type for the Emacs source code."
+  :method-invocation-order :depth-first)
+
+;;;###autoload
 (defun ede-emacs-load (dir &optional rootproj)
   "Return an Emacs Project object if there is a match.
 Return nil if there isn't one.
@@ -145,7 +152,8 @@ ROOTPROJ is nil, since there is only one project."
 	      :proj-root 'ede-emacs-project-root
 	      :load-type 'ede-emacs-load
 	      :class-sym 'ede-emacs-project
-	      :new-p nil)
+	      :new-p nil
+	      :safe-p t)
 	     t)
 
 (defclass ede-emacs-target-c (ede-target)
@@ -162,13 +170,6 @@ All directories need at least one target.")
   ()
   "EDE Emacs Project target for Misc files.
 All directories need at least one target.")
-
-;;;###autoload
-(defclass ede-emacs-project (ede-project eieio-instance-tracker)
-  ((tracking-symbol :initform 'ede-emacs-project-list)
-   )
-  "Project Type for the Emacs source code."
-  :method-invocation-order :depth-first)
 
 (defmethod initialize-instance ((this ede-emacs-project)
 				&rest fields)

@@ -1,6 +1,6 @@
 ;;; eieio-opt.el -- eieio optional functions (debug, printing, speedbar)
 
-;;; Copyright (C) 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 1996, 1998, 1999, 2000, 2001, 2002, 2003, 2005, 2008, 2009, 2010, 2012 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
 ;; RCS: $Id: eieio-opt.el,v 1.40 2010-04-09 02:11:42 zappo Exp $
@@ -79,7 +79,7 @@ Argument CH-PREFIX is another character prefix to display."
 ;;;###autoload
 (defun eieio-describe-class (class &optional headerfcn)
   "Describe a CLASS defined by a string or symbol.
-If CLASS is actually an object, then also display current values of that obect.
+If CLASS is actually an object, then also display current values of that object.
 Optional HEADERFCN should be called to insert a few bits of info first."
   (interactive (list (eieio-read-class "Class: ")))
   (with-output-to-temp-buffer (help-buffer) ;"*Help*"
@@ -275,7 +275,16 @@ Uses `eieio-describe-class' to describe the class being constructed."
 	 ))
   )
 
-;;;###autoload
+(defun eieio-build-class-list (class)
+  "Return a list of all classes that inherit from CLASS."
+  (if (class-p class)
+      (apply #'append
+	     (mapcar
+	      (lambda (c)
+		(append (list c) (eieio-build-class-list c)))
+	      (class-children-fast class)))
+    (list class)))
+
 (defun eieio-build-class-alist (&optional class instantiable-only buildlist)
   "Return an alist of all currently active classes for completion purposes.
 Optional argument CLASS is the class to start with.

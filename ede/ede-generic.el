@@ -1,6 +1,6 @@
 ;;; ede-generic.el --- Base Support for generic build systems
 ;;
-;; Copyright (C) 2010 Eric M. Ludlam
+;; Copyright (C) 2010, 2012 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; X-RCS: $Id: ede-generic.el,v 1.5 2010-07-25 14:12:11 zappo Exp $
@@ -203,7 +203,7 @@ The class allocated value is replace by different sub classes.")
 				     (oref proj :directory))))
 	(if (file-exists-p fname)
 	    ;; Load in the configuration
-	    (setq config (eieio-persistent-read fname))
+	    (setq config (eieio-persistent-read fname 'ede-generic-config))
 	  ;; Create a new one.
 	  (setq config (ede-generic-config 
 			"Configuration"
@@ -390,8 +390,7 @@ the new configuration."
      (ede-map-target-buffers
       target
       (lambda (b)
-	(save-excursion
-	  (set-buffer b)
+	(with-current-buffer b
 	  (ede-apply-target-options)))))))
 
 (defmethod ede-commit ((config ede-generic-config))
@@ -418,7 +417,11 @@ the class `ede-generic-project' project."
 				     :proj-file projectfile
 				     :load-type 'ede-generic-load
 				     :class-sym class
-				     :new-p nil)
+				     :new-p nil
+				     :safe-p nil) ; @todo - could be
+					; safe if we do something
+					; about the loading of the
+					; generic config file.
 	       ;; Generics must go at the end, since more specific types
 	       ;; can create Makefiles also.
 	       t))

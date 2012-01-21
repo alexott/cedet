@@ -1,8 +1,8 @@
 ;;; eieio.el --- Enhanced Implementation of Emacs Interpreted Objects
-;;               or maybe Eric's Implementation of Emacs Intrepreted Objects
+;;;              or maybe Eric's Implementation of Emacs Interpreted Objects
 
 ;;;
-;; Copyright (C) 1995,1996,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010 Eric M. Ludlam
+;; Copyright (C) 1995,1996,1998,1999,2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2012 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
 ;; RCS: $Id: eieio.el,v 1.197 2010-06-18 00:07:25 zappo Exp $
@@ -103,7 +103,7 @@ introduced."
   "*This hook is executed, then cleared each time `defclass' is called.")
 
 (defvar eieio-error-unsupported-class-tags nil
-  "*Non nil to throw an error if an encountered tag us unsupported.
+  "Non-nil to throw an error if an encountered tag is unsupported.
 This may prevent classes from CLOS applications from being used with EIEIO
 since EIEIO does not support all CLOS tags.")
 
@@ -343,7 +343,7 @@ Options added to EIEIO:
                         If a string, use as an error string if someone does
                         try to make an instance.
   :method-invocation-order
-                      - Control the method invokation order if there is
+                      - Control the method invocation order if there is
                         multiple inheritance.  Valid values are:
                          :breadth-first - The default.
                          :depth-first
@@ -368,7 +368,7 @@ wish, and reference them using the function `class-option'."
 ;;;###autoload
 (defun eieio-defclass-autoload (cname superclasses filename doc)
   "Create autoload symbols for the EIEIO class CNAME.
-SUPERCLASSES are the superclasses that CNAME inherites from.
+SUPERCLASSES are the superclasses that CNAME inherits from.
 DOC is the docstring for CNAME.
 This function creates a mock-class for CNAME and adds it into
 SUPERCLASSES as children.
@@ -437,6 +437,7 @@ It creates an autoload function for CNAME's constructor."
 	(autoload cname filename doc nil nil)
 	(autoload (intern (concat (symbol-name cname) "-p")) filename "" nil nil)
 	(autoload (intern (concat (symbol-name cname) "-child-p")) filename "" nil nil)
+	(autoload (intern (concat (symbol-name cname) "-list-p")) filename "" nil nil)
 
 	))))
 
@@ -564,6 +565,23 @@ OPTIONS-AND-DOC as the toplevel documentation for this class."
 		  cname)
 	       (and (eieio-object-p obj)
 		    (object-of-class-p obj ,cname))))
+
+    ;; Create a handy list of the class test too
+    (let ((csym (intern (concat (symbol-name cname) "-list-p"))))
+      (fset csym
+	    `(lambda (obj)
+	       ,(format
+		  "Test OBJ to see if it a list of objects which are a child of type %s"
+		  cname)
+	       (when (listp obj)
+		 (let ((ans t)) ;; nil is valid
+		   ;; Loop over all the elements of the input list, test
+		   ;; each to make sure it is a child of the desired object class.
+		   (while (and obj ans)
+		     (setq ans (and (eieio-object-p (car obj))
+				    (object-of-class-p (car obj) ,cname)))
+		     (setq obj (cdr obj)))
+		   ans)))))
 
       ;; When using typep, (typep OBJ 'myclass) returns t for objects which
       ;; are subclasses of myclass.  For our predicates, however, it is
