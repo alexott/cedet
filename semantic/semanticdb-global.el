@@ -39,10 +39,17 @@
   )
 ;;; Code:
 ;;;###autoload
-(defun semanticdb-enable-gnu-global-databases (mode)
+(defun semanticdb-enable-gnu-global-databases (mode &optional noerror)
   "Enable the use of the GNU Global SemanticDB back end for all files of MODE.
 This will add an instance of a GNU Global database to each buffer
-in a GNU Global supported hierarchy."
+in a GNU Global supported hierarchy.
+
+Two sanity checks are performed to assure (a) that GNU global program exists
+and (b) that the GNU global program version is compatibility with the database
+version.  If optional NOERROR is nil, then an error may be signalled on version
+mismatch.  If NOERROR is not nil, then no error will be signlled.  Instead
+return value will indicate success or failure with non-nil or nil respective
+values."
   (interactive
    (list (completing-read
           "Enable in Mode: " obarray
@@ -50,17 +57,18 @@ in a GNU Global supported hierarchy."
           t (symbol-name major-mode))))
 
   ;; First, make sure the version is ok.
-  (cedet-gnu-global-version-check)
+  (if (not (cedet-gnu-global-version-check noerror))
+      nil
+    ;; Make sure mode is a symbol.
+    (when (stringp mode)
+      (setq mode (intern mode)))
 
-  ;; Make sure mode is a symbol.
-  (when (stringp mode)
-    (setq mode (intern mode)))
-
-  (let ((ih (mode-local-value mode 'semantic-init-mode-hook)))
-    (eval `(setq-mode-local
-	    ,mode semantic-init-mode-hook
-	    (cons 'semanticdb-enable-gnu-global-hook ih))))
-
+    (let ((ih (mode-local-value mode 'semantic-init-mode-hook)))
+      (eval `(setq-mode-local
+              ,mode semantic-init-mode-hook
+              (cons 'semanticdb-enable-gnu-global-hook ih))))
+    t
+    )
   )
 
 (defun semanticdb-enable-gnu-global-hook ()
