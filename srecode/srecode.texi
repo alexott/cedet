@@ -1181,11 +1181,11 @@ Sets up variables about the current user.
 @item AUTHOR
 Value of the Emacs function @code{user-full-name}
 @item EMAIL
-Current Emacs users email address.
+Current Emacs user's email address.
 @item LOGIN
-Current Emacs users login name.
+Current Emacs user's login name.
 @item UID
-Current Emacs users login name.
+Current Emacs user's login ID.
 @item EMACSINITFILE
 This Emacs sessions' init file.
 @end table
@@ -1229,9 +1229,9 @@ Sets up variables with details about the current file.
 
 @table @code
 @item FILENAME
-The filename with out the directory part of the current buffer.
+The filename without the directory part of the current buffer.
 @item FILE
-The filename with out the directory or extension
+The filename without the directory or extension
 @item EXTENSION
 The filename extension.
 @item DIRECTORY

@@ -193,7 +193,7 @@ variables.
 @eieio{} contains the core object library for @cedet{}.  You can
 define classes, and methods for those classes using @i{CLOS} style
 syntax.  Objects can be customized using the Emacs customization tool,
-which allows easy creation of dialog box style UIs.  A series of bases
+which allows easy creation of dialog box style UIs.  A series of base
 classes allows the creation of Emacs centric tools, wrapping up the
 details of persistence, instance tracking, or instance inheritance.
 
@@ -221,7 +221,7 @@ search utility.  Code analysis and completion generation is also
 provided.  @semantic{} includes tools such as speedbar interfaces to
 tags, context analysis, and completion options, Popup smart
 completion, tag decoration, and support for a wide range of Emacs
-tools such as Imenu, wich-func, hippie-expand, isearch, and
+tools such as Imenu, which-func, hippie-expand, isearch, and
 cut/copy/paste.
 
 For high level overviews, configuration advice, etc, please read
@@ -293,7 +293,7 @@ Makefiles or Automake files, and provides menus and keybindings for
 compiling any target, debugging programs by providing the arguments to
 your debugger, and will make sure you don't forget to include some
 file in your targets.  It will help you build distribution files, and
-post them to the web (such as with Source Forge).  @ede{} will track
+post them to the web (such as with SourceForge).  @ede{} will track
 revision numbers and make sure they are updated in multiple places.
 
 Projects that are merely wrapped with @ede{} can support a small
@@ -1078,7 +1078,7 @@ You can wrap any @cedet{} / CScope configurations in your
 CScope is detected by the presense of a @file{cscope.out} file at the
 ROOT of your current project, as specified by @ede{}.  CScope the program
 supports multiple @file{cscope.out} files spread out through your
-project, but this is not detecte by @cedet{}.  It will also use a
+project, but this is not detected by @cedet{}.  It will also use a
 @file{cscope.out} in the same directory as your sources if you do not
 use @ede{}
 
