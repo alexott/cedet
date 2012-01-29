@@ -1,6 +1,6 @@
 ;;; wisent-python.el --- Semantic support for Python
 ;;
-;; Copyright (C) 2010, 2011 Jan Moringen
+;; Copyright (C) 2010, 2011, 2012 Jan Moringen
 ;; Copyright (C) 2007, 2008, 2009, 2010 Eric M. Ludlam
 ;; Copyright (C) 2002, 2004, 2006 Richard Kim
 ;;
@@ -56,8 +56,7 @@
 ;;
 
 (defun semantic-python-get-system-include-path ()
-  "Evaluate some Python code that determines the system include
-path."
+  "Evaluate some Python code that determines the system include path."
   (python-proc)
   (if python-buffer
       (with-current-buffer python-buffer
@@ -67,8 +66,14 @@ path."
 	(accept-process-output (python-proc) 2)
 	(if python-preoutput-result
 	    (split-string python-preoutput-result "[\0\n]" t)
-	  (message "Timeout while querying Python for system include path.")
-	  nil))
+	  ;; Try a second, Python3k compatible shot
+	  (python-send-string
+	   "import sys; print('_emacs_out ' + '\\0'.join(sys.path))")
+	  (accept-process-output (python-proc) 2)
+	  (if python-preoutput-result
+	      (split-string python-preoutput-result "[\0\n]" t)
+	    (message "Timeout while querying Python for system include path.")
+	    nil)))
     (message "Python seems to be unavailable on this system.")))
 
 (defcustom-mode-local-semantic-dependency-system-include-path
