@@ -285,7 +285,7 @@ include directories (-I) and preprocessor symbols (-D)."
 			vars))))))))
 
 
-(provide 'semantic/clang)
+(provide 'semantic/bovine/clang)
 
 ;; Local variables:
 ;; generated-autoload-file: "../loaddefs.el"
