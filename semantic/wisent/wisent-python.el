@@ -434,8 +434,11 @@ To be implemented for Python!  For now just return nil."
   "Setup buffer for parse."
   (wisent-python-wy--install-parser)
   (set (make-local-variable 'parse-sexp-ignore-comments) t)
+  ;; Give python modes the possibility to overwrite this: 
+  (if (not comment-start-skip)
+      (set (make-local-variable 'comment-start-skip) "#+\\s-*"))
   (setq
-   ;; Character used to separation a parent/child relationship
+  ;; Character used to separation a parent/child relationship
    semantic-type-relation-separator-character '(".")
    semantic-command-separation-character ";"
    ;; The following is no more necessary as semantic-lex is overriden
