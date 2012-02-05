@@ -1,6 +1,6 @@
 ;;; semantic/ectags/parse.el --- exuberant CTags into Semantic tags
 
-;; Copyright (C) 2008, 2009, 2010, 2011 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -72,7 +72,7 @@ TAG and PARENTS are ignored."
   "Execute Exuberant CTags on this buffer.
 Convert the output tags into Semantic tags."
   (interactive)
-  (require 'semantic-ectags-lang)
+  (require 'semantic/ectags/lang)
   (when (not semantic-ectags-lang)
     (error "Exuberant CTags support for Semantic not configured for %s"
            major-mode))
