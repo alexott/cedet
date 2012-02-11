@@ -403,7 +403,7 @@ a list.  In python, this can happen with `import' statements."
     (cond
      ((and (eq class 'include) (listp elts))
       (dolist (E elts)
-	(setq expand (cons (semantic-clone-tag tag E) expand)))
+	(setq expand (cons (semantic-tag-clone tag E) expand)))
       (setq expand (nreverse expand)))
      )))
      
