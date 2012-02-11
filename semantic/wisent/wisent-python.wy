@@ -1,6 +1,6 @@
 ;;; wisent-python.wy -- LALR grammar for Python
 ;;
-;; Copyright (C) 2002, 2003, 2004, 2007 Richard Kim
+;; Copyright (C) 2002, 2003, 2004, 2007, 2012 Richard Kim
 ;; Copyright (C) 2001-2010 Python Software Foundation
 ;;
 ;; Author: Richard Kim <ryk@dspwiz.com>
@@ -553,8 +553,10 @@ import_stmt
 
 ;; dotted_as_name (',' dotted_as_name)*
 dotted_as_name_list
-  : dotted_as_name
-  | dotted_as_name_list COMMA dotted_as_name
+  : dotted_as_name_list COMMA dotted_as_name
+    (cons $3 $1)
+  | dotted_as_name
+    (list $1)
   ;
 
 ;; ('*' | import_as_name (',' import_as_name)*)
