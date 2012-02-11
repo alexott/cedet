@@ -891,6 +891,14 @@ to some class in JARFILE."
       (goto-char (point-min))
       ;; The first line says "Compiled from ..." or some-such.
       (insert "// ")
+
+      ;; strip out fully qualified part of class- and interface names
+      (save-excursion
+	(goto-char (point-min))
+	(while (re-search-forward "\\(class\\|interface\\) \\([^\\. ]*\\.\\)+" nil t)
+	  (replace-match "\\1 " nil nil))
+	)
+      
       ;; Enable java mode and semantic parsing.
       (java-mode)
       (semantic-new-buffer-fcn)
