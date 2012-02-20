@@ -38,6 +38,7 @@
    (proj-file :initarg :proj-file
 	      :documentation "Name of a project file of this type.")
    (proj-root-dirmatch :initarg :proj-root-dirmatch
+		       :initform ""
 		       :type string
 		       :documentation
 		       "To avoid loading a project, check if the directory matches this.
@@ -170,7 +171,7 @@ the current buffer."
 	  (rootfcn (oref this proj-root))
 	  (callfcn t))
       (when rootfcn
-	(when (and (not (featurep (oref this file))) dirmatch)
+	(when (and (not (featurep (oref this file))) (not (string= dirmatch "")))
 	  (unless (string-match dirmatch file)
 	    (setq callfcn nil)))
 	(when callfcn
