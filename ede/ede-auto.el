@@ -29,6 +29,68 @@
 ;; handing over control to the usual EDE project system.
 
 ;;; Code:
+
+(defclass ede-project-autoload-dirmatch ()
+  ((fromconfig :initarg :fromconfig 
+	       :initform nil
+	       :documentation
+	       "A config file within which the match pattern lives.")
+   (configregex :initarg :configregex
+		:initform nil
+		:documentation
+		"A regexp to identify the dirmatch pattern.")
+   (configregexidx :initarg :configregexidx
+		   :initform nil
+		   :documentation
+		   "An index into the match-data of `configregex'.")
+   (configdatastash :initform nil
+		    :documentation
+		    "Save discovered match string.")
+   )
+  "Support complex matches for projects that live in named directories.
+For most cases, a simple string is sufficient.  If, however, a project
+location is varied dependent on other complex criteria, this class
+can be used to define that match without loading the specific project
+into memory.")
+
+(defmethod ede-do-dirmatch ((dirmatch ede-project-autoload-dirmatch) file)
+  "Does DIRMATCH match the filename FILE."
+  (let ((fc (oref dirmatch fromconfig)))
+
+    (cond
+     ;; If the thing to match is stored in a config file.
+     ((stringp fc)
+      (when (file-exists-p fc)
+	(let ((matchstring (oref dirmatch configdatastash)))
+	  (unless matchstring
+	    (save-current-buffer
+	      (let* ((buff (get-file-buffer fc))
+		     (readbuff
+		      (let ((find-file-hooks nil) ;; Disable ede from recursing
+			    (find-file-hook nil)) ;; Disable ede from recursing
+			(find-file-noselect fc))))
+		(set-buffer readbuff)
+		(save-excursion
+		  (goto-char (point-min))
+		  (when (re-search-forward (oref dirmatch configregex) nil t)
+		    (setq matchstring
+			  (match-string (or (oref dirmatch configregexidx) 0)))))
+		(if (not buff) (kill-buffer readbuff))))
+	    ;; Save what we find in our cache.
+	    (oset dirmatch configdatastash matchstring))
+	  ;; Match against our discovered string
+	  (and matchstring (string-match (regexp-quote matchstring) file))
+	  )))
+
+     ;; Add new matches here
+     ;; ((stringp somenewslot ...)
+     ;;   )
+
+     ;; Error if none others known
+     (t
+      (error "Unknown dirmatch object match style.")))
+    ))
+
 ;;;###autoload
 (defclass ede-project-autoload ()
   ((name :initarg :name
@@ -39,7 +101,7 @@
 	      :documentation "Name of a project file of this type.")
    (proj-root-dirmatch :initarg :proj-root-dirmatch
 		       :initform ""
-		       :type string
+		       :type (or string ede-project-autoload-dirmatch)
 		       :documentation
 		       "To avoid loading a project, check if the directory matches this.
 For projects that use directory name matches, a function would load that project.
@@ -158,6 +220,21 @@ added.  Possible values are:
 Allows for one-project-object-for-a-tree type systems."
   nil)
 
+(defun ede-project-dirmatch-p (file dirmatch)
+  "Return non-nil if FILE matches DIRMATCH.
+DIRMATCH could be nil (no match), a string (regexp match),
+or an `ede-project-autoload-dirmatch' object."
+  ;; If dirmatch is a string, then we simply match it against
+  ;; the file we are testing.
+  (if (stringp dirmatch)
+      (string-match dirmatch file)
+    ;; if dirmatch is instead a dirmatch object, we test against
+    ;; that object instead.
+    (if (ede-project-autoload-dirmatch-p dirmatch)
+	(ede-do-dirmatch dirmatch file)
+      (error "Unknown project directory match type."))
+    ))
+
 (defmethod ede-project-root-directory ((this ede-project-autoload)
 				       &optional file)
   "If a project knows its root, return it here.
@@ -171,9 +248,21 @@ the current buffer."
 	  (rootfcn (oref this proj-root))
 	  (callfcn t))
       (when rootfcn
-	(when (and (not (featurep (oref this file))) (not (string= dirmatch "")))
-	  (unless (string-match dirmatch file)
+	(when (and 
+	       ;; If the Emacs Lisp file handling this project hasn't
+	       ;; been loaded, we will use the quick dirmatch feature.
+	       (not (featurep (oref this file)))
+	       ;; If the dirmatch is an empty string, then we always
+	       ;; skip doing a match.
+	       (not (and (stringp dirmatch) (string= dirmatch "")))
+	       )
+	  ;; If this file DOES NOT match dirmatch, we set the callfcn
+	  ;; to nil, meaning don't load the ede support file for this
+	  ;; type of project.  If it does match, we will load the file
+	  ;; and use a more accurate programatic match from there.
+	  (unless (ede-project-dirmatch-p file dirmatch)
 	    (setq callfcn nil)))
+	;; Call into the project support file for a match.
 	(when callfcn
 	  (condition-case nil
 	      (funcall rootfcn file)
@@ -187,10 +276,20 @@ Return nil if the project file does not exist."
   (let* ((d (file-name-as-directory dir))
 	 (root (ede-project-root-directory this d))
 	 (pf (oref this proj-file))
+	 (dm (oref this proj-root-dirmatch))
 	 (f (cond ((stringp pf)
 		   (expand-file-name pf (or root d)))
 		  ((and (symbolp pf) (fboundp pf))
-		   (funcall pf (or root d)))))
+		   ;; If there is a symbol to call, lets make extra
+		   ;; sure we really can call it without loading in
+		   ;; other EDE projects.  This happens if the file is
+		   ;; already loaded, or if there is a dirmatch, but
+		   ;; root is empty.
+		   (when (and (featurep (oref this file))
+			      (or (not (stringp dm))
+				  (not (string= dm "")))
+			      root)
+		     (funcall pf (or root d))))))
 	 )
     (when (and f (file-exists-p f))
       f)))
