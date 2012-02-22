@@ -1,6 +1,6 @@
 ;;; semantic-c.el --- Semantic details for C
 
-;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; X-RCS: $Id: semantic-c.el,v 1.145 2010-08-05 03:01:57 zappo Exp $
@@ -66,6 +66,8 @@ This function does not do any hidden buffer changes."
 ;;; Code:
 (define-child-mode c++-mode c-mode
   "`c++-mode' uses the same parser as `c-mode'.")
+(define-child-mode arduino-mode c++-mode
+  "`arduino-mode' uses the same parser as `c++-mode'.")
 
 
 ;;; Include Paths
@@ -102,6 +104,7 @@ NOTE: In process of obsoleting this."
   '( ("__THROW" . "")
      ("__const" . "const")
      ("__restrict" . "")
+     ("__attribute_pure__" . "")
      ("__attribute_malloc__" . "")
      ("__nonnull" . "")
      ("__wur" . "")
@@ -1458,6 +1461,19 @@ For C++, we also have to search namespaces for include tags."
 		     (semantic-tag-get-attribute cur :members)))))
     tags))
 
+;;; For arduino, we need to glom WProgram to the beginning of the pde
+;; sketch.
+(define-mode-local-override semantic-find-tags-included arduino-mode (&optional table)
+  "When looking up includes for this buffer, always include an arduino header.
+For versions of arduino before 1.0, include WProgram.h.  For 1.0 and after
+we need to instead use Arduino.h.  Add both since semantic doesn't care if it
+can't find one of them."
+  (cons (semantic-tag-new-include "WProgram.h" t)
+	(cons
+	 (semantic-tag-new-include "Arduino.h" t)
+	 (semantic-find-tags-included-default table))))
+
+
 (define-mode-local-override semantic-tag-components c-mode (tag)
   "Return components for TAG."
   (if (and (eq (semantic-tag-class tag) 'type)
@@ -2088,13 +2104,16 @@ actually in their parent which is not accessible.")
 (add-hook 'c-mode-hook 'semantic-default-c-setup)
 ;;;###autoload
 (add-hook 'c++-mode-hook 'semantic-default-c-setup)
+;;;###autoload
+(add-hook 'arduino-mode-hook 'semantic-default-c-setup)
 
 ;;; SETUP QUERY
 ;;
 (defun semantic-c-describe-environment ()
   "Describe the Semantic features of the current C environment."
   (interactive)
-  (if (not (or (eq major-mode 'c-mode) (eq major-mode 'c++-mode)))
+  (if (not (or (eq major-mode 'c-mode) (eq major-mode 'c++-mode)
+	       (eq major-mode 'arduino-mode)))
       (error "Not useful to query C mode in %s mode" major-mode))
   (let ((gcc (when (boundp 'semantic-gcc-setup-data)
 	       semantic-gcc-setup-data))
