@@ -400,9 +400,14 @@ Argument MENU-DEF is the definition of the current menu."
   "Add target specific keybindings into the local map.
 Optional argument DEFAULT indicates if this should be set to the default
 version of the keymap."
-  (let ((object (or ede-object ede-selected-object)))
+  (let ((object (or ede-object ede-selected-object))
+	(proj ede-object-project))
     (condition-case nil
 	(let ((keys (ede-object-keybindings object)))
+	  ;; Add keys for the project to whatever is in the current object
+	  ;; so long as it isn't the same.
+	  (when (not (eq object proj))
+	    (setq keys (append keys (ede-object-keybindings proj))))
 	  (while keys
 	    (local-set-key (concat "\C-c." (car (car keys)))
 			   (cdr (car keys)))
@@ -552,8 +557,8 @@ If ARG is negative, disable.  Toggle otherwise."
 	  (add-hook 'semanticdb-project-predicate-functions 'ede-directory-project-p)
 	  (add-hook 'semanticdb-project-root-functions 'ede-toplevel-project-or-nil)
 	  (add-hook 'ecb-source-path-functions 'ede-ecb-project-paths)
-	  (add-hook 'find-file-hooks 'ede-turn-on-hook)
-	  (add-hook 'dired-mode-hook 'ede-turn-on-hook)
+	  (add-hook 'find-file-hooks 'ede-turn-on-hook t)
+	  (add-hook 'dired-mode-hook 'ede-turn-on-hook t)
 
 	  (add-hook 'cedet-m3-menu-do-hooks 'ede-m3-ede-items nil))
       (remove-hook 'semanticdb-project-predicate-functions 'ede-directory-project-p)
@@ -1362,7 +1367,9 @@ and <root>/doc for doc sources."
 ;; C/C++
 (defun ede-apply-preprocessor-map ()
   "Apply preprocessor tables onto the current buffer."
-  (when (and ede-object (boundp 'semantic-lex-spp-macro-symbol-obarray))
+  (when (and ede-object
+	     (boundp 'semantic-lex-spp-macro-symbol-obarray)
+	     semantic-lex-spp-macro-symbol-obarray)
     (let* ((objs ede-object)
 	   (map (ede-preprocessor-map (if (consp objs)
 					  (car objs)
