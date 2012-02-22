@@ -1,6 +1,6 @@
 ;;; c.by -- LL grammar for C/C++ language specification
 ;;
-;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2012 Eric M. Ludlam
 ;; Copyright (C) 2002, 2003 David Ponce
 ;;
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
@@ -1107,6 +1107,8 @@ functionname
 function-pointer
   : LPAREN STAR symbol RPAREN
     ( (concat "*" $3) )
+  | LPAREN symbol RPAREN
+    ( $2 )
   ;
 
 fun-or-proto-end
