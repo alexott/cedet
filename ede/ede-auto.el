@@ -53,6 +53,21 @@ location is varied dependent on other complex criteria, this class
 can be used to define that match without loading the specific project
 into memory.")
 
+(defmethod ede-dirmatch-installed ((dirmatch ede-project-autoload-dirmatch))
+  "Return non-nil if the tool DIRMATCH might match is installed on the system."
+  (let ((fc (oref dirmatch fromconfig)))
+
+    (cond
+     ;; If the thing to match is stored in a config file.
+     ((stringp fc)
+      (file-exists-p fc))
+
+     ;; Add new types of dirmatches here.
+
+     ;; Error for wierd stuff
+     (t (error "Unknown dirmatch type.")))))
+  
+
 (defmethod ede-do-dirmatch ((dirmatch ede-project-autoload-dirmatch) file)
   "Does DIRMATCH match the filename FILE."
   (let ((fc (oref dirmatch fromconfig)))
@@ -248,20 +263,26 @@ the current buffer."
 	  (rootfcn (oref this proj-root))
 	  (callfcn t))
       (when rootfcn
-	(when (and 
-	       ;; If the Emacs Lisp file handling this project hasn't
-	       ;; been loaded, we will use the quick dirmatch feature.
-	       (not (featurep (oref this file)))
-	       ;; If the dirmatch is an empty string, then we always
-	       ;; skip doing a match.
-	       (not (and (stringp dirmatch) (string= dirmatch "")))
-	       )
-	  ;; If this file DOES NOT match dirmatch, we set the callfcn
-	  ;; to nil, meaning don't load the ede support file for this
-	  ;; type of project.  If it does match, we will load the file
-	  ;; and use a more accurate programatic match from there.
-	  (unless (ede-project-dirmatch-p file dirmatch)
-	    (setq callfcn nil)))
+	(if ;; If the dirmatch (an object) is not installed, then we
+	    ;; always skip doing a match.
+	    (and (ede-project-autoload-dirmatch-p dirmatch)
+		 (not (ede-dirmatch-installed dirmatch)))
+	    (setq callfcn nil)
+	  ;; Other types of dirmatch:
+	  (when (and 
+		 ;; If the Emacs Lisp file handling this project hasn't
+		 ;; been loaded, we will use the quick dirmatch feature.
+		 (not (featurep (oref this file)))
+		 ;; If the dirmatch is an empty string, then we always
+		 ;; skip doing a match.
+		 (not (and (stringp dirmatch) (string= dirmatch "")))
+		 )
+	    ;; If this file DOES NOT match dirmatch, we set the callfcn
+	    ;; to nil, meaning don't load the ede support file for this
+	    ;; type of project.  If it does match, we will load the file
+	    ;; and use a more accurate programatic match from there.
+	    (unless (ede-project-dirmatch-p file dirmatch)
+	      (setq callfcn nil))))
 	;; Call into the project support file for a match.
 	(when callfcn
 	  (condition-case nil
