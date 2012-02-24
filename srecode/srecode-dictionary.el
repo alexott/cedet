@@ -210,7 +210,10 @@ associated with a buffer or parent."
   "Insert into DICT the variables found in table TPL.
 TPL is an object representing a compiled template file."
   (when tpl
-    (let ((tabs (oref tpl :tables)))
+    ;; Tables are sorted with highest priority first, useful for looking
+    ;; up templates, but this means we need to install the variables in
+    ;; reverse order so higher priority variables override lower ones.
+    (let ((tabs (reverse (oref tpl :tables))))
       (while tabs
 	(when (srecode-template-table-in-project-p (car tabs))
 	  (let ((vars (oref (car tabs) variables)))
