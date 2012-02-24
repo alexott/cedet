@@ -17,7 +17,7 @@ END-INFO-DIR-ENTRY
 @sp 10
 @center @titlefont{ede}
 @vskip 0pt plus 1 fill
-Copyright @copyright{} 1998, 1999, 2000, 2001, 2004, 2005, 2008, 2009, 2010, 2011 Eric M. Ludlam
+Copyright @copyright{} 1998, 1999, 2000, 2001, 2004, 2005, 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
 @end titlepage
 
 @macro cedet{}
@@ -412,6 +412,8 @@ that use @ede{} to look up files.
 @menu
 * Make and Automake projects::  Project types of @samp{ede-project}
 * Automake direct projects::    Project interface on hand-written automake files.
+* Android projects::            Projects for Android development
+* Arduino projects::            Projects for Arduino sketches
 * Simple projects::             Projects @ede{} doesn't manage.
 @end menu
 
@@ -436,6 +438,38 @@ distributed independently.  This mode eventually became @ede{}.  The
 @samp{project-am} project will read existing automake files, but will
 not generate them automatically, or create new ones.  As such, it is
 useful as a browsing tool, or as maintenance in managing file lists.
+
+@node Android projects
+@section Android projects
+
+An Android project of type @samp{ede-android-project} will detect and
+support development of Android apps.  Android projects use an
+@file{AndroidManifest.xml} file.  Always load your Manifest first in a
+running Emacs to make sure the project is identified correctly.
+
+Android projects can be created with @code{ede-new} but depend on a
+correctly configured Android SDK via CEDET support.
+
+@defun cedet-android-sdk-root
+@anchor{cedet-android-sdk-root}
+The root to the android @var{SDK}.
+@end defun
+
+Android projects support different configurations including compile,
+and install, which will upload a program to your Android device.  It
+also supports several debugging tools via @file{android.el}.
+
+@node Arduino projects
+@section Arduino projects
+
+An arduino project of type @samp{ede-arduino-project} will read your
+@file{~/.arduino/preferences.txt} file, and identify your sketches.
+You will still need the Arduino IDE to set up your preferences and
+locate your arduino.  After quiting the IDE, Emacs will be able to
+find your sketches, compile them, and upload them to your arduino.
+
+If you have the @file{arduino} command on your path, @ede{} will be
+able to find your SDK and compile your programs.
 
 @node Simple projects
 @section Simple Projects
