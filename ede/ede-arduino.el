@@ -496,16 +496,16 @@ This is also where Arduino.mk will be found."
   (let ((vfile (expand-file-name "lib/version.txt" (ede-arduino-find-install))))
     (let ((buff (get-file-buffer vfile))
 	  (kill nil))
-      (if (not buff)
-	  (setq buff (find-file-noselect vfile)
-		kill t)
-	(prog1
-	    (with-current-buffer buff
-	      (save-excursion
-		(goto-char (point-min))
-		(buffer-substring-no-properties (point) (point-at-eol))
-		))
-	  (if kill (kill-buffer buff)))))))
+      (when (not buff)
+	(setq buff (find-file-noselect vfile)
+	      kill t))
+      (prog1
+	  (with-current-buffer buff
+	    (save-excursion
+	      (goto-char (point-min))
+	      (buffer-substring-no-properties (point) (point-at-eol))
+	      ))
+	(if kill (kill-buffer buff))))))
 	  
 (defun ede-arduino-boards.txt ()
   "Return the location of Arduino's boards.txt file."
