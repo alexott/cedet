@@ -1,6 +1,6 @@
 ;;; cedet-integ-test.el --- CEDET full integration tests.
 
-;; Copyright (C) 2008, 2009, 2010, 2011 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -116,6 +116,7 @@
 (require 'cit-externaldb)
 (require 'cit-gnustep)
 (require 'cit-android)
+(require 'cit-arduino)
 (require 'cit-dist)
 
 (defvar cedet-integ-target (expand-file-name "edeproj" cedet-integ-base)
@@ -221,6 +222,18 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
     (cit-finish-message "PASSED" "Android")
     ))
 
+(defun cedet-integ-test-Arduino ()
+  "Run the CEDET integration test using the Android style project."
+  (interactive)
+
+  (let ((ede-auto-add-method 'never))
+    (global-ede-mode 1)
+    ;; Do an EDE Android project. Use cedet-android.el for project fabrication.
+    (cit-ede-arduino-test)
+
+    (cit-finish-message "PASSED" "Arduino")
+    ))
+
 (defun cit-finish-message (message style)
   "Display a MESSAGE that some test is now finished.
 Argument STYLE is the type of build done."
@@ -275,24 +288,11 @@ EMPTY-DICT-ENTRIES are dictionary entries for the EMPTY fill macro."
     (setq post-empty-tags (semantic-fetch-tags))
 
     (sit-for 0)
+
     ;;
     ;; Add in our tags
     ;;
-    (dolist (tag tags)
-
-      ;; 3 b) Srecode to make more sources
-      ;; 3 c) Test incremental parsers (by side-effect)
-      (let ((e (srecode-semantic-insert-tag tag))
-	    (code (semantic-tag-get-attribute tag :code)))
-      
-	(when code (insert code))
-
-	(goto-char e)
-	(sit-for 0)
-	)
-      )
-
-    (save-buffer)
+    (cit-srecode-insert-taglist tags)
 
     ;; Make sure the tags we have are the same as the tags we tried
     ;; to insert.
@@ -302,6 +302,25 @@ EMPTY-DICT-ENTRIES are dictionary entries for the EMPTY fill macro."
 
 
     ))
+
+(defun cit-srecode-insert-taglist (tags)
+  "Insert the list of TAGS at point in buffer."
+  (dolist (tag tags)
+
+    ;; 3 b) Srecode to make more sources
+    ;; 3 c) Test incremental parsers (by side-effect)
+    (let ((e (srecode-semantic-insert-tag tag))
+	  (code (semantic-tag-get-attribute tag :code)))
+      
+      (when code (insert code))
+
+      (goto-char e)
+      (sit-for 0)
+      )
+    )
+  
+  (save-buffer)
+  )
 
 (defclass cit-tag-verify-error-debug ()
   ((actual :initarg :actual
