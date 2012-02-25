@@ -821,9 +821,11 @@ Typically you can specify NAME, target TYPE, and AUTOADD, where AUTOADD is
 a string \"y\" or \"n\", which answers the y/n question done interactively."
   (interactive)
   (apply 'project-new-target (ede-current-project) args)
-  (setq ede-object nil)
-  (setq ede-object (ede-buffer-object (current-buffer)))
-  (ede-apply-target-options))
+  (when (and buffer-file-name
+	     (not (file-directory-p buffer-file-name)))
+    (setq ede-object nil)
+    (setq ede-object (ede-buffer-object (current-buffer)))
+    (ede-apply-target-options)))
 
 (defun ede-new-target-custom ()
   "Create a new target specific to this type of project file."
