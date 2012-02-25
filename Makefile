@@ -1,6 +1,6 @@
 ## Makefile --- Definition file for building CEDET
 ##
-## Copyright (C) 2005, 2007, 2008, 2009, 2010, 2011 by Eric M. Ludlam
+## Copyright (C) 2005, 2007, 2008, 2009, 2010, 2011, 2012 by Eric M. Ludlam
 ## Copyright (C) 2003, 2004  by David Ponce
 ##
 ## Author: David Ponce <david@dponce.com>
@@ -150,6 +150,7 @@ itest:
 	cd tests; ./cit-test.sh Automake
 	cd tests; ./cit-test.sh GNUStep
 	cd tests; ./cit-test.sh Android
+	cd tests; ./cit-test.sh Arduino
 
 ### Install info files
 ## Thanks Stefano Sabatini for the info install patch.
