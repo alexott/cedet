@@ -70,10 +70,55 @@ This function overrides `get-local-variables'."
   ;; Does javascript have identifiable local variables?
   nil)
 
+(define-mode-local-override semantic-tag-protection javascript-mode (tag &optional parent)
+  "Return protection information about TAG with optional PARENT.
+This function returns on of the following symbols:
+   nil        - No special protection.  Language dependent.
+   'public    - Anyone can access this TAG.
+   'private   - Only methods in the local scope can access TAG.
+   'protected - Like private for outside scopes, like public for child
+                classes.
+Some languages may choose to provide additional return symbols specific
+to themselves.  Use of this function should allow for this.
 
+The default behavior (if not overridden with `tag-protection'
+is to return a symbol based on type modifiers."
+  nil)
+
+(define-mode-local-override semantic-analyze-scope-calculate-access javascript-mode (type scope)
+  "Calculate the access class for TYPE as defined by the current SCOPE.
+Access is related to the :parents in SCOPE.  If type is a member of SCOPE
+then access would be 'private.  If TYPE is inherited by a member of SCOPE,
+the access would be 'protected.  Otherwise, access is 'public."
+  nil)
+
+(define-mode-local-override semantic-ctxt-current-symbol javascript-mode (&optional point)
+  "Return the current symbol the cursor is on at POINT in a list.
+This is a very simple implementation for Javascript symbols.  It
+will at maximum do one split, so that the first part is seen as
+one type.  For example:  $('#sel').foo.bar will return (\"$('sel').foo\" \"bar\").
+This is currently needed for the mozrepl omniscient database."
+  (save-excursion
+    (if point (goto-char point))
+    (let* ((case-fold-search semantic-case-fold)
+	   symlist tmp end)
+      (with-syntax-table semantic-lex-syntax-table
+	(save-excursion
+	  (when (looking-at "\\w\\|\\s_")
+	    (forward-sexp 1))
+	  (setq end (point))
+	  (unless (re-search-backward "\\s-" (point-at-bol) t)
+	    (beginning-of-line))
+	  (setq tmp (buffer-substring-no-properties (point) end))
+	  (if (string-match "\\(.+\\)\\." tmp)
+	    (setq symlist (list (match-string 1 tmp)
+				(substring tmp (1+ (match-end 1)) (length tmp))))
+	    (setq symlist (list tmp))))))))
+	  
 ;;; Setup Function
 ;;
 ;; This sets up the javascript parser
+(define-child-mode js-mode javascript-mode)
 
 ;; In semantic-imenu.el, not part of Emacs.
 (defvar semantic-imenu-summary-function)

@@ -28,7 +28,7 @@
    (ede-proj-target-elisp "Database"
     :name "Database"
     :path ""
-    :source '("db.el" "db-mode.el" "db-debug.el" "db-ebrowse.el" "db-el.el" "db-file.el" "db-find.el" "db-mk.el" "db-ref.el" "db-search.el" "db-typecache.el" "db-javascript.el" "db-global.el" "db-cscope.el" "db-javap.el")
+    :source '("db.el" "db-mode.el" "db-debug.el" "db-ebrowse.el" "db-el.el" "db-file.el" "db-find.el" "db-mk.el" "db-ref.el" "db-search.el" "db-typecache.el" "db-javascript.el" "db-global.el" "db-cscope.el" "db-javap.el" "db-mozrepl.el")
     :aux-packages '("cedet-compat" "cedet" "eieio" "speedbar")
     :pre-load-packages '("cedet-compat")
     )
