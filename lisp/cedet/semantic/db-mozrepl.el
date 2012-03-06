@@ -313,4 +313,9 @@ Like `semanticdb-find-tags-for-completion-method' for mozrepl."
 
 (provide 'semantic/db-mozrepl)
 
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/db-mozrepl"
+;; End:
+
 ;;; semantic/db-mozrepl.el ends here
