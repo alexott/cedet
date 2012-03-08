@@ -1,6 +1,6 @@
 ;;; semantic-complete.el --- Routines for performing tag completion
 
-;;; Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2003, 2004, 2005, 2007, 2008, 2009, 2010, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
@@ -2243,24 +2243,22 @@ use `semantic-complete-analyze-inline' to complete."
       (error nil))
     ))
 
-;; @TODO - I can't  find where this fcn is used.  Delete?
-
 ;;;;###autoload
-;(defun semantic-complete-inline-project ()
-;  "Perform inline completion for any symbol in the current project.
-;`semantic-analyze-possible-completions' is used to determine the
-;possible values.
-;The function returns immediately, leaving the buffer in a mode that
-;will perform the completion."
-;  (interactive)
-;  ;; Only do this if we are not already completing something.
-;  (if (not (semantic-completion-inline-active-p))
-;      (semantic-complete-inline-tag-project))
-;  ;; Report a message if things didn't startup.
-;  (if (and (interactive-p)
-;	   (not (semantic-completion-inline-active-p)))
-;      (message "Inline completion not needed."))
-;  )
+(defun semantic-complete-inline-project ()
+  "Perform inline completion for any symbol in the current project.
+`semantic-analyze-possible-completions' is used to determine the
+possible values.
+The function returns immediately, leaving the buffer in a mode that
+will perform the completion."
+  (interactive)
+  ;; Only do this if we are not already completing something.
+  (if (not (semantic-completion-inline-active-p))
+      (semantic-complete-inline-tag-project))
+  ;; Report a message if things didn't startup.
+  (if (and (interactive-p)
+	   (not (semantic-completion-inline-active-p)))
+      (message "Inline completion not needed."))
+  )
 
 ;; End
 (provide 'semantic-complete)
