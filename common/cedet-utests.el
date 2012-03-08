@@ -84,6 +84,7 @@
     ("semantic: lex spp table write" . semantic-lex-spp-write-utest)
     ("semantic: multi-lang parsing" . semantic-utest-main)
     ("semantic: C preprocessor" . semantic-utest-c)
+    ("semantic: format tests" . semantic-fmt-utest)
     ("semantic: analyzer tests" . semantic-ia-utest)
     ("semanticdb: data cache" . semantic-test-data-cache)
     ("semantic: throw-on-input" .
