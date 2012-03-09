@@ -216,8 +216,8 @@ that just points to a database, and must redirect all its calls to its decendent
 	       
 	       ;; For jar databases, we need to extract a table of classes first.
 	       ((semanticdb-java-jar-database-child-p P)
-		(let ((tab (semanticdb-create-table
-			    P (if starry (file-name-directory fname) fname))))
+		(let* ((fnlocal (if starry (file-name-directory fname) fname))
+		       (tab (if fnlocal (semanticdb-create-table P fnlocal))))
 		  (when tab
 		    ;; We have a table, now we need to extract the tags from it.
 		    ;; TODO - just return the table normally for now.  Fix later.
@@ -804,8 +804,11 @@ tables of classes based on files, not files in a directory.
 DIR is a package name, such as 'java/net' which contains classes.
 We assume that java classes are rooted to be base of the jar file they
 are extracted from, so no prefixes are added."
-  ;; Raw classes come in w/out the .class extension, so if there is an extension, remove it.
-  (object-assoc (concat (file-name-sans-extension dir) ".class") :filename (oref dbc tables)))
+  (or
+   ;; Raw classes come in w/out the .class extension, so if there is an extension, remove it.
+   (object-assoc (concat (file-name-sans-extension dir) ".class") :filename (oref dbc tables))
+   ;; The dir may be a directory, so check that too.
+   (object-assoc dir :directory (oref dbc tables))))
 
 
 (defmethod semanticdb-create-table ((db semanticdb-java-jar-database) dirorfile)
