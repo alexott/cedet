@@ -494,7 +494,8 @@ using.
 @menu
 * Add/Remove target::           
 * Add/Remove files::            
-* Customize Features::          
+* Customize Features::  
+* Project Local Variables::        
 * EDE Project Features::        
 @end menu
 
@@ -539,7 +540,7 @@ remind you to add it to a target of your choosing.  If you do not wish
 to add it to a target, you can choose @samp{none}.  You can customize
 the behavior with the variable @command{ede-auto-add-method}.
 
-@node Customize Features, EDE Project Features, Add/Remove files, Modifying your project
+@node Customize Features, Project Local Variables, Add/Remove files, Modifying your project
 @section Customize Features
 
 A project, and its targets, are objects using the @samp{EIEIO} object
@@ -558,7 +559,44 @@ Makefile, or existing file.  Instead of letting you directly edit the
 object, you can edit the file.  Use the command
 @command{ede-edit-file-target} bound to @kbd{C-c . e}.
 
-@node EDE Project Features,  , Customize Features, Modifying your project
+@node Project Local Variables, EDE Project Features, Customize Features, Modifying your project
+@section Project Local Variables
+
+EDE projects can store and manager project local variables.  The
+variables are stored in the project, and will be restored when a
+project reloads.
+
+Projects which are not stored on disk WILL NOT restore your project
+local variables later.
+
+You can use @ref{Customize Features} to of the project to edit the
+project local variables.  They are under the 'Settings' group as
+``Project Local Variables''.
+
+You can also use @kbd{M-x ede-set} to set a new variable local in the
+mini buffer.
+
+In multi-level projects such as Automake and Make generating projects,
+project local variables are installed from both the TOP most project,
+and the local directory's project.  In that way, you can have some
+variables across your whole project, and some specific to a
+subdirectory.
+
+You can use project local variables to set any Emacs variable so that
+buffers belonging to different projects can have different settings.
+
+NOTE: When you use project-local variables with @ref{ede-cpp-root},
+the format is an association list.  For example:
+
+@example
+(ede-cpp-root-project "SOMENAME"
+                       :file "/dir/to/some/file"
+                       :local-variables
+                       '((grep-command . "grep -nHi -e ")
+                         (compile-command . "make -f MyCustomMakefile all")))
+@end example
+
+@node EDE Project Features,  , Project Local Variables, Modifying your project
 @section EDE Project Features
 
 This section details user facing features of an @ede{} @samp{Make} style
@@ -970,6 +1008,11 @@ The name of the file to find.
 The directory root for this cpp-root project.
 @end table
 
+When creating a project with @code{ede-cpp-root}, you can get
+additional configurations via @ref{Project Local Variables}.  Be aware
+that the format for project local variables is an association list.
+You cannot use @kbd{M-x ede-set} and have your project local variables
+persist between sessions.
 
 If the cpp-root project style is right for you, but you want a dynamic
 loader, instead of hard-coding path name values in your @file{.emacs}, you
