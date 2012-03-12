@@ -443,8 +443,8 @@ If optional argument CURRENT is non-nil, return sub-menu code."
 
 (defun ede-apply-target-options ()
   "Apply options to the current buffer for the active project/target."
-  (if (ede-current-project)
-      (ede-set-project-variables (ede-current-project)))
+  (ede-apply-project-local-variables)
+  ;; Apply keymaps and preprocessor symbols.
   (ede-apply-object-keymap)
   (ede-apply-preprocessor-map)
   )
@@ -866,7 +866,10 @@ a string \"y\" or \"n\", which answers the y/n question done interactively."
 
   (project-add-file target (buffer-file-name))
   (setq ede-object nil)
-  (setq ede-object (ede-buffer-object (current-buffer)))
+  
+  ;; Setup buffer local variables.
+  (ede-initialize-state-current-buffer)
+
   (when (not ede-object)
     (error "Can't add %s to target %s: Wrong file type"
 	   (file-name-nondirectory (buffer-file-name))
@@ -1227,16 +1230,24 @@ could become slow in time."
 (defmethod ede-find-target ((proj ede-project) buffer)
   "Fetch the target in PROJ belonging to BUFFER or nil."
   (with-current-buffer buffer
-    (or ede-object
-	(if (ede-buffer-mine proj buffer)
-	    proj
-	  (let ((targets (oref proj targets))
-		(f nil))
-	    (while targets
-	      (if (ede-buffer-mine (car targets) buffer)
-		  (setq f (cons (car targets) f)))
-	      (setq targets (cdr targets)))
-	    f)))))
+
+    ;; We can do a short-ut if ede-object local variable is set.
+    (if ede-object
+	;; If the buffer is already loaded with good EDE stuff, make sure the
+	;; saved project is the project we're looking for.
+	(when (and ede-object-project (eq proj ede-object-project)) ede-object)
+
+      ;; If the variable wasn't set, then we are probably initializing the buffer.
+      ;; In that case, search the file system.
+      (if (ede-buffer-mine proj buffer)
+	  proj
+	(let ((targets (oref proj targets))
+	      (f nil))
+	  (while targets
+	    (if (ede-buffer-mine (car targets) buffer)
+		(setq f (cons (car targets) f)))
+	    (setq targets (cdr targets)))
+	  f)))))
 
 (defmethod ede-target-buffer-in-sourcelist ((this ede-target) buffer source)
   "Return non-nil if object THIS is in BUFFER to a SOURCE list.
@@ -1264,8 +1275,8 @@ This includes buffers controlled by a specific target of PROJECT."
 	(pl nil))
     (while bl
       (with-current-buffer (car bl)
-	(if (ede-buffer-belongs-to-project-p)
-	    (setq pl (cons (car bl) pl))))
+	(when (and ede-object (ede-find-target project (car bl)))
+	  (setq pl (cons (car bl) pl))))
       (setq bl (cdr bl)))
     pl))
 
@@ -1400,17 +1411,54 @@ and <root>/doc for doc sources."
 
 
 ;;; Project-local variables
-;;
+
+(defun ede-set (variable value &optional proj)
+  "Set the project local VARIABLE to VALUE.
+If VARIABLE is not project local, just use set.  Optional argument PROJ
+is the project to use, instead of `ede-current-project'."
+  (interactive "sVariable: \nxExpression: ")
+  (let ((p (or proj (ede-toplevel)))
+	a)
+    ;; Make the change
+    (ede-make-project-local-variable variable p)
+    (ede-set-project-local-variable variable value p)
+    (ede-commit-local-variables p)
+
+    ;; This is a heavy hammer, but will apply variables properly
+    ;; based on stacking between the toplevel and child projects.
+    (ede-map-buffers 'ede-apply-project-local-variables)
+    
+    value))
+
+(defun ede-apply-project-local-variables (&optional buffer)
+  "Apply project local variables to the current buffer."
+  (with-current-buffer (or buffer (current-buffer))
+    ;; Always apply toplevel variables.
+    (if (not (eq (ede-current-project) (ede-toplevel)))
+	(ede-set-project-variables (ede-toplevel)))
+    ;; Next apply more local project's variables.
+    (if (ede-current-project)
+	(ede-set-project-variables (ede-current-project)))
+    ))
+
 (defun ede-make-project-local-variable (variable &optional project)
   "Make VARIABLE project-local to PROJECT."
-  (if (not project) (setq project (ede-current-project)))
+  (if (not project) (setq project (ede-toplevel)))
   (if (assoc variable (oref project local-variables))
       nil
     (oset project local-variables (cons (list variable)
-					(oref project local-variables)))
-    (dolist (b (ede-project-buffers project))
-      (with-current-buffer b
-        (make-local-variable variable)))))
+					(oref project local-variables)))))
+
+(defun ede-set-project-local-variable (variable value &optional project)
+  "Set VARIABLE to VALUE for PROJECT.
+If PROJ isn't specified, use the current project.
+This function only assigns the value within the project structure.
+It does not apply the value to buffers."
+  (if (not project) (setq project (ede-toplevel)))
+  (let ((va (assoc variable (oref project local-variables))))
+    (unless va
+      (error "Cannot set project variable until it is added with `ede-make-project-local-variable'"))
+    (setcdr va value)))
 
 (defmethod ede-set-project-variables ((project ede-project) &optional buffer)
   "Set variables local to PROJECT in BUFFER."
@@ -1418,24 +1466,7 @@ and <root>/doc for doc sources."
   (with-current-buffer buffer
     (dolist (v (oref project local-variables))
       (make-local-variable (car v))
-      ;; set its value here?
       (set (car v) (cdr v)))))
-
-(defun ede-set (variable value &optional proj)
-  "Set the project local VARIABLE to VALUE.
-If VARIABLE is not project local, just use set.  Optional argument PROJ
-is the project to use, instead of `ede-current-project'."
-  (let ((p (or proj (ede-current-project)))
-	a)
-    (if (and p (setq a (assoc variable (oref p local-variables))))
-	(progn
-	  (setcdr a value)
-      (dolist (b (ede-project-buffers p))
-        (with-current-buffer b
-          (set variable value))))
-      (set variable value))
-    (ede-commit-local-variables p))
-  value)
 
 (defmethod ede-commit-local-variables ((proj ede-project))
   "Commit change to local variables in PROJ."
