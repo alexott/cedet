@@ -113,6 +113,7 @@
 (require 'cit-srec)
 (require 'cit-el)
 (require 'cit-texi)
+(require 'cit-projvar)
 (require 'cit-externaldb)
 (require 'cit-gnustep)
 (require 'cit-android)
@@ -189,6 +190,9 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
 
     ;; Do some texinfo documentation.
     (cit-srecode-fill-texi)
+
+    ;; Test out EDE project local variables
+    (cit-proj-variables)
 
     ;; Create a distribution
     (find-file (expand-file-name "README" cedet-integ-target))
