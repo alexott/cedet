@@ -1,9 +1,9 @@
 ;; Object semantic
-;; EDE project file.
+;; EDE Project Files are auto generated: Do Not Edit
 (ede-proj-project "semantic"
+  :file "Project.ede"
   :name "semantic"
   :version "2.1beta"
-  :file "Project.ede"
   :targets (list 
    (ede-proj-target-elisp-autoloads "autoloads"
     :name "autoloads"
@@ -73,7 +73,7 @@
    (ede-proj-target-elisp "tests"
     :name "tests"
     :path ""
-    :source '("semantic-regtest.el" "semantic-ia-utest.el" "semantic-utest.el" "semantic-utest-c.el")
+    :source '("semantic-regtest.el" "semantic-ia-utest.el" "semantic-utest.el" "semantic-utest-c.el" "semantic-fmt-utest.el")
     )
    (ede-proj-target-makefile-miscelaneous "example"
     :name "example"
