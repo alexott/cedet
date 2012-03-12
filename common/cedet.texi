@@ -940,7 +940,7 @@ First, you need to install both the Arduino IDE
 and arduino-mode for Emacs.
 @url{https://github.com/bookest/arduino-mode}
 
-@section Create and Arduino Sketch (Project)
+@section Create an Arduino Sketch (Project)
 
 To create an arduino sketch, you will need to first use the Arduino
 IDE.  Use the preferences to set the location of your sketchbook
