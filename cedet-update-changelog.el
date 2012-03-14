@@ -1,9 +1,9 @@
 ;;; cedet-update-changelog --- Utility for updating changelogs in CEDET.
 
 ;;; Copyright (C) 2005, 2008, 2009, 2010 Eric M. Ludlam
+;;;               2012 David Engster
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
-;; X-RCS: $Id: cedet-update-changelog.el,v 1.16 2010-08-22 16:38:28 zappo Exp $
 
 ;; This file is not part of GNU Emacs.
 
@@ -24,27 +24,67 @@
 
 ;;; Commentary:
 ;;
-;; I rebuild the ChangeLog from CVS log files using rcs2log for each release.
-;; This automates the process, and fixes up the bad email addresses that
-;; are created by rcs2log.
-
+;; The CEDET project does not maintain ChangeLog files under version
+;; control.  However, since people often find them useful, they are
+;; generated from the version control logs and shipped with CEDET
+;; releases.  In the CVS days, this was done through rcs2log, but this
+;; obviously does not work with bzr.  While bzr does support ChangeLog
+;; generation through the '--gnu-changelog' option, this has a few
+;; quirks, which is why we do the conversion ourselves.
 
 ;;; History:
-;; 
+;;
+;; Mostly rewritten in 3/2012 to support conversion from bzr logs.
 
 (require 'cedet)
+
 ;;; Code:
 
-(defvar cuc-my-machine-name
-  (let* ((sn (system-name)))
-    (if (string-match "\\." sn)
-	(concat
-	 (substring sn 0 (match-beginning 0))
-	 "\\("
-	 (substring sn (match-beginning 0))
-	 "\\)?")
-      sn))
-  "The name of the machine running this code as output by rcs2diff.")
+(defvar cuc-bzr-log-regexp
+  (concat
+   "^\\s-*revno: \\(.+\\)"
+   "\\(?:\n\\s-*tags: \\(.+\\)\\)?"
+   "\\(?:\n\\s-*author: \\(.+\\)\\)?"
+   "\n\\s-*committer: \\(.+\\)"
+   "\n\\s-*branch nick: \\(.+\\)"
+   "\n\\s-*timestamp: \\(.+\\)"
+   "\n\\s-*message:\\([^\0]*?\\)"
+   "\n\\s-*\\(removed\\|added\\|modified\\):")
+  "Regexp for parsing the bzr log output.")
+
+(defvar cuc-committer-names
+  '(
+    ;; Eric
+    ("zappo" "Eric M. Ludlam <zappo@gnu.org>")
+    ;; David (I)
+    ("ponced" "David Ponce <david@dponce.com>")
+    ("david_ponce" "David Ponce <david@dponce.com>")
+    ;; Richard
+    ("emacsman" "Richard Y. Kim <emacs18@gmail.com>")
+    ;; Klaus
+    ("berndl" "Klaus Berndl <klaus.berndl@sdm.de>")
+    ;; Suraj
+    ("surajacharya" "Suraj Acharya <sacharya@gmail.com>")
+    ;; Marco
+    ("safanaj" "Marco (Bj) Bardelli <safanaj@users.sourceforge.net>")
+    ;; Anton
+    ("kpoxman" "Anton V. Belyaev <kpoxman@users.sourceforge.net>")
+    ;; Dan
+    ("airboss" "Dan Debertin <airboss@users.sourceforge.net>")
+    ;; Jan
+    ("scymtym" "Jan Moringen <scymtym@users.sourceforge.net>")
+    ;; David (II)
+    ("davenar" "David Engster <dengste@eml.cc>")
+    ;; Alex
+    ("ottalex" "Alex Ott <alexott@gmail.com>")
+    ;; Joakim
+    ("joakimv" "Joakim Verona <joakim@verona.se>")
+    ;; Lluís
+    ("xscript" "Lluís <xscript@users.sourceforge.net>"))
+  "Sourceforge names of committers from the older CVS imports.
+Newer bzr commits should have proper names in them.")
+
+(defvar cuc-entries nil)
 
 (defvar cuc-dirs
   (let ((pack cedet-packages)
@@ -70,12 +110,106 @@
   (erase-buffer)
   (goto-char (point-min))
   (sit-for 0)
-  (message "Calling rcs2log on %s..."
+  (message "Calling bzr log on %s..."
 	   (file-name-nondirectory (directory-file-name dir)))
-  (call-process "rcs2log" nil (current-buffer) nil
-		"-r" "-r1.1:" "." "-c" "ChangeLog")
-  (cuc-fixup-ChangeLog-names)
+  (call-process "bzr" nil (current-buffer) nil
+		"log" "-n0" "-v" (expand-file-name (directory-file-name dir)))
+  ;; Symmetry makes things easier.
+  (goto-char (point-max))
+  (insert "------------------------------------------------------------")
+  ;; Generate ChangeLog.
+  (cuc-convert-to-changelog)
   (save-buffer))
+
+(defun cuc-convert-to-changelog ()
+  "Convert bzr log output to ChangeLog format."
+  (interactive)
+  (goto-char (point-min))
+  (setq cuc-entries nil)
+  (while (progn
+	   (forward-line 1)
+	   (looking-at "^\\s-*revno: "))
+    (if (null
+	 (re-search-forward cuc-bzr-log-regexp
+			    (save-excursion
+			      (re-search-forward "^\\s-*------------------------------" nil t)
+			      (point)) t))
+	(error "Could not correctly parse this log entry.")
+      (let* ((revision (match-string-no-properties 1))
+	     (tags (match-string-no-properties 2))
+	     (author (or (match-string-no-properties 3) (match-string-no-properties 4)))
+	     (branch (match-string-no-properties 5))
+	     (timestamp (match-string-no-properties 6))
+	     (message (match-string-no-properties 7))
+	     (ismerge (string-match "\\[merge\\]" revision))
+	     files type added removed modified)
+      ;; Parse modified/added/removed files
+      (beginning-of-line)
+      (while (looking-at "^\\s-*\\(added\\|removed\\|modified\\):$")
+	(forward-line 1)
+	(let ((type (intern (match-string-no-properties 1))))
+	  (while (looking-at "^\\s-+\\([^- ].+\\)$")
+	    (set type (cons (match-string-no-properties 1) (symbol-value type)))
+	    (forward-line 1))))
+      (push (list timestamp ismerge author modified added removed message)
+	    cuc-entries))))
+  (erase-buffer)
+  (change-log-mode)
+  (cuc-generate-changelog))
+
+(defun cuc-generate-changelog ()
+  "Generate ChangeLog from `cuc-entries'."
+  (let (cur)
+    ;; Sort according to timestamp.
+    (setq cuc-entries
+	  (sort cuc-entries
+		(lambda (x y)
+		  (> (float-time (date-to-time (car x)))
+		     (float-time (date-to-time (car y)))))))
+    ;; Insert entries.
+    (while (setq cur (pop cuc-entries))
+      (cuc-insert-changelog-entry cur)))
+  ;; Make things prettier.
+  (delete-trailing-whitespace)
+  (fill-region (point-min) (point-max) t))
+
+(defun cuc-insert-changelog-entry (entry)
+  "Insert one ChangeLog entry from ENTRY."
+  (let ((time (car entry))
+	 (author (nth 2 entry))
+	 (message (nth 6 entry))
+	 (ismerge (nth 1 entry))
+	 (modded (nth 3 entry))
+	 (added (nth 4 entry))
+	 (removed (nth 5 entry))
+	 name)
+    ;; Fix old CVS author names.
+    (string-match "\\(.+\\) <" author)
+    (setq author (or (cadr (assoc (match-string 1 author)
+				  cuc-committer-names))
+		     author))
+    (insert
+     (nth 1 (split-string time)) "  " author "\n")
+    (if ismerge
+	;; This is a merge commit
+	(insert "\n\t[Branch merge]\n" message "\n\n")
+      ;; This is a regular commit
+      ;; Let's try to see if the committer already provided file information.
+      (if (string-match "^\\s-*\\* [a-zA-Z]+" message)
+	  (insert message)
+	;; If not, add it from the bzr log.
+	(setq message (substring message 3))
+	(insert
+	 (concat
+	  (when removed
+	    (mapconcat (lambda (x) (concat "\n\t* " x ": Removed.")) removed ""))
+	  (when added
+	    (mapconcat (lambda (x) (concat "\n\t* " x ": New file.")) added ""))
+	  (when modded
+	    (mapconcat (lambda (x) (concat "\n\t* " x ":")) modded ""))))
+	(when (string-match "^(" message)
+	  (backward-delete-char 1)))
+      (insert " " message "\n\n"))))
 
 (defun cuc-update-all-changelogs ()
   "Update all ChangeLogs for CEDET."
@@ -84,94 +218,6 @@
     (while d
       (cuc-update-changelog (car d))
       (setq d (cdr d)))))
-
-(defun cuc-make-search-name (name)
-  "Make a search name based on NAME."
-  (concat name " +<" name "@" cuc-my-machine-name ">"))
-
-(defun cuc-fixup-ChangeLog-names ()
-  "Update the names in the current ChangeLog.
-Because the names come out of rcs2log as if on my machine, they
-need to be transformed into the actual values."
-  (interactive)
-  (save-excursion
-    ;; Eric's Name
-    (goto-char (point-min))
-    (while (re-search-forward (concat "<zappo@"
-				      cuc-my-machine-name
-				      ">")
-			      nil t)
-      (replace-match "<zappo@gnu.org>" t t))
-    ;; David's Name.  (Why 2?)
-    (goto-char (point-min))
-    (while (or (re-search-forward
-		(concat "\\("
-			(cuc-make-search-name "ponced")
-			"\\|"
-			(cuc-make-search-name "david_ponce")
-			"\\)")
-		nil t))
-      (replace-match "David Ponce  <david@dponce.com>" t t))
-    ;; Richard's Name
-    (goto-char (point-min))
-    (while (re-search-forward (cuc-make-search-name "emacsman")
-			      nil t)
-      (replace-match "Richard Y. Kim <emacs18@gmail.com>" t t))
-    ;; Klaus's Name
-    (goto-char (point-min))
-    (while (re-search-forward (cuc-make-search-name "berndl")
-			      nil t)
-      (replace-match "Klaus Berndl <klaus.berndl@sdm.de>" t t))
-    ;; Suraj's Name
-    (goto-char (point-min))
-    (while (re-search-forward (cuc-make-search-name "surajacharya")
-			      nil t)
-      (replace-match "Suraj Acharya <sacharya@gmail.com>" t t))
-    ;; Marco's Name
-    (goto-char (point-min))
-    (while (re-search-forward (cuc-make-search-name "safanaj")
-			      nil t)
-      (replace-match "Marco (Bj) Bardelli <safanaj@users.sourceforge.net>" t t))
-    ;; Anton
-    (goto-char (point-min))
-    (while (re-search-forward (cuc-make-search-name "kpoxman")
-			      nil t)
-      (replace-match "Anton V. Belyaev <kpoxman@users.sourceforge.net>" t t))
-    ;; Dan's
-    (goto-char (point-min))
-    (while (re-search-forward (cuc-make-search-name "airboss")
-			      nil t)
-      (replace-match "Dan Debertin <airboss@users.sourceforge.net>" t t))
-    ;; Jan
-    (goto-char (point-min))
-    (while (re-search-forward (cuc-make-search-name "scymtym")
-			      nil t)
-      (replace-match "Jan Moringen <scymtym@users.sourceforge.net>" t t))
-    ;; David Engster
-    (goto-char (point-min))
-    (while (re-search-forward (cuc-make-search-name "davenar")
-			      nil t)
-      (replace-match "David Engster <dengste@eml.cc>" t t))
-    
-    ;; Alex Ott
-    (goto-char (point-min))
-    (while (re-search-forward (cuc-make-search-name "ottalex")
-			      nil t)
-      (replace-match "Alex Ott <alexott@gmail.com>" t t))
-
-    ;; Joakim Verona
-    (goto-char (point-min))
-    (while (re-search-forward (cuc-make-search-name "joakimv")
-			      nil t)
-      (replace-match "Joakim Verona <joakim@verona.se>" t t))
-    
-    ;; Lluís
-    (goto-char (point-min))
-    (while (re-search-forward (cuc-make-search-name "xscript")
-			      nil t)
-      (replace-match "Lluís <xscript@users.sourceforge.net>" t t))
-    
-    ))
 
 (provide 'cedet-update-changelog)
 
