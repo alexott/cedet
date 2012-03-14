@@ -84,7 +84,7 @@
 (defconst cedet-version "1.1beta2"
   "Current version of CEDET.")
 
-(defconst cedet-emacs-min-version "21.1"
+(defconst cedet-emacs-min-version "22.1"
   "Minimum version of GNU Emacs supported by CEDET.")
 (defconst cedet-xemacs-min-version "21.4"
   "Minimum version of XEmacs supported by CEDET.")
