@@ -10,7 +10,7 @@ top=../
 ede_FILES=Project.ede Makefile
 
 templates_MISC=srecode-dot.srt cogre-default.srt
-VERSION=1.1beta
+VERSION=1.1beta2
 DISTDIR=$(top)COGRE-$(VERSION)/templates
 
 

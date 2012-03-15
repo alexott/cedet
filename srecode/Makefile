@@ -24,7 +24,7 @@ doc_TEXINFOS=srecode.texi
 MAKEINFO=makeinfo
 tests_LISP=srecode-test.el srecode-test-getset.el
 document_LISP=srecode-document.el srecode-document-vars.el
-VERSION=1.1beta
+VERSION=1.1beta2
 DISTDIR=$(top)srecode-$(VERSION)
 
 

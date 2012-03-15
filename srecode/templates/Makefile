@@ -13,7 +13,7 @@ templates_MISC=default.srt srecode-el.srt srecode-getset-cpp.srt srecode-templat
 document_MISC=document-default.srt srecode-document-cpp.srt srecode-document-java.srt
 android_MISC=android-java.srt
 arduino_MISC=arduino-pde.srt
-VERSION=1.1beta
+VERSION=1.1beta2
 DISTDIR=$(top)srecode-$(VERSION)/templates
 
 

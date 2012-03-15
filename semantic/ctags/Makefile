@@ -14,7 +14,7 @@ EMACS=emacs
 EMACSFLAGS=-batch --no-site-file
 LOADPATH= ../bovine/ ../../eieio/ ../ ../../common/
 ELISPPRELOAD= cedet-compat
-VERSION=2.1beta
+VERSION=2.1beta2
 DISTDIR=$(top)semantic-$(VERSION)/ctags
 
 

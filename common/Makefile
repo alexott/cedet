@@ -22,7 +22,7 @@ setup_LISP=cedet.el
 common_LISP=cedet-autogen.el cedet-compat.el ezimage.el inversion.el pprint.el fame.el working.el cedet-edebug.el mode-local.el cedet-files.el pulse.el data-debug.el cedet-global.el cedet-idutils.el cedet-cscope.el cedet-graphviz.el cedet-android.el cedet-java.el cedet-m3.el
 ELISPPRELOAD= cedet-compat.el
 tests_LISP=cedet-utests.el
-VERSION=1.1beta
+VERSION=1.1beta2
 DISTDIR=$(top)common-$(VERSION)
 
 

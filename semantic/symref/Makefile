@@ -14,7 +14,7 @@ EMACS=emacs
 EMACSFLAGS=-batch --no-site-file
 LOADPATH= ../../srecode/ ../../speedbar/ ../../ede/ ../../common/ ../bovine/ ../ ../../eieio/
 ELISPPRELOAD= cedet-compat
-VERSION=2.1beta
+VERSION=2.1beta2
 DISTDIR=$(top)semantic-$(VERSION)/symref
 
 

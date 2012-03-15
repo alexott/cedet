@@ -9,12 +9,12 @@
 top=
 ede_FILES=Project.ede Makefile
 
-EMACSFLAGS=-batch --no-site-file
 EMACS=emacs
 LOADPATH= ../common/  ../speedbar/
 LOADDEFS=eieio-loaddefs.el
 LOADDIRS=.
 init_LISP=eieio-load.el
+EMACSFLAGS=-batch --no-site-file
 eieio_LISP=eieio.el eieio-comp.el eieio-opt.el eieio-custom.el eieio-doc.el eieio-base.el eieio-datadebug.el
 ELISPPRELOAD= cedet-compat
 examples_LISP=chart.el eieio-speedbar.el linemark.el lmcompile.el
@@ -22,7 +22,7 @@ eieio_info_TEXINFOS=eieio.texi
 MAKEINFO=makeinfo
 test_LISP=eieio-tests.el eieio-test-methodinvoke.el eieio-perftest.el eieio-test-mro.el
 Misc_MISC=INSTALL ChangeLog NEWS
-VERSION=1.4beta
+VERSION=1.4beta2
 DISTDIR=$(top)eieio-$(VERSION)
 
 
