@@ -1,6 +1,6 @@
 ;;; cedet-update-changelog --- Utility for updating changelogs in CEDET.
 
-;;; Copyright (C) 2005, 2008, 2009, 2010 Eric M. Ludlam
+;;; Copyright (C) 2005, 2008, 2009, 2010, 2012 Eric M. Ludlam
 ;;;               2012 David Engster
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
@@ -49,7 +49,7 @@
    "\n\\s-*branch nick: \\(.+\\)"
    "\n\\s-*timestamp: \\(.+\\)"
    "\n\\s-*message:\\([^\0]*?\\)"
-   "\n\\s-*\\(removed\\|added\\|modified\\):")
+   "\n\\s-*\\(removed\\|added\\|modified\\|renamed\\):")
   "Regexp for parsing the bzr log output.")
 
 (defvar cuc-committer-names
@@ -112,7 +112,7 @@ Newer bzr commits should have proper names in them.")
   (sit-for 0)
   (message "Calling bzr log on %s..."
 	   (file-name-nondirectory (directory-file-name dir)))
-  (call-process "bzr" nil (current-buffer) nil
+  (call-process "bzr" nil (current-buffer) t
 		"log" "-n0" "-v" (expand-file-name (directory-file-name dir)))
   ;; Symmetry makes things easier.
   (goto-char (point-max))
@@ -134,7 +134,7 @@ Newer bzr commits should have proper names in them.")
 			    (save-excursion
 			      (re-search-forward "^\\s-*------------------------------" nil t)
 			      (point)) t))
-	(error "Could not correctly parse this log entry.")
+	(error "Could not correctly parse this log entry")
       (let* ((revision (match-string-no-properties 1))
 	     (tags (match-string-no-properties 2))
 	     (author (or (match-string-no-properties 3) (match-string-no-properties 4)))
@@ -142,16 +142,16 @@ Newer bzr commits should have proper names in them.")
 	     (timestamp (match-string-no-properties 6))
 	     (message (match-string-no-properties 7))
 	     (ismerge (string-match "\\[merge\\]" revision))
-	     files type added removed modified)
+	     files type added removed renamed modified)
       ;; Parse modified/added/removed files
       (beginning-of-line)
-      (while (looking-at "^\\s-*\\(added\\|removed\\|modified\\):$")
+      (while (looking-at "^\\s-*\\(added\\|removed\\|modified\\|renamed\\):$")
 	(forward-line 1)
 	(let ((type (intern (match-string-no-properties 1))))
 	  (while (looking-at "^\\s-+\\([^- ].+\\)$")
 	    (set type (cons (match-string-no-properties 1) (symbol-value type)))
 	    (forward-line 1))))
-      (push (list timestamp ismerge author modified added removed message)
+      (push (list timestamp ismerge author modified added removed renamed message)
 	    cuc-entries))))
   (erase-buffer)
   (change-log-mode)
@@ -159,7 +159,7 @@ Newer bzr commits should have proper names in them.")
 
 (defun cuc-generate-changelog ()
   "Generate ChangeLog from `cuc-entries'."
-  (let (cur)
+  (let (cur (last '("" . "")))
     ;; Sort according to timestamp.
     (setq cuc-entries
 	  (sort cuc-entries
@@ -168,28 +168,36 @@ Newer bzr commits should have proper names in them.")
 		     (float-time (date-to-time (car y)))))))
     ;; Insert entries.
     (while (setq cur (pop cuc-entries))
-      (cuc-insert-changelog-entry cur)))
+      (setq last (cuc-insert-changelog-entry cur (car last) (cdr last)))
+      (sit-for 0)))
   ;; Make things prettier.
   (delete-trailing-whitespace)
   (fill-region (point-min) (point-max) t))
 
-(defun cuc-insert-changelog-entry (entry)
-  "Insert one ChangeLog entry from ENTRY."
+(defun cuc-insert-changelog-entry (entry lasttime lastauthor)
+  "Insert one ChangeLog entry from ENTRY.
+Don't insert the TIME/AUTHOR combo if it matches the LASTTIME and LASTAUTHOR.
+Return Time String & Author."
   (let ((time (car entry))
-	 (author (nth 2 entry))
-	 (message (nth 6 entry))
-	 (ismerge (nth 1 entry))
-	 (modded (nth 3 entry))
-	 (added (nth 4 entry))
-	 (removed (nth 5 entry))
-	 name)
+	(author (nth 2 entry))
+	(message (nth 7 entry))
+	(ismerge (nth 1 entry))
+	(modded (nth 3 entry))
+	(added (nth 4 entry))
+	(removed (nth 5 entry))
+	(renamed (nth 6 entry))
+	timestr
+	name)
     ;; Fix old CVS author names.
     (string-match "\\(.+\\) <" author)
     (setq author (or (cadr (assoc (match-string 1 author)
 				  cuc-committer-names))
 		     author))
-    (insert
-     (nth 1 (split-string time)) "  " author "\n")
+    (setq timestr (nth 1 (split-string time)))
+    (when (not (and (string= timestr lasttime)
+		    (string= author lastauthor)))
+      (when (not (bobp)) (insert "\n"))
+      (insert timestr "  " author "\n"))
     (if ismerge
 	;; This is a merge commit
 	(insert "\n\t[Branch merge]\n" message "\n\n")
@@ -205,11 +213,17 @@ Newer bzr commits should have proper names in them.")
 	    (mapconcat (lambda (x) (concat "\n\t* " x ": Removed.")) removed ""))
 	  (when added
 	    (mapconcat (lambda (x) (concat "\n\t* " x ": New file.")) added ""))
+	  (when renamed
+	    (mapconcat (lambda (x) (concat "\n\t* " x ": Renamed.")) renamed ""))
 	  (when modded
 	    (mapconcat (lambda (x) (concat "\n\t* " x ":")) modded ""))))
 	(when (string-match "^(" message)
 	  (backward-delete-char 1)))
-      (insert " " message "\n\n"))))
+      (insert " " message "\n"))
+
+    ;; Return the timestr and author
+    (cons timestr author)
+    ))
 
 (defun cuc-update-all-changelogs ()
   "Update all ChangeLogs for CEDET."
