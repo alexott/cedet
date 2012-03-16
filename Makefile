@@ -64,7 +64,7 @@ INSTALL_INFO=ginstall-info
 ############### Internal part of the Makefile ###############
 CEDET_VERSION=$(shell grep "defconst cedet-version" common/cedet.el | cut -d " " -f 3)
 
-CEDET_FILES=Makefile INSTALL cedet-build.el cedet-update-version.el PRERELEASE_CHECKLIST USING_CEDET_FROM_CVS
+CEDET_FILES=Makefile INSTALL cedet-build.el cedet-update-version.el NEWS PRERELEASE_CHECKLIST USING_CEDET_FROM_BZR
 DIST_ROOT=cedet-$(CEDET_VERSION)
 DIST_DIR=$(CEDET_HOME)/$(DIST_ROOT)
 DIST_FILE=$(DIST_DIR).tar.gz
