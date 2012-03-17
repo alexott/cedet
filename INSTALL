@@ -7,25 +7,19 @@ includeing:
    Semantic - Parser Infrastructure for Emacs
    Speedbar - Everything browser
    EDE -      File manager/ Makefile generator
-   SRecode -  Templte manager/ code generator
+   SRecode -  Template manager/ code generator
    COGRE -    Connected Graph Editor
 
 REQUIREMENTS:
 
    The full CEDET suite requires Emacs 22.1 or newer.
-   CEDET works well with either Emacs 21.3 or XEmacs 21.3.
-   Older versions of either will also work with fewer CEDET
-   features being available.
 
    If you use a binary install of Emacs, you may need the .el
    files for Emacs available for some aspects of the build.
 
-   CEDET is always developed on a recent CVS build of Emacs, and often
-   takes advantage of such new features.
-
 INSTALL:
 
-You can install all these packagees at once with the CEDET build and
+You can install all these packages at once with the CEDET build and
 install scripts:
 
 1) Copy source files somewhere.
@@ -184,7 +178,7 @@ OTHER REQUIREMENTS:
    You may also need to download some of the following files for more
    obscure features.
 
-   To use the JavaScript parser:
+   To use the JavaScript parser on older Emacsen (23.1 or older):
    javascript-mode.el : http://www.emacswiki.org/cgi-bin/wiki/JavaScriptMode
    
    To use Exuberent CTags to parse files:
