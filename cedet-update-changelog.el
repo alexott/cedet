@@ -190,45 +190,50 @@ Return Time String & Author."
 	(renamed (nth 6 entry))
 	timestr
 	name)
-    ;; Fix old CVS author names.
-    (string-match "\\(.+\\) <" author)
-    (setq author (or (cadr (assoc (match-string 1 author)
-				  cuc-committer-names))
-		     author))
-    (setq timestr (nth 1 (split-string time)))
-    (when (not (and (string= timestr lasttime)
-		    (string= author lastauthor)))
-      (when (not (bobp)) (insert "\n"))
-      (insert timestr "  " author "\n"))
-    (if ismerge
-	;; Ommit 'merge from trunk' messages from feature branches.
-	(unless (string-match "[Mm]erge from trunk" message)
+    ;; Ommit 'merge from trunk' messages from feature branches.
+    (unless (and ismerge
+		 (string-match "[Mm]erge from trunk" message))
+      ;; Fix old CVS author names.
+      (string-match "\\(.+\\) <" author)
+      (setq author (or (cadr (assoc (match-string 1 author)
+				    cuc-committer-names))
+		       author))
+      (setq timestr (nth 1 (split-string time)))
+      (when (not (and (string= timestr lasttime)
+		      (string= author lastauthor)))
+	(when (not (bobp)) (insert "\n"))
+	(insert timestr "  " author "\n"))
+      (if ismerge
 	  ;; This is a regular merge commit.
-	  (insert "\n\t[Branch merge]\n" message "\n\n"))
-      ;; This is a regular commit
-      ;; Let's try to see if the committer already provided file information.
-      (if (string-match "^\\s-*\\* [a-zA-Z]+" message)
-	  (insert message "\n")
-	;; If not, add it from the bzr log.
-	(setq message (progn (string-match "^[ \n\t]*\\([^\0]*\\)" message)
-			     (match-string-no-properties 1 message)))
-	(insert
-	 (concat
-	  (when removed
-	    (mapconcat (lambda (x) (concat "\n\t* " x ": Removed.")) removed ""))
-	  (when added
-	    (mapconcat (lambda (x) (concat "\n\t* " x ": New file.")) added ""))
-	  (when renamed
-	    (mapconcat (lambda (x) (concat "\n\t* " x ": Renamed.")) renamed ""))
-	  (when modded
-	    (mapconcat (lambda (x) (concat "\n\t* " x ":")) modded ""))))
-	(when (string-match "^(" message)
-	  (backward-delete-char 1))
-	(insert " " message "\n")))
+	  (insert "\n\t[Branch merge]\n" message "\n\n")
+	;; This is a regular commit
+	;; Let's try to see if the committer already provided file information.
+	(if (string-match "^\\s-*\\* [a-zA-Z]+" message)
+	    (insert message "\n")
+	  ;; If not, add it from the bzr log.
+	  (setq message (progn (string-match "^[ \n\t]*\\([^\0]*\\)" message)
+			       (match-string-no-properties 1 message)))
+	  ;; Check if committer provided an initial summary line.
+	  (when (string-match "^\\([^(][A-Z].+\\)\n\\s-*\n\\s-*(" message)
+	    (insert "\n\t" (match-string 1 message) "\n")
+	    (setq message (substring message (1- (match-end 0)))))
+	  (insert
+	   (concat
+	    (when removed
+	      (mapconcat (lambda (x) (concat "\n\t* " x ": Removed.")) removed ""))
+	    (when added
+	      (mapconcat (lambda (x) (concat "\n\t* " x ": New file.")) added ""))
+	    (when renamed
+	      (mapconcat (lambda (x) (concat "\n\t* " x ": Renamed.")) renamed ""))
+	    (when modded
+	      (mapconcat (lambda (x) (concat "\n\t* " x ":")) modded ""))))
+	  (when (string-match "^(" message)
+	    (backward-delete-char 1))
+	  (insert " " message "\n")))
 
-    ;; Return the timestr and author
-    (cons timestr author)
-    ))
+      ;; Return the timestr and author
+      (cons timestr author)
+      )))
 
 (defun cuc-update-all-changelogs ()
   "Update all ChangeLogs for CEDET."
