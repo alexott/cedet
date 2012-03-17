@@ -142,14 +142,16 @@ Newer bzr commits should have proper names in them.")
 	     (timestamp (match-string-no-properties 6))
 	     (message (match-string-no-properties 7))
 	     (ismerge (string-match "\\[merge\\]" revision))
-	     files type added removed renamed modified)
+	     files type added removed renamed modified tmp)
       ;; Parse modified/added/removed files
       (beginning-of-line)
       (while (looking-at "^\\s-*\\(added\\|removed\\|modified\\|renamed\\):$")
 	(forward-line 1)
 	(let ((type (intern (match-string-no-properties 1))))
 	  (while (looking-at "^\\s-+\\([^- ].+\\)$")
-	    (set type (cons (match-string-no-properties 1) (symbol-value type)))
+	    (let ((tmp (match-string-no-properties 1)))
+	      (unless (string-match "/$" tmp)
+		(set type (cons (match-string-no-properties 1) (symbol-value type)))))
 	    (forward-line 1))))
       (push (list timestamp ismerge author modified added removed renamed message)
 	    cuc-entries))))
@@ -199,8 +201,10 @@ Return Time String & Author."
       (when (not (bobp)) (insert "\n"))
       (insert timestr "  " author "\n"))
     (if ismerge
-	;; This is a merge commit
-	(insert "\n\t[Branch merge]\n" message "\n\n")
+	;; Ommit 'merge from trunk' messages from feature branches.
+	(unless (string-match "[Mm]erge from trunk" message)
+	  ;; This is a regular merge commit.
+	  (insert "\n\t[Branch merge]\n" message "\n\n"))
       ;; This is a regular commit
       ;; Let's try to see if the committer already provided file information.
       (if (string-match "^\\s-*\\* [a-zA-Z]+" message)
