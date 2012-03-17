@@ -208,9 +208,10 @@ Return Time String & Author."
       ;; This is a regular commit
       ;; Let's try to see if the committer already provided file information.
       (if (string-match "^\\s-*\\* [a-zA-Z]+" message)
-	  (insert message)
+	  (insert message "\n")
 	;; If not, add it from the bzr log.
-	(setq message (substring message 3))
+	(setq message (progn (string-match "^[ \n\t]*\\([^\0]*\\)" message)
+			     (match-string-no-properties 1 message)))
 	(insert
 	 (concat
 	  (when removed
@@ -222,8 +223,8 @@ Return Time String & Author."
 	  (when modded
 	    (mapconcat (lambda (x) (concat "\n\t* " x ":")) modded ""))))
 	(when (string-match "^(" message)
-	  (backward-delete-char 1)))
-      (insert " " message "\n"))
+	  (backward-delete-char 1))
+	(insert " " message "\n")))
 
     ;; Return the timestr and author
     (cons timestr author)
