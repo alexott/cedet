@@ -30,7 +30,7 @@ metagrammar_SEMANTIC_GRAMMAR_EL=semantic-grammar-wy.el
 tests_LISP=semantic-regtest.el semantic-ia-utest.el semantic-utest.el semantic-utest-c.el semantic-fmt-utest.el
 example_MISC=semantic-example.el semanticdb-skel.el
 scripts_MISC=semanticdb.sh
-misc_AUX=INSTALL NEWS ChangeLog AUTHORS ONEWS renamelist.txt
+misc_AUX=INSTALL ChangeLog AUTHORS ONEWS OONEWS renamelist.txt
 VERSION=2.1beta2
 DISTDIR=$(top)semantic-$(VERSION)
 
