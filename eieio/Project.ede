@@ -38,7 +38,7 @@
    (ede-proj-target-elisp "test"
     :name "test"
     :path ""
-    :source '("eieio-tests.el" "eieio-test-methodinvoke.el" "eieio-perftest.el" "eieio-test-mro.el")
+    :source '("eieio-tests.el" "eieio-test-methodinvoke.el" "eieio-perftest.el" "eieio-test-mro.el" "eieio-test-persist.el")
     :partofall 'nil
     )
    (ede-proj-target-makefile-miscelaneous "Misc"
