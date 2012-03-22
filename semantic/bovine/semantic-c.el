@@ -1911,6 +1911,7 @@ have to be wrapped in that namespace."
 	(inside-ns (semantic-tag-get-attribute includetag :inside-ns))
 	tags newtags namespaces prefix parenttable newtable)
     (if (or (null inside-ns)
+	    (not inctable)
 	    (not (slot-boundp inctable 'tags)))
 	inctable
       (when (and (eq inside-ns t)
