@@ -456,6 +456,13 @@ javascript-mode.el : @url{http://www.emacswiki.org/cgi-bin/wiki/JavaScriptMode}
 To use Exuberent ctags to emable Semantic support in more major modes,
 or as an extra database backend parser, install ctags:
 @url{http://ctags.sourceforge.net/}
+
+For developing Android programs:
+@url{http://developer.android.com/sdk/index.html}.
+
+For developing Arduino programs:
+Major Mode: @url{https://github.com/bookest/arduino-mode}
+Arduino IDE:@url{http://arduino.cc/en/Main/Software}
    
 To use the UML chart generation from @code{M-x semantic-dot}
 graphviz dot programs, including @file{dotty}
