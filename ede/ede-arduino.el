@@ -68,7 +68,9 @@ Consider expanding this at some later date."
 	(when (file-directory-p root)
 	  (if basefile
 	      (let ((tmp (expand-file-name (concat (car dirsplit) ".pde") root)))
-		(when (not (file-exists-p tmp))
+		;; Also check for the desired file in a buffer if the
+		;; user just made the file but not saved it yet.
+		(when (or (not (file-exists-p tmp)) (not (get-file-buffer tmp)))
 		  (setq tmp (expand-file-name (concat (car dirsplit) ".ino") root)))
 		tmp)
 	    root))))))
@@ -177,7 +179,7 @@ If one doesn't exist, create a new one for this directory."
 (defun ede-arduino-upload ()
   "Compile the current project, and upload the result to the board."
   (interactive)
-  (project-compile-project (ede-current-project) "make upload"))
+  (project-compile-project (ede-current-project) "make all upload"))
 
 (eval-when-compile (require 'term))
 
