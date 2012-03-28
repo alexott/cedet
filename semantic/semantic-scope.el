@@ -154,7 +154,7 @@ If nil, then the typescope is reset."
 
 ;;;###autoload
 (defun semantic-scope-tag-clone-with-scope (tag scopetags)
-  "Close TAG, and return it.  Add SCOPETAGS as a tag-local scope.
+  "Clone TAG, and return it.  Add SCOPETAGS as a tag-local scope.
 Stores the SCOPETAGS as a set of tag properties on the cloned tag."
   (let ((clone (semantic-tag-clone tag))
 	)
