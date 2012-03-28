@@ -55,7 +55,8 @@ the current EDE project."
   "Flush the file locate hash for the current project."
   (interactive)
   (let* ((loc (ede-get-locator-object (ede-current-project))))
-    (ede-locate-flush-hash loc)))
+    (when loc
+      (ede-locate-flush-hash loc))))
 
 ;;; Placeholders for ROOT directory scanning on base objects
 ;;
@@ -222,7 +223,8 @@ Do this only when developing new projects that are incorrectly putting
   (setq ede-project-directory-hash (make-hash-table :test 'equal))
   ;; Also slush the current project's locator hash.
   (let ((loc (ede-get-locator-object this)))
-    (ede-locate-flush-hash loc))
+    (when loc
+      (ede-locate-flush-hash loc)))
   )
 
 (defun ede-project-directory-remove-hash (dir)
@@ -392,10 +394,11 @@ Get it from the toplevel project.  If it doesn't have one, make one."
   ;; Make sure we have a location object available for
   ;; caching values, and for locating things more robustly.
   (let ((top (ede-toplevel proj)))
-    (when (not (slot-boundp top 'locate-obj))
-      (ede-enable-locate-on-project top))
-    (oref top locate-obj)
-    ))
+    (when top
+      (when (not (slot-boundp top 'locate-obj))
+	(ede-enable-locate-on-project top))
+      (oref top locate-obj)
+      )))
 
 (defmethod ede-expand-filename ((this ede-project) filename &optional force)
   "Return a fully qualified file name based on project THIS.
