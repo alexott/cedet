@@ -1,6 +1,6 @@
 ;;; semantic-clang.el --- Use 'clang' to provide completions for C/C++
 
-;; Copyright (C) 2011 David Engster
+;; Copyright (C) 2011, 2012 David Engster
 
 ;; Author: David Engster <deng@randomsample.de>
 
@@ -251,7 +251,7 @@ include directories (-I) and preprocessor symbols (-D)."
     (when proj
       (cond
        ;; For ede-cpp-root-project it's easy
-       ((ede-cpp-root-project-p proj)
+       ((ede-cpp-root-project-child-p proj)
 	(append
 	 (mapcar (lambda (inc) (concat "-I" inc))
 		 (append (oref proj include-path)
