@@ -1,6 +1,6 @@
 ;;; semantic-symref.el --- Symbol Reference API
 
-;; Copyright (C) 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -384,9 +384,11 @@ already."
 	      (forward-line (1- line))
 
 	      ;; Search forward for the matching text
-	      (re-search-forward (regexp-quote txt)
-				 (point-at-eol)
-				 t)
+	      (when (re-search-forward (regexp-quote txt)
+				       (point-at-eol)
+				       t)
+		(goto-char (match-beginning 0))
+		)
 
 	      (setq tag (semantic-current-tag))
 
