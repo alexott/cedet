@@ -49,6 +49,11 @@
   :group 'java
   :type '(repeat string))
 
+(defcustom cedet-java-version-regexp "java version \"\\([0-9._]+\\)\""
+  "Regual expression used to parse java -version for version number"
+  :group 'java
+  :type 'string)
+
 ;;; Java command Support
 ;;
 (defun cedet-java-call (flags)
@@ -86,7 +91,8 @@ return nil."
       t)))
 
 (defun cedet-java-get-version ()
-  "Return the version string from executing the java command."
+  "Return the version string from executing the java command.
+Parses the java string with `cedet-java-version-regexp'."
   (let ((b (condition-case nil
 	       (cedet-java-call (list "-version"))
 	     (error nil)))
@@ -98,7 +104,7 @@ return nil."
 	  nil)
       (with-current-buffer b
 	(goto-char (point-min))
-	(re-search-forward "java version \"\\([0-9._]+\\)\"" nil t)
+	(re-search-forward cedet-java-version-regexp nil t)
 	(setq rev (match-string 1))))
     rev))
 
