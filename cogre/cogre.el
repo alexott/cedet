@@ -6,7 +6,7 @@
 ;; Keywords: graph, oop, extensions, outlines
 ;; X-RCS: $Id: cogre.el,v 1.47 2010-04-18 21:39:12 zappo Exp $
 
-(defvar cogre-version "1.1beta2"
+(defvar cogre-version "1.1"
   "Current version of Cogre.")
 
 ;; This file is not part of GNU Emacs.

@@ -19,7 +19,7 @@ EMACSFLAGS=-batch --no-site-file
 examples_MISC=semantic-skel.el skeleton.by
 languages_LISP=semantic-c.el semantic-el.el semantic-make.el semantic-scm.el semantic-java.el semantic-erlang.el semantic-gcc.el semantic-f90.el semantic-clang.el
 ELISPPRELOAD= cedet-compat
-VERSION=2.1beta2
+VERSION=2.1
 DISTDIR=$(top)semantic-$(VERSION)/bovine
 
 

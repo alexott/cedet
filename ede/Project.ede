@@ -1,9 +1,9 @@
 ;; Object EDE
 ;; EDE Project Files are auto generated: Do Not Edit
 (ede-proj-project "EDE"
-  :file "Project.ede"
   :name "EDE"
-  :version "1.1beta2"
+  :version "1.1"
+  :file "Project.ede"
   :targets (list 
    (ede-proj-target-elisp-autoloads "autoloads"
     :name "autoloads"

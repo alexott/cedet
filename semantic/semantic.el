@@ -33,7 +33,7 @@
 
 (eval-and-compile
   ;; Other package depend on this value at compile time via inversion.
-  (defvar semantic-version "2.1beta2"
+  (defvar semantic-version "2.1"
     "Current version of Semantic."))
 
 (require 'working)

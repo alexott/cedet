@@ -31,7 +31,7 @@ tests_LISP=semantic-regtest.el semantic-ia-utest.el semantic-utest.el semantic-u
 example_MISC=semantic-example.el semanticdb-skel.el
 scripts_MISC=semanticdb.sh
 misc_AUX=INSTALL ChangeLog AUTHORS ONEWS OONEWS renamelist.txt
-VERSION=2.1beta2
+VERSION=2.1
 DISTDIR=$(top)semantic-$(VERSION)
 
 

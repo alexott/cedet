@@ -1,9 +1,9 @@
 ;; Object SRecode
 ;; EDE Project Files are auto generated: Do Not Edit
 (ede-proj-project "SRecode"
-  :file "Project.ede"
   :name "srecode"
-  :version "1.1beta2"
+  :version "1.1"
+  :file "Project.ede"
   :targets (list 
    (ede-proj-target-aux "Misc"
     :name "Misc"

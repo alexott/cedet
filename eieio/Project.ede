@@ -1,9 +1,9 @@
 ;; Object eieio
 ;; EDE Project Files are auto generated: Do Not Edit
 (ede-proj-project "eieio"
-  :file "Project.ede"
   :name "eieio"
-  :version "1.4beta2"
+  :version "1.4"
+  :file "Project.ede"
   :targets (list 
    (ede-proj-target-elisp-autoloads "autoloads"
     :name "autoloads"

@@ -28,7 +28,7 @@ hacks_LISP=picture-hack.el
 COGRE_LISP=cogre.el cogre-uml.el cogre-periodic.el cogre-ascii.el cogre-srecode.el cogre-convert.el cogre-layout.el cogre-semantic.el
 utests_LISP=cogre-utest.el
 icons_MISC=cogre-class.xpm cogre-hasa.xpm cogre-isa.xpm cogre-package.xpm cogre-node.xpm cogre-instance.xpm cogre-arrow.xpm cogre-link.xpm cogre-note.xpm
-VERSION=1.1beta2
+VERSION=1.1
 DISTDIR=$(top)COGRE-$(VERSION)
 
 

@@ -1,9 +1,9 @@
 ;; Object common
 ;; EDE Project Files are auto generated: Do Not Edit
 (ede-proj-project "common"
-  :file "Project.ede"
   :name "common"
-  :version "1.1beta2"
+  :version "1.1"
+  :file "Project.ede"
   :targets (list 
    (ede-proj-target-makefile-info "Doc"
     :name "Doc"

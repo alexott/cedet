@@ -1,9 +1,9 @@
 ;; Object COGRE
 ;; EDE Project Files are auto generated: Do Not Edit
 (ede-proj-project "COGRE"
-  :file "Project.ede"
   :name "COGRE"
-  :version "1.1beta2"
+  :version "1.1"
+  :file "Project.ede"
   :targets (list 
    (semantic-ede-proj-target-grammar "wy"
     :name "wy"
