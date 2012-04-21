@@ -3,7 +3,6 @@
 ;; Copyright (C) 2009 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cit-uml.el,v 1.2 2009-08-08 21:53:08 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -28,6 +27,9 @@
 ;; that we created the correct objects.
 
 ;;; Code:
+
+(require 'cogre/uml)
+
 (defvar cit-uml-cogre-file "cit-uml.cgr"
   "The file read in for a COGRE diagram.")
 
@@ -48,7 +50,9 @@
   
   ;; 5 a) Read in the cogre UML file.
   ;; It should automatically switch to cogre mode.
-  (find-file (locate-library "cit-uml.cgr"))
+  (let ((ll (or (locate-library "cit-uml.cgr")
+		(error "Could not locate 'cit-uml.cgr'."))))
+    (find-file ll))
   (sit-for 0)
 
   ;; 5 b) Generate code for the graph.

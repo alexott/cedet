@@ -3,7 +3,6 @@
 ;; Copyright (C) 2010 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cit-externaldb.el,v 1.3 2010-07-25 13:50:15 zappo Exp $
 ;;
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -49,7 +48,7 @@
       cedet-gnu-global-version-check ;; 2 version check
       cedet-gnu-global-create/update-database ;; 3 create a db
       ede-locate-global ;; 4 ede locate tool name
-      semanticdb-global ;; 5 database src file
+      semantic/db-global ;; 5 database src file
       semanticdb-enable-gnu-global-in-buffer ;; 6 enable db in a buffer
       semanticdb-table-global ;; 7 the database type
       ( "GTAGS" "GPATH" "GSYMS" "GRTAGS" ) ;; 8 files created
@@ -115,7 +114,7 @@
     (funcall createfcn default-directory)
     
     ;; 2) force ede's find file to use external tool
-    (require 'ede-locate)
+    (require 'ede/locate)
     (let* ((ede-locate-setup-options (list edelocatesym))
 	   (base default-directory)
 	   (fname nil))

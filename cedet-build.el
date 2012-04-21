@@ -3,7 +3,6 @@
 ;; Copyright (C) 2008, 2009 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
-;; X-RCS: $Id: cedet-build.el,v 1.12 2009-12-28 14:16:12 zappo Exp $
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -120,10 +119,10 @@ OVERRIDE-CHECK to override cedet short-cicuit."
 
   ;; Get EIEIO built first.
   (save-excursion
-    (load-file "common/inversion.el")
-    (load-file "common/cedet-compat.el")
-    (load-file "eieio/eieio-comp.el")
-    (let ((src "eieio/eieio.el") (dst "eieio/eieio.elc"))
+    (load-file "lisp/common/inversion.el")
+    (load-file "lisp/common/cedet-compat.el")
+    (load-file "lisp/eieio/eieio-comp.el")
+    (let ((src "lisp/eieio/eieio.el") (dst "eieio/eieio.elc"))
       (if (file-newer-than-file-p src dst)
 	  (progn
 	    (when (featurep 'eieio)
@@ -133,39 +132,39 @@ OVERRIDE-CHECK to override cedet short-cicuit."
 	(cedet-build-msg "not needed\n")))
     )
 
-  (load-file "common/cedet-autogen.el")
+  (load-file "lisp/common/cedet-autogen.el")
 
   ;; Get EDE autoloads built...
   (cedet-build-msg "Step 2: EDE Autloads...")
   (save-excursion
-    (let ((default-directory (expand-file-name "ede")))
+    (let ((default-directory (expand-file-name "lisp/ede")))
       (cedet-update-autoloads "ede-loaddefs.el" ".")))
   (cedet-build-msg "done.\n")
 
   ;; Get Semantic autoloads built...
   (cedet-build-msg "Step 3: Semantic Autloads...")
   (save-excursion
-    (let ((default-directory (expand-file-name "semantic")))
+    (let ((default-directory (expand-file-name "lisp/semantic")))
       (cedet-update-autoloads "semantic-loaddefs.el" "." "bovine" "wisent")))
   (cedet-build-msg "done.\n")
 
   ;; Get SRecode autoloads built...
   (cedet-build-msg "Step 4: SRecode Autloads...")
   (save-excursion
-    (let ((default-directory (expand-file-name "srecode")))
+    (let ((default-directory (expand-file-name "lisp/srecode")))
       (cedet-update-autoloads "srecode-loaddefs.el" ".")))
   (cedet-build-msg "done.\n")
 
   ;; Fire up CEDET and EDE
   (cedet-build-msg "Step 5: Load common/cedet.el ...")
   (save-excursion
-    (load-file (expand-file-name "common/cedet.el" cedet-build-location)))
+    (load-file (expand-file-name "lisp/common/cedet.el" cedet-build-location)))
 
   (cedet-build-msg "done\nStep 6: Turning on EDE ...")
   (save-excursion
     (global-ede-mode 1)
     (require 'semantic-ede-grammar)
-    (require 'wisent))
+    (require 'semantic/wisent))
   (cedet-build-msg "done.\n\n")
 
   ;; Load in the Makefile
@@ -179,7 +178,7 @@ OVERRIDE-CHECK to override cedet short-cicuit."
       (insert-file-contents "Makefile" nil)
       (goto-char (point-min))
       (re-search-forward "CEDET_ELISP_PACKAGES\\s-*=\\s-*\\\\\n")
-      (while (looking-at "\\(\\w+\\)\\s-*\\\\?\n")
+      (while (looking-at "\\(lisp/\\w+\\)\\s-*\\\\?\n")
 	(setq subdirs (cons (buffer-substring-no-properties
 			     (match-beginning 1) (match-end 1))
 			    subdirs))

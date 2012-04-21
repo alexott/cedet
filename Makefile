@@ -1,191 +1,99 @@
-## Makefile --- Definition file for building CEDET
-##
-## Copyright (C) 2005, 2007, 2008, 2009, 2010, 2011, 2012 by Eric M. Ludlam
-## Copyright (C) 2003, 2004  by David Ponce
-##
-## Author: David Ponce <david@dponce.com>
-## Maintainer: CEDET developers <http://sf.net/projects/cedet>
-## Created: 12 Sep 2003
-## X-RCS: $Id: Makefile,v 1.27 2010-04-23 00:04:39 zappo Exp $
-##
-## This program is free software; you can redistribute it and/or
-## modify it under the terms of the GNU General Public License as
-## published by the Free Software Foundation; either version 2, or
-## (at your option) any later version.
-##
-## This program is distributed in the hope that it will be useful, but
-## WITHOUT ANY WARRANTY; without even the implied warranty of
-## MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-## GNU General Public License for more details.
-##
-## You should have received a copy of the GNU General Public License
-## along with GNU Emacs; see the file COPYING.  If not, write to the
-## Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
-## Boston, MA 02110-1301, USA.
+# Toplevel Makefile
+#
+# (C) 2011 CEDET Developers
+#
+# This program is free software; you can redistribute it and/or
+# modify it under the terms of the GNU General Public License as
+# published by the Free Software Foundation; either version 2, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful, but
+# WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with GNU Emacs; see the file COPYING.  If not, write to the
+# Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
+# Boston, MA 02110-1301, USA.
 
-######## You can customize this part of the Makefile ########
+PROJECTS=lisp/cedet lisp/eieio lisp/speedbar lisp/cedet/cogre lisp/cedet/semantic \
+lisp/cedet/ede lisp/cedet/srecode lisp/cedet/semantic/bovine lisp/cedet/semantic/wisent \
+lisp/cedet/semantic/analyze lisp/cedet/semantic/decorate lisp/cedet/semantic/ectags \
+lisp/cedet/semantic/symref doc/texi doc/texi/semantic
 
-## The directory where CEDET is installed
-CEDET_HOME="$(CURDIR)"
+PROJECTS_AUTOLOADS=lisp/cedet lisp/eieio lisp/speedbar lisp/cedet/cogre lisp/cedet/semantic \
+lisp/cedet/ede lisp/cedet/srecode
 
-## The CEDET's packages installed
-CEDET_ELISP_PACKAGES=\
-common \
-speedbar \
-eieio \
-semantic \
-srecode \
-ede \
-cogre \
-contrib
-
-CEDET_PACKAGES=\
-$(CEDET_ELISP_PACKAGES) \
-tests
-
-## Path to your Emacs
-EMACS?=emacs
-EMACSFLAGS=-batch --no-site-file
-
-## Your shell (On Windows/Cygwin I recommend to use bash)
-#SHELL=bash
-
-## Path to your find and rm commands
+EMACS=emacs
+EMACSFLAGS=-batch --no-site-file -l cedet-remove-builtin.el
+LOADDEFS=loaddefs.el
+BOOTSTRAP=(progn (global-ede-mode) (find-file "$(CURDIR)/lisp/Project.ede") (ede-proj-regenerate) (find-file "$(CURDIR)/doc/texi/Project.ede") (ede-proj-regenerate))
+UTEST=(progn (add-to-list (quote load-path) "$(CURDIR)/tests") (require (quote cedet-utests)) (semantic-mode))
+RM=rm
 FIND=find
-#RM = rm -f
+INSTALL-INFO=install-info
+INFO_FILES=$(shell $(FIND) $(CURDIR)/doc/texi -type f -name '*.info')
+INFODIR=$(CURDIR)/doc/info
 
-## INSTALL PATHS
-PREFIX=/usr/local
+all: clean-autoloads autoloads makefiles compile info
 
-INFO_DIR=$(PREFIX)/share/info
+compile:
+	$(MAKE) -C lisp
 
-INSTALL_INFO=ginstall-info
+makefiles: $(addsuffix /Makefile,$(PROJECTS))
+$(addsuffix /Makefile,$(PROJECTS)): $(addsuffix /Project.ede,$(PROJECTS))
+	@echo "Creating Makefiles using EDE."
+	@$(EMACS) $(EMACSFLAGS) --eval '(setq cedet-bootstrap-in-progress t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
 
-############### Internal part of the Makefile ###############
-CEDET_VERSION=$(shell grep "defconst cedet-version" common/cedet.el | cut -d " " -f 3)
+makefiles-bootstrap:
+	@echo "Creating Makefiles using EDE and builtin Emacs-CEDET as fallback."
+	@$(EMACS) -batch --no-site-file --eval '(setq cedet-bootstrap-in-progress t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
 
-CEDET_FILES=Makefile INSTALL cedet-build.el cedet-update-version.el NEWS PRERELEASE_CHECKLIST USING_CEDET_FROM_BZR
-DIST_ROOT=cedet-$(CEDET_VERSION)
-DIST_DIR=$(CEDET_HOME)/$(DIST_ROOT)
-DIST_FILE=$(DIST_DIR).tar.gz
+autoloads:
+	@echo "Generating autoloads."
+	@$(foreach proj,$(PROJECTS_AUTOLOADS),cd $(CURDIR)/$(proj) && $(MAKE) autoloads;)
 
-__BUILD_AUTOLOADS=$(patsubst %,%-autoloads,$(CEDET_ELISP_PACKAGES))
-__CLEAN_AUTOLOADS=$(patsubst %,clean-%,$(__BUILD_AUTOLOADS))
-__DOMAKE=$(MAKE) $(MFLAGS) EMACS="$(EMACS)" EMACSFLAGS="$(EMACSFLAGS)" SHELL="$(SHELL)"
+info:
+	$(MAKE) -C doc -C texi
+	@echo Run \"$(MAKE) install-info\" to install info files in $(INFODIR)
 
-## Build
-##
-
-all: clean-autoloads packages
-
-bootstrap: clean-all packages
-
-packages: $(CEDET_PACKAGES)
-
-.PHONY: $(CEDET_PACKAGES)
-$(CEDET_PACKAGES):
-	cd $(CEDET_HOME)/$@ && $(__DOMAKE)
-
-.PHONY: ebuild
-ebuild:
-	$(EMACS) -q -batch --no-site-file -l cedet-build.el -f cedet-build
-
-## Update
-##
-
-autoloads: $(__BUILD_AUTOLOADS)
-
-.PHONY: $(__BUILD_AUTOLOADS)
-$(__BUILD_AUTOLOADS):
-	cd $(CEDET_HOME)/$(firstword $(subst -, ,$@)) && \
-	$(__DOMAKE) autoloads
-
-recompile: autoloads
-	cd $(CEDET_HOME) && \
-	"$(EMACS)" $(EMACSFLAGS) -l common/cedet.el \
-	-f batch-byte-recompile-directory $(CEDET_PACKAGES)
-
-## Cleanup
-##
-
-clean-autoloads: $(__CLEAN_AUTOLOADS)
-
-.PHONY: $(__CLEAN_AUTOLOADS)
-$(__CLEAN_AUTOLOADS):
-	$(FIND) $(CEDET_HOME)/$(word 2,$(subst -, ,$@)) -type f \
-	-name "*-loaddefs.el" \
-	-print -exec $(RM) {} \;
-
-.PHONY: clean-grammars
-clean-grammars:
-	$(FIND) $(CEDET_HOME) -type f -name "*-[bw]y.el" \
-	! -name "semantic-grammar-wy.el" \
-	-print -exec $(RM) {} \;
-
-.PHONY: clean-info
-clean-info:
-	$(FIND) $(CEDET_HOME) -type f -name "*.info*" \
-	-print -exec $(RM) {} \;
-
-.PHONY: clean-elc
-clean-elc:
-	$(FIND) $(CEDET_HOME) -type f -name "*.elc" \
-	-print -exec $(RM) {} \;
-
-.PHONY: clean
-clean:
-	$(FIND) $(CEDET_HOME) -type f \( -name "*-script" -o -name "*~" \) \
-	-print -exec $(RM) {} \;
-
-clean-all: clean clean-elc clean-info clean-grammars clean-autoloads
-
-### UNIT TEST Harness
-## Run the master CEDET unit-test suite.
-.PHONY: utest itest
-utest:
-	$(EMACS) $(EMACSFLAGS) -l "common/cedet.el" -f cedet-utest-batch
-
-itest:
-	cd tests; ./cit-test.sh Make
-	cd tests; ./cit-test.sh Automake
-	cd tests; ./cit-test.sh GNUStep
-	cd tests; ./cit-test.sh Android
-	cd tests; ./cit-test.sh Arduino
-
-### Install info files
-## Thanks Stefano Sabatini for the info install patch.
-INFO_FILES=$(shell $(FIND) $(CEDET_HOME) -type f -name '*.info')
-
-.PHONY: install-info
 install-info:
-	for file in $(INFO_FILES); do \
-	    cp $$file $(INFO_DIR); \
-	    $(INSTALL_INFO) $$file $(INFO_DIR)/dir ;\
-	done 
+	@echo Installing info files under $(INFODIR)
+	@$(foreach infofile,$(INFO_FILES),cp $(infofile) $(INFODIR);$(INSTALL-INFO) --info-dir=$(INFODIR) $(infofile);)
 
-## Uninstall info files 
-INSTALLED_INFO_FILES=$(shell find . -name *.info | sed -e 's|.*/\(.*\.info$$\)|$(INFO_DIR)/\1|')
+clean-autoloads:
+	@echo Removing loaddefs.el files from subprojects.
+	@$(foreach proj,$(PROJECTS_AUTOLOADS),cd $(CURDIR)/$(proj) && if [ -f $(LOADDEFS) ];then $(RM) -f $(LOADDEFS);fi;)
 
-.PHONY: uninstall-info
-uninstall-info:
-	for file in $(INSTALLED_INFO_FILES); do \
-	    $(INSTALL_INFO) --delete $$file $(INFO_DIR)/dir ;\
-	    rm -f $$file;\
-	done
+clean-all: clean-autoloads
+	@echo Calling \"$(MAKE) clean\" in all projects.
+	@$(foreach proj,$(PROJECTS),echo "  > $(proj)";cd $(CURDIR)/$(proj) && $(MAKE) clean;)
 
+utest: 
+	$(EMACS) -Q -l cedet-devel-load.el --eval '$(UTEST)' -f cedet-utest
 
-## Build a distribution file.
-dist: # $(CEDET_PACKAGES)
-	rm -rf $(DIST_DIR)
-	mkdir $(DIST_DIR)
-	cp $(CEDET_FILES) $(DIST_DIR)
-	for package in ${CEDET_PACKAGES}; do \
-	   make -C $$package $(MFLAGS) DISTDIR=$(DIST_DIR)/$$package dist; \
-	done;
-	tar -cvzf $(DIST_FILE) $(DIST_ROOT)
-	rm -rf $(DIST_DIR)
+utest-batch:
+	$(EMACS) $(EMACSFLAGS) -l cedet-devel-load.el --eval '$(UTEST)' -f cedet-utest-batch
 
-testvar:
-	@echo "$(TESTVAR)=$($(TESTVAR))"
+itest: itest-make itest-automake
 
-# Makefile ends here
+itest-make:
+	cd $(CURDIR)/tests;./cit-test.sh Make
+
+itest-automake:
+	cd $(CURDIR)/tests;./cit-test.sh Automake
+
+itest-android:
+	cd $(CURDIR)/tests;./cit-test.sh Android
+
+itest-batch: itest-make-batch itest-automake-batch
+
+itest-make-batch:
+	cd $(CURDIR)/tests;./cit-test.sh Make --batch
+
+itest-automake-batch:
+	cd $(CURDIR)/tests;./cit-test.sh Automake --batch
+
+itest-android-batch:
+	cd $(CURDIR)/tests;./cit-test.sh Android --batch

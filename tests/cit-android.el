@@ -30,7 +30,7 @@
 
 ;;; Code:
 (require 'cedet-android)
-(require 'ede-android)
+(require 'ede/android)
 
 ;;; Setup
 (defvar cit-integ-target-android

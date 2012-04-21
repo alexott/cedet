@@ -96,8 +96,9 @@
 (require 'semantic)
 (require 'ede)
 (require 'data-debug)
-(require 'ede-make)
+(require 'ede/make)
 (require 'cogre)
+(require 'srecode/find)
 
 (eval-and-compile
   (defvar cedet-integ-base
@@ -115,7 +116,6 @@
 (require 'cit-texi)
 (require 'cit-projvar)
 (require 'cit-externaldb)
-(require 'cit-gnustep)
 (require 'cit-android)
 (require 'cit-arduino)
 (require 'cit-dist)
@@ -201,19 +201,6 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
     (cit-finish-message "PASSED" make-type)
     ))
 
-(defun cedet-integ-test-GNUStep ()
-  "Run the CEDET integration test using GNUStep style project."
-  (interactive)
-
-  ;; Do an EDE GNUstep-Make Project
-  (make-directory (concat cedet-integ-target "_ede_GSMake") t)
-  (find-file (expand-file-name "README" (concat cedet-integ-target "_ede_GSMake"))) ;; only to change dir
-  (let ((ede-auto-add-method 'always))
-    (cit-ede-step-test))
-
-  (cit-finish-message "PASSED" "GNUStep")
-  )
-
 (defun cedet-integ-test-Android ()
   "Run the CEDET integration test using the Android style project."
   (interactive)
@@ -278,6 +265,7 @@ EMPTY-DICT-ENTRIES are dictionary entries for the EMPTY fill macro."
     ;;
     (find-file (cit-file filename))
     (srecode-load-tables-for-mode major-mode)
+    (semantic-mode)
     (condition-case nil
 	;; Protect against a font-lock bug.
 	(erase-buffer)
@@ -458,7 +446,7 @@ Use COMMAND to run the program."
 	  (while (not (re-search-forward "MOOSE" nil t))
 	    (setq cnt (1+ cnt))
 	    (when (> cnt 10) (error "Program output not detected"))
-	    (sit-for .1))
+	    (sit-for .3))
 	;; Show program output
 	(sit-for .2)
 	)

@@ -72,12 +72,12 @@
 
 (eval-and-compile 
   (require 'ede)
-  (require 'ede-proj)
+  (require 'ede/proj)
   (require 'makefile-edit)
   ;; to easy parsing of GNUmakefiles
   (require 'semantic)
-  (require 'semantic-find)
-  (require 'semantic-tag-file)
+  (require 'semantic/find)
+  (require 'semantic/tag-file)
   )
 
 (unless (fboundp 'string-file-contents)
@@ -944,8 +944,8 @@ Argument COMMAND is the command to use for compiling the target."
 ;;; Target type specific autogenerating gobbldegook.
 ;; I would implement the ede-proj interface.
 (eval-when-compile
-  (require 'ede-pmake "ede-pmake.el")
-  (require 'ede-pconf "ede-pconf.el"))
+  (require 'ede-pmake "ede/pmake.el")
+  (require 'ede-pconf "ede/pconf.el"))
 
 (defmethod ede-proj-dist-makefile ((this ede-step-project))
   "Return the name of the Makefile with the DIST target in it for THIS."
@@ -963,7 +963,7 @@ Argument COMMAND is the command to use for compiling the target."
   "Create a Makefile for all Makefile targets in THIS if needed.
 MFILENAME is the makefile to generate."
   ;; For now, pass through until dirty is implemented.
-  (require 'ede-pmake)
+  (require 'ede/pmake)
   (if (or (not (file-exists-p mfilename))
 	  (file-newer-than-file-p (oref this file) mfilename))
       (ede-proj-makefile-create this mfilename)))
@@ -975,7 +975,7 @@ Handles the Makefile, or a Makefile.am configure.in combination.
 Optional argument FORCE will force items to be regenerated."
   (if (not force)
       (ede-proj-makefile-create-maybe this (ede-proj-dist-makefile this))
-;    (require 'ede-pmake)
+;    (require 'ede/pmake)
     (ede-proj-makefile-create this (ede-proj-dist-makefile this)))
   ;; Rebuild all subprojects
   (ede-map-subprojects
@@ -1289,7 +1289,7 @@ Check match of a line for validity."
 
 (provide 'ede-gnustep)
 
-;;; ede-proj.el ends here
+;;; ede/proj.el ends here
 
 
 
