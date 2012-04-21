@@ -215,7 +215,7 @@ Argument COMMAND is the command to use for compiling the target."
   (error "No Debugger support for Arduino."))
 
 ;;; C/C++ support
-(require 'semanticdb)
+(require 'semantic/db)
 (defmethod ede-preprocessor-map ((this ede-arduino-target))
   "Get the pre-processor map for some generic C code."
   ;; wiring.h and pins_arduino.h have lots of #defines in them.
@@ -250,8 +250,8 @@ Argument COMMAND is the command to use for compiling the target."
 
 ;;; Makefile Creation
 ;;
-;; Use SRecode, and the ede-srecode tool to build our Makefile.
-(require 'ede-srecode)
+;; Use SRecode, and the ede/srecode tool to build our Makefile.
+(require 'ede/srecode)
 
 (defmethod ede-arduino-create-makefile ((proj ede-arduino-project))
   "Create an arduino based Makefile for project PROJ."

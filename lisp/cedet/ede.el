@@ -609,7 +609,7 @@ an EDE controlled project."
 	(add-hook 'dired-mode-hook 'ede-turn-on-hook)
 	(add-hook 'kill-emacs-hook 'ede-save-cache)
 	(ede-load-cache)
-	(ede-reset-all-buffers 1))
+	(ede-reset-all-buffers))
     ;; Turn off global-ede-mode
     (define-key cedet-menu-map [cedet-menu-separator] nil)
     (remove-hook 'semanticdb-project-predicate-functions 'ede-directory-project-p)
@@ -619,7 +619,7 @@ an EDE controlled project."
     (remove-hook 'dired-mode-hook 'ede-turn-on-hook)
     (remove-hook 'kill-emacs-hook 'ede-save-cache)
     (ede-save-cache)
-    (ede-reset-all-buffers -1)))
+    (ede-reset-all-buffers)))
 
 (defvar ede-ignored-file-alist
   '( "\\.cvsignore$"

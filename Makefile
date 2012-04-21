@@ -44,11 +44,11 @@ compile:
 makefiles: $(addsuffix /Makefile,$(PROJECTS))
 $(addsuffix /Makefile,$(PROJECTS)): $(addsuffix /Project.ede,$(PROJECTS))
 	@echo "Creating Makefiles using EDE."
-	@$(EMACS) $(EMACSFLAGS) --eval '(setq cedet-bootstrap-in-progress t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
+	@$(EMACS) $(EMACSFLAGS) --eval '(setq cedet-bootstrap-in-progress t ede-project-directories t)' -f toggle-debug-on-error -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
 
 makefiles-bootstrap:
 	@echo "Creating Makefiles using EDE and builtin Emacs-CEDET as fallback."
-	@$(EMACS) -batch --no-site-file --eval '(setq cedet-bootstrap-in-progress t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
+	@$(EMACS) -batch --no-site-file --eval '(setq cedet-bootstrap-in-progress t ede-project-directories t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
 
 autoloads:
 	@echo "Generating autoloads."
