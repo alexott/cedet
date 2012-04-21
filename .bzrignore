@@ -1,5 +1,6 @@
 cedet-1.*/
 contrib/wisent-*-wy.el
+lisp/cedet/semantic/grammar-wy.el
 lisp/cedet/semantic/bovine/*-by.el
 lisp/cedet/semantic/wisent/*-wy.el
 lisp/cedet/srecode/srt-wy.el
