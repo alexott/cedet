@@ -1,4 +1,4 @@
-;;; ede-arduino.el --- EDE support for arduino projects / sketches
+;;; ede/arduino.el --- EDE support for arduino projects / sketches
 ;;
 ;; Copyright (C) 2012 Eric M. Ludlam
 ;;
@@ -632,6 +632,6 @@ Data returned is the intputs needed for the Makefile."
 			   :core core)
 	))))
 
-(provide 'ede-arduino)
+(provide 'ede/arduino)
 
 ;;; arduino.el ends here

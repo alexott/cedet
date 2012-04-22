@@ -129,7 +129,6 @@ ROOTPROJ is nil, since there is only one project."
 	(ede-add-project-to-global-list proj))
       ))
 
-;;;###autoload
 (ede-add-project-autoload
  (ede-project-autoload "linux"
 		       :name "LINUX ROOT"

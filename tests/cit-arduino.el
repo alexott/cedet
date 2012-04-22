@@ -27,7 +27,7 @@
 
 ;;; Code:
 
-(require 'ede-arduino)
+(require 'ede/arduino)
 
 (condition-case nil
     (require 'arduino-mode)
