@@ -1,4 +1,4 @@
-;;; semantic.elp.el --- Bind ELP to measure Semantic
+;;; semantic-elp.el --- Bind ELP to measure Semantic
 
 ;; Copyright (C) 2008, 2009, 2012 Eric M. Ludlam
 
@@ -42,7 +42,7 @@
 (require 'semantic/symref/filter)
 
 ;;; Code:
-(defvar semantic.elp-emacs-core-list
+(defvar semantic-elp-emacs-core-list
   '(
     append
     copy-sequence
@@ -63,7 +63,7 @@
     )
   "List of Emacs functions for profiling.")
 
-(defvar semantic.elp-eieio-core-list
+(defvar semantic-elp-eieio-core-list
   '(
     eieio-generic-call
     eieio-generic-call-primary-only
@@ -75,7 +75,7 @@
     )
   "List of EIEIO functions for profiling.")
 
-(defvar semantic.elp-ede-core-list
+(defvar semantic-elp-ede-core-list
   '(
     ede-current-project
     ede-directory-get-open-project
@@ -90,7 +90,7 @@
     )
   "List of EDE functions to watch out for.")
 
-(defvar semantic.elp-semantic-core-list
+(defvar semantic-elp-semantic-core-list
   '(
     semantic-ctxt-current-argument
     semantic-ctxt-current-assignment
@@ -133,7 +133,7 @@
     semantic-tag-with-position-p
     )
   "List of core Semantic functions for profiling.")
-(defvar semantic.elp-semantic-find-core-list
+(defvar semantic-elp-semantic-find-core-list
   '(
     semantic-find-tags-by-class
     semantic-find-tags-by-name
@@ -146,7 +146,7 @@
     )
   "List of semantic-find routines for profiling.")
 
-(defvar semantic.elp-semanticdb-core-list
+(defvar semantic-elp-semanticdb-core-list
   '(
     semanticdb-cache-get
     semanticdb-current-database-list
@@ -164,7 +164,7 @@
     )
   "List of core Semanticdb functions for profiling.")
 
-(defvar semantic.elp-include-path-list
+(defvar semantic-elp-include-path-list
   '(
     semanticdb-find-incomplete-cache-entries-p
     semanticdb-find-load-unloaded
@@ -177,7 +177,7 @@
     )
   "List of include path calculation functions for profiling.")
 
-(defvar semantic.elp-semanticdb-find-list
+(defvar semantic-elp-semanticdb-find-list
   '(
     semanticdb-fast-strip-find-results
     semanticdb-find-results-p
@@ -190,28 +190,28 @@
     semanticdb-strip-find-results
     )
   "List of semanticdb find functions to profile.
-You may also need `semantic.elp-include-path-list'.")
+You may also need `semantic-elp-include-path-list'.")
 
-(defun semantic.elp-core-enable ()
+(defun semantic-elp-core-enable ()
   "Do an ELP reset, and enable profiling of the core system."
   (elp-reset-all)
-  (elp-instrument-list semantic.elp-emacs-core-list)
-  (elp-instrument-list semantic.elp-eieio-core-list)
-  (elp-instrument-list semantic.elp-ede-core-list)
-  (elp-instrument-list semantic.elp-semantic-core-list)
-  (elp-instrument-list semantic.elp-semanticdb-core-list)
-  (elp-instrument-list semantic.elp-semanticdb-find-list)
-  (elp-instrument-list semantic.elp-include-path-list)
+  (elp-instrument-list semantic-elp-emacs-core-list)
+  (elp-instrument-list semantic-elp-eieio-core-list)
+  (elp-instrument-list semantic-elp-ede-core-list)
+  (elp-instrument-list semantic-elp-semantic-core-list)
+  (elp-instrument-list semantic-elp-semanticdb-core-list)
+  (elp-instrument-list semantic-elp-semanticdb-find-list)
+  (elp-instrument-list semantic-elp-include-path-list)
   )
 
 
-(defun semantic.elp-include-path-enable ()
+(defun semantic-elp-include-path-enable ()
   "Enable profiling for `semanticdb-find-translate-path'."
-  (semantic.elp-core-enable)
+  (semantic-elp-core-enable)
   (elp-set-master 'semanticdb-find-translate-path-default)
   )
 
-(defvar semantic.elp-typecache-list
+(defvar semantic-elp-typecache-list
   '(
     semantic-analyze-split-name
     semanticdb-get-typecache
@@ -223,21 +223,21 @@ You may also need `semantic.elp-include-path-list'.")
     )
   "List of typecaching functions for profiling.")
 
-(defun semantic.elp-profile-typecache (tab)
+(defun semantic-elp-profile-typecache (tab)
   "Profile the typecache.  Start with table TAB."
   (let ((tc (semanticdb-get-typecache tab)))
     (semanticdb-typecache-file-tags tab)
     (semanticdb-typecache-include-tags tab)
     tc))
 
-(defun semantic.elp-typecache-enable ()
+(defun semantic-elp-typecache-enable ()
   "Enable profiling for `semanticdb-get-typecache'."
-  (semantic.elp-include-path-enable)
-  (elp-instrument-list semantic.elp-typecache-list)
-  (elp-set-master 'semantic.elp-profile-typecache)
+  (semantic-elp-include-path-enable)
+  (elp-instrument-list semantic-elp-typecache-list)
+  (elp-set-master 'semantic-elp-profile-typecache)
   )
 
-(defvar semantic.elp-scope-list
+(defvar semantic-elp-scope-list
   '(
     semantic-analyze-find-tag
     semantic-analyze-scope-nested-tags
@@ -254,15 +254,15 @@ You may also need `semantic.elp-include-path-list'.")
     )
   "List of scope calculation functions for profiling.")
 
-(defun semantic.elp-scope-enable ()
+(defun semantic-elp-scope-enable ()
   "Enable profiling for `semanticdb-calculate-scope'."
-  (semantic.elp-core-enable)
-  (elp-instrument-list semantic.elp-typecache-list)
-  (elp-instrument-list semantic.elp-scope-list)
+  (semantic-elp-core-enable)
+  (elp-instrument-list semantic-elp-typecache-list)
+  (elp-instrument-list semantic-elp-scope-list)
   (elp-set-master 'semantic-calculate-scope)
   )
 
-(defvar semantic.elp-analyze-list
+(defvar semantic-elp-analyze-list
   '(
     semantic-analyze-current-symbol
     semantic-analyze-current-context
@@ -279,28 +279,28 @@ You may also need `semantic.elp-include-path-list'.")
     )
   "List of analyzer calculation functions for profiling.")
 
-(defun semantic.elp-analyze-enable ()
+(defun semantic-elp-analyze-enable ()
   "Enable profiling for `semanticdb-analyze-current-context'."
-  (semantic.elp-scope-enable)
-  (elp-instrument-list semantic.elp-analyze-list)
+  (semantic-elp-scope-enable)
+  (elp-instrument-list semantic-elp-analyze-list)
   (elp-set-master 'semantic-analyze-current-context)
   )
 
-(defvar semantic.elp-symref-list
+(defvar semantic-elp-symref-list
   '(
     semantic-symref-hits-in-region
     semantic-symref-test-count-hits-in-tag
     )
   "List of symref functions for profiling.")
 
-(defun semantic.elp-analyze-symref-hits ()
+(defun semantic-elp-analyze-symref-hits ()
   "Enable profiling for `semanticdb-analyze-current-context'."
-  (semantic.elp-analyze-enable)
-  (elp-instrument-list semantic.elp-symref-list)
+  (semantic-elp-analyze-enable)
+  (elp-instrument-list semantic-elp-symref-list)
   (elp-set-master 'semantic-symref-test-count-hits-in-tag)
   )
 
-(defvar semantic.elp-complete-list
+(defvar semantic-elp-complete-list
   '(
     semantic-analyze-possible-completions
     semantic-analyze-possible-completions-default
@@ -310,17 +310,17 @@ You may also need `semantic.elp-include-path-list'.")
     )
   "List of smart completion functions for profiling.")
 
-(defun semantic.elp-complete-enable ()
+(defun semantic-elp-complete-enable ()
   "Enable profiling for `semanticdb-analyze-current-context'."
-  (semantic.elp-analyze-enable)
-  (elp-instrument-list semantic.elp-complete-list)
+  (semantic-elp-analyze-enable)
+  (elp-instrument-list semantic-elp-complete-list)
   (elp-set-master 'semantic-analyze-possible-completions)
   )
 
 ;;; Storage Classes
 ;;
 ;;
-(defclass semantic.elp-data ()
+(defclass semantic-elp-data ()
   ((raw :initarg :raw
 	:type list
 	:documentation
@@ -339,7 +339,7 @@ Recorded outside of ELP.")
    )
   "Class for managing ELP data.")
 
-(defmethod semantic.elp-change-sort ((data semantic.elp-data) &optional newsort)
+(defmethod semantic-elp-change-sort ((data semantic-elp-data) &optional newsort)
   "Change the sort in DATA object to NEWSORT."
   (cond ((eq newsort 'rotate)
 	 (let* ((arot '((time . avg)
@@ -378,7 +378,7 @@ Recorded outside of ELP.")
 	  (t (message "Don't know how to resort with %s" s)
 	     ))))
 
-(defun semantic.elp-goto-function (point)
+(defun semantic-elp-goto-function (point)
   "Goto the function from the ELP data.
 Argument POINT is where to get the data from."
   (let* ((data (get-text-property point 'ddebug))
@@ -386,7 +386,7 @@ Argument POINT is where to get the data from."
     (find-function (intern-soft (aref data 3)))
     ))
 
-(defmethod semantic.elp-dump-table ((data semantic.elp-data)
+(defmethod semantic-elp-dump-table ((data semantic-elp-data)
 				    prefix)
   "dump out the current DATA table using PREFIX before each line."
   (let* ((elpd (oref data sorted))
@@ -407,13 +407,13 @@ Argument POINT is where to get the data from."
 	  (put-text-property start end 'ddebug d)
 	  (put-text-property start end 'ddebug-noexpand t)
 	  (put-text-property start end 'ddebug-function
-			     'semantic.elp-goto-function)
+			     'semantic-elp-goto-function)
 	  )
 	))
     )
   )
 
-(defmethod data-debug/eieio-insert-slots ((data semantic.elp-data)
+(defmethod data-debug/eieio-insert-slots ((data semantic-elp-data)
 					   prefix)
   "Show the fields of ELP data in an adebug buffer.
 Ignore the usual, and format a nice table."
@@ -445,19 +445,19 @@ Ignore the usual, and format a nice table."
       (put-text-property start end 'ddebug-indent(length prefix))
       (put-text-property start end 'ddebug-prefix prefix)
       (put-text-property start end 'ddebug-function
-			 'semantic.elp-change-sort-adebug)
+			 'semantic-elp-change-sort-adebug)
       (put-text-property start end 'help-echo
 			 "Change the Sort by selecting twice.")
       (insert "\n"))
 
     ;; How to sort the raw data
-    (semantic.elp-change-sort data)
+    (semantic-elp-change-sort data)
     )
   ;; Display
-  (semantic.elp-dump-table data prefix)
+  (semantic-elp-dump-table data prefix)
   )
 
-(defun semantic.elp-change-sort-adebug (point)
+(defun semantic-elp-change-sort-adebug (point)
   "Change the sort function here.  Redisplay.
 Argument POINT is where the text is."
   (let* ((data (get-text-property point 'ddebug))
@@ -466,7 +466,7 @@ Argument POINT is where the text is."
     ;; Get rid of the old table.
     (data-debug-contract-current-line)
     ;; Change it
-    (semantic.elp-change-sort data 'rotate)
+    (semantic-elp-change-sort data 'rotate)
     (end-of-line)
     (forward-word -1)
     (delete-region (point) (point-at-eol))
@@ -475,10 +475,10 @@ Argument POINT is where the text is."
     (save-excursion
       (end-of-line)
       (forward-char 1)
-      (semantic.elp-dump-table data prefix))
+      (semantic-elp-dump-table data prefix))
     ))
 
-(defclass semantic.elp-object-base (eieio-persistent)
+(defclass semantic-elp-object-base (eieio-persistent)
   ((file-header-line :initform ";; SEMANTIC ELP Profiling Save File")
    (total :initarg :total
 	  :type number
@@ -487,9 +487,9 @@ Argument POINT is where the text is."
    )
   "Base elp object.")
 
-(defclass semantic.elp-object (semantic.elp-object-base)
+(defclass semantic-elp-object (semantic-elp-object-base)
   ((time :initarg :time
-	 :type semantic.elp-data
+	 :type semantic-elp-data
 	 :documentation
 	 "Times for calculating something.")
    (answer :initarg :answer
@@ -497,25 +497,25 @@ Argument POINT is where the text is."
 	   "Any answer that might be useful."))
   "Simple elp object for remembering one analysis run.")
 
-(defclass semantic.elp-object-analyze (semantic.elp-object-base)
+(defclass semantic-elp-object-analyze (semantic-elp-object-base)
   ((pathtime :initarg :pathtime
-	     :type semantic.elp-data
+	     :type semantic-elp-data
 	     :documentation
 	     "Times for calculating the include path.")
    (typecachetime :initarg :typecachetime
-		  :type semantic.elp-data
+		  :type semantic-elp-data
 		  :documentation
 		  "Times for calculating the typecache.")
    (scopetime :initarg :scopetime
-	      :type semantic.elp-data
+	      :type semantic-elp-data
 	      :documentation
 	      "Times for calculating the typecache")
    (ctxttime :initarg :ctxttime
-	     :type semantic.elp-data
+	     :type semantic-elp-data
 	     :documentation
 	     "Times for calculating the context.")
    (completiontime :initarg :completiontime
-		   :type semantic.elp-data
+		   :type semantic-elp-data
 		   :documentation
 		   "Times for calculating the completions.")
    )
@@ -524,10 +524,10 @@ Argument POINT is where the text is."
 ;;; ELP hackery.
 ;;
 
-(defvar semantic.elp-last-results nil
+(defvar semantic-elp-last-results nil
   "Save the last results from an ELP run for more post processing.")
 
-(defun semantic.elp-results (name)
+(defun semantic-elp-results (name)
   "Fetch results from the last run, and display.
 Copied out of elp.el and modified only slightly.
 Argument NAME is the name to give the ELP data object."
@@ -549,7 +549,7 @@ Argument NAME is the name to give the ELP data object."
 			 symname)))))
 	  elp-all-instrumented-list))
 	)				; end let
-    (setq semantic.elp-last-results (semantic.elp-data name :raw resvec))
+    (setq semantic-elp-last-results (semantic-elp-data name :raw resvec))
     (elp-reset-all))
   )
 
@@ -557,11 +557,11 @@ Argument NAME is the name to give the ELP data object."
 ;;
 ;;
 
-(defvar semantic.elp-last-run nil
+(defvar semantic-elp-last-run nil
   "The results from the last elp run.")
 
 ;;;###autoload
-(defun semantic.elp-analyze ()
+(defun semantic-elp-analyze ()
   "Run the analyzer, using ELP to measure performance."
   (interactive)
   (let ((elp-recycle-buffers-p nil)
@@ -577,59 +577,59 @@ Argument NAME is the name to give the ELP data object."
     (semantic-clear-toplevel-cache)
     (semantic-fetch-tags)
     ;; Path translation
-    (semantic.elp-include-path-enable)
+    (semantic-elp-include-path-enable)
     (progn
       (setq start (current-time))
       (setq path (semanticdb-find-translate-path nil nil))
       (setq stop (current-time)))
-    (semantic.elp-results "translate-path")
-    (setq pathtime semantic.elp-last-results)
+    (semantic-elp-results "translate-path")
+    (setq pathtime semantic-elp-last-results)
     (oset pathtime :total (semantic-elapsed-time start stop))
     ;; typecache
     (let* ((tab semanticdb-current-table)
 	   (idx (semanticdb-get-table-index tab))
 	   (tc nil)
 	   )
-      (semantic.elp-typecache-enable)
+      (semantic-elp-typecache-enable)
       (progn
 	(setq start (current-time))
-	(setq tc (semantic.elp-profile-typecache tab))
+	(setq tc (semantic-elp-profile-typecache tab))
 	(setq stop (current-time)))
       (setq typecache tc))
-    (semantic.elp-results "typecache")
-    (setq typecachetime semantic.elp-last-results)
+    (semantic-elp-results "typecache")
+    (setq typecachetime semantic-elp-last-results)
     (oset typecachetime :total (semantic-elapsed-time start stop))
     ;; Scope
-    (semantic.elp-scope-enable)
+    (semantic-elp-scope-enable)
     (progn
       (setq start (current-time))
       (setq scope (semantic-calculate-scope))
       (setq stop (current-time)))
-    (semantic.elp-results "scope")
-    (setq scopetime semantic.elp-last-results)
+    (semantic-elp-results "scope")
+    (setq scopetime semantic-elp-last-results)
     (oset scopetime :total (semantic-elapsed-time start stop))
     ;; Analyze!
-    (semantic.elp-analyze-enable)
+    (semantic-elp-analyze-enable)
     (progn
       (setq start (current-time))
       (setq ctxt (semantic-analyze-current-context)) ; skip caching
       (setq stop (current-time)))
-    (semantic.elp-results "analyze")
-    (setq ctxttime semantic.elp-last-results)
+    (semantic-elp-results "analyze")
+    (setq ctxttime semantic-elp-last-results)
     (oset ctxttime :total (semantic-elapsed-time start stop))
     ;; Complete!
-    (semantic.elp-complete-enable)
+    (semantic-elp-complete-enable)
     (progn
       (setq start (current-time))
       (setq completion (semantic-analyze-possible-completions ctxt))
       (setq stop (current-time)))
-    (semantic.elp-results "complete")
-    (setq completiontime semantic.elp-last-results)
+    (semantic-elp-results "complete")
+    (setq completiontime semantic-elp-last-results)
     (oset completiontime :total (semantic-elapsed-time start stop))
     ;; Finish it
     (setq totalstop (current-time))
     ;; build it
-    (let ((elpobj (semantic.elp-object-analyze
+    (let ((elpobj (semantic-elp-object-analyze
 		   "ELP"
 		   :total          (semantic-elapsed-time totalstart totalstop)
 		   :pathtime	   pathtime
@@ -639,15 +639,15 @@ Argument NAME is the name to give the ELP data object."
 		   :completiontime completiontime
 		   )))
       (data-debug-show elpobj)
-      (setq semantic.elp-last-run elpobj)
+      (setq semantic-elp-last-run elpobj)
       (let ((saveas (read-file-name "Save Profile to: " (expand-file-name "~/")
-				    "semantic.elp" nil "semantic.elp")))
+				    "semantic-elp" nil "semantic-elp")))
 	(oset elpobj :file saveas)
 	(eieio-persistent-save elpobj)
 	)
       )))
 
-(defun semantic.elp-idle-work ()
+(defun semantic-elp-idle-work ()
   "Run the idle work scheduler, using ELP to measure performance."
   (interactive)
   (let ((elp-recycle-buffers-p nil)
@@ -656,28 +656,28 @@ Argument NAME is the name to give the ELP data object."
 	ans time
 	)
     ;; Path translation
-    (semantic.elp-core-enable)
+    (semantic-elp-core-enable)
     (setq totalstart (current-time))
     (semantic-idle-scheduler-work-parse-neighboring-files)
     (setq totalstop (current-time))
-    (semantic.elp-results "")
-    (setq time semantic.elp-last-results)
+    (semantic-elp-results "")
+    (setq time semantic-elp-last-results)
     (oset time :total (semantic-elapsed-time totalstart totalstop))
     ;; build it
-    (let ((elpobj (semantic.elp-object
+    (let ((elpobj (semantic-elp-object
 		   "ELP"
 		   :total          (semantic-elapsed-time totalstart totalstop)
 		   :time	   time)))
       (data-debug-show elpobj)
-      (setq semantic.elp-last-run elpobj)
+      (setq semantic-elp-last-run elpobj)
       (let ((saveas (read-file-name "Save Profile to: " (expand-file-name "~/")
-				    "semantic.elp" nil "semantic.elp")))
+				    "semantic-elp" nil "semantic-elp")))
 	(oset elpobj :file saveas)
 	(eieio-persistent-save elpobj)
 	)
       )))
 
-(defun semantic.elp-searchdb ()
+(defun semantic-elp-searchdb ()
   "Run a semanticdb search routine with the profiler.
 The expectation is that you will edit this fcn with different
 `semanticdb-find-' routines."
@@ -692,31 +692,31 @@ The expectation is that you will edit this fcn with different
     (semantic-fetch-tags)
 
     ;; Path translation
-    (semantic.elp-include-path-enable)
+    (semantic-elp-include-path-enable)
     (setq totalstart (current-time))
 
     (setq ans (semanticdb-find-tags-by-name-regexp "task" nil))
 
     (setq totalstop (current-time))
-    (semantic.elp-results "")
-    (setq time semantic.elp-last-results)
+    (semantic-elp-results "")
+    (setq time semantic-elp-last-results)
     (oset time :total (semantic-elapsed-time totalstart totalstop))
     ;; build it
-    (let ((elpobj (semantic.elp-object
+    (let ((elpobj (semantic-elp-object
 		   "ELP"
 		   :total          (semantic-elapsed-time totalstart totalstop)
 		   :time	   time
 		   :answer         ans)))
       (data-debug-show elpobj)
-      (setq semantic.elp-last-run elpobj)
+      (setq semantic-elp-last-run elpobj)
       (let ((saveas (read-file-name "Save Profile to: " (expand-file-name "~/")
-				    "semantic.elp" nil "semantic.elp")))
+				    "semantic-elp" nil "semantic-elp")))
 	(oset elpobj :file saveas)
 	(eieio-persistent-save elpobj)
 	)
       )))
 
-(defun semantic.elp-symref-hit-count ()
+(defun semantic-elp-symref-hit-count ()
   "Run a `semantic-symref-test-count-hits-in-tag' with elp on."
   (interactive)
   (let ((elp-recycle-buffers-p nil)
@@ -732,7 +732,7 @@ The expectation is that you will edit this fcn with different
     (semantic-analyze-current-context)
 
     ;; Enable everything for analysis.
-    (semantic.elp-analyze-symref-hits)
+    (semantic-elp-analyze-symref-hits)
 
     ;; Do the analysis
     (setq totalstart (current-time))
@@ -741,38 +741,38 @@ The expectation is that you will edit this fcn with different
 
     (setq totalstop (current-time))
 
-    (semantic.elp-results "")
-    (setq time semantic.elp-last-results)
+    (semantic-elp-results "")
+    (setq time semantic-elp-last-results)
     (oset time :total (semantic-elapsed-time totalstart totalstop))
     ;; build it
-    (let ((elpobj (semantic.elp-object
+    (let ((elpobj (semantic-elp-object
 		   "ELP"
 		   :total          (semantic-elapsed-time totalstart totalstop)
 		   :time	   time
 		   :answer         ans)))
       (data-debug-show elpobj)
-      (setq semantic.elp-last-run elpobj)
+      (setq semantic-elp-last-run elpobj)
 ;;(let ((saveas (read-file-name "Save Profile to: " (expand-file-name "~/")
-;;				    "semantic.elp" nil "semantic.elp")))
+;;				    "semantic-elp" nil "semantic-elp")))
 ;;	(oset elpobj :file saveas)
 ;;	(eieio-persistent-save elpobj)
 ;;	)
       )))
 
-(defun semantic.elp-show-last-run ()
+(defun semantic-elp-show-last-run ()
   "Show the last elp run."
   (interactive)
-  (when (not semantic.elp-last-run)
+  (when (not semantic-elp-last-run)
     (error "No last run to show"))
-  (data-debug-show semantic.elp-last-run))
+  (data-debug-show semantic-elp-last-run))
 
 ;;;###autoload
-(defun semantic.elp-load-old-run (file)
+(defun semantic-elp-load-old-run (file)
   "Load an old run from FILE, and show it."
   (interactive "fLast Run File: ")
   (setq semantic-elp-last-run
 	(eieio-persistent-read file semantic-elp-object-base t))
   (data-debug-show semantic-elp-last-run))
 
-(provide 'semantic.elp)
-;;; semantic.elp.el ends here
+(provide 'semantic-elp)
+;;; semantic-elp.el ends here
