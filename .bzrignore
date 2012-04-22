@@ -11,4 +11,4 @@ loaddefs.el
 *-ps*.pt
 ChangeLog
 test-p.el
-cogre/tests/Subclass.dot
+tests/cedet/cogre/Subclass.dot
