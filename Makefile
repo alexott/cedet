@@ -50,6 +50,10 @@ makefiles-bootstrap:
 	@echo "Creating Makefiles using EDE and builtin Emacs-CEDET as fallback."
 	@$(EMACS) -batch --no-site-file --eval '(setq cedet-bootstrap-in-progress t ede-project-directories t)' -l cedet-devel-load.el --eval '$(BOOTSTRAP)'
 
+touch-makefiles:
+	@echo Updating timestamps on all Makefiles.
+	$(FIND) . -name "Makefile" -exec touch '{}' \;
+
 autoloads:
 	@echo "Generating autoloads."
 	@$(foreach proj,$(PROJECTS_AUTOLOADS),cd $(CURDIR)/$(proj) && $(MAKE) autoloads;)
