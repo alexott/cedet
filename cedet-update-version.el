@@ -35,6 +35,12 @@
 (if (not (featurep 'cedet))
     (error "You need to have cedet loaded to manage the update versions"))
 
+(require 'semantic/find)
+(require 'semantic/decorate)
+(semantic-mode 1)
+(global-ede-mode 1)
+(setq ede-project-directories t)
+
 (defun cuv-load-package-file (package)
   "Get the file name for PACKAGE."
   (setq package (symbol-name package))
