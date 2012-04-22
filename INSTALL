@@ -31,22 +31,26 @@ INSTALL:
   CEDET is designed to be used 'in-place', so you do *not* have to
   call 'make install' afterwards.
 
-- Building Documentation
+- Documentation
 
-  After compilation, you can generate the info documentation by calling
+  By default, info files containing the CEDET documentation will be
+  generated through the above 'make' call and put into
+
+    <CEDET-TOPDIR>/doc/info
+
+  where they will be automatically made known to Emacs when CEDET is
+  loaded (so usually, you can stop reading here).  Like the EMACS
+  variable above, you can specify binaries for makeinfo and
+  install-info, as well as the location for the generated info files,
+  by using the 'MAKEINFO', 'INSTALL-INFO' and 'INFODIR' variables,
+  respectively.  Note that if you use another INFODIR than the
+  default, you have to make sure that they are found by Emacs
+  yourself.  Additionally, if writing into your custom INFODIR
+  requires special permissions, you'll have to call
 
     make install-info
 
-  This will generate info files and put them into
-  <CEDET-TOP>/doc/info, which will be automatically loaded into Emacs
-  when CEDET is initialized.  You can set specific binaries for
-  'makeinfo' and 'install-info', as well as the location for the
-  resulting info files by calling
-
-    make install-info MAKEINFO=<...> INSTALL-INFO=<...> INFODIR=<...>
-
-  Note that if you use another INFODIR than the default, you have to
-  make sure that they are found by Emacs yourself.
+  manually as root or via sudo.
 
 - Build Issues
 

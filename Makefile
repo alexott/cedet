@@ -36,7 +36,7 @@ INSTALL-INFO=install-info
 INFO_FILES=$(shell $(FIND) $(CURDIR)/doc/texi -type f -name '*.info')
 INFODIR=$(CURDIR)/doc/info
 
-all: clean-autoloads autoloads makefiles compile info
+all: clean-autoloads autoloads makefiles compile info install-info
 
 compile:
 	$(MAKE) -C lisp
@@ -60,7 +60,6 @@ autoloads:
 
 info:
 	$(MAKE) -C doc -C texi
-	@echo Run \"$(MAKE) install-info\" to install info files in $(INFODIR)
 
 install-info:
 	@echo Installing info files under $(INFODIR)
