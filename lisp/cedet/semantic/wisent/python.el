@@ -69,7 +69,9 @@
 
 (defcustom-mode-local-semantic-dependency-system-include-path
   python-mode semantic-python-dependency-system-include-path
-  (when (featurep 'python)
+  (when (and (featurep 'python)
+	     ;; python-mode and batch somehow often hangs.
+	     (not noninteractive))
     (semantic-python-get-system-include-path))
   "The system include path used by Python language.")
 
