@@ -1036,8 +1036,6 @@ supported at a time.
   ;; Frame modifications
   (set (make-local-variable 'dframe-delete-frame-function)
        'speedbar-handle-delete-frame)
-  ;; hscroll
-  (set (make-local-variable 'automatic-hscrolling) nil) ; Emacs 21
   ;; reset the selection variable
   (setq speedbar-last-selected-file nil))
 
