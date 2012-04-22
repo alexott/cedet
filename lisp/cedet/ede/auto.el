@@ -31,6 +31,9 @@
 
 (require 'eieio)
 
+(declare-function ede-directory-safe-p "ede")
+(declare-function ede-add-project-to-global-list "ede")
+
 (defclass ede-project-autoload-dirmatch ()
   ((fromconfig :initarg :fromconfig 
 	       :initform nil
@@ -82,8 +85,7 @@ into memory.")
 	    (save-current-buffer
 	      (let* ((buff (get-file-buffer fc))
 		     (readbuff
-		      (let ((find-file-hooks nil) ;; Disable ede from recursing
-			    (find-file-hook nil)) ;; Disable ede from recursing
+		      (let ((find-file-hook nil)) ;; Disable ede from recursing
 			(find-file-noselect fc))))
 		(set-buffer readbuff)
 		(save-excursion

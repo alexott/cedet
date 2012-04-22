@@ -44,6 +44,51 @@ Note: If this changes, we need to also update the autoload feature."
   :group 'arduino
   :type 'string)
 
+;;; CLASSES
+;;
+;; The classes for arduino projects include arduino (PDE) files, plus C, CPP, and H files.
+;;
+(defclass ede-arduino-target (ede-target)
+  ()
+  "EDE Arduino C files target.  Includes PDE, C, C++ and anything else we find.")
+
+(defclass ede-arduino-project (ede-project)
+  ((keybindings :initform (("U" . ede-arduino-upload)))
+   (menu :initform
+	 (
+	  [ "Upload Project to Board" ede-arduino-upload ]
+	  [ "Serial Monitor" cedet-arduino-serial-monitor ]
+	  "--"
+	  [ "Edit Projectfile" ede-edit-file-target
+	    (ede-buffer-belongs-to-project-p) ]
+	  "--"
+	  [ "Update Version" ede-update-version ede-object ]
+	  [ "Version Control Status" ede-vc-project-directory ede-object ]
+	  "--"
+	  [ "Rescan Project Files" ede-rescan-toplevel t ]
+	  ))
+   )
+  "EDE Arduino project.")
+
+;;; TARGET MANAGEMENT
+;;
+(defmethod ede-find-target ((proj ede-arduino-project) buffer)
+  "Find an EDE target in PROJ for BUFFER.
+If one doesn't exist, create a new one for this directory."
+  (let* ((targets (oref proj targets))
+	 (dir default-directory)
+	 (ans (object-assoc dir :path targets))
+	 )
+    (when (not ans)
+      (setq ans (ede-arduino-target dir
+                 :name (file-name-nondirectory
+			(directory-file-name dir))
+		 :path dir
+		 :source nil))
+      (object-add-to-list proj :targets ans)
+      )
+    ans))
+
 ;;;###autoload
 (defun ede-arduino-root (&optional dir basefile)
   "Get the root project directory for DIR.
@@ -128,51 +173,6 @@ ROOTPROJ is nil, sinc there is only one project for a directory tree."
 	      :safe-p t
 	      :new-p t)
 	     t)
-
-;;; CLASSES
-;;
-;; The classes for arduino projects include arduino (PDE) files, plus C, CPP, and H files.
-;;
-(defclass ede-arduino-target (ede-target)
-  ()
-  "EDE Arduino C files target.  Includes PDE, C, C++ and anything else we find.")
-
-(defclass ede-arduino-project (ede-project)
-  ((keybindings :initform (("U" . ede-arduino-upload)))
-   (menu :initform
-	 (
-	  [ "Upload Project to Board" ede-arduino-upload ]
-	  [ "Serial Monitor" cedet-arduino-serial-monitor ]
-	  "--"
-	  [ "Edit Projectfile" ede-edit-file-target
-	    (ede-buffer-belongs-to-project-p) ]
-	  "--"
-	  [ "Update Version" ede-update-version ede-object ]
-	  [ "Version Control Status" ede-vc-project-directory ede-object ]
-	  "--"
-	  [ "Rescan Project Files" ede-rescan-toplevel t ]
-	  ))
-   )
-  "EDE Arduino project.")
-
-;;; TARGET MANAGEMENT
-;;
-(defmethod ede-find-target ((proj ede-arduino-project) buffer)
-  "Find an EDE target in PROJ for BUFFER.
-If one doesn't exist, create a new one for this directory."
-  (let* ((targets (oref proj targets))
-	 (dir default-directory)
-	 (ans (object-assoc dir :path targets))
-	 )
-    (when (not ans)
-      (setq ans (ede-arduino-target dir
-                 :name (file-name-nondirectory
-			(directory-file-name dir))
-		 :path dir
-		 :source nil))
-      (object-add-to-list proj :targets ans)
-      )
-    ans))
 
 ;;; COMMAND SUPPORT
 ;;

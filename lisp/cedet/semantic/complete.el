@@ -2226,7 +2226,7 @@ will perform the completion."
   (if (not (semantic-completion-inline-active-p))
       (semantic-complete-inline-tag-project))
   ;; Report a message if things didn't startup.
-  (if (and (interactive-p)
+  (if (and (cedet-called-interactively-p 'interactive)
 	   (not (semantic-completion-inline-active-p)))
       (message "Inline completion not needed."))
   )

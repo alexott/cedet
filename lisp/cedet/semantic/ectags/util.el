@@ -193,11 +193,11 @@ return nil."
   (interactive)
   (let ((res (if noerror
 		 (condition-case nil
-		     (semantic-ectag-test-version)
+		     (semantic-ectags-test-version)
 		   (error nil))
-	       (semantic-ectag-test-version))))
+	       (semantic-ectags-test-version))))
     (when (and res (cedet-called-interactively-p 'interactive))
-      (message "Exuberent CTags %s  - Good enough for CEDET." (car (semantic-ectag-version))))))
+      (message "Exuberent CTags %s  - Good enough for CEDET." (car (semantic-ectags-version))))))
 
 (provide 'semantic/ectags/util)
 ;;; semantic/ectags/util.el ends here
