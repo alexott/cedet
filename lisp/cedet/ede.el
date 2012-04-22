@@ -129,42 +129,6 @@ specified by `ede-project-directories'."
       (and (listp ede-project-directories)
 	   (member dir ede-project-directories))))
 
-(defcustom ede-project-directories nil
-  "Directories in which EDE may search for project files.
-If the value is t, EDE may search in any directory.
-
-If the value is a function, EDE calls that function with one
-argument, the directory name; the function should return t iff
-EDE should look for project files in the directory.
-
-Otherwise, the value should be a list of fully-expanded directory
-names.  EDE searches for project files only in those directories.
-If you invoke the commands \\[ede] or \\[ede-new] on a directory
-that is not listed, Emacs will offer to add it to the list.
-
-Any other value disables searching for EDE project files."
-  :group 'ede
-  :type '(choice (const :tag "Any directory" t)
-		 (repeat :tag "List of directories"
-			 (directory))
-		 (function :tag "Predicate"))
-  :version "23.4")
-
-(put 'ede-project-directories 'risky-local-variable t)
-
-(defun ede-directory-safe-p (dir)
-  "Is DIR a safe directory to load Emacs Lisp based projects from.
-Many projects that do not load a project definition saved as Emacs
-Lisp code are safe, and can be safely loaded automatically.  Other
-project types, such as those created with Project.ede files, are not."
-  (setq dir (directory-file-name (expand-file-name dir))) ; strip trailing /
-  ;; Load only if allowed by `ede-project-directories'.
-  (or (eq ede-project-directories t)
-      (and (functionp ede-project-directories)
-	   (funcall ede-project-directories dir))
-      (and (listp ede-project-directories)
-	   (member dir ede-project-directories))))
-
 
 ;;; Management variables
 
