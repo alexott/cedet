@@ -12,68 +12,74 @@ including:
 
 REQUIREMENTS:
 
-   The full CEDET suite requires Emacs 22.1 or newer.
+   The full CEDET suite requires Emacs 23.1 or newer.
 
-   If you use a binary install of Emacs, you may need the .el
-   files for Emacs available for some aspects of the build.
+   Compilation of CEDET currently requires GNU Make.
 
 INSTALL:
 
-You can install all these packages at once with the CEDET build and
-install scripts:
+- Byte Compilation
 
-1) Copy source files somewhere.
+  Byte compilation is done by entering the top directory and calling
 
-2) Byte compile
+    make
 
-   There are several ways to get CEDET compiled:
+  If you want to byte-compile with a specific Emacs version, use
 
-   a) make
+    make EMACS=<Emacs binary>
 
-   b) make EMACS=<your favorite emacs>
+  CEDET is designed to be used 'in-place', so you do *not* have to
+  call 'make install' afterwards.
 
-    You might also have trouble with makeinfo.  If you need to upgrade
-    makeinfo, you can do this:
+- Building Documentation
 
-  c) make MAKEINFO=/usr/local/bin/makeinfo
+  After compilation, you can generate the info documentation by calling
 
-    Note: For speedbar, and older versions of Emacs, you may also need
-          to byte-compile the version of INFO and RMAIL that come with
-          your version of emacs.
+    make install-info
 
-  d) make MAKEINFO=echo
+  This will generate info files and put them into
+  <CEDET-TOP>/doc/info, which will be automatically loaded into Emacs
+  when CEDET is initialized.  You can set specific binaries for
+  'makeinfo' and 'install-info', as well as the location for the
+  resulting info files by calling
 
-    To skip making the doc.
+    make install-info MAKEINFO=<...> INSTALL-INFO=<...> INFODIR=<...>
 
+  Note that if you use another INFODIR than the default, you have to
+  make sure that they are found by Emacs yourself.
 
-  e) cedet-build.el
+- Build Issues
 
-    If you do not have "make", are on Windows, or otherwise cannot use
-    the Makefiles, you can build CEDET from within Emacs.  See the
-    commentary in cedet-build.el
+  If running MAKE fails due to other issues such as bad loaddef files,
+  custom-autoload or incomprehensible run time errors during a byte
+  compilation, do a
 
+    make clean-all
 
-2.1) Build Issues
+  and try again. If you're running the development version from bzr,
+  you can also do
 
-  If running MAKE fails due to other issues such as bad loaddef
-  files, custom-autoload, incomprehensible run time errors during a byte
-  compilation, try these steps, then go back to step 2.
+    bzr revert
+    bzr clean-tree
+    bzr clean-tree --ignore
 
-  a) make clean-autoloads
-  b) make clean-all
+  to get a clean slate of all files (deleting all new files you've
+  created and all changes you've made, of course).
 
-2.2) Make Issues
+  If you're getting error messages about Makefiles that have to be
+  regenerated, or maybe this regeneration is triggered automatically
+  and it fails, you can always enforce the current Makefiles by
+  updating their timestamps through
 
-  If the version of Make you are using doesn't work with the CEDET
-  Makefiles, (such as the version on AIX) you will need to download and
-  install GNU Make to use with these Makefiles.  Alternatively, 
-  see cedet-build.el.
+    make touch-makefiles
 
-3) Install load hooks into your .emacs file.  For newer Emacsen which
-   already ship with CEDET, you should place the `load-file' command
-   near the beginning of your init file, otherwise parts of CEDET like
-   EIEIO might already be loaded. For more detail on any topic, see
-   the info file common/cedet.info.
+- Install CEDET into your Emacs init files (.emacs):
+
+  You only have to load the cedet-devel-load.el file that ships with
+  the CEDET development version. You should place the `load-file'
+  command near the beginning of your init file, otherwise parts of
+  CEDET like EIEIO might already be loaded. For more details on any
+  topic, see the info file common/cedet.info.
 
 -----------
 ;; Load CEDET.
@@ -81,112 +87,56 @@ install scripts:
 ;; IMPORTANT: For Emacs >= 23.2, you must place this *before* any
 ;; CEDET component (including EIEIO) gets activated by another 
 ;; package (Gnus, auth-source, ...).
-(load-file "~/cedet-VERSION/common/cedet.el")
+(load-file "/home/user/cedet/cedet-devel-load.el")
+
+;; Add further minor-modes to be enabled by semantic-mode.
+;; See doc-string of `semantic-default-submodes' for other things
+;; you can use here.
+(add-to-list 'semantic-default-submodes 'global-semantic-idle-summary-mode t)
+(add-to-list 'semantic-default-submodes 'global-semantic-idle-completions-mode t)
+(add-to-list 'semantic-default-submodes 'global-cedet-m3-minor-mode t)
+
+;; Enable Semantic
+(semantic-mode 1)
 
 ;; Enable EDE (Project Management) features
 (global-ede-mode 1)
 
-;; Enable EDE for a pre-existing C++ project
-;; (ede-cpp-root-project "NAME" :file "~/myproject/Makefile")
-
-
-;; Enabling Semantic (code-parsing, smart completion) features
-;; Select one of the following:
-
-;; * This enables the database and idle reparse engines
-(semantic-load-enable-minimum-features)
-
-;; * This enables some tools useful for coding, such as summary mode,
-;;   imenu support, and the semantic navigator
-(semantic-load-enable-code-helpers)
-
-;; * This enables even more coding tools such as intellisense mode,
-;;   decoration mode, and stickyfunc mode (plus regular code helpers)
-;; (semantic-load-enable-gaudy-code-helpers)
-
-;; * This enables the use of Exuberant ctags if you have it installed.
-;;   If you use C++ templates or boost, you should NOT enable it.
-;; (semantic-load-enable-all-exuberent-ctags-support)
-;;   Or, use one of these two types of support.
-;;   Add support for new languages only via ctags.
-;; (semantic-load-enable-primary-exuberent-ctags-support)
-;;   Add support for using ctags as a backup parser.
-;; (semantic-load-enable-secondary-exuberent-ctags-support)
-
-;; Enable SRecode (Template management) minor-mode.
-;; (global-srecode-minor-mode 1)
-
 -----------
 
-  Some items in the contrib directory may need additional study or
-  installation.  Read contrib/INSTALL for specifics on those extra
-  packages.
 
-3.1) CODE COMPLETION
-
-  If you are installing CEDET to get code completion, see the info
-  manual in common/cedet.info for more information.
-
-3.2) INSTALL INFO
-
-   Installing the info files can be done with:
-
-     make install-info
-
-   or, if you need to specify:
-
-     make PREFIX=/prefix/to/install/to install-info
-
-4) CONFIGURE:
-
-   You can configure how the individual packages are loaded in the above
-   example by adding settings in the comment section.  Please read
-   individual info manuals for each package for details on configuring
-   them.  See the texinfo manuals for details on more specific
-   configurations.
-
-   To dive right into configuring CEDET for a particular purpose, many
-   common purposes are enumerated in the CEDET installation info file.
-
-   C-u C-h i common/cedet.info
-
-
-5) BUGS/COMMENTS
+BUGS/COMMENTS
 
    To send bug reports, or participate in discussions on these
-   packages, choose a mailing list:
+   packages, there are three lists available:
 
-   For Semantic use the mailing list cedet-semantic@sourceforge.net
-   via the URL:
+   For general discussions on CEDET, use cedet-devel@sourceforge.net
+   via the URL
+
+   http://lists.sourceforge.net/lists/listinfo/cedet-devel
+
+   For discussions specific to Semantic use the mailing list
+   cedet-semantic@sourceforge.net via the URL:
 
    http://lists.sourceforge.net/lists/listinfo/cedet-semantic
 
-   For EIEIO use the mailing list cedet-eieio@sourceforge.net
+   For EIEIO, use the mailing list cedet-eieio@sourceforge.net
    via the URL:
 
    http://lists.sourceforge.net/lists/listinfo/cedet-eieio
 
-   For general discussions on development of these tools, and get learn
-   when minor updates are added to CVS, use the mailing list
-   cedet-devel@sourceforge.net via the URL:
-
-   http://lists.sourceforge.net/lists/listinfo/cedet-devel
-
    All mailing lists are also available via Gmane (gmane.org) as
 
-     gmane.emacs.semantic
      gmane.emacs.cedet
+     gmane.emacs.semantic
      gmane.emacs.eieio
 
-OTHER REQUIREMENTS:
+OTHER OPTIONAL REQUIREMENTS:
 
    You may also need to download some of the following files for more
    obscure features.
-
-   To use the JavaScript parser on older Emacsen (23.1 or older):
-   javascript-mode.el : http://www.emacswiki.org/cgi-bin/wiki/JavaScriptMode
    
-   To use Exuberent CTags to parse files:
+   To use Exuberant CTags to parse files:
    http://ctags.sourceforge.net/
 
    To use GNU Global integration:
@@ -197,6 +147,17 @@ OTHER REQUIREMENTS:
 
    To use CScope integration:
    http://cscope.sourceforge.net/
+
+   To use C/C++ completion with clang:
+   http://clang.llvm.org/
+
+   To use Javascript completions through Firefox and mozrepl:
+   https://github.com/bard/mozrepl/wiki
+
+   To use the JavaScript parser on older Emacsen you will need
+   javascript-mode.el (this only applies to version 23.1; version 23.2
+   and newer will have it included):
+   http://www.emacswiki.org/cgi-bin/wiki/JavaScriptMode
 
    To use COGRE with Graphviz Dot integration:
    http://www.graphviz.org/
