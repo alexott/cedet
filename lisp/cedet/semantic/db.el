@@ -570,7 +570,7 @@ This will call `semantic-fetch-tags' if that file is in memory."
     ;;        semanticdb-create-table-for-file-not-in-buffer
     (save-excursion
       (let ((buff (semantic-find-file-noselect
-		   (semanticdb-full-filename obj))))
+		   (semanticdb-full-filename obj) t)))
 	(set-buffer buff)
 	(semantic-fetch-tags)
 	;; Kill off the buffer if it didn't exist when we were called.
