@@ -354,14 +354,6 @@ ERRORCONDITION is some error that may have occured durinig testing."
     (setq cedet-utest-last-log-item nil)
     (remove-hook 'post-command-hook 'cedet-utest-post-command-hook)
     )
-  
-  (let ((lib (locate-library "eieio/eieio-test-methodinvoke.el" t)))
-    (unless lib
-      (error "Could not locate 'eieio/eieio-test-methodinvoke.el'"))
-    (message "EIEIO MethodInvoke tests loading from: %S" lib)
-    (load-file lib)
-    ))
-
 
 (provide 'cedet-utests)
 ;;; cedet-utests.el ends here
