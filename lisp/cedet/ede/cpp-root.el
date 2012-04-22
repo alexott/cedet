@@ -238,8 +238,7 @@ ROOTPROJ is nil, since there is only one project."
   ;; Snoop through our master list.
   (ede-cpp-root-file-existing dir))
 
-;; No autoload - unless a user creates one, there will never be
-;; a match.
+;;;###autoload
 (ede-add-project-autoload
  (ede-project-autoload "cpp-root"
 		       :name "CPP ROOT"
