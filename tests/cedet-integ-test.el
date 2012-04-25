@@ -265,7 +265,7 @@ EMPTY-DICT-ENTRIES are dictionary entries for the EMPTY fill macro."
     ;;
     (find-file (cit-file filename))
     (srecode-load-tables-for-mode major-mode)
-    (semantic-mode)
+    (semantic-mode 1)
     (condition-case nil
 	;; Protect against a font-lock bug.
 	(erase-buffer)
