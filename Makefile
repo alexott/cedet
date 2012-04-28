@@ -63,6 +63,7 @@ info:
 
 install-info:
 	@echo Installing info files under $(INFODIR)
+	@mkdir -p $(INFODIR)
 	@$(foreach infofile,$(INFO_FILES),cp $(infofile) $(INFODIR);$(INSTALL-INFO) --info-dir=$(INFODIR) $(infofile);)
 
 clean-autoloads:
