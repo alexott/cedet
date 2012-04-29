@@ -94,16 +94,6 @@ default setting for optimization purposes.")
 (defvar eieio-optimize-primary-methods-flag t
   "Non-nil means to optimize the method dispatch on primary methods.")
 
-;; State Variables
-;; FIXME: These two constants below should have an `eieio-' prefix added!!
-(defvar this nil
-  "Inside a method, this variable is the object in question.
-DO NOT SET THIS YOURSELF unless you are trying to simulate friendly slots.
-
-Note: Embedded methods are no longer supported.  The variable THIS is
-still set for CLOS methods for the sake of routines like
-`call-next-method'.")
-
 (defvar scoped-class nil
   "This is set to a class when a method is running.
 This is so we know we are allowed to check private parts or how to

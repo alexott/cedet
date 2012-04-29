@@ -227,7 +227,7 @@ Do this only when developing new projects that are incorrectly putting
   (interactive)
   (setq ede-project-directory-hash (make-hash-table :test 'equal))
   ;; Also slush the current project's locator hash.
-  (let ((loc (ede-get-locator-object this)))
+  (let ((loc (ede-get-locator-object ede-object)))
     (when loc
       (ede-locate-flush-hash loc)))
   )
