@@ -94,11 +94,6 @@ default setting for optimization purposes.")
 (defvar eieio-optimize-primary-methods-flag t
   "Non-nil means to optimize the method dispatch on primary methods.")
 
-(defvar scoped-class nil
-  "This is set to a class when a method is running.
-This is so we know we are allowed to check private parts or how to
-execute a `call-next-method'.  DO NOT SET THIS YOURSELF!")
-
 (defvar eieio-initializing-object  nil
   "Set to non-nil while initializing an object.")
 
@@ -2003,6 +1998,11 @@ so that we can protect private slots."
 	(setq par (cdr par)))
       ret)))
 
+;;This is set to a class when a method is running.
+;;This is so we know we are allowed to check private parts or how to
+;;execute a `call-next-method'.
+(defvar scoped-class)
+
 (defun eieio-slot-name-index (class obj slot)
   "In CLASS for OBJ find the index of the named SLOT.
 The slot is a symbol which is installed in CLASS by the `defclass'
@@ -3062,14 +3062,6 @@ Optional argument NOESCAPE is passed to `prin1-to-string' when appropriate."
 (eieio-update-lisp-imenu-expression)
 
 ))
-
-;; Disable messages with regards to lexical scoping, since 'this'
-;; still needs an eieio- prefix.
-
-;; Local variables:
-;; byte-compile-warnings: (not lexical)
-;; End:
-
 
 (provide 'eieio)
 ;;; eieio ends here
