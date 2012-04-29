@@ -1998,11 +1998,6 @@ so that we can protect private slots."
 	(setq par (cdr par)))
       ret)))
 
-;;This is set to a class when a method is running.
-;;This is so we know we are allowed to check private parts or how to
-;;execute a `call-next-method'.
-(defvar scoped-class)
-
 (defun eieio-slot-name-index (class obj slot)
   "In CLASS for OBJ find the index of the named SLOT.
 The slot is a symbol which is installed in CLASS by the `defclass'
@@ -2021,13 +2016,13 @@ reverse-lookup that name, and recurse with the associated slot value."
 	 ((not (get fsym 'protection))
 	  (+ 3 fsi))
 	 ((and (eq (get fsym 'protection) 'protected)
-	       scoped-class
+	       (bound-and-true-p scoped-class)
 	       (or (child-of-class-p class scoped-class)
 		   (and (eieio-object-p obj)
 			(child-of-class-p class (object-class obj)))))
 	  (+ 3 fsi))
 	 ((and (eq (get fsym 'protection) 'private)
-	       (or (and scoped-class
+	       (or (and (bound-and-true-p scoped-class)
 			(eieio-slot-originating-class-p scoped-class slot))
 		   eieio-initializing-object))
 	  (+ 3 fsi))
@@ -2332,7 +2327,7 @@ If REPLACEMENT-ARGS is non-nil, then use them instead of
 arguments passed in at the top level.
 
 Use `next-method-p' to find out if there is a next method to call."
-  (if (not scoped-class)
+  (if (not (bound-and-true-p scoped-class))
       (error "`call-next-method' not called within a class specific method"))
   (if (and (/= eieio-generic-call-key method-primary)
 	   (/= eieio-generic-call-key method-static))
