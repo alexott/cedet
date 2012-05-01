@@ -123,7 +123,6 @@ Returns string with output from mozrepl."
 		    (beginning-of-line)
 		    (looking-at (concat semanticdb-mozrepl-object ">"))))
 	(accept-process-output semanticdb-mozrepl-proc semanticdb-mozrepl-maxwait))
-
       (buffer-substring-no-properties cur (point)))))
 
 (defun semanticdb-mozrepl-home-and-check-state ()
@@ -137,7 +136,6 @@ Will return non-nil if everything is OK."
       (setq res (semanticdb-mozrepl-send "home()")))
     (string-match "object ChromeWindow" res)))
 
-
 (defun semanticdb-mozrepl-reconnect ()
   "Kill current mozrepl connection and reconnect."
   (interactive)
@@ -147,6 +145,15 @@ Will return non-nil if everything is OK."
   (with-current-buffer semanticdb-mozrepl-buffer
     (erase-buffer))
   (semanticdb-mozrepl-activate))
+
+(defun semanticdb-mozrepl-reload ()
+  "Reload the current page."
+  (interactive)
+  (when (null semanticdb-mozrepl-proc)
+    (error "No mozrepl connection available."))
+  (if (semanticdb-mozrepl-home-and-check-state)
+      (process-send-string semanticdb-mozrepl-proc "BrowserReload();")
+    (message "Mozrepl connection corrupt. Use M-x semanticdb-mozrepl-reconnect.")))
 
 (defun semanticdb-mozrepl-set-URL (url)
   "Change URL for mozrepl database."
@@ -242,7 +249,6 @@ database (if available.)"
 			    semanticdb-project-system-databases))))
 	(append default tables)))))
 
-
 ;;; Search Overrides
 ;;
 ;; NOTE WHEN IMPLEMENTING: Be sure to add doc-string updates explaining
@@ -267,7 +273,6 @@ Return a list of tags by calling 'inspect' on NAME through mozrepl."
 	(when members
 	  (list
 	   (semantic-tag-new-type name nil members nil)))))))
-
 
 (defmethod semanticdb-find-tags-by-name-regexp-method
   ((table semanticdb-table-mozrepl) regex &optional tags)
