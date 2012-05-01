@@ -69,28 +69,43 @@ Connect to `semanticdb-mozrepl-host' on port
 defined it will automatically open that location, otherwise it
 will ask the user."
   (interactive)
-  (unless semanticdb-mozrepl-URL
-    (setq semanticdb-mozrepl-URL (read-from-minibuffer "mozrepl URL: ")))
-  (setq semanticdb-mozrepl-proc
-	(open-network-stream "mozrepl" semanticdb-mozrepl-buffer
-			     semanticdb-mozrepl-host semanticdb-mozrepl-port))
+  (when semanticdb-mozrepl-proc
+    (message "Killing existing mozrepl connection.")
+    (delete-process semanticdb-mozrepl-proc)
+    (with-current-buffer semanticdb-mozrepl-buffer
+      (erase-buffer)))
+  (setq semanticdb-mozrepl-URL
+	(read-from-minibuffer "Enter mozrepl URL: "
+			      (or semanticdb-mozrepl-URL
+				  (concat "file://" (expand-file-name "~") "/"))))
+  (condition-case nil
+      (setq semanticdb-mozrepl-proc
+	    (open-network-stream "mozrepl" semanticdb-mozrepl-buffer
+				 semanticdb-mozrepl-host semanticdb-mozrepl-port))
+    (error nil))
   (when (null semanticdb-mozrepl-proc)
     (error "Could not open connection to mozrepl on %s:%s."
 	   semanticdb-mozrepl-host semanticdb-mozrepl-port))
-  (accept-process-output semanticdb-mozrepl-proc semanticdb-mozrepl-maxwait)
   (with-current-buffer semanticdb-mozrepl-buffer
+    (while (not (progn
+		  (goto-char (point-max))
+		  (beginning-of-line)
+		  (looking-at "^\\(repl[0-9]*\\)>")))
+      (accept-process-output semanticdb-mozrepl-proc semanticdb-mozrepl-maxwait))
     (goto-char (point-max))
-    (beginning-of-line)
-    (if (looking-at "\\(.+\\)>")
-	(setq semanticdb-mozrepl-object (match-string 1))
-      (error "Could not parse mozrepl prompt.")))
-  ;; Open page
-  (process-send-string
-   semanticdb-mozrepl-proc
-   (concat "content.location.href='" semanticdb-mozrepl-URL "'\n"))
-  (accept-process-output semanticdb-mozrepl-proc semanticdb-mozrepl-maxwait)
-
-  (message "Activated mozrepl database for %s." semanticdb-mozrepl-URL))
+    (setq semanticdb-mozrepl-object (match-string 1))
+    (message "Found mozrepl prompt: %s" semanticdb-mozrepl-object)
+    ;; Open page
+    (message "Opening page %s in Firefox." semanticdb-mozrepl-URL)
+    (let ((current (point)))
+      (process-send-string
+       semanticdb-mozrepl-proc
+       (concat "content.location.href='" semanticdb-mozrepl-URL "'\n"))
+      (accept-process-output semanticdb-mozrepl-proc semanticdb-mozrepl-maxwait)
+      (goto-char (point-max))
+      (when (re-search-backward "!!!.*Exception" current t)
+	(error "It seems %s could not be opened - see Firefox window for details." semanticdb-mozrepl-URL)))
+    (message "Finished activating mozrepl database for %s." semanticdb-mozrepl-URL)))
 
 (defun semanticdb-mozrepl-send (msg)
   "Send MSG to mozrepl object.
@@ -108,7 +123,7 @@ Returns string with output from mozrepl."
 		    (beginning-of-line)
 		    (looking-at (concat semanticdb-mozrepl-object ">"))))
 	(accept-process-output semanticdb-mozrepl-proc semanticdb-mozrepl-maxwait))
-      (goto-char (point-max))
+
       (buffer-substring-no-properties cur (point)))))
 
 (defun semanticdb-mozrepl-home-and-check-state ()
