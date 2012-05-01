@@ -26,10 +26,9 @@
 ;;         https://addons.mozilla.org/de/firefox/addon/mozrepl/
 ;;   - Activate mozrepl in Firefox
 ;;   In Emacs:
-;;   - Put (require 'semantic/db-mozrepl) in your .emacs
 ;;   - M-x semanticdb-mozrepl-activate
 ;;   - Enter URL of the page you're currently working on (you can
-;;     set it permanently through `semanticdb-mozrepl-URL'.
+;;     set the default in `semanticdb-mozrepl-URL').
 ;;
 ;; Semantic will now be able to provide completions based on what it
 ;; can gather from mozrepl.  Use semanticdb-set-URL to change URL.
@@ -86,6 +85,7 @@ will ask the user."
   (when (null semanticdb-mozrepl-proc)
     (error "Could not open connection to mozrepl on %s:%s."
 	   semanticdb-mozrepl-host semanticdb-mozrepl-port))
+  (set-process-query-on-exit-flag semanticdb-mozrepl-proc nil)
   (with-current-buffer semanticdb-mozrepl-buffer
     (while (not (progn
 		  (goto-char (point-max))
