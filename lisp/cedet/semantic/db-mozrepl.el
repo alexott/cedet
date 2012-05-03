@@ -46,6 +46,16 @@
 (defvar semanticdb-mozrepl-URL nil
   "URL mozrepl should connect to.")
 
+(defvar semanticdb-mozrepl-switch-tabs nil
+  "Whether we should automatically switch to proper tab.
+If you switch to another tab in Firefox, the mozrepl context will
+switch, too. Semanticdb-mozrepl can automatically switch back to
+the initial tab if it detects this situation.
+Possible symbols:
+   ask = Ask if it should switch.
+   t = Switch without asking.
+   nil = Never switch.")
+
 ;;; Internal variables
 
 (defvar semanticdb-mozrepl-proc nil
@@ -59,6 +69,20 @@
 
 (defvar semanticdb-mozrepl-object nil
   "Current mozrepl object name.")
+
+(defvar semanticdb-mozrepl-selecttab-func
+  "
+  function semanticselecttab(url) {
+     var numTabs=gBrowser.browsers.length;
+     for(i=0; i<numTabs-1; i++) {
+       if(gBrowser.browsers[i].contentDocument.location.href.indexOf(url)>=0) {
+         gBrowser.tabContainer.selectedIndex=i;
+         break;
+       }
+     }
+  }
+"
+  "Javascript function for selecting tab containing certain URL.")
 
 ;;;###autoload
 (defun semanticdb-mozrepl-activate ()
@@ -97,25 +121,28 @@ will ask the user."
     (message "Found mozrepl prompt: %s" semanticdb-mozrepl-object)
     ;; Open page
     (message "Opening page %s in Firefox." semanticdb-mozrepl-URL)
-    (let ((current (point)))
-      (process-send-string
-       semanticdb-mozrepl-proc
-       (concat "content.location.href='" semanticdb-mozrepl-URL "'\n"))
-      (accept-process-output semanticdb-mozrepl-proc semanticdb-mozrepl-maxwait)
-      (goto-char (point-max))
-      (when (re-search-backward "!!!.*Exception" current t)
-	(error "It seems %s could not be opened - see Firefox window for details." semanticdb-mozrepl-URL)))
+    (let ((answer
+	   (semanticdb-mozrepl-send
+	    (concat "content.location.href='" semanticdb-mozrepl-URL "'") t )))
+      (when (string-match "!!!.*Exception" answer)
+	(error "It seems %s could not be opened - see Firefox window for details."
+	       semanticdb-mozrepl-URL)))
+    (semanticdb-mozrepl-send semanticdb-mozrepl-selecttab-func t)
     (message "Finished activating mozrepl database for %s." semanticdb-mozrepl-URL)))
 
-(defun semanticdb-mozrepl-send (msg)
+(defun semanticdb-mozrepl-send (msg &optional raw)
   "Send MSG to mozrepl object.
-Returns string with output from mozrepl."
+Returns string with output from mozrepl.
+If RAW is non-nil, do not prepend mozrepl object but send
+message as-is."
   (with-current-buffer semanticdb-mozrepl-buffer
     (goto-char (point-max))
     (let ((cur (point)))
       (process-send-string
        semanticdb-mozrepl-proc
-       (concat semanticdb-mozrepl-object "." msg "\n"))
+       (if raw
+	   (concat msg "\n")
+	 (concat semanticdb-mozrepl-object "." msg "\n")))
       (accept-process-output semanticdb-mozrepl-proc semanticdb-mozrepl-maxwait)
       ;; Wait till we have a prompt
       (while (not (progn
@@ -127,14 +154,30 @@ Returns string with output from mozrepl."
 
 (defun semanticdb-mozrepl-home-and-check-state ()
   "Send 'home()' to mozrepl and check if it is still running properly.
-Will return non-nil if everything is OK."
-  (let ((res (semanticdb-mozrepl-send "home()")))
+Will return non-nil if everything is OK.  Depending on
+`semanticdb-mozrepl-switch-tabs' might also switch to initial
+tab."
+  (let ((res (semanticdb-mozrepl-send "home()"))
+	answer)
     ;; Try to revive mozrepl when stuck
     (when (string-match "^....>" res)
       (process-send-string semanticdb-mozrepl-proc ";\n")
       (accept-process-output semanticdb-mozrepl-proc 1)
       (setq res (semanticdb-mozrepl-send "home()")))
-    (string-match "object ChromeWindow" res)))
+    (setq answer (string-match "object ChromeWindow" res))
+    (semanticdb-mozrepl-possibly-switch-tab)
+    answer))
+
+(defun semanticdb-mozrepl-possibly-switch-tab ()
+  (let ((currentURL
+	 (semanticdb-mozrepl-send "content.location.href" t)))
+    (unless (string-match semanticdb-mozrepl-URL currentURL)
+      (when (or
+	     (and (eq semanticdb-mozrepl-switch-tabs 'ask)
+		  (y-or-n-p "Switch to initial tab? "))
+	     (eq semanticdb-mozrepl-switch-tabs t))
+	(semanticdb-mozrepl-send (format "semanticselecttab(\"%s\")"
+					 semanticdb-mozrepl-URL) t)))))
 
 (defun semanticdb-mozrepl-reconnect ()
   "Kill current mozrepl connection and reconnect."
@@ -152,14 +195,13 @@ Will return non-nil if everything is OK."
   (when (null semanticdb-mozrepl-proc)
     (error "No mozrepl connection available."))
   (if (semanticdb-mozrepl-home-and-check-state)
-      (process-send-string semanticdb-mozrepl-proc "BrowserReload();")
+      (semanticdb-mozrepl-send "BrowserReload();" t)
     (message "Mozrepl connection corrupt. Use M-x semanticdb-mozrepl-reconnect.")))
 
-(defun semanticdb-mozrepl-set-URL (url)
-  "Change URL for mozrepl database."
-  (interactive "sURL: ")
-  (setq semanticdb-mozrepl-URL url)
-  (semanticdb-mozrepl-reconnect))
+(defalias 'semanticdb-mozrepl-set-URL
+  'semanticdb-mozrepl-activate
+  "Change URL for mozrepl database.
+This just an alias for `semanticdb-mozrepl-activate'.")
 
 ;; Omniscient semanticdb interface
 
