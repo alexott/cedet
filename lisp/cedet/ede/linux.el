@@ -132,7 +132,7 @@ ROOTPROJ is nil, since there is only one project."
 (ede-add-project-autoload
  (ede-project-autoload "linux"
 		       :name "LINUX ROOT"
-		       :file 'ede-linux
+		       :file 'ede/linux
 		       :proj-file "scripts/ver_linux"
 		       :proj-root-dirmatch "linux[^/]*"
 		       :proj-root 'ede-linux-project-root
@@ -293,4 +293,10 @@ Argument COMMAND is the command to use for compiling the target."
     (compile command)))
 
 (provide 'ede-linux)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/linux"
+;; End:
+
 ;;; ede-linux.el ends here

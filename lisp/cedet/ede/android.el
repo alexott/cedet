@@ -96,7 +96,7 @@ ROOTPROJ is nil, since there is only one project."
 (ede-add-project-autoload
  (ede-project-autoload "android"
 		       :name "ANDROID ROOT"
-		       :file 'ede-android
+		       :file 'ede/android
 		       :proj-file "AndroidManifest.xml"
 		       :load-type 'ede-android-load
 		       :class-sym 'ede-android-project
@@ -455,5 +455,10 @@ WHERE is something like menu or layout, and what is the name of the resource."
   (find-file (ede-android-resource-file "values" "strings")))
 
 (provide 'ede/android)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/android"
+;; End:
 
 ;;; ede-android.el ends here

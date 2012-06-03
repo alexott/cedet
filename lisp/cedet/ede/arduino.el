@@ -159,7 +159,7 @@ ROOTPROJ is nil, sinc there is only one project for a directory tree."
 (add-to-list 'ede-project-class-files
 	     (ede-project-autoload "arduino"
 	      :name "ARDUINO SKETCH"
-	      :file 'ede-arduino
+	      :file 'ede/arduino
 	      :proj-root-dirmatch
 	      (ede-project-autoload-dirmatch 
 	       "arduino"
@@ -633,5 +633,10 @@ Data returned is the intputs needed for the Makefile."
 	))))
 
 (provide 'ede/arduino)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/arduino"
+;; End:
 
 ;;; arduino.el ends here
