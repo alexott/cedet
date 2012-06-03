@@ -109,7 +109,6 @@ into memory.")
       (error "Unknown dirmatch object match style.")))
     ))
 
-;;;###autoload
 (defclass ede-project-autoload ()
   ((name :initarg :name
 	 :documentation "Name of this project type")
