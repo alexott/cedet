@@ -1,6 +1,6 @@
 ;;; data-debug.el --- Datastructure Debugger
 
-;; Copyright (C) 2007-2011  Free Software Foundation, Inc.
+;; Copyright (C) 2007-2012  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam  <zappo@gnu.org>
 ;; Version: 0.2
@@ -825,28 +825,30 @@ FCN is a function that will display stuff in the data debug buffer."
 PREBUTTONTEXT is some text to insert between prefix and the thing
 that is not included in the indentation calculation of any children.
 If PARENT is non-nil, it is somehow related as a parent to thing."
-  (when (catch 'done
-	  (dolist (test data-debug-thing-alist)
-	    (when (funcall (car test) thing)
-	      (condition-case nil
-		  (progn
-		    (funcall (cdr test) thing prefix prebuttontext parent)
-		    (throw 'done nil))
-		(error
-		 (condition-case nil
-		     (progn
-		       (funcall (cdr test) thing prefix prebuttontext)
-		       (throw 'done nil))
-		   (error nil))))
-	      ;; Only throw the 'done if no error was caught.
-	      ;; If an error was caught, skip this predicate as being
-	      ;; unsuccessful, and move on.
-	      ))
-	  nil)
-    (data-debug-insert-simple-thing (format "%S" thing)
-				    prefix
-				    prebuttontext
-				    'bold)))
+  (let ((inhibit-read-only t))
+    (when (catch 'done
+	    (dolist (test data-debug-thing-alist)
+	      (when (funcall (car test) thing)
+		(condition-case nil
+		    (progn
+		      (funcall (cdr test) thing prefix prebuttontext parent)
+		      (throw 'done nil))
+		  (error
+		   (condition-case nil
+		       (progn
+			 (funcall (cdr test) thing prefix prebuttontext)
+			 (throw 'done nil))
+		     (error nil))))
+		;; Only throw the 'done if no error was caught.
+		;; If an error was caught, skip this predicate as being
+		;; unsuccessful, and move on.
+		))
+	    nil)
+      (data-debug-insert-simple-thing (format "%S" thing)
+				      prefix
+				      prebuttontext
+				      'bold)))
+  (set-buffer-modified-p nil))
 
 ;;; MAJOR MODE
 ;;
@@ -873,6 +875,7 @@ If PARENT is non-nil, it is somehow related as a parent to thing."
 
 (defvar data-debug-map
   (let ((km (make-sparse-keymap)))
+    (suppress-keymap km)
     (define-key km [mouse-2] 'data-debug-expand-or-contract-mouse)
     (define-key km " " 'data-debug-expand-or-contract)
     (define-key km "\C-m" 'data-debug-expand-or-contract)
@@ -897,7 +900,8 @@ If PARENT is non-nil, it is somehow related as a parent to thing."
   (setq major-mode 'data-debug-mode
         mode-name "DATA-DEBUG"
 	comment-start ";;"
-	comment-end "")
+	comment-end ""
+	buffer-read-only t)
   (set (make-local-variable 'comment-start-skip)
        "\\(\\(^\\|[^\\\\\n]\\)\\(\\\\\\\\\\)*\\);+ *")
   (set-syntax-table data-debug-mode-syntax-table)
@@ -989,6 +993,7 @@ Do nothing if already expanded."
 	     ;; Don't contract if the current line is not expandable.
 	     (get-text-property (point) 'ddebug-function))
     (let ((ti (current-indentation))
+	  (inhibit-read-only t)
 	  )
       ;; If next indentation is larger, collapse.
       (end-of-line)
@@ -1007,7 +1012,8 @@ Do nothing if already expanded."
 	  (error (setq end (point-max))))
 	(delete-region start end)
 	(forward-char -1)
-	(beginning-of-line)))))
+	(beginning-of-line))))
+  (set-buffer-modified-p nil))
 
 (defun data-debug-expand-or-contract ()
   "Expand or contract anything at the current point."
