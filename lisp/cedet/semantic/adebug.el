@@ -1,6 +1,6 @@
 ;;; semantic/adebug.el --- Semantic Application Debugger
 
-;; Copyright (C) 2007, 2008, 2009 Eric M. Ludlam
+;; Copyright (C) 2007, 2008, 2009, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -402,6 +402,25 @@ Display the results as a debug list."
 ;; (semanticdb-debug-file-tag-check "/usr/include/stdlib.h")
 
 
+;;; Interfacing with data-debug
+;;
+;; Augment data-debug
+;;
+;; A tag
+(data-debug-add-specialized-thing #'semantic-tag-p
+				  #'data-debug-insert-tag)
+;; A taglist
+(data-debug-add-specialized-thing (lambda (thing) (and (listp thing) (semantic-tag-p (car thing))))
+				  #'data-debug-insert-tag-list-button)
+;; Find results
+(data-debug-add-specialized-thing #'semanticdb-find-results-p
+				  #'data-debug-insert-find-results-button)
+;; Find results elements.
+(data-debug-add-specialized-thing (lambda (thing) 
+				    (and (listp thing)
+					 (semanticdb-abstract-table-child-p (car thing))
+					 (semantic-tag-p (cdr thing))))
+				  #'data-debug-insert-db-and-tag-button)
 
 (provide 'semantic/adebug)
 
