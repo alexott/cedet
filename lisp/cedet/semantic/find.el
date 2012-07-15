@@ -1,6 +1,6 @@
 ;;; semantic/find.el --- Search routines for Semantic
 
-;; Copyright (C) 1999-2005, 2008-2011  Free Software Foundation, Inc.
+;; Copyright (C) 1999-2005, 2008-2012  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
@@ -362,7 +362,8 @@ See `semantic-tag-protected-p' for details on which tags are returned."
 	table
       (require 'semantic/tag-ls)
       (semantic--find-tags-by-macro
-       (not (semantic-tag-protected-p (car tags) scopeprotection parent))
+       (not (and (semantic-tag-protected-p (car tags) scopeprotection parent)
+		 (semantic-tag-package-protected-p (car tags) parent)))
        table)))
 
 ;;;###autoload
