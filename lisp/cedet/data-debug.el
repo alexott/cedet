@@ -918,6 +918,7 @@ If PARENT is non-nil, it is somehow related as a parent to thing."
   (let ((b (get-buffer-create name)))
     (pop-to-buffer b)
     (set-buffer b)
+    (setq buffer-read-only nil) ; disable read-only
     (erase-buffer)
     (data-debug-mode)
     b))
@@ -980,7 +981,8 @@ Do nothing if already expanded."
   (when (or (not (data-debug-line-expandable-p))
 	    (not (data-debug-current-line-expanded-p)))
     ;; If the next line is the same or less indentation, expand.
-    (let ((fcn (get-text-property (point) 'ddebug-function)))
+    (let ((fcn (get-text-property (point) 'ddebug-function))
+	  (inhibit-read-only t))
       (when fcn
 	(funcall fcn (point))
 	(beginning-of-line)
@@ -1098,7 +1100,13 @@ If the result is a list or vector, then use the data debugger to display it."
 
 (provide 'data-debug)
 
-(if (featurep 'eieio)
-    (require 'eieio-datadebug))
+;; eieio customizations
+(eval-after-load "eieio"
+  '(require 'eieio-datadebug))
+
+;; semantic customizations
+(eval-after-load "semantic"
+  '(require 'semantic/adebug))
+
 
 ;;; data-debug.el ends here
