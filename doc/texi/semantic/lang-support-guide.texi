@@ -25,7 +25,7 @@
 @copying
 This manual documents Application Development with Semantic.
 
-Copyright @copyright{} 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008 Eric M. Ludlam
+Copyright @copyright{} 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2012 Eric M. Ludlam
 Copyright @copyright{} 2001, 2002, 2003, 2004 David Ponce
 Copyright @copyright{} 2002, 2003 Richard Y. Kim
 
@@ -306,6 +306,23 @@ An example from @file{semantic/wisent/python.el} file is shown below.
 The above declaration overrides @code{semantic-parse-region} so that
 for buffers whose major mode is @code{python-mode}, the code specified
 above is executed rather than the default implementation.
+
+@subsection Supporting Child Modes
+
+A child mode is a major mode that is derived from some parent mode.
+For example, C++ is a child mode of C.  Arduino files are a child mode
+of C++.
+
+While it is possible to query this in some cases, the overload
+mechanism depends on @code{define-child-mode} to explicitly declare
+one mode the child of another with respect to the overload mechanism.
+
+@defun define-child-mode mode parent &optional docstring
+Make major mode @var{MODE} inherit behavior from @var{PARENT} mode.
+@var{DOCSTRING} is optional and not used.
+To work properly, this should be put after @var{PARENT} mode local variables
+definition.
+@end defun
 
 @subsection Why not to use advice
 
