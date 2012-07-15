@@ -269,6 +269,7 @@ setup to use Semantic."
   '((emacs-lisp-mode . semantic-default-elisp-setup)
     (c-mode . semantic-default-c-setup)
     (c++-mode . semantic-default-c-setup)
+    (arduino-mode . semantic-default-c-setup)
     (html-mode . semantic-default-html-setup)
     (java-mode . wisent-java-default-setup)
     (js-mode . wisent-javascript-setup-parser)
@@ -991,6 +992,12 @@ Throw away all the old tags, and recreate the tag database."
 		:help "Highlight the tag at point"
 		:visible semantic-mode
 		:button (:toggle . global-semantic-highlight-func-mode)))
+  (define-key cedet-menu-map [global-semantic-stickyfunc-mode]
+    '(menu-item "Stick Top Tag to Headerline" global-semantic-stickyfunc-mode
+		:help "Stick the tag scrolled off the top of the buffer into the header line"
+		:visible semantic-mode
+		:button (:toggle . (bound-and-true-p
+				    global-semantic-stickyfunc-mode))))
   (define-key cedet-menu-map [global-semantic-decoration-mode]
     '(menu-item "Decorate Tags" global-semantic-decoration-mode
 		:help "Decorate tags based on tag attributes"
