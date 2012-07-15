@@ -41,7 +41,7 @@
 %package semantic-c-by
 %provide semantic/bovine/c-by
 
-%languagemode  c-mode c++-mode
+%languagemode  c-mode c++-mode arduino-mode
 %start         declaration
 %scopestart    codeblock
 
