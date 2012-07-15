@@ -35,7 +35,6 @@
 (require 'eieio)
 (require 'data-debug)
 (require 'semantic)
-(require 'semantic/tag)
 (require 'semantic/format)
 (eval-when-compile
   (require 'semantic/db-find))
@@ -423,5 +422,10 @@ Display the results as a debug list."
 				  #'data-debug-insert-db-and-tag-button)
 
 (provide 'semantic/adebug)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/adebug"
+;; End:
 
 ;;; semantic/adebug.el ends here
