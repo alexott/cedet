@@ -1,6 +1,6 @@
 ;;; semantic/java.el --- Semantic functions for Java
 
-;;; Copyright (C) 1999-2011 Free Software Foundation, Inc.
+;;; Copyright (C) 1999-2012 Free Software Foundation, Inc.
 
 ;; Author: David Ponce <david@dponce.com>
 
@@ -173,6 +173,15 @@ corresponding compound declaration."
           (semantic-find-tags-by-class
            'type (semantic-find-tag-by-overlay point))))
 
+;; Tag Protection
+;;
+(define-mode-local-override semantic-tag-protection
+  java-mode (tag &optional parent)
+  "Return the protection of TAG in PARENT.
+Override function for `semantic-tag-protection'."
+  (let ((prot (semantic-tag-protection-default tag parent)))
+    (or prot 'package)))
+
 ;; Prototype handler
 ;;
 (defun semantic-java-prototype-function (tag &optional parent color)
@@ -255,7 +264,6 @@ Optional argument COLOR indicates that color should be mixed in."
   "Return a suitable path for (some) Java imports."
   (let ((name (semantic-tag-name tag)))
     (concat (mapconcat 'identity (split-string name "\\.") "/") ".java")))
-
 
 ;; Documentation handler
 ;;
