@@ -85,7 +85,7 @@
 ;;  file name for a header in your project where most of your CPP
 ;;  macros reside.  Doing this can be easier than listing everything in
 ;;  the :spp-table option.  The files listed in :spp-files should not
-;;  start with a /, and are relative to something in :include-path.;;
+;;  start with a /, and are relative to something in :include-path.
 ;;
 ;; If you want to override the file-finding tool with your own
 ;; function you can do this:
