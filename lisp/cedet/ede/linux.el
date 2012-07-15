@@ -33,6 +33,8 @@
 ;; * Add website
 
 (require 'ede)
+(require 'ede/make)
+
 (declare-function semanticdb-file-table-object "semantic/db")
 (declare-function semanticdb-needs-refresh-p "semantic/db")
 (declare-function semanticdb-refresh-table "semantic/db")
@@ -129,6 +131,7 @@ ROOTPROJ is nil, since there is only one project."
 	(ede-add-project-to-global-list proj))
       ))
 
+;;;###autoload
 (ede-add-project-autoload
  (ede-project-autoload "linux"
 		       :name "LINUX ROOT"
@@ -292,7 +295,7 @@ Argument COMMAND is the command to use for compiling the target."
 
     (compile command)))
 
-(provide 'ede-linux)
+(provide 'ede/linux)
 
 ;; Local variables:
 ;; generated-autoload-file: "loaddefs.el"
