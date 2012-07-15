@@ -245,4 +245,9 @@ If optional arg STANDARDFILE is non nil, use a standard file w/ cscope enabled."
 
 (provide 'semantic/db-cscope)
 
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/db-cscope"
+;; End:
+
 ;;; semantic/db-cscope.el ends here

@@ -456,4 +456,10 @@ NOTE: Currently this only supports a flat-list style tag."
       ret)))
 
 (provide 'semantic/ectags/parse)
+
+;; Local variables:
+;; generated-autoload-file: "../loaddefs.el"
+;; generated-autoload-load-name: "semantic/ectags/parse"
+;; End:
+
 ;;; semantic/ectags/parse.el ends here

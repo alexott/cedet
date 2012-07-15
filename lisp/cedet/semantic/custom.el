@@ -273,4 +273,10 @@ Must return the created widget."
 
 
 (provide 'semantic/custom)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/custom"
+;; End:
+
 ;;; semantic/custom.el ends here

@@ -444,4 +444,9 @@ Return a list of matches."
 
 (provide 'semantic/db-search)
 
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/db-search"
+;; End:
+
 ;;; semantic/db-search.el ends here

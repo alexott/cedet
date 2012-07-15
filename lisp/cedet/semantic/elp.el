@@ -775,4 +775,10 @@ The expectation is that you will edit this fcn with different
   (data-debug-show semantic-elp-last-run))
 
 (provide 'semantic-elp)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/elp"
+;; End:
+
 ;;; semantic-elp.el ends here
