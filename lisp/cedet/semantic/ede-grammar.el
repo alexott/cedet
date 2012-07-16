@@ -1,6 +1,6 @@
 ;;; semantic/ede-grammar.el --- EDE support for Semantic Grammar Files
 
-;; Copyright (C) 2003-2004, 2007-2011  Free Software Foundation, Inc.
+;; Copyright (C) 2003-2004, 2007-2012  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
@@ -138,24 +138,34 @@ Lays claim to all -by.el, and -wy.el files."
   "Compile all sources in a Lisp target OBJ."
   (let* ((cb (current-buffer))
 	 (proj (ede-target-parent obj))
-	 (default-directory (oref proj directory)))
+	 (default-directory (oref proj directory))
+	 (comp 0)
+	 (utd 0))
     (mapc (lambda (src)
 	    (with-current-buffer (find-file-noselect src)
 	      (save-excursion
 		(semantic-grammar-create-package))
+	      ;; After compile, the current buffer is the compiled grammar.
+	      ;; Save and compile it.
 	      (save-buffer)
-	      (if (< emacs-major-version 24)
-		  ;; Does not have `byte-recompile-file'
-		  (let ((cf (concat (semantic-grammar-package) ".el")))
-		    (if (or (not (file-exists-p cf))
-			    (file-newer-than-file-p src cf))
-			(byte-compile-file cf)))
-		;; Emacs 24 and newer
-		(with-no-warnings
-		  (byte-recompile-file (concat (semantic-grammar-package) ".el")
-				       nil 0)))))
-	  (oref obj source)))
-  (message "All Semantic Grammar sources are up to date in %s" (object-name obj)))
+	      (let* ((src (buffer-file-name))
+		     (csrc (concat (file-name-sans-extension src) ".elc")))
+		(if (< emacs-major-version 24)
+		    ;; Does not have `byte-recompile-file'
+		    (if (or (not (file-exists-p csrc))
+			    (file-newer-than-file-p src csrc))
+			(progn
+			  (setq comp (1+ comp))
+			  (byte-compile-file src))
+		      (setq utd (1+ utd)))
+		  ;; Emacs 24 and newer
+		  (with-no-warnings
+		    (if (eq (byte-recompile-file src nil 0) t)
+			(setq comp (1+ comp))
+		      (setq utd (1+ utd))))))))
+	  (oref obj source))
+    (message "All Semantic Grammar sources are up to date in %s" (object-name obj))
+    (cons comp utd)))
 
 ;;; Makefile generation functions
 ;;
