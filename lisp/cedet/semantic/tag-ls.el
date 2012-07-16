@@ -1,6 +1,6 @@
 ;;; semantic/tag-ls.el --- Language Specific override functions for tags
 
-;; Copyright (C) 1999-2004, 2006-2011  Free Software Foundation, Inc.
+;; Copyright (C) 1999-2004, 2006-2012  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
@@ -30,6 +30,7 @@
 ;; the information.
 
 (require 'semantic)
+(require 'semantic/find)
 
 ;;; Code:
 
