@@ -607,6 +607,17 @@ the format is an association list.  For example:
                          (compile-command . "make -f MyCustomMakefile all")))
 @end example
 
+The same is true when you use project-local variables with
+@ref{ede-java-root}.  For example:
+
+@example
+(ede-java-root-project "SOMENAME"
+                       :file "/dir/to/some/file"
+                       :local-variables
+                       '((grep-command . "grep -nHi -e ")
+                         (compile-command . "ant")))
+@end example
+
 @node EDE Project Features,  , Project Local Variables, Modifying your project
 @section EDE Project Features
 
@@ -799,13 +810,13 @@ lookup for @semantic{}, improving code completion performance.
 
 @menu
 * ede-cpp-root::                This project marks the root of a C/C++ code project.
-* ede-simple subclassing::      Create your own simple project.
+* ede-java-root::               This project marks the root of a Java project.
 * ede-emacs::                   A project for working with Emacs.
 * ede-linux::                   A project for working with Linux kernels.
 * Custom Locate::               Customizing how to locate files in a simple project
 @end menu
 
-@node ede-cpp-root, ede-simple subclassing, Simple projects, Simple projects
+@node ede-cpp-root, ede-java-root, Simple projects, Simple projects
 @subsection ede-cpp-root
 
 The @code{ede-cpp-root} project type allows you to create a single
@@ -942,14 +953,90 @@ of project.
 @xref{ede-cpp-root-project}, for details about the class that defines
 the @code{ede-cpp-root} project type.
 
-@node ede-simple subclassing, ede-emacs, ede-cpp-root, Simple projects
-@subsection ede-simple Subclassing
+@node ede-java-root, ede-emacs, ede-cpp-root, Simple projects
+@subsection ede-java-root
 
-todo - Write some doc.
+Much like the project type @ref{ede-cpp-root}, the java variant is
+can be setup in your @file{.emacs} file and just marks a directory as
+the root of a java source tree.
 
-  In the meantime look in the commentary of ede-simple.el
+The @code{ede-java-root} project class knows a few things about Java
+projects.  In particular, you can use it to control your classpath at
+both the system level, and for your project.  If it is insufficient,
+you can subclass @code{ede-java-root-project} and add your own tweaks
+in just a few lines.  See @ref{ede-cpp-root} for an example using the
+C++ variant.
 
-@node ede-emacs, ede-linux, ede-simple subclassing, Simple projects
+In the most basic case, add this to your @file{.emacs} file, modifying
+appropriate bits as needed.
+
+@example
+(ede-java-root-project "SOMENAME" :file "/dir/to/some/file" :srcroot '("src"))
+@end example
+
+Replace @var{SOMENAME} with whatever name you want, and the filename
+to an actual file at the root of your project.  It might be a
+Makefile, a README file.  Whatever.  It doesn't matter.  It's just a
+key to hang the rest of @ede{} off of.
+
+Replace the value of :srcroot with a list of directories under the
+project root which contains Java sources.  For example, if you have:
+
+@example
+~/myprojects/P1/
+~/myprojects/P1/src/
+~/myprojects/P1/src/com/ericsoft/MyCode.java
+~/myprojects/P1/doc/
+@end example
+
+Then @file{src} represents the directory under which all your Java
+code is.  It is important that @file{src} is one step above the
+directory that is the base of your package name, such as
+@file{com/ericsoft} in the example above so that new files can be
+discovered via fully qualified name.  You can have multiple such
+directories in one project, and each will be accessible.
+
+You can specify your classpath like this:
+
+@example
+(ede-java-root-project "NAME" :file "FILENAME"
+    :srcroot '("src")
+    :classpath '("/absolute/path.jar")
+    :localclasspath '( "/relative/path.jar" ))
+@end example
+
+In this example, @code{:classpath} specifies absolute paths somewhere
+on your system, and the explicit jar or source root directories
+@semantic{} will search when performing completions.
+
+The @code{:localclasspath} is like @code{:classpath}, but it will
+contain path names relative to the root of your project.
+
+If you want to override the file-finding tool with your own
+function you can do this:
+
+@example
+(ede-java-root-project "NAME" :file "FILENAME" :locate-fcn 'MYFCN)
+@end example
+
+Where @var{MYFCN} is a symbol for a function.  The locate function can
+be used in place of @code{ede-expand-filename} so you can quickly
+customize your custom target to use specialized local routines instead
+of the default @ede{} routines.  The function symbol must take two
+arguments:
+
+@table @var
+@item NAME
+The name of the file to find.
+@item DIR
+The directory root for this java-root project.
+@end table
+
+If you would like to create your Java projects dynamically, instead of
+putting them all in your @file{.emacs}, you can do that too.  See
+@ref{ede-cpp-root} for details that can be applied to this project type.
+
+@node ede-emacs, ede-linux, ede-java-root, Simple projects
 @subsection ede-emacs
 
 The @code{ede-emacs} project automatically identifies an Emacs source
