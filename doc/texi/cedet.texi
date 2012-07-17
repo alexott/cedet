@@ -116,8 +116,9 @@ use the mailing list cedet-devel.net via the URL:
 * Code Completion::
 * Code Generation::     
 * C++ Features::        
-* Android Features::    
 * Arduino Features::    
+* Java Features::
+* Android Features::    
 * GNU Global::  
 * ID Utils::    
 * CScope::      
@@ -552,8 +553,21 @@ See the
 @inforef{Canned Configuration, Semantic Configuration, semantic}.
 section of the semantic manual for more details about these features.
 
-@@TODO -- Add section on how to configure semanticdb-javap for
-extracting symbols and header info from .jar files for semantic.
+The JDEE doesn't act as an EDE project type as used by CEDET to manage
+smart completion.  As such, you will need to also have a Java based
+project associated with your JDEE project.
+
+You can set this up using the @code{java-root} project type.  Basic
+setup is like this:
+
+@example
+(ede-java-root-project "MYPROJ" :file "/home/user/projects/myProj"
+		      :srcroot '( "src" )
+		      :classpath nil
+		      )
+@end example
+
+See the commentary for ede/java-root.el for more details.
 
 @node ECB Target
 @chapter ECB Target
@@ -828,6 +842,154 @@ For more on this option, including include path setting, and providing
 macro to the C pre-processor, see
 @inforef{the ede-cpp-root chapter, ede-cpp-root, ede}.
 
+@node Arduino Features
+@chapter Arduino Sketchbook Features
+
+If you do Arduino development using the Arduino IDE, you can use CEDET
+and EDE in Emacs as a replacement.  So far, I have only verified usage
+of Arduino development with CEDET on Linux.
+
+First, you need to install both the Arduino IDE
+@url{http://arduino.cc/en/Main/Software},
+and arduino-mode for Emacs.
+@url{https://github.com/bookest/arduino-mode}
+
+@section Create an Arduino Sketch (Project)
+
+To create an arduino sketch, you will need to first use the Arduino
+IDE.  Use the preferences to set the location of your sketchbook
+(where your arduino sketches will be kept.)  You should also plug your
+Arduino into your computer, and try out one of the examples using the
+IDE.  This will force the IDE to select the correct serial terminal to
+use, and it will configure other aspects of your Arduino.
+
+Once the IDE has save your Arduino's information, Emacs will read the
+preferences file from the arduino IDE, and use that to development.
+
+@defvar ede-arduino-preferences-file
+@anchor{ede-arduino-preferences-file}
+The location of personl preferences for the arduino @var{IDE}.
+@end defvar
+
+@section EDE Setup
+
+EDE will detect arduino projects once you have used the IDE to create
+your arduino preferences file.
+
+When you use EDE to compile your arduino project, it will
+automatically generated a Makefile that will include the Arduino.mk
+helper makefile.  This build system allows you to compile and upload
+arduino sketches into your arduino.
+
+EDE provides the following convenience features for arduino projects:
+
+@table @key
+@item C-c . c
+@itemx C-c . C
+Compile your arduino project.
+@item C-c . U
+Upload your arduino project to your Arduino.
+@item Menu: Project -> Project Options -> Serial Monitor
+Open a serial monitor to your arduino so you can interact with you
+sketch.  This uses the Emacs @code{serial-term} command.
+@end table
+
+@section Serial Monitor
+
+The Arduino IDE has a serial monitor you can use to interact with your
+Arduino.  You can open a serial monitor in Emacs for your arduino
+also.
+
+@defun cedet-arduino-serial-monitor
+@anchor{cedet-arduino-serial-monitor}
+Start up a serial monitor for a running arduino board.
+Uses @dfn{serial-term}.
+@end defun
+
+The serial term in Emacs is imperfect in some ways becaus it can
+create a conflict with uploading new sketches to your Arduino, so be
+sure to kill it before uploading new sketches.
+
+@section Arduino support for SRecode
+
+You can create macros for use with arduino-mode.  (Files that end in
+@file{.pde}, or @file{.ino}.)  By default, a handy empty file macro
+can be used to create the standard setup and loop functions.
+
+@section Arduino and smart completion
+
+The Arduino environment hides a common include file for wither
+@file{WProgram.h} or @file{Arduino.h}, depending on the version of
+your IDE.  The smart completion engine will automatically load these
+header files for buffers in @code{arduino-mode} for use in smart
+completion.
+
+@node Java Features
+@chapter Java Features
+
+If you are using @cedet{} with Java, then there are a few Java
+specific options you may need to configure for your system.
+
+@section Java programs
+
+You can configure @cedet{} to use programs from the JDK, such as
+@file{java} and @file{javap}.
+
+@defvar cedet-java-command
+@anchor{cedet-java-command}
+The command for running the java program.
+@end defvar
+
+@defvar cedet-javap-command
+@anchor{cedet-javap-command}
+The command for running the javap program.
+This program is used by @semantic{} to extract symbols from Jar files.
+@end defvar
+
+@section System Class Path
+
+@defvar cedet-java-classpath-extension
+@anchor{cedet-java-classpath-extension}
+List of extended classpath directories and Jar files to pass to java
+commands.  This will affect ALL calls to java and javap.  This path is
+ignored when @semantic{} looks up files, but can help when running
+java programs.
+@end defvar
+
+@defvar semanticdb-javap-classpath
+@anchor{semanticdb-javap-classpath}
+List of extended classpath directories and Jar files used by
+semantic/db-javap when searching for classes.  This classpath is NOT
+passed to java when invoking java commands.
+@end defvar
+
+@section EDE Setup
+
+For large Java programs, it is important to setup @ede{} for it.
+While @ede{} can be used to create Makefiles or use Automake files for
+several languages, @ede{} also provides a way to merely describe a
+project so that tools like @semantic{} can find your sources.
+
+If you are programming for Android, then there is already a special
+EDE project type for that.  See @ref{Android Features} for more.
+
+If you aren't programming with a supported EDE Java projec type, you
+can identify your build system with the very simple
+@code{ede-java-root-project} type.  To use it, add this to your
+@file{.emacs} file, or other configuration:
+
+@example
+(global-ede-mode 1) ;; Enable EDE
+(ede-java-root-project "SOMENAME" :file "/dir/to/some/file")
+@end example
+
+where SOMENAME is a name for this project, and the file is a file or
+directory name that exists at the root of your java project directory.
+There are also options for customizing your classpath, both for the
+system, and local to your project.  For more on this option, including
+class path settings
+@inforef{ede-java-root, the ede-java-root chapter, ede}.
+
 @node Android Features
 @chapter Android Features
 
@@ -955,88 +1117,6 @@ Visit @var{SAMPLE} code in the Android @var{SDK} samples directory.
 
 You can create macros for use with android.  Add the :android argument
 to your templates to get some android specific features.
-
-@node Arduino Features
-@chapter Arduino Sketchbook Features
-
-If you do Arduino development using the Arduino IDE, you can use CEDET
-and EDE in Emacs as a replacement.  So far, I have only verified usage
-of Arduino development with CEDET on Linux.
-
-First, you need to install both the Arduino IDE
-@url{http://arduino.cc/en/Main/Software},
-and arduino-mode for Emacs.
-@url{https://github.com/bookest/arduino-mode}
-
-@section Create an Arduino Sketch (Project)
-
-To create an arduino sketch, you will need to first use the Arduino
-IDE.  Use the preferences to set the location of your sketchbook
-(where your arduino sketches will be kept.)  You should also plug your
-Arduino into your computer, and try out one of the examples using the
-IDE.  This will force the IDE to select the correct serial terminal to
-use, and it will configure other aspects of your Arduino.
-
-Once the IDE has save your Arduino's information, Emacs will read the
-preferences file from the arduino IDE, and use that to development.
-
-@defvar ede-arduino-preferences-file
-@anchor{ede-arduino-preferences-file}
-The location of personl preferences for the arduino @var{IDE}.
-@end defvar
-
-@section EDE Setup
-
-EDE will detect arduino projects once you have used the IDE to create
-your arduino preferences file.
-
-When you use EDE to compile your arduino project, it will
-automatically generated a Makefile that will include the Arduino.mk
-helper makefile.  This build system allows you to compile and upload
-arduino sketches into your arduino.
-
-EDE provides the following convenience features for arduino projects:
-
-@table @key
-@item C-c . c
-@itemx C-c . C
-Compile your arduino project.
-@item C-c . U
-Upload your arduino project to your Arduino.
-@item Menu: Project -> Project Options -> Serial Monitor
-Open a serial monitor to your arduino so you can interact with you
-sketch.  This uses the Emacs @code{serial-term} command.
-@end table
-
-@section Serial Monitor
-
-The Arduino IDE has a serial monitor you can use to interact with your
-Arduino.  You can open a serial monitor in Emacs for your arduino
-also.
-
-@defun cedet-arduino-serial-monitor
-@anchor{cedet-arduino-serial-monitor}
-Start up a serial monitor for a running arduino board.
-Uses @dfn{serial-term}.
-@end defun
-
-The serial term in Emacs is imperfect in some ways becaus it can
-create a conflict with uploading new sketches to your Arduino, so be
-sure to kill it before uploading new sketches.
-
-@section Arduino support for SRecode
-
-You can create macros for use with arduino-mode.  (Files that end in
-@file{.pde}, or @file{.ino}.)  By default, a handy empty file macro
-can be used to create the standard setup and loop functions.
-
-@section Arduino and smart completion
-
-The Arduino environment hides a common include file for wither
-@file{WProgram.h} or @file{Arduino.h}, depending on the version of
-your IDE.  The smart completion engine will automatically load these
-header files for buffers in @code{arduino-mode} for use in smart
-completion.
 
 @node GNU Global
 @chapter GNU Global
