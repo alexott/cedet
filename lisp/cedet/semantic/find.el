@@ -49,6 +49,7 @@
 (require 'semantic/tag)
 
 (declare-function semantic-tag-protected-p "semantic/tag-ls")
+(declare-function semantic-tag-package-protected-p "semantic/tag-ls")
 
 ;;; Overlay Search Routines
 ;;
