@@ -177,6 +177,70 @@ See `semantic-tag-similar-p' for details."
       (setq attr1 (cdr (cdr attr1))))
     (and A1 A2 A3)))
 
+;;; FULL NAMES
+;;
+;; For programmer convenience, a full name is not specified in source
+;; code.  Instead some abbreviation is made, and the local environment
+;; will contain the info needed to determine the full name.
+(define-overloadable-function semantic-tag-full-package (tag &optional stream-or-buffer)
+  "Return the fully qualified package name of TAG in a package hierarchy.
+STREAM-OR-BUFFER can be anything convertable by `semantic-something-to-stream',
+but must be a toplevel semantic tag stream that contains TAG.
+A Package Hierarchy is defined in UML by the way classes and methods
+are organized on disk.  Some languages use this concept such that a
+class can be accessed via it's fully qualified name, (such as Java.)
+Other languages qualify names within a Namespace (such as C++) which
+result in a different package like structure.
+
+Languages which do not override this function will just search the
+stream for a tag of class 'package, and return that."
+  (let ((stream (semantic-something-to-tag-table
+                 (or stream-or-buffer tag))))
+    (:override-with-args (tag stream))))
+
+(defun semantic-tag-full-package-default (tag stream)
+  "Default method for `semantic-tag-full-package' for TAG.
+Return the name of the first tag of class `package' in STREAM."
+  (let ((pack (car-safe (semantic-find-tags-by-class 'package stream))))
+    (when (and pack (semantic-tag-p pack))
+      (semantic-tag-name pack))))
+
+(define-overloadable-function semantic-tag-full-name (tag &optional stream-or-buffer)
+  "Return the fully qualified name of TAG in the package hierarchy.
+STREAM-OR-BUFFER can be anything convertable by `semantic-something-to-stream',
+but must be a toplevel semantic tag stream that contains TAG.
+A Package Hierarchy is defined in UML by the way classes and methods
+are organized on disk.  Some languages use this concept such that a
+class can be accessed via it's fully qualified name, (such as Java.)
+Other languages qualify names within a Namespace (such as C++) which
+result in a different package like structure.
+
+Languages which do not override this function with
+`tag-full-name' will combine `semantic-tag-full-package' and
+`semantic-tag-name', separated with language separator character.
+Override functions only need to handle STREAM-OR-BUFFER with a
+tag stream value, or nil.
+
+TODO - this function should probably also take a PARENT to TAG to
+resolve issues where a method in a class in a package is present."
+  (let ((stream (semantic-something-to-tag-table
+                 (or stream-or-buffer tag))))
+    (:override-with-args (tag stream))))
+
+(make-obsolete-overload 'semantic-nonterminal-full-name
+                        'semantic-tag-full-name "23.2")
+
+(defun semantic-tag-full-name-default (tag stream)
+  "Default method for `semantic-tag-full-name'.
+Return the name of TAG found in the toplevel STREAM."
+  (let ((pack (semantic-tag-full-package tag stream))
+	(name (semantic-tag-name tag)))
+    (if pack
+	(concat pack
+		(car semantic-type-relation-separator-character)
+		name)
+      name)))
+
 ;;; UML features:
 ;;
 ;; UML can represent several types of features of a tag
@@ -384,70 +448,6 @@ something without an implementation."
      ;; No other heuristics.
      (t nil))
     ))
-
-;;; FULL NAMES
-;;
-;; For programmer convenience, a full name is not specified in source
-;; code.  Instead some abbreviation is made, and the local environment
-;; will contain the info needed to determine the full name.
-(define-overloadable-function semantic-tag-full-package (tag &optional stream-or-buffer)
-  "Return the fully qualified package name of TAG in a package hierarchy.
-STREAM-OR-BUFFER can be anything convertable by `semantic-something-to-stream',
-but must be a toplevel semantic tag stream that contains TAG.
-A Package Hierarchy is defined in UML by the way classes and methods
-are organized on disk.  Some languages use this concept such that a
-class can be accessed via it's fully qualified name, (such as Java.)
-Other languages qualify names within a Namespace (such as C++) which
-result in a different package like structure.
-
-Languages which do not override this function will just search the
-stream for a tag of class 'package, and return that."
-  (let ((stream (semantic-something-to-tag-table
-                 (or stream-or-buffer tag))))
-    (:override-with-args (tag stream))))
-
-(defun semantic-tag-full-package-default (tag stream)
-  "Default method for `semantic-tag-full-package' for TAG.
-Return the name of the first tag of class `package' in STREAM."
-  (let ((pack (car-safe (semantic-find-tags-by-class 'package stream))))
-    (when (and pack (semantic-tag-p pack))
-      (semantic-tag-name pack))))
-
-(define-overloadable-function semantic-tag-full-name (tag &optional stream-or-buffer)
-  "Return the fully qualified name of TAG in the package hierarchy.
-STREAM-OR-BUFFER can be anything convertable by `semantic-something-to-stream',
-but must be a toplevel semantic tag stream that contains TAG.
-A Package Hierarchy is defined in UML by the way classes and methods
-are organized on disk.  Some languages use this concept such that a
-class can be accessed via it's fully qualified name, (such as Java.)
-Other languages qualify names within a Namespace (such as C++) which
-result in a different package like structure.
-
-Languages which do not override this function with
-`tag-full-name' will combine `semantic-tag-full-package' and
-`semantic-tag-name', separated with language separator character.
-Override functions only need to handle STREAM-OR-BUFFER with a
-tag stream value, or nil.
-
-TODO - this function should probably also take a PARENT to TAG to
-resolve issues where a method in a class in a package is present."
-  (let ((stream (semantic-something-to-tag-table
-                 (or stream-or-buffer tag))))
-    (:override-with-args (tag stream))))
-
-(make-obsolete-overload 'semantic-nonterminal-full-name
-                        'semantic-tag-full-name "23.2")
-
-(defun semantic-tag-full-name-default (tag stream)
-  "Default method for `semantic-tag-full-name'.
-Return the name of TAG found in the toplevel STREAM."
-  (let ((pack (semantic-tag-full-package tag stream))
-	(name (semantic-tag-name tag)))
-    (if pack
-	(concat pack
-		(car semantic-type-relation-separator-character)
-		name)
-      name)))
 
 (provide 'semantic/tag-ls)
 
