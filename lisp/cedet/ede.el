@@ -341,6 +341,7 @@ Argument MENU-DEF is the menu definition to use."
 	    (append
 	     '( [ "Add Target" ede-new-target (ede-current-project) ]
 		[ "Remove Target" ede-delete-target ede-object ]
+		( "Default configuration" :filter ede-configuration-forms-menu )
 		"-")
 	     menu
 	     ))
