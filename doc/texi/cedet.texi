@@ -946,20 +946,36 @@ The command for running the javap program.
 This program is used by @semantic{} to extract symbols from Jar files.
 @end defvar
 
+@section Using JAR files for Semantic data
+
+Semantic can use your system Jar files to look up data for smart
+completion and other uses.  To enable the system, you need to use the
+javap extension for semanticdb.  To do that, require the semantic
+javap database in your @file{.emacs} file
+
+@example
+(require 'semantic/db-javap)
+@end example
+
 @section System Class Path
+In order for @semantic{} to find your sources, or jar files for use
+with the javap database extension, you need a way to customize the
+classpaths used.
+
+You can do that through a couple variables, and through EDE.
 
 @defvar cedet-java-classpath-extension
 @anchor{cedet-java-classpath-extension}
 List of extended classpath directories and Jar files to pass to java
-commands.  This will affect ALL calls to java and javap.  This path is
-ignored when @semantic{} looks up files, but can help when running
-java programs.
+commands.  This will affect ALL calls to java and javap that @CEDET{}
+makes so that java programs will use those libraries.  This path is
+ignored when @semantic{} looks up files.
 @end defvar
 
 @defvar semanticdb-javap-classpath
 @anchor{semanticdb-javap-classpath}
 List of extended classpath directories and Jar files used by
-semantic/db-javap when searching for classes.  This classpath is NOT
+@file{semantic/db-javap} when searching for classes.  This classpath is NOT
 passed to java when invoking java commands.
 @end defvar
 
