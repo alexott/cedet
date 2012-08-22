@@ -28,7 +28,7 @@
 (require 'ede)
 
 (defvar cedet-java-min-version "1.4"
-  "Minimum version of the java JDR.")
+  "Minimum version of the java JDK.")
 
 (defcustom cedet-java-command "java"
   "The command used for running Java."
