@@ -25,7 +25,7 @@
 @copying
 This is the Semantic User's Manual
 
-Copyright @copyright{} 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Eric M. Ludlam
+Copyright @copyright{} 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2012 Eric M. Ludlam
 Copyright @copyright{} 2001, 2002, 2003, 2004 David Ponce
 Copyright @copyright{} 2002, 2003 Richard Y. Kim
 
@@ -890,7 +890,39 @@ Expand all tag items in the results buffer.
 Collapse all tag items in the results buffer.
 @end table
 
+You can also perform basic refactoring within the symref list buffer.
+The refactoring commands assume that the list of found occurances of
+your symbol may not be exactly what you are looking for.
 
+To perform a refactoring, ``open'' using + all the hit locations so
+that the code line is shown that match valid cases for your
+refactoring.  Any closed location is considered false positive while
+mass editing all the locations.
+
+Once you have selected the code lines you want to have modified, there
+are several options:
+
+@table @kbd
+@item R
+Rename all open matches to a new name typed in the minibuffer.
+@item (
+Create a keyboard macro on the open hit under the cursor.  This is
+just like @function{kmacro-start-macro}, but the macro is started only
+after symref has moved the cursor to a valid hit.  Complete the macro
+with @kbd{C-x )}.
+@item E
+Execute the current keyboard macro on all open hits in the symref
+buffer.  You can create macros with @kbd{(} in the symref buffer, or
+the usual way with @kbd{C-x (} in a buffer of your choice.  The macro
+is executed afte the cursor is placed on the starting character of the
+word at each hit.  If there is more than 1 hit per line, the macro is
+called multiple times for that line.
+@end table
+
+There have been requests for features such as changing or adding
+arguments to functions.  Such features tend to be too language
+specific to be successful in a mode such as symref.  Instead, the
+generic macro feature should be used, allowing any kind of change.
 
 @node Configuring SymRef
 @section Configuring SymRef
