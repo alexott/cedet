@@ -907,7 +907,7 @@ are several options:
 Rename all open matches to a new name typed in the minibuffer.
 @item (
 Create a keyboard macro on the open hit under the cursor.  This is
-just like @function{kmacro-start-macro}, but the macro is started only
+just like @code{kmacro-start-macro}, but the macro is started only
 after symref has moved the cursor to a valid hit.  Complete the macro
 with @kbd{C-x )}.
 @item E
