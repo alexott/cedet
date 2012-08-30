@@ -85,10 +85,32 @@
 ;; to be suppressed.  For example, r"01\n34" is a string with six
 ;; characters 0, 1, \, n, 3 and 4.  The 'u' prefix means the following
 ;; string is a unicode.
-(defconst wisent-python-string-re
-  (concat (regexp-opt '("r" "u" "ur" "R" "U" "UR" "Ur" "uR") t)
-          "?['\"]")
+(defconst wisent-python-string-start-re "[uU]?[rR]?['\"]"
   "Regexp matching beginning of a Python string.")
+
+(defconst wisent-python-string-re
+  (rx
+   (opt (any "uU")) (opt (any "rR"))
+   (or
+    ;; Triple-quoted string using apostrophes
+    (: "'''" (zero-or-more (or "\\'"
+                               (not (any "'"))
+                               (: (repeat 1 2 "'") (not (any "'")))))
+       "'''")
+    ;; String using apostrophes
+    (: "'" (zero-or-more (or "\\'"
+                             (not (any "'"))))
+       "'")
+    ;; Triple-quoted string using quotation marks.
+    (: "\"\"\"" (zero-or-more (or "\\\""
+                                  (not (any "\""))
+                                  (: (repeat 1 2 "\"") (not (any "\"")))))
+       "\"\"\"")
+    ;; String using quotation marks.
+    (: "\"" (zero-or-more (or "\\\""
+                              (not (any "\""))))
+       "\"")))
+  "Regexp matching a complete Python string.")
 
 (defvar wisent-python-EXPANDING-block nil
   "Non-nil when expanding a paren block for Python lexical analyzer.")
@@ -101,16 +123,46 @@ curly braces."
 
 (defsubst wisent-python-forward-string ()
   "Move point at the end of the Python string at point."
-  (when (looking-at wisent-python-string-re)
-     ;; skip the prefix
-    (and (match-end 1) (goto-char (match-end 1)))
-    ;; skip the quoted part
-    (cond
-     ((looking-at "\"\"\"[^\"]")
-      (search-forward "\"\"\"" nil nil 2))
-     ((looking-at "'''[^']")
-      (search-forward "'''" nil nil 2))
-     ((forward-sexp 1)))))
+  (if (looking-at wisent-python-string-re)
+      (let ((start (match-beginning 0))
+            (end (match-end 0)))
+        ;; Incomplete triple-quoted string gets matched instead as a
+        ;; complete single quoted string.  (This special case would be
+        ;; unnecessary if Emacs regular expressions had negative
+        ;; look-ahead assertions.)
+        (when (and (= (- end start) 2)
+                   (looking-at "\"\\{3\\}\\|'\\{3\\}"))
+          (error "unterminated syntax"))
+        (goto-char end))
+    (error "unterminated syntax")))
+
+(defun wisent-python-forward-balanced-expression ()
+  "Move point to the end of the balanced expression at point.
+Here 'balanced expression' means anything matched by Emacs'
+open/close parenthesis syntax classes.  We can't use forward-sexp
+for this because that Emacs built-in can't parse Python's
+triple-quoted string syntax."
+  (let ((end-char (cdr (syntax-after (point)))))
+    (forward-char 1)
+    (while (not (or (eobp) (eq (char-after (point)) end-char)))
+      (cond
+       ;; Skip over python strings.
+       ((looking-at wisent-python-string-start-re)
+        (wisent-python-forward-string))
+       ;; At a comment start just goto end of line.
+       ((looking-at "\\s<")
+        (end-of-line))
+       ;; Skip over balanced expressions.
+       ((looking-at "\\s(")
+        (wisent-python-forward-balanced-expression))
+       ;; Skip over white space, word, symbol, punctuation, paired
+       ;; delimiter (backquote) characters, line continuation, and end
+       ;; of comment characters (AKA newline characters in Python).
+       ((zerop (skip-syntax-forward "-w_.$\\>"))
+        (error "can't figure out how to go forward from here"))))
+    ;; Skip closing character.  As a last resort this should raise an
+    ;; error if we hit EOB before we find our closing character..
+    (forward-char 1)))
 
 (defun wisent-python-forward-line ()
   "Move point to the beginning of the next logical line.
@@ -124,14 +176,14 @@ line ends at the end of the buffer, leave the point there."
              (progn
                (cond
                 ;; Skip over python strings.
-                ((looking-at wisent-python-string-re)
+                ((looking-at wisent-python-string-start-re)
                  (wisent-python-forward-string))
                 ;; At a comment start just goto end of line.
                 ((looking-at "\\s<")
                  (end-of-line))
-                ;; Skip over generic lists and strings.
-                ((looking-at "\\(\\s(\\|\\s\"\\)")
-                 (forward-sexp 1))
+                ;; Skip over balanced expressions.
+                ((looking-at "\\s(")
+                 (wisent-python-forward-balanced-expression))
                 ;; At the explicit line continuation character
                 ;; (backslash) move to next line.
                 ((looking-at "\\s\\")
@@ -253,7 +305,7 @@ continuation of current line."
 
 (define-lex-regex-analyzer wisent-python-lex-string
   "Detect and create python string tokens."
-  wisent-python-string-re
+  wisent-python-string-start-rev
   (semantic-lex-push-token
    (semantic-lex-token
     'STRING_LITERAL
