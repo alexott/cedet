@@ -305,7 +305,7 @@ continuation of current line."
 
 (define-lex-regex-analyzer wisent-python-lex-string
   "Detect and create python string tokens."
-  wisent-python-string-start-rev
+  wisent-python-string-start-re
   (semantic-lex-push-token
    (semantic-lex-token
     'STRING_LITERAL
