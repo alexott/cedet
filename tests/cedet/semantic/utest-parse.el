@@ -1,6 +1,6 @@
 ;;; semantic/utest.el --- Tests for semantic's parsing system.
 
-;;; Copyright (C) 2003, 2004, 2007, 2008, 2009, 2010, 2011 Eric M. Ludlam
+;;; Copyright (C) 2003, 2004, 2007, 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
@@ -255,6 +255,32 @@ if x:
 x = 2
 y = 3
 r, s, t = 1, 2, '3'
+
+# Test string corner cases.  Note that triple-quoted strings used
+# to depend on font-lock to apply syntax properties to them.
+# Code in the Python lexer that depended on scan-sexps and the
+# like has been replaced with more manual methods to work around
+# this problem.
+def str_test_1():
+    '''This might trip up wisent-python-forward-string: \\''' '''
+
+def str_test_2():
+    ('''Internal apostrophe in PAREN_BLOCK doesn't end this
+    string literal.  If you're using forward-sexp to skip this
+    parenthetical expression, and syntax properties from
+    python-mode haven't been applied, you'll fail to recognize
+    the end of this triple-quoted string because this last
+    apostrophe makes an odd number of apostrophes: ' Now it would
+    look like you have an unterminated string literal starting at
+    the last of these three apostrophes:''')
+
+def str_test_3():
+    \"don't\" \"trip\" \"on\" \"adjacent\" \"strings\"
+
+# str_test_4 is only here to make sure that we're still correctly
+# finding tags after all the preceding tests.
+def str_test_4():
+    pass
 "
 
 
@@ -406,6 +432,12 @@ r, s, t = 1, 2, '3'
     ("x"       variable nil nil nil)
     ("y"       variable nil nil nil)
     ("r, s, t" code nil nil nil) ;; TODO should be multiple variable tags
+
+    ;; String tests
+    ("str_test_1" function nil nil nil)
+    ("str_test_2" function nil nil nil)
+    ("str_test_3" function nil nil nil)
+    ("str_test_4" function nil nil nil)
     )
   "List of expected tag names for Python.")
 
