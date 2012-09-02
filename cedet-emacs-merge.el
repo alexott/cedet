@@ -41,9 +41,11 @@
 ;; - Test commit with 't' and investigate failed hunks.
 ;; - Apply the patch with 'a' and use ediff to manually deal with
 ;;   failed hunks.
-;; - Generate commit message with 'c'.
+;; - Generate commit message with 'c' (it will also be in the kill-ring).
+;; - Call up vc-dir with 'v'.
 ;; - Commit, yank generated commit message, edit at will.
-;; - Mark commit as applied or partly applied.
+;; - Mark commit as applied or partly applied (the latter will require a
+;;   comment regarding why).
 ;; - Check other commands with '?'.
 ;;
 ;; State of merge will be saved as soon as you mark a commit. You
@@ -56,8 +58,11 @@
 (require 'esh-util)			; For flatten lists
 (require 'faces)
 
-(defvar ceemme-emacs-repo (expand-file-name "~/emacs/trunk"))
-(defvar ceemme-cedet-repo (expand-file-name "~/cedet/newtrunk"))
+;; Location of Emacs trunk
+(defvar ceemme-emacs-trunk (expand-file-name "~/emacs/trunk"))
+;; Location of CEDET repository
+;; The branches 'trunk', 'to-emacs' and 'from-emacs' must be present.
+(defvar ceemme-cedet-repo (expand-file-name "~/cedet"))
 
 (defvar ceemme-cedet-files nil)
 
@@ -88,11 +93,13 @@
 
 (defvar ceemme-patch-program "/usr/bin/patch")
 
-(defvar ceemme-merge-direction 'c2e)
+;; Direction of merges; can be 'e2c or 'c2e.
+(defvar ceemme-merge-direction 'e2c)
 
 (defvar ceemme-log-entries nil)
 
-(defvar ceemme-first-emacs-revision 97781)
+;;(defvar ceemme-first-emacs-revision 97781)
+(defvar ceemme-first-emacs-revision 105000)
 (defvar ceemme-first-cedet-revision 7000)
 
 (defvar ceemme-buffer-name "*ceemme main*")
@@ -102,21 +109,19 @@
 (defvar ceemme-to nil)
 
 (defsubst ceemme-buffer ()
-  (prog1
-      (get-buffer-create ceemme-buffer-name)
-    (with-current-buffer ceemme-buffer-name
-      (setq buffer-read-only nil))))
+  (with-current-buffer (get-buffer-create ceemme-buffer-name)
+    (setq buffer-read-only nil)
+    (current-buffer)))
 
 (defsubst ceemme-out-buffer ()
-  (prog1
-      (get-buffer-create ceemme-out-buffer-name)
-    (with-current-buffer ceemme-out-buffer-name
-      (setq buffer-read-only nil))))
+  (with-current-buffer (get-buffer-create ceemme-out-buffer-name)
+    (setq buffer-read-only nil)
+    (current-buffer)))
 
 (defvar ceemme-mark-faces
-  '(('applied ceemme-applied-face)
-    ('ignore ceemme-ignore-face)
-    ('partly ceemme-partly-face)))
+  '((applied ceemme-applied-face)
+    (ignore ceemme-ignore-face)
+    (partly ceemme-partly-face)))
   
 (defface ceemme-applied-face
   '((t :background "dark green"))
@@ -131,9 +136,9 @@
   "Applied face.")
 
 (defvar ceemme-key->symbol
-  '((?a 'applied)
-    (?i 'ignore)
-    (?p 'partly)))
+  '((?a applied)
+    (?i ignore)
+    (?p partly)))
 
 (defvar ceemme-mode-map
   (let ((map (make-keymap)))
@@ -146,6 +151,7 @@
     (define-key map [(t)] 'ceemme-test-patch)
     (define-key map [(a)] 'ceemme-apply)
     (define-key map [(c)] 'ceemme-commit-message)
+    (define-key map [(v)] 'ceemme-vc-dir)
     map)
   "keymap")
 
@@ -188,6 +194,11 @@
     (if (overlay-get ov 'invisible)
 	(overlay-put ov 'invisible nil)
       (overlay-put ov 'invisible t))))
+
+(defun ceemme-vc-dir ()
+  (interactive)
+  (message "Calling vc-dir on %s" ceemme-to)
+  (vc-dir ceemme-to))
 
 (defun ceemme-commit-message ()
   (interactive)
@@ -239,12 +250,21 @@
     (looking-at "\\s-*\\([0-9.]+\\):")
     (match-string-no-properties 1)))
 
+(defun ceemme-is-merge ()
+  (save-excursion
+    (beginning-of-line)
+    (search-forward "[merge]" (point-at-eol) t)))
+
 (defun ceemme-save-state ()
   (with-temp-buffer
     (prin1 ceemme-state (current-buffer))
+    ;; Just cosmetics to make it more human readable
+    (goto-char (point-min))
+    (while (search-forward ")" nil t)
+      (insert "\n"))
     (write-region (point-min) (point-max)
-		  (concat ceemme-cedet-repo "/ceemme-state"))
-    (message "Saved ceemme state to %s." (concat ceemme-cedet-repo "/ceemme-state"))))
+		  (expand-file-name "ceemme-state" ceemme-to ))
+    (message "Saved ceemme state to %s." (expand-file-name "ceemme-state" ceemme-to))))
 
 (defun ceemme-show-commands ()
   (interactive)
@@ -260,6 +280,7 @@
 	    "m - Mark commit\n"
 	    "c - Generate commit message\n"
 	    "h - Hide/Unhide all marked commits\n"
+	    "v - Call vc-dir on target repository\n"
 	    "? - This")))
 
 (defun ceemme-mark-revno (mark)
@@ -271,7 +292,8 @@
     (unless mark
       (error "Unknown mark."))
     (when (or (equal mark 'partly)
-	      (equal mark 'ignore))
+	      (and (equal mark 'ignore)
+		   (not (ceemme-is-merge))))
       (setq comment (read-from-minibuffer "Comment: ")))
     (if entry
 	(setcdr entry (list mark comment))
@@ -359,12 +381,12 @@
   (eshell-flatten-list
    (append
     (ceemme-get-cedet-files-under
-     (concat ceemme-emacs-repo "/lisp/cedet"))
+     (concat ceemme-emacs-trunk "/lisp/cedet"))
     (mapcar
      (lambda (x)
-       (concat ceemme-emacs-repo "/lisp/emacs-lisp/" x))
+       (concat ceemme-emacs-trunk "/lisp/emacs-lisp/" x))
      (directory-files
-      (concat ceemme-emacs-repo "/lisp/emacs-lisp")
+      (concat ceemme-emacs-trunk "/lisp/emacs-lisp")
       nil "eieio.*\\.el$")))))
 
 (defun ceemme-get-cedet-files-under (dir)
@@ -442,11 +464,11 @@
   (setq font-lock-defaults '(ceemme-mode-font-lock-keywords)))
 
 (defun ceemme-load-state ()
-  (when (file-exists-p (concat ceemme-cedet-repo "/ceemme-state"))
+  (when (file-exists-p (expand-file-name "ceemme-state" ceemme-to))
     (with-temp-buffer
       (insert "(setq ceemme-state '")
-      (insert-file-contents (concat ceemme-cedet-repo "/ceemme-state"))
-      (goto-char ((point-max)))
+      (insert-file-contents (expand-file-name "ceemme-state" ceemme-to))
+      (goto-char (point-max))
       (insert ")")
       (eval-buffer))))
 
@@ -465,16 +487,18 @@
   (erase-buffer)
   (if (eq ceemme-merge-direction 'e2c)
       (setq ceemme-cedet-files (ceemme-build-filelist)
-	    ceemme-from ceemme-emacs-repo
-	    ceemme-to ceemme-cedet-repo)
+	    ceemme-from ceemme-emacs-trunk
+	    ceemme-to (expand-file-name "from-emacs" ceemme-cedet-repo))
     (setq ceemme-cedet-files
 	  (ceemme-filelist-c2e
 	   (ceemme-build-filelist))
-	  ceemme-from ceemme-cedet-repo
-	  ceemme-to ceemme-emacs-repo))
+	  ceemme-from (expand-file-name "trunk" ceemme-cedet-repo)
+	  ceemme-to (expand-file-name "to-emacs" ceemme-cedet-repo)))
   (if (and (eq ceemme-merge-direction 'e2c)
-	   (file-exists-p ceemme-emacs-log-file))
+	   (file-exists-p ceemme-emacs-log-file)
+	   (y-or-n-p "Use cached Emacs revisions? "))
       (insert-file-contents ceemme-emacs-log-file)
+    (message "Generating list of revisions.")
     (if (eq ceemme-merge-direction 'e2c)
 	(ceemme-call-bzr-cedet-files "log" "-n0" "--line" "-r"
 				     (format "%d.." ceemme-first-emacs-revision))
