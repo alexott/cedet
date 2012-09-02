@@ -74,8 +74,7 @@ Argument CH-PREFIX is another character prefix to display."
 
 ;;; CLASS COMPLETION / DOCUMENTATION
 
-;;;###autoload
-(defalias 'describe-class 'eieio-describe-class)
+;;;###autoload(defalias 'describe-class 'eieio-describe-class)
 
 ;;;###autoload
 (defun eieio-describe-class (class &optional headerfcn)
@@ -328,8 +327,7 @@ are not abstract."
 ;;; METHOD COMPLETION / DOC
 
 (defalias 'describe-method 'eieio-describe-generic)
-;;;###autoload
-(defalias 'describe-generic 'eieio-describe-generic)
+;;;###autoload(defalias 'describe-generic 'eieio-describe-generic)
 (defalias 'eieio-describe-method 'eieio-describe-generic)
 
 ;;;###autoload
