@@ -306,7 +306,7 @@ are from nesting data types."
 		   (miniscope (semantic-scope-cache "mini"))
 		   ptag)
 
-	      ;; Find the next entry in the refereneced type for
+	      ;; Find the next entry in the referenced type for
 	      ;; our function, and append to return list till our
 	      ;; returnlist is empty.
 	      (while snlist
@@ -728,7 +728,7 @@ The class returned from the scope calculation is variable
 	      (oset scopecache localargs localargs)
 	      (oset scopecache localvar localvar)
 	      )))
-	;; Make sure we become dependant on the typecache.
+	;; Make sure we become dependent on the typecache.
 	(semanticdb-typecache-add-dependant scopecache)
 	;; Handy debug output.
 	(when (cedet-called-interactively-p 'any)

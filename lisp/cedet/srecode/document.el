@@ -167,7 +167,7 @@ doesn't always work correctly."
     ("str\\(ing\\)?" . "string")
     ("use?r" . "user")
     ("num\\(ber\\)?" . "number")
-    ("\\(^\\|\\s-\\)id\\($\\|\\s-\\)" . "Identifier") ;complex cause ;commen sylable
+    ("\\(^\\|\\s-\\)id\\($\\|\\s-\\)" . "Identifier") ;complex cause ;commen syllable
     )
   "List of common English abbreviations or full words.
 These are nouns (as opposed to verbs) for use in creating expanded
@@ -698,7 +698,7 @@ allocating something based on its type."
 				 (cdr (car al)))))
 	    (setq al nil)))
       (setq al (cdr al)))
-    ;; add tailers to names which are obviously returning something.
+    ;; add trailers to names which are obviously returning something.
     (if tailit
 	(progn
 	  (setq al srecode-document-autocomment-return-last-alist)

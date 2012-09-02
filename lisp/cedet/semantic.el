@@ -441,7 +441,7 @@ RETURNONERROR specifies that parsing should stop on the first
 unmatched syntax encountered.  When nil, parsing skips the syntax,
 adding it to the unmatched syntax cache.
 
-Must return a list of semantic tags wich have been cooked
+Must return a list of semantic tags which have been cooked
 \(repositioned properly) but which DO NOT HAVE OVERLAYS associated
 with them.  When overloading this function, use `semantic--tag-expand'
 to cook raw tags.")
@@ -686,7 +686,7 @@ Does nothing if the current buffer doesn't need reparsing."
 		    (save-excursion (semantic-fetch-tags))
 		    nil)
 	      ;; If we are here, it is because the lexical step failed,
-	      ;; proably due to unterminated lists or something like that.
+	      ;; probably due to unterminated lists or something like that.
 
 	      ;; We do nothing, and just wait for the next idle timer
 	      ;; to go off.  In the meantime, remember this, and make sure

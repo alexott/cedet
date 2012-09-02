@@ -452,7 +452,7 @@ continue processing recursively."
 	 ;; If val is nil, that's probably wrong.
 	 ;; Found a system header case where this was true.
 	 ((null val) "")
-	 ;; Debug wierd stuff.
+	 ;; Debug weird stuff.
 	 (t (debug)))
 	))
      ((stringp txt)
@@ -635,7 +635,7 @@ and what valid VAL values are."
   "Merge the tokens listed in TXT.
 TXT might contain further 'spp-symbol-merge, which will
 be merged recursively."
-  ;; We need to merge the tokens in the 'text segement together,
+  ;; We need to merge the tokens in the 'text segment together,
   ;; and produce a single symbol from it.
   (mapconcat (lambda (tok)
 	       (cond

@@ -165,7 +165,7 @@
 ;;
 ;; %type  <punctuation> syntax "\\(\\s.\\|\\s$\\|\\s'\\)+" matchdatatype string
 ;;
-;; ;; Some punctuations based on the type defines above
+;; ;; Some punctuation based on the type defines above
 ;;
 ;; %token <punctuation> NOT         "!"
 ;; %token <punctuation> NOTEQ       "!="
@@ -1250,7 +1250,7 @@ they are comment end characters) AND when you want whitespace tokens."
   (if (eq (semantic-lex-token-class (car semantic-lex-token-stream))
 	  'whitespace)
       ;; Merge whitespace tokens together if they are adjacent.  Two
-      ;; whitespace tokens may be sperated by a comment which is not in
+      ;; whitespace tokens may be separated by a comment which is not in
       ;; the token stream.
       (setcdr (semantic-lex-token-bounds (car semantic-lex-token-stream))
               (match-end 0))
@@ -1273,7 +1273,7 @@ they are comment end characters)."
   (if (eq (semantic-lex-token-class (car semantic-lex-token-stream))
 	  'whitespace)
       ;; Merge whitespace tokens together if they are adjacent.  Two
-      ;; whitespace tokens may be sperated by a comment which is not in
+      ;; whitespace tokens may be separated by a comment which is not in
       ;; the token stream.
       (progn
         (setq semantic-lex-end-point (match-end 0))
@@ -1315,7 +1315,7 @@ and number formats."
 
 (define-lex-analyzer semantic-lex-punctuation-type
   "Detect and create a punctuation type token.
-Recognized punctuations are defined in the current table of lexical
+Recognized punctuation is defined in the current table of lexical
 types, as the value of the `punctuation' token type."
   (and (looking-at "\\(\\s.\\|\\s$\\|\\s'\\)+")
        (let* ((key (match-string 0))
@@ -1706,7 +1706,7 @@ If there is no error, then the last value of FORMS is returned."
                       nil))))
        ;; Great Sadness.  Assume that FORMS execute within the
        ;; confines of the current buffer only!  Mark this thing
-       ;; unparseable iff the special symbol was thrown.  This
+       ;; unparsable iff the special symbol was thrown.  This
        ;; will prevent future calls from parsing, but will allow
        ;; then to still return the cache.
        (when ,ret

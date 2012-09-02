@@ -431,7 +431,7 @@ See `semantic-tag-static-p'."
 ;;;###autoload
 (define-overloadable-function semantic-tag-prototype-p (tag)
   "Return non nil if TAG is a prototype.
-For some laguages, such as C, a prototype is a declaration of
+For some languages, such as C, a prototype is a declaration of
 something without an implementation."
   )
 
