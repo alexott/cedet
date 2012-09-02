@@ -91,6 +91,9 @@
 (defvar ceemme-patch-out-regexp5
   "^\\(Hunk #[0-9]+\\) \\(ignored\\) at.*$")
 
+(defvar ceemme-merge-from-trunk-regexp
+  "\\[merge\\]\\s-*[mM]erge \\(from \\)?[tT]runk")
+
 (defvar ceemme-patch-program "/usr/bin/patch")
 
 ;; Direction of merges; can be 'e2c or 'c2e.
@@ -98,8 +101,7 @@
 
 (defvar ceemme-log-entries nil)
 
-;;(defvar ceemme-first-emacs-revision 97781)
-(defvar ceemme-first-emacs-revision 105000)
+(defvar ceemme-first-emacs-revision 106349)
 (defvar ceemme-first-cedet-revision 7000)
 
 (defvar ceemme-buffer-name "*ceemme main*")
@@ -122,7 +124,7 @@
   '((applied ceemme-applied-face)
     (ignore ceemme-ignore-face)
     (partly ceemme-partly-face)))
-  
+
 (defface ceemme-applied-face
   '((t :background "dark green"))
   "Applied face.")
@@ -147,6 +149,7 @@
     (define-key map [(f)] 'ceemme-show-affected-files)
     (define-key map [(\?)] 'ceemme-show-commands)
     (define-key map [(m)] 'ceemme-mark-revno)
+    (define-key map [(i)] 'ceemme-ignore-merge-from-trunk)
     (define-key map [(h)] 'ceemme-toggle-visibility)
     (define-key map [(t)] 'ceemme-test-patch)
     (define-key map [(a)] 'ceemme-apply)
@@ -278,12 +281,13 @@
 	    "t - Test: Dry run of patch\n"
 	    "a - Apply this patch\n"
 	    "m - Mark commit\n"
+	    "i - Ignore all \"merge from trunk\" commits\n"
 	    "c - Generate commit message\n"
 	    "h - Hide/Unhide all marked commits\n"
 	    "v - Call vc-dir on target repository\n"
 	    "? - This")))
 
-(defun ceemme-mark-revno (mark)
+(defun ceemme-mark-revno (mark &optional dontsave)
   (interactive "cMark (a=applied, p=partly applied, i=ignore): ")
   (let* ((revno (ceemme-get-revno))
 	 (entry (assoc revno ceemme-state))
@@ -299,6 +303,20 @@
 	(setcdr entry (list mark comment))
       (push (list revno mark comment) ceemme-state)))
   (ceemme-set-mark-overlays)
+  (unless dontsave
+    (ceemme-save-state)))
+
+(defun ceemme-ignore-merge-from-trunk ()
+  (interactive)
+  (goto-char (point-min))
+  (while (not (eobp))
+    (let* ((revno (ceemme-get-revno))
+	   (entry (assoc revno ceemme-state)))
+      (when (and (not entry)
+		 (re-search-forward ceemme-merge-from-trunk-regexp
+				    (point-at-eol) t))
+	(ceemme-mark-revno ?i t))
+      (forward-line 1)))
   (ceemme-save-state))
 
 (defun ceemme-set-mark-overlays ()
