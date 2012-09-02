@@ -359,6 +359,7 @@
   (interactive)
   (let ((revno (ceemme-get-revno)))
       (pop-to-buffer (ceemme-out-buffer))
+      (setq default-directory ceemme-to)
       (erase-buffer)
       (ceemme-call-bzr-cedet-files "diff" "-c" revno)
       (goto-char (point-min))
@@ -427,7 +428,10 @@
   (save-excursion
     (goto-char (point-min))
     (if (eq ceemme-merge-direction 'e2c)
-	(while (re-search-forward "^[+=-]\\{3\\} \\(lisp/emacs-lisp/\\)" nil t)
+	(while (re-search-forward
+		(concat "^[+=-]\\{3\\} "
+			"\\(?:modified file '\\)?"
+			"\\(lisp/emacs-lisp/\\)") nil t)
 	  (replace-match "lisp/eieio/" nil nil nil 1))
       (while (re-search-forward "^[+=-]\\{3\\} \\(lisp/eieio/\\)" nil t)
 	(replace-match "lisp/emacs-lisp/" nil nil nil 1)))))
