@@ -249,7 +249,7 @@ Return the name of TAG found in the toplevel STREAM."
 
 (define-overloadable-function semantic-tag-calculate-parent (tag)
   "Attempt to calculate the parent of TAG.
-The default behavior (if not overriden with `tag-calculate-parent')
+The default behavior (if not overridden with `tag-calculate-parent')
 is to search a buffer found with TAG, and if externally defined,
 search locally, then semanticdb for that tag (when enabled.)")
 
@@ -334,7 +334,7 @@ buffer."
 	  t)) )))
 
 (defun semantic-tag-protected-p (tag protection &optional parent)
-  "Non-nil if TAG is is protected.
+  "Non-nil if TAG is protected.
 PROTECTION is a symbol which can be returned by the method
 `semantic-tag-protection'.
 PARENT is the parent data type which contains TAG.
@@ -342,7 +342,7 @@ PARENT is the parent data type which contains TAG.
 For these PROTECTIONs, true is returned if TAG is:
 @table @asis
 @item nil
-  Always true
+  Always true.
 @item  private
   True if nil.
 @item protected
@@ -431,7 +431,7 @@ See `semantic-tag-static-p'."
 ;;;###autoload
 (define-overloadable-function semantic-tag-prototype-p (tag)
   "Return non nil if TAG is a prototype.
-For some laguages, such as C, a prototype is a declaration of
+For some languages, such as C, a prototype is a declaration of
 something without an implementation."
   )
 

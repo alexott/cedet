@@ -887,7 +887,7 @@ If PARENT is non-nil, it is somehow related as a parent to thing."
   "Keymap used in data-debug.")
 
 (defcustom data-debug-mode-hook nil
-  "*Hook run when data-debug starts."
+  "Hook run when data-debug starts."
   :group 'data-debug
   :type 'hook)
 
@@ -933,7 +933,7 @@ If PARENT is non-nil, it is somehow related as a parent to thing."
   (skip-chars-forward " *-><[]" (point-at-eol)))
 
 (defun data-debug-prev ()
-  "Go to the next line in the Ddebug buffer."
+  "Go to the previous line in the Ddebug buffer."
   (interactive)
   (forward-line -1)
   (beginning-of-line)
@@ -990,7 +990,7 @@ Do nothing if already expanded."
 
 (defun data-debug-contract-current-line ()
   "Contract the current line (if possible).
-Do nothing if already expanded."
+Do nothing if already contracted."
   (when (and (data-debug-current-line-expanded-p)
 	     ;; Don't contract if the current line is not expandable.
 	     (get-text-property (point) 'ddebug-function))
@@ -1080,11 +1080,11 @@ If the result is a list or vector, then use the data debugger to display it."
       (setq values (cons (eval expr) values))
     (let ((old-value (make-symbol "t")) new-value)
       ;; Bind debug-on-error to something unique so that we can
-      ;; detect when evaled code changes it.
+      ;; detect when evalled code changes it.
       (let ((debug-on-error old-value))
 	(setq values (cons (eval expr) values))
 	(setq new-value debug-on-error))
-      ;; If evaled code has changed the value of debug-on-error,
+      ;; If evalled code has changed the value of debug-on-error,
       ;; propagate that change to the global binding.
       (unless (eq old-value new-value)
 	(setq debug-on-error new-value))))

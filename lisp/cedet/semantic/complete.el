@@ -54,7 +54,7 @@
 ;;
 ;; Here, we will treat each section separately (excluding D)
 ;; They can then be strung together in user-visible commands to
-;; fulfil specific needs.
+;; fulfill specific needs.
 ;;
 ;; COLLECTORS:
 ;;
@@ -892,7 +892,7 @@ making the action of homing in on a token faster.")
 This completion is calculated and saved for future use.")
    (last-whitespace-completion :type (or null string)
 			       :documentation "The last whitespace completion.
-For partial completion, SPC will disabiguate over whitespace type
+For partial completion, SPC will disambiguate over whitespace type
 characters.  This is the last calculated version.")
    (current-exact-match :type list
 			:protection :protected
@@ -1074,7 +1074,7 @@ Output must be in semanticdb Find result format."
   ((obj semantic-collector-abstract) prefix)
   "For OBJ, do whitespace completion based on PREFIX.
 This implies that if there are two completions, one matching
-the test \"preifx\\>\", and one not, the one matching the full
+the test \"prefix\\>\", and one not, the one matching the full
 word version of PREFIX will be chosen, and that text returned.
 This function requires that `semantic-collector-calculate-completions'
 has been run first."
@@ -1372,7 +1372,7 @@ to click on the items to aid in completion.")
 (defmethod semantic-displayor-show-request ((obj semantic-displayor-traditional))
   "A request to show the current tags table."
 
-  ;; NOTE TO SELF.  Find the character to type next, and emphesize it.
+  ;; NOTE TO SELF.  Find the character to type next, and emphasize it.
 
   (with-output-to-temp-buffer "*Completions*"
     (display-completion-list
@@ -1396,7 +1396,7 @@ given tag, by highlighting its location.")
    )
   "Abstract displayor supporting `focus'.
 A displayor which has the ability to focus in on one tag.
-Focusing is a way of differentiationg between multiple tags
+Focusing is a way of differentiating among multiple tags
 which have the same name."
   :abstract t)
 
@@ -1497,7 +1497,7 @@ one in the source buffer."
 	 (tag (cdr nt))
 	 (table (car nt))
 	 (curwin (selected-window)))
-    ;; If we fail to normalize, resete.
+    ;; If we fail to normalize, reset.
     (when (not tag) (setq table rtable tag rtag))
     ;; Do the focus.
     (let ((buf (or (semantic-tag-buffer tag)

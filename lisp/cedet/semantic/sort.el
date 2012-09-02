@@ -1,6 +1,6 @@
 ;;; semantic/sort.el --- Utilities for sorting and re-arranging tag tables.
 
-;;; Copyright (C) 1999-2005, 2007-2011 Free Software Foundation, Inc.
+;;; Copyright (C) 1999-2005, 2007-2012 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax
@@ -229,7 +229,7 @@ unmodified as components of their parent tags."
     (mapc (lambda (tag)
 	    (let ((components (semantic-tag-components tag)))
 	      (if (and components
-		       ;; unpositined tags can be hazardous to
+		       ;; unpositioned tags can be hazardous to
 		       ;; completion.  Do we need any type of tag
 		       ;; here?  - EL
 		       (semantic-tag-with-position-p (car components)))

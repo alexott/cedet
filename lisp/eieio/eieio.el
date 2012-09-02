@@ -56,7 +56,7 @@
 
 (eval-and-compile
 ;; About the above.  EIEIO must process its own code when it compiles
-;; itself, thus, by eval-and-compiling outselves, we solve the problem.
+;; itself, thus, by eval-and-compiling ourselves, we solve the problem.
 
 ;; Compatibility
 (if (fboundp 'compiled-function-arglist)
@@ -78,7 +78,7 @@
 ;;
 
 (defvar eieio-hook nil
-  "*This hook is executed, then cleared each time `defclass' is called.")
+  "This hook is executed, then cleared each time `defclass' is called.")
 
 (defvar eieio-error-unsupported-class-tags nil
   "Non-nil to throw an error if an encountered tag is unsupported.
@@ -86,7 +86,7 @@ This may prevent classes from CLOS applications from being used with EIEIO
 since EIEIO does not support all CLOS tags.")
 
 (defvar eieio-skip-typecheck nil
-  "*If non-nil, skip all slot typechecking.
+  "If non-nil, skip all slot typechecking.
 Set this to t permanently if a program is functioning well to get a
 small speed increase.  This variable is also used internally to handle
 default setting for optimization purposes.")
@@ -379,7 +379,7 @@ It creates an autoload function for CNAME's constructor."
 	  (aset newc class-parent (cons SC (aref newc class-parent)))
 	  )
 
-	;; turn this into a useable self-pointing symbol
+	;; turn this into a usable self-pointing symbol
 	(set cname cname)
 
 	;; Store the new class vector definition into the symbol.  We need to
@@ -494,7 +494,7 @@ See `defclass' for more information."
 	;; save parent in child
 	(aset newc class-parent (list eieio-default-superclass))))
 
-    ;; turn this into a useable self-pointing symbol
+    ;; turn this into a usable self-pointing symbol
     (set cname cname)
 
     ;; These two tests must be created right away so we can have self-
@@ -555,7 +555,7 @@ See `defclass' for more information."
       (put cname 'cl-deftype-handler
 	   (list 'lambda () `(list 'satisfies (quote ,csym)))))
 
-    ;; before adding new slots, lets add all the methods and classes
+    ;; before adding new slots, let's add all the methods and classes
     ;; in from the parent class
     (eieio-copy-parents-into-subclass newc superclasses)
 
@@ -838,7 +838,7 @@ if default value is nil."
   ;; Make sure we duplicate those items that are sequences.
   (condition-case nil
       (if (sequencep d) (setq d (copy-sequence d)))
-    ;; This copy can fail on a cons cell with a non-cons in the cdr.  Lets skip it if it doesn't work.
+    ;; This copy can fail on a cons cell with a non-cons in the cdr.  Let's skip it if it doesn't work.
     (error nil))
   (if (sequencep type) (setq type (copy-sequence type)))
   (if (sequencep cust) (setq cust (copy-sequence cust)))
@@ -970,7 +970,7 @@ if default value is nil."
 	  (progn
 	    (eieio-perform-slot-validation-for-default a type value skipnil)
 	    ;; Here we have found a :class version of a slot.  This
-	    ;; requires a very different aproach.
+	    ;; requires a very different approach.
 	    (aset newc class-class-allocation-a (cons a (aref newc class-class-allocation-a)))
 	    (aset newc class-class-allocation-doc (cons doc (aref newc class-class-allocation-doc)))
 	    (aset newc class-class-allocation-type (cons type (aref newc class-class-allocation-type)))
@@ -1004,7 +1004,7 @@ if default value is nil."
 	      ;; EML - Note: the only reason to override a class bound slot
 	      ;;       is to change the default, so allow unbound in.
 
-	      ;; If we have a repeat, only update the vlaue...
+	      ;; If we have a repeat, only update the value...
 	      (eieio-perform-slot-validation-for-default a tp value skipnil)
 	      (setcar dp value))
 
@@ -1486,7 +1486,7 @@ created by the :initarg tag."
 	 (c (eieio-slot-name-index class obj slot)))
     (if (not c)
 	;; It might be missing because it is a :class allocated slot.
-	;; Lets check that info out.
+	;; Let's check that info out.
 	(if (setq c (eieio-class-slot-name-index class slot))
 	    ;; Oref that slot.
 	    (aref (aref (class-v class) class-class-allocation-values) c)
@@ -1519,7 +1519,7 @@ Fills in OBJ's SLOT with its default value."
 	 (c (eieio-slot-name-index cl obj slot)))
     (if (not c)
 	;; It might be missing because it is a :class allocated slot.
-	;; Lets check that info out.
+	;; Let's check that info out.
 	(if (setq c
 		  (eieio-class-slot-name-index cl slot))
 	    ;; Oref that slot.
@@ -1565,7 +1565,7 @@ Fills in OBJ's SLOT with VALUE."
   (let ((c (eieio-slot-name-index (object-class-fast obj) obj slot)))
     (if (not c)
 	;; It might be missing because it is a :class allocated slot.
-	;; Lets check that info out.
+	;; Let's check that info out.
 	(if (setq c
 		  (eieio-class-slot-name-index (aref obj object-class) slot))
 	    ;; Oset that slot.
@@ -1597,7 +1597,7 @@ Fills in the default value in CLASS' in SLOT with VALUE."
 	 (c (eieio-slot-name-index class nil slot)))
     (if (not c)
 	;; It might be missing because it is a :class allocated slot.
-	;; Lets check that info out.
+	;; Let's check that info out.
 	(if (setq c (eieio-class-slot-name-index class slot))
 	    (progn
 	      ;; Oref that slot.
@@ -2060,7 +2060,7 @@ During executions, the list is first generated, then as each next method
 is called, the next method is popped off the stack.")
 
 (defvar eieio-pre-method-execution-hooks nil
-  "*Hooks run just before a method is executed.
+  "Hooks run just before a method is executed.
 The hook function must accept one argument, the list of forms
 about to be executed.")
 
@@ -2591,7 +2591,7 @@ This is usually a symbol that starts with `:'."
 
 ;;;
 ;; We want all objects created by EIEIO to have some default set of
-;; behaviours so we can create object utilities, and allow various
+;; behaviors so we can create object utilities, and allow various
 ;; types of error checking.  To do this, create the default EIEIO
 ;; class, and when no parent class is specified, use this as the
 ;; default.  (But don't store it in the other classes as the default,

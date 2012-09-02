@@ -1,6 +1,6 @@
 ;;; srecode/compile --- Compilation of srecode template files.
 
-;; Copyright (C) 2005, 2007-2011  Free Software Foundation, Inc.
+;; Copyright (C) 2005, 2007-2012  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: codegeneration
@@ -62,7 +62,7 @@
    (dictionary :initarg :dictionary
 	       :type (or null srecode-dictionary)
 	       :documentation
-	       "List of section dictinaries.
+	       "List of section dictionaries.
 The compiled template can contain lists of section dictionaries,
 or values that are expected to be passed down into different
 section macros.  The template section dictionaries are merged in with

@@ -253,8 +253,8 @@ And also manages services that depend on tag values."
 
 	;; NOTE ON COMMENTED SAFE HERE
 	;; We used to not execute the services if the buffer was
-	;; unparseable.  We now assume that they are lexically
-	;; safe to do, because we have marked the buffer unparseable
+	;; unparsable.  We now assume that they are lexically
+	;; safe to do, because we have marked the buffer unparsable
 	;; if there was a problem.
 	;;(when safe
 	(dolist (service semantic-idle-scheduler-queue)
@@ -434,7 +434,7 @@ datasets."
 
 (defun semantic-idle-scheduler-work-parse-neighboring-files ()
   "Parse all the files in similar directories to buffers being edited."
-  ;; Lets check to see if EDE matters.
+  ;; Let's check to see if EDE matters.
   (let ((ede-auto-add-method 'never))
     (dolist (a auto-mode-alist)
       (when (eq (cdr a) major-mode)
@@ -483,7 +483,7 @@ Does nothing if the current buffer doesn't need reparsing."
       ;; do them here, then all the bovination hooks are not run, and
       ;; we save lots of time.
       (cond
-       ;; If the buffer was previously marked unparseable,
+       ;; If the buffer was previously marked unparsable,
        ;; then don't waste our time.
        ((semantic-parse-tree-unparseable-p)
 	nil)
@@ -522,7 +522,7 @@ Does nothing if the current buffer doesn't need reparsing."
 			(save-excursion (semantic-fetch-tags))
 			nil)
 		  ;; If we are here, it is because the lexical step failed,
-		  ;; proably due to unterminated lists or something like that.
+		  ;; probably due to unterminated lists or something like that.
 
 		  ;; We do nothing, and just wait for the next idle timer
 		  ;; to go off.  In the meantime, remember this, and make sure

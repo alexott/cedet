@@ -99,7 +99,7 @@ Optional HEADERFCN should be called to insert a few bits of info first."
       (princ (file-name-nondirectory (get class 'class-location)))
       (princ "'"))
     (terpri)
-    ;; Inheritence tree information
+    ;; Inheritance tree information
     (let ((pl (class-parents class)))
       (when pl
 	(princ " Inherits from ")

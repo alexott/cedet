@@ -258,7 +258,7 @@ Return the defined symbol as a special spp lex token."
 			(goto-char (match-end 0))
 			(looking-at "(")))
 	   (semantic-lex-spp-replacements-enabled nil)
-	   ;; Temporarilly override the lexer to include
+	   ;; Temporarily override the lexer to include
 	   ;; special items needed inside a macro
 	   (semantic-lex-analyzer #'semantic-cpp-lexer)
 	   (raw-stream
@@ -273,7 +273,7 @@ Return the defined symbol as a special spp lex token."
 						   (point)))))
 	   )
 
-      ;; Only do argument checking if the paren was immediatly after
+      ;; Only do argument checking if the paren was immediately after
       ;; the macro name.
       (if with-args
 	  (semantic-lex-spp-first-token-arg-list (car raw-stream)))
@@ -543,7 +543,7 @@ Uses known macro tables in SPP to determine what block to skip."
 	 )
     (if (or (and ifdef (not (semantic-lex-spp-symbol-p sym)))
 	    (and ifndef (semantic-lex-spp-symbol-p sym)))
-	;; The if indecates to skip this preprocessor section
+	;; The if indicates to skip this preprocessor section.
 	(let ((pt nil))
 	  ;; (message "%s %s yes" ift sym)
 	  (beginning-of-line)
@@ -850,7 +850,7 @@ as for the parent."
 		(setq depth 0)
 
 		;; This is a copy of semantic-parse-region-default where we
-		;; are doing something special with the lexication of the
+		;; are doing something special with the lexing of the
 		;; contents of the semantic-list token.  Stuff not used by C
 		;; removed.
 		(let ((tokstream
@@ -1061,7 +1061,7 @@ If so, extract it, and replace it with a reference to that type.
 Thus, 'struct A { int a; } B;' will create 2 toplevel tags, one
 is type A, and the other variable B where the :type of B is just
 a type tag A that is a prototype, and the actual struct info of A
-is it's own toplevel tag.  This function will return (cons A B)."
+is its own toplevel tag.  This function will return (cons A B)."
   (let* ((basetype (semantic-tag-type tag))
 	 (typeref nil)
 	 (ret nil)
@@ -1173,7 +1173,7 @@ is it's own toplevel tag.  This function will return (cons A B)."
 			     (nth 1 (car names)) ; name
 			     "typedef"
 			     (semantic-tag-type-members tag)
-			     ;; parent is just tbe name of what
+			     ;; parent is just the name of what
 			     ;; is passed down as a tag.
 			     (list
 			      (semantic-tag-name
@@ -1311,7 +1311,7 @@ Optional argument STAR and REF indicate the number of * and & in the typedef."
 	      ;; `throws' as a common name for things that toss
 	      ;; exceptions about.
 	      :throws (nth 5 tokenpart)
-	      ;; Reemtrant is a C++ thingy.  Add it here
+	      ;; Reentrant is a C++ thingy.  Add it here
 	      :reentrant-flag (if (member "reentrant" (nth 6 tokenpart)) t)
 	      ;; A function post-const is funky.  Try stuff
 	      :methodconst-flag (if (member "const" (nth 6 tokenpart)) t)
@@ -1558,7 +1558,7 @@ Optional PARENT and COLOR as specified with
   "Return non-nil if TAG is considered abstract.
 PARENT is tag's parent.
 In C, a method is abstract if it is `virtual', which is already
-handled.  A class is abstract iff it's destructor is virtual."
+handled.  A class is abstract iff its destructor is virtual."
   (cond
    ((eq (semantic-tag-class tag) 'type)
     (require 'semantic/find)
@@ -1838,7 +1838,7 @@ DO NOT return the list of tags encompassing point."
 	(setq tagreturn (cons (semantic-tag-type (car (semanticdb-find-result-nth tmp idx))) tagreturn))
 	(setq idx (1+ idx)))
       )
-    ;; Use the encompased types around point to also look for using statements.
+    ;; Use the encompassed types around point to also look for using statements.
     ;;(setq tagreturn (cons "bread_name" tagreturn))
     (while (cdr tagsaroundpoint)  ; don't search the last one
       (setq tmp (semantic-find-tags-by-class 'using (semantic-tag-components (car tagsaroundpoint))))

@@ -1,6 +1,6 @@
 ;;; semantic/wisent/comp.el --- GNU Bison for Emacs - Grammar compiler
 
-;; Copyright (C) 1984, 1986, 1989, 1992, 1995, 2000-2007, 2009-2011
+;; Copyright (C) 1984, 1986, 1989, 1992, 1995, 2000-2007, 2009-2012
 ;;   Free Software Foundation, Inc.
 
 ;; Author: David Ponce <david@dponce.com>
@@ -51,7 +51,7 @@
 ;; name space.  Elisp dynamic binding allows that ;-)
 
 ;; Here are simple macros to easily define and use set of variables
-;; binded locally, without all these "reference to free variable"
+;; bound locally, without all these "reference to free variable"
 ;; compiler warnings!
 
 (defmacro wisent-context-name (name)
@@ -553,7 +553,7 @@ S must be a vector of integers."
               N  Ns)))
     (setq N Np)))
 
-(defun wisent-inaccessable-symbols ()
+(defun wisent-inaccessible-symbols ()
   "Find out which productions are reachable and which symbols are used."
   ;; Starting with an empty set of productions and a set of symbols
   ;; which only has the start symbol in it, iterate over all
@@ -712,7 +712,7 @@ S must be a vector of integers."
         nuseless-productions  0)
 
   (wisent-useless-nonterminals)
-  (wisent-inaccessable-symbols)
+  (wisent-inaccessible-symbols)
 
   (when (> (+ nuseless-nonterminals nuseless-productions) 0)
     (wisent-total-useless)
@@ -2643,7 +2643,7 @@ there are any reduce/reduce conflicts.")
 
 (defun wisent-print-results ()
   "Print information on generated parser.
-Report detailed informations if `wisent-verbose-flag' or
+Report detailed information if `wisent-verbose-flag' or
 `wisent-debug-flag' are non-nil."
   (when (or wisent-verbose-flag wisent-debug-flag)
     (wisent-print-useless))
