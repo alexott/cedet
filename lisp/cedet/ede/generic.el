@@ -113,7 +113,7 @@
 		:group (default build)
 		:documentation
 		"Command used to run something related to this project.")
-   ;; C target customixations
+   ;; C target customizations
    (c-include-path :initarg :c-include-path
 		   :initform nil
 		   :type list
@@ -257,7 +257,7 @@ All directories need at least one target.")
   "EDE Generic Project target for Misc files.
 All directories need at least one target.")
 
-;;; Automatic target aquisition.
+;;; Automatic target acquisition.
 (defun ede-generic-find-matching-target (class dir targets)
   "Find a target that is a CLASS and is in DIR in the list of TARGETS."
   (let ((match nil))
