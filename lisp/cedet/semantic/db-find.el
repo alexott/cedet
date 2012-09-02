@@ -580,7 +580,7 @@ a new path from the provided PATH."
 	  (setq ans (semanticdb-file-table
 		     (car systemdb)
 		     ;; I would expect most omniscient to return the same
-		     ;; thing reguardless of filename, but we may have
+		     ;; thing regardless of filename, but we may have
 		     ;; one that can return a table of all things the
 		     ;; current file needs.
 		     (buffer-file-name (current-buffer))))
@@ -680,7 +680,7 @@ Included databases are filtered based on `semanticdb-find-default-throttle'."
      ;;
      ;; NOTE: Not used if EDE is active!
      ((and (semanticdb-find-throttle-active-p 'project)
-	   ;; And dont do this if it is a system include.  Not supported by all languages,
+	   ;; And don't do this if it is a system include.  Not supported by all languages,
 	   ;; but when it is, this is a nice fast way to skip this step.
 	   (not (semantic-tag-include-system-p includetag))
 	   ;; Don't do this if we have an EDE project.

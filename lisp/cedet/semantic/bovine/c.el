@@ -1061,7 +1061,7 @@ If so, extract it, and replace it with a reference to that type.
 Thus, 'struct A { int a; } B;' will create 2 toplevel tags, one
 is type A, and the other variable B where the :type of B is just
 a type tag A that is a prototype, and the actual struct info of A
-is it's own toplevel tag.  This function will return (cons A B)."
+is its own toplevel tag.  This function will return (cons A B)."
   (let* ((basetype (semantic-tag-type tag))
 	 (typeref nil)
 	 (ret nil)
@@ -1558,7 +1558,7 @@ Optional PARENT and COLOR as specified with
   "Return non-nil if TAG is considered abstract.
 PARENT is tag's parent.
 In C, a method is abstract if it is `virtual', which is already
-handled.  A class is abstract iff it's destructor is virtual."
+handled.  A class is abstract iff its destructor is virtual."
   (cond
    ((eq (semantic-tag-class tag) 'type)
     (require 'semantic/find)
@@ -1838,7 +1838,7 @@ DO NOT return the list of tags encompassing point."
 	(setq tagreturn (cons (semantic-tag-type (car (semanticdb-find-result-nth tmp idx))) tagreturn))
 	(setq idx (1+ idx)))
       )
-    ;; Use the encompased types around point to also look for using statements.
+    ;; Use the encompassed types around point to also look for using statements.
     ;;(setq tagreturn (cons "bread_name" tagreturn))
     (while (cdr tagsaroundpoint)  ; don't search the last one
       (setq tmp (semantic-find-tags-by-class 'using (semantic-tag-components (car tagsaroundpoint))))
