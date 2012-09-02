@@ -187,7 +187,7 @@ Use `semantic-ctxt-scoped-types' to find types."
   (save-excursion
     (goto-char position)
     (let ((code-scoped-types nil))
-      ;; Lets ask if any types are currently scoped.  Scoped
+      ;; Let's ask if any types are currently scoped.  Scoped
       ;; classes and types provide their public methods and types
       ;; in source code, but are unrelated hierarchically.
       (let ((sp (semantic-ctxt-scoped-types)))
@@ -250,7 +250,7 @@ are from nesting data types."
       ;;    Analyze the stack of tags we are nested in as parents.
       ;;
 
-      ;; If we have a pparent tag, lets go there
+      ;; If we have a pparent tag, let's go there
       ;; an analyze that stack of tags.
       (when (and pparent (semantic-tag-with-position-p pparent))
 	(semantic-go-to-tag pparent)
@@ -415,7 +415,7 @@ implicit \"object\"."
 	  ))
       (setq typelist (cdr typelist)))
 
-    ;; Loop over the types (which should be sorted by postion
+    ;; Loop over the types (which should be sorted by position)
     ;; adding to the scopelist as we go, and using the scopelist
     ;; for additional searching!
     (while typelist2
@@ -427,9 +427,9 @@ implicit \"object\"."
 			  currentscope))
       (setq typelist2 (cdr typelist2)))
 
-    ;; Collect all the types (class, etc) that are in our heratage.
+    ;; Collect all the types (class, etc) that are in our heritage.
     ;; These are types that we can extract members from, not those
-    ;; delclared in using statements, or the like.
+    ;; declared in using statements, or the like.
     ;; Get the PARENTS including nesting scope for this location.
     (while parentlist
       (oset miniscope scope currentscope)

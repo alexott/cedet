@@ -70,7 +70,7 @@
 ;; subclasses `ede-generic-target'.  The slots `shortname' and
 ;; `extension' should be given new initial values.
 ;;
-;; Optionally, any target method used by EDE can then be overriden.
+;; Optionally, any target method used by EDE can then be overridden.
 ;; The ede-generic-target-c-cpp has some example methods setting up
 ;; the pre-processor map and system include path.
 ;;
@@ -141,7 +141,7 @@
 Return nil if there isn't one.
 Argument DIR is the directory it is created for.
 ROOTPROJ is nil, since there is only one project."
-  ;; Doesn't already exist, so lets make one.
+  ;; Doesn't already exist, so let's make one.
   (let* ((alobj ede-constructing)
 	 (this nil))
     (when (not alobj) (error "Cannot load generic project without the autoload instance"))
