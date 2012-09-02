@@ -654,7 +654,7 @@ will return empty string instead.")
 
 ;;; Macro Merging
 ;;
-;; Used when token streams from different macros include eachother.
+;; Used when token streams from different macros include each other.
 ;; Merged macro streams perform in place replacements.
 
 (defun semantic-lex-spp-merge-streams (raw-stream)
@@ -1095,7 +1095,7 @@ of type `spp-macro-undef' is to be created."
 ;;
 ;; These analyzers help a language define how include files
 ;; are identified.  These are ONLY for languages that perform
-;; an actual textual includesion, and not for imports.
+;; an actual textual inclusion, and not for imports.
 ;;
 ;; This section is supposed to allow the macros from the headers to be
 ;; added to the local dynamic macro table, but that hasn't been
