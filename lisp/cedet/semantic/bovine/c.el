@@ -254,6 +254,7 @@ Return the defined symbol as a special spp lex token."
       nil
     (let* ((name (buffer-substring-no-properties
 		  (match-beginning 1) (match-end 1)))
+	   (beginning-of-define (match-end 1))
 	   (with-args (save-excursion
 			(goto-char (match-end 0))
 			(looking-at "(")))
@@ -266,7 +267,7 @@ Return the defined symbol as a special spp lex token."
 						 (semantic-c-end-of-macro)
 						 ;; HACK - If there's a C comment after
 						 ;; the macro, do not parse it.
-						 (if (looking-back "/\\*.*")
+						 (if (looking-back "/\\*.*" beginning-of-define)
 						     (progn
 						       (goto-char (match-beginning 0))
 						       (1- (point)))
