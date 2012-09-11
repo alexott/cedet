@@ -1155,7 +1155,7 @@ Supplies the @code{INDENT} macro.  When @code{INDENT} is non-nil, then
 each line is individually indented with
 @code{indent-according-to-mode} during macro processing.
 
-@subsection Argument :blank
+@subsubsection Argument :blank
 
 Specifying this argument adds a special @code{:blank} handler at the
 beginning and end of the template.  This handler will insert @code{\n}
