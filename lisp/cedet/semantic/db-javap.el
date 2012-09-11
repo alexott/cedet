@@ -832,7 +832,7 @@ represent jar files."
 	   (ans nil)
 	   )
       ;; Get a list of paths together
-      (dolist (P (append edepaths edeclasspath))
+      (dolist (P (append edepaths edeclasspath semanticdb-javap-classpath))
 	(cond
 	 ;; Somtimes a null gets in.  Ignore it.
 	 ((null P)
