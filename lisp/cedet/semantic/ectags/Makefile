@@ -13,7 +13,7 @@ top=../../../
 ede_FILES=Project.ede Makefile
 
 ectags_LISP=db.el util.el lang.el lang2.el parse.el
-LOADPATH= ../../../speedbar/ ../../../eieio/ ../../ ../../
+LOADPATH= ../../../eieio/ ../../ ../../
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic/ectags
 

@@ -29,10 +29,5 @@
     :path ""
     :source '("eieio.texi")
     )
-   (ede-proj-target-makefile-info "speedbar-doc"
-    :name "speedbar-doc"
-    :path ""
-    :source '("speedbar.texi")
-    )
    )
   )
