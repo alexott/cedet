@@ -117,9 +117,6 @@ This is currently needed for the mozrepl omniscient database."
 	  
 ;;; Setup Function
 ;;
-;; This sets up the javascript parser
-(define-child-mode js-mode javascript-mode)
-
 ;; Since javascript-mode is an alias for js-mode, let it inherit all
 ;; the overrides.
 (define-child-mode js-mode javascript-mode)
