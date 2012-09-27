@@ -38,9 +38,9 @@
 (require 'semantic/format)
 (require 'pulse)
 (require 'semantic/senator)
+(require 'semantic/analyze/refs)
 (eval-when-compile
   (require 'semantic/analyze)
-  (require 'semantic/analyze/refs)
   (require 'semantic/find))
 
 (declare-function imenu--mouse-menu "imenu")
