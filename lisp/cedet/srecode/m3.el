@@ -53,4 +53,9 @@
 
 (provide 'srecode/m3)
 
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/m3"
+;; End:
+
 ;;; srecode-m3.el ends here
