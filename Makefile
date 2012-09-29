@@ -30,13 +30,14 @@ EMACSFLAGS=-batch --no-site-file -l cedet-remove-builtin.el
 LOADDEFS=loaddefs.el
 BOOTSTRAP=(progn (global-ede-mode) (find-file "$(CURDIR)/lisp/Project.ede") (ede-proj-regenerate) (find-file "$(CURDIR)/doc/texi/Project.ede") (ede-proj-regenerate))
 UTEST=(progn (add-to-list (quote load-path) "$(CURDIR)/tests") (add-to-list (quote load-path) "$(CURDIR)/tests/eieio") (require (quote cedet-utests)) (semantic-mode))
+SHOWVERSION=(message "Emacs version: %s %s on %s " emacs-version (bound-and-true-p emacs-bzr-version) (symbol-name system-type))
 RM=rm
 FIND=find
 INSTALL-INFO=install-info
 INFO_FILES=$(shell $(FIND) $(CURDIR)/doc/texi -type f -name '*.info')
 INFODIR=$(CURDIR)/doc/info
 
-all: clean-autoloads autoloads touch-makefiles compile info install-info
+all: showversion clean-autoloads autoloads touch-makefiles compile info install-info
 
 compile:
 	$(MAKE) -C lisp
@@ -101,3 +102,6 @@ itest-automake-batch:
 
 itest-android-batch:
 	cd $(CURDIR)/tests;./cit-test.sh Android --batch
+
+showversion:
+	@$(EMACS) -Q --batch --eval '$(SHOWVERSION)'
