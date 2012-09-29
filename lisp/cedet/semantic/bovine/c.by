@@ -41,6 +41,12 @@
 %package semantic-c-by
 %provide semantic/bovine/c-by
 
+%{
+  (declare-function semantic-c-reconstitute-token "semantic/bovine/c")
+  (declare-function semantic-c-reconstitute-template "semantic/bovine/c")
+  (declare-function semantic-expand-c-tag "semantic/bovine/c")
+}
+
 %languagemode  c-mode c++-mode arduino-mode
 %start         declaration
 %scopestart    codeblock
