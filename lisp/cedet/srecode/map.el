@@ -405,8 +405,8 @@ Return non-nil if the map changed."
 	)
   "Global load path for SRecode template files."
   :group 'srecode
-  :type '(repeat file)
-  :set 'srecode-map-load-path-set)
+  :type '(repeat file))
+;;  :set 'srecode-map-load-path-set)
 
 (provide 'srecode/map)
 
