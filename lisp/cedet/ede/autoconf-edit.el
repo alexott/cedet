@@ -26,7 +26,7 @@
 ;; for Emacses w/out autoconf mode built in.
 
 ;;; Code:
-(require 'autoconf)
+(require 'autoconf-mode "autoconf.el")
 (declare-function ede-srecode-setup "ede/srecode")
 (declare-function ede-srecode-insert "ede/srecode")
 
