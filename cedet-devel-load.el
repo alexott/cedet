@@ -41,7 +41,6 @@
   (add-to-list 'load-path CEDETDIR)
   (add-to-list 'load-path (expand-file-name "lisp/cedet" CEDETDIR))
   (add-to-list 'load-path (expand-file-name "lisp/eieio" CEDETDIR))
-  (add-to-list 'load-path (expand-file-name "lisp/common" CEDETDIR))
   (add-to-list 'load-path (expand-file-name "lisp/speedbar" CEDETDIR))
 
   (require 'eieio)
@@ -49,14 +48,14 @@
 
   ;; Load in all the loaddefs unless we're bootstrapping the system
   (unless (boundp 'cedet-bootstrap-in-progress)
-    (load-file (expand-file-name "lisp/eieio/loaddefs.el" CEDETDIR))
-    (load-file (expand-file-name "lisp/speedbar/loaddefs.el" CEDETDIR))
-    (load-file (expand-file-name "lisp/cedet/loaddefs.el" CEDETDIR))
-    (load-file (expand-file-name "lisp/cedet/ede/loaddefs.el" CEDETDIR))
-    (load-file (expand-file-name "lisp/cedet/cogre/loaddefs.el" CEDETDIR))
-    (load-file (expand-file-name "lisp/cedet/srecode/loaddefs.el" CEDETDIR))
-    (load-file (expand-file-name "lisp/cedet/semantic/loaddefs.el"CEDETDIR))
-
+    (message "Loading autoloads from CEDET development.")
+    (load (expand-file-name "lisp/eieio/loaddefs.el" CEDETDIR) nil t t)
+    (load (expand-file-name "lisp/speedbar/loaddefs.el" CEDETDIR) nil t t)
+    (load (expand-file-name "lisp/cedet/loaddefs.el" CEDETDIR) nil t t)
+    (load (expand-file-name "lisp/cedet/ede/loaddefs.el" CEDETDIR) nil t t)
+    (load (expand-file-name "lisp/cedet/cogre/loaddefs.el" CEDETDIR) nil t t)
+    (load (expand-file-name "lisp/cedet/srecode/loaddefs.el" CEDETDIR) nil t t)
+    (load (expand-file-name "lisp/cedet/semantic/loaddefs.el" CEDETDIR) nil t t)
     (setq Info-directory-list
 	  (cons (expand-file-name "doc/info" CEDETDIR)
 		Info-default-directory-list)))
