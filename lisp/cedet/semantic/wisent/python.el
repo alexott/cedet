@@ -393,7 +393,7 @@ Set attributes for constructors, special, private and static methods."
      (cons "static"
 	   (semantic-tag-get-attribute tag :typemodifiers))))
 
-  ;; TODO 
+  ;; TODO
   ;; + check for decorators classmethod
   ;; + check for operators
   tag)
@@ -445,7 +445,7 @@ a list.  In python, this can happen with `import' statements."
 	(setq expand (cons (semantic-tag-clone tag E) expand)))
       (setq expand (nreverse expand)))
      )))
-     
+
 
 
 ;;; Overridden Semantic API.

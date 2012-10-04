@@ -4,6 +4,7 @@
 ;; Copyright (C) 1995-1996, 1998-2012  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
+;; Version: 1.3
 ;; Keywords: OO, lisp
 
 ;; This file is part of GNU Emacs.
@@ -792,7 +793,7 @@ See `defclass' for more information."
 	(when (string-match "\\.elc$" fname)
 	  (setq fname (substring fname 0 (1- (length fname)))))
 	(put cname 'class-location fname)))
-    
+
     ;; We have a list of custom groups.  Store them into the options.
     (let ((g (class-option-assoc options :custom-groups)))
       (mapc (lambda (cg) (add-to-list 'g cg)) groups)
@@ -1270,9 +1271,7 @@ IMPL is the symbol holding the method implementation."
 		  `(apply ,(list 'quote impl) local-args)
 		`(apply #',impl local-args))
 	      ;(,impl local-args)
-	      ))))
-     )
-  ))
+	      )))))))
 
 (defsubst eieio-defgeneric-reset-generic-form-primary-only-one (method)
   "Setup METHOD to call the generic form."

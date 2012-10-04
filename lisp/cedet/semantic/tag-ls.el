@@ -114,7 +114,7 @@ to do the default equality tests if ATTR is not special for that mode.")
 	      taglist1 (cdr taglist1)
 	      taglist2 (cdr taglist2)))
       ans))
-   
+
    ;; The attributes are not the same?
    ((not (equal value1 value2))
     nil)

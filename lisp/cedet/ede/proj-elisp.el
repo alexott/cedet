@@ -36,8 +36,7 @@
    (keybindings :initform nil)
    (phony :initform t)
    (sourcetype :initform '(ede-source-emacs))
-   (availablecompilers :initform '(ede-emacs-compiler 
-				   ede-xemacs-compiler))
+   (availablecompilers :initform '(ede-emacs-compiler ede-xemacs-compiler))
    (aux-packages :initarg :aux-packages
 		 :initform nil
 		 :type list

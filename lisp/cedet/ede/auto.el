@@ -35,7 +35,7 @@
 (declare-function ede-add-project-to-global-list "ede")
 
 (defclass ede-project-autoload-dirmatch ()
-  ((fromconfig :initarg :fromconfig 
+  ((fromconfig :initarg :fromconfig
 	       :initform nil
 	       :documentation
 	       "A config file within which the match pattern lives.")
@@ -70,7 +70,7 @@ into memory.")
 
      ;; Error for wierd stuff
      (t (error "Unknown dirmatch type.")))))
-  
+
 
 (defmethod ede-do-dirmatch ((dirmatch ede-project-autoload-dirmatch) file)
   "Does DIRMATCH match the filename FILE."
@@ -274,7 +274,7 @@ the current buffer."
 		 (not (ede-dirmatch-installed dirmatch)))
 	    (setq callfcn nil)
 	  ;; Other types of dirmatch:
-	  (when (and 
+	  (when (and
 		 ;; If the Emacs Lisp file handling this project hasn't
 		 ;; been loaded, we will use the quick dirmatch feature.
 		 (not (featurep (oref this file)))
@@ -292,7 +292,7 @@ the current buffer."
 	(when callfcn
 	  (condition-case nil
 	      (funcall rootfcn file)
-	    (error 
+	    (error
 	     (funcall rootfcn))))
 	))))
 
