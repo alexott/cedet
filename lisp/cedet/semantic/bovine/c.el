@@ -254,6 +254,7 @@ Return the defined symbol as a special spp lex token."
       nil
     (let* ((name (buffer-substring-no-properties
 		  (match-beginning 1) (match-end 1)))
+	   (beginning-of-define (match-end 1))
 	   (with-args (save-excursion
 			(goto-char (match-end 0))
 			(looking-at "(")))
@@ -266,7 +267,7 @@ Return the defined symbol as a special spp lex token."
 						 (semantic-c-end-of-macro)
 						 ;; HACK - If there's a C comment after
 						 ;; the macro, do not parse it.
-						 (if (looking-back "/\\*.*")
+						 (if (looking-back "/\\*.*" beginning-of-define)
 						     (progn
 						       (goto-char (match-beginning 0))
 						       (1- (point)))
@@ -2112,8 +2113,7 @@ actually in their parent which is not accessible.")
 (defun semantic-c-describe-environment ()
   "Describe the Semantic features of the current C environment."
   (interactive)
-  (if (not (or (eq major-mode 'c-mode) (eq major-mode 'c++-mode)
-	       (eq major-mode 'arduino-mode)))
+  (if (not (member 'c-mode (mode-local-equivalent-mode-p major-mode)))
       (error "Not useful to query C mode in %s mode" major-mode))
   (let ((gcc (when (boundp 'semantic-gcc-setup-data)
 	       semantic-gcc-setup-data))

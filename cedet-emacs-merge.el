@@ -368,9 +368,11 @@
       (setq buffer-read-only t)
       (if dry-run
 	  (ceemme-call-patch (current-buffer) ceemme-to
-			     "-p0" "--verbose" "-u" "--dry-run")
+			     "-p0" "--verbose" "-u" "--dry-run"
+			     "--no-backup-if-mismatch" "-r" "-")
 	(ceemme-call-patch (current-buffer) ceemme-to
-			   "-p0" "--verbose" "-u"))
+			   "-p0" "--verbose" "-u" "--no-backup-if-mismatch"
+			   "-r" "-"))
       (pop-to-buffer "*ceemme patch output*")
       (goto-char (point-min))
       (when dry-run

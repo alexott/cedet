@@ -233,7 +233,7 @@ being pendantic."
   (when (not class)
     (message "Unsafe call to `eieio-persistent-read'.")
     )
-  (when (not (class-p class))
+  (when (and class (not (class-p class)))
     (signal 'wrong-type-argument (list 'class-p class)))
   (let ((ret nil)
 	(buffstr nil))

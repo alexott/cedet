@@ -228,7 +228,7 @@ Text in speedbar consists of four different types of data.  Knowing how
 to read these textual elements will make it easier to navigate by
 identifying the types of data available.
 
-@subsubsection Groups
+@subsection Groups
 @cindex groups
 
 Groups summarize information in a single line, and provide a high level
@@ -264,14 +264,14 @@ When a group has been expanded, the indicator button changes from
 Click the @samp{-} button to contract the group, or hide the contents
 currently displayed.
 
-@subsubsection Tags
+@subsection Tags
 @cindex tags
 
 Tags are the leaf nodes of the tree system.  Tags are generally prefixed
 with a simple character, such as @samp{>}.  Tags can only be jumped to using
 @kbd{RET} or @kbd{e}.
 
-@subsubsection Boolean Flags
+@subsection Boolean Flags
 
 Sometimes a group or tag is given a boolean flag.  These flags appear as
 extra text characters at the end of the line.  File mode uses boolean
@@ -282,7 +282,7 @@ For additional flags, see
 @c Note to self, update these to sub-nodes which are more relevant.
 @ref{File Mode}, and @ref{Version Control}.
 
-@subsubsection Unadorned Text
+@subsection Unadorned Text
 
 Unadorned text generally starts in column 0, without any special symbols
 prefixing them.  In Buffers mode different buffer groups are prefixed
@@ -291,7 +291,7 @@ buffers, and invisible buffers.)
 
 Unadorned text will generally be colorless, and not clickable.
 
-@subsubsection Color Cues
+@subsection Color Cues
 
 Each type of Group, item indicator, and label is given a different
 color.  The colors chosen are dependent on whether the background color

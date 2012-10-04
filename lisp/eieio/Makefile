@@ -30,7 +30,7 @@ clean-autoloads:
 
 .PHONY: autoloads
 autoloads: 
-	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn (require (quote cedet-compat)) (require (quote mode-local)) (setq generated-autoload-file "$(abspath $(LOADDEFS))"))' -f batch-update-autoloads $(abspath $(LOADDIRS))
 
 
 %.elc: %.el

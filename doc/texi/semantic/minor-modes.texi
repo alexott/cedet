@@ -32,15 +32,6 @@ that can assist in programming Semantic supported languages.
 
 Senator is another mode which can assist in programming @ref{senator}.
 
-@node Development Modes
-@section Development Modes
-
-@menu
-* Highlight Edits Mode::
-* Parser State::
-* Unmatched Syntax Highlighting::
-@end menu
-
 @node Sticky Function Mode
 @subsection Sticky Function Headers
 
@@ -314,6 +305,15 @@ in C++, or "." in Java) can be used.
 String used to indent the breadcrumbs string. Customize this string to
 match the space used by scrollbars and fringe.
 @end deffn
+
+@node Development Modes
+@section Development Modes
+
+@menu
+* Highlight Edits Mode::
+* Parser State::
+* Unmatched Syntax Highlighting::
+@end menu
 
 @node Highlight Edits Mode
 @subsection Highlight Edits Mode

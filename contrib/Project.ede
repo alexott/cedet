@@ -38,7 +38,7 @@
     :path ""
     :source '("wisent-csharp.el" "semantic-tag-folding.el" "eassist.el" "wisent-ruby.el" "wisent-php.el" "ede-gnustep.el" "semantic-ectag-scala.el")
     :compiler 'ede-emacs-preload-compiler
-    :aux-packages '("semantic-grammar" "wisent" "inversion" "speedbar" "semantic-el")
+    :aux-packages '("semantic-grammar" "wisent" "inversion" "semantic-el")
     )
    )
   :metasubproject 't

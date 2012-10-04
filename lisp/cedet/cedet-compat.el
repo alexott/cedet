@@ -198,6 +198,12 @@ Return a coding system between BEGIN and END."
 	 ((any nil) '(called-interactively-p))))
      )))
 
+(when (and (= emacs-major-version 23)
+	   (= emacs-minor-version 1))
+  (message "Loading CEDET fallback autoload library.")
+  (require 'autoload
+	   (expand-file-name "../../etc/fallback-libraries/autoload.el"
+			     (file-name-directory load-file-name))))
 
 ;;; TESTS
 ;;

@@ -47,16 +47,16 @@ buffer contains a using NAMESPACE; statement "
   :group 'srecode-cpp
   :type  '(repeat string))
 
-;;; :cpp ARGUMENT HANDLING
+;;; :c ARGUMENT HANDLING
 ;;
-;; When a :cpp argument is required, fill the dictionary with
-;; information about the current C++ file.
+;; When a :c argument is required, fill the dictionary with
+;; information about the current C file.
 ;;
-;; Error if not in a C++ mode.
+;; Error if not in a C mode.
 
 ;;;###autoload
-(defun srecode-semantic-handle-:cpp (dict)
-  "Add macros into the dictionary DICT based on the current c++ file.
+(defun srecode-semantic-handle-:c (dict)
+  "Add macros into the dictionary DICT based on the current c file.
 Adds the following:
 FILENAME_SYMBOL - filename converted into a C compat symbol.
 HEADER - Shown section if in a header file."
@@ -74,6 +74,21 @@ HEADER - Shown section if in a header file."
       (setq fsym (replace-match "_" t t fsym)))
     (srecode-dictionary-set-value dict "FILENAME_SYMBOL" fsym)
     )
+  )
+
+;;; :cpp ARGUMENT HANDLING
+;;
+;; When a :cpp argument is required, fill the dictionary with
+;; information about the current C++ file.
+;;
+;; Error if not in a C++ mode.
+;;;###autoload
+(defun srecode-semantic-handle-:cpp (dict)
+  "Add macros into the dictionary DICT based on the current c file.
+Calls `srecode-semantic-handle-:c.
+Also adds the following:
+ - nothing -"
+  (srecode-semantic-handle-:c dict)
   )
 
 (defun srecode-semantic-handle-:using-namespaces (dict)
@@ -94,10 +109,15 @@ PREFIX_NAMESPACE - for each NAMESPACE in `srecode-cpp-namespaces'."
   )
 
 (define-mode-local-override srecode-semantic-apply-tag-to-dict
-  c++-mode (tag-wrapper dict)
-  "Apply C++ specific features from TAG-WRAPPER into DICT.
+  c-mode (tag-wrapper dict)
+  "Apply C and C++ specific features from TAG-WRAPPER into DICT.
 Calls `srecode-semantic-apply-tag-to-dict-default' first. Adds
-special behavior for tag of classes include, using and function."
+special behavior for tag of classes include, using and function.
+
+This function cannot be split into C and C++ specific variants, as
+the way the tags are created from the parser does not distinguish
+either.  The side effect is that you could get some C++ tag properties
+specified in a C file."
 
   ;; Use default implementation to fill in the basic properties.
   (srecode-semantic-apply-tag-to-dict-default tag-wrapper dict)
@@ -163,7 +183,7 @@ special behavior for tag of classes include, using and function."
 	    (srecode-dictionary-set-value modifier-dict "NAME" modifier)))
 
 	;; Add templates into child dictionaries.
-	(srecode-cpp-apply-templates dict templates)
+	(srecode-c-apply-templates dict templates)
 
 	;; When the function is a member function, it can have
 	;; additional modifiers.
@@ -189,7 +209,7 @@ special behavior for tag of classes include, using and function."
 
 	;; Add templates into child dictionaries.
 	(let ((templates (semantic-tag-get-attribute tag :template)))
-	  (srecode-cpp-apply-templates dict templates))))
+	  (srecode-c-apply-templates dict templates))))
      ))
   )
 
@@ -197,7 +217,7 @@ special behavior for tag of classes include, using and function."
 ;;; Helper functions
 ;;
 
-(defun srecode-cpp-apply-templates (dict templates)
+(defun srecode-c-apply-templates (dict templates)
   "Add section dictionaries for TEMPLATES to DICT."
   (when templates
     (let ((templates-dict (srecode-dictionary-add-section-dictionary

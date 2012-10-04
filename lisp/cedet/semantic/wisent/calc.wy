@@ -37,6 +37,12 @@
 %package wisent-calc-wy
 %provide semantic/wisent/calc-wy
 
+%{
+(declare-function wisent-calc-= "semantic/wisent/calc")
+(declare-function wisent-calc-not "semantic/wisent/calc")
+(declare-function wisent-calc-factorial "semantic/wisent/calc")
+}
+
 %token <number> NUM
 
 %nonassoc '=' ;; comparison

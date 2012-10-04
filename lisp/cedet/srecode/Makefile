@@ -5,7 +5,8 @@
 # EDE is the Emacs Development Environment.
 # http://cedet.sourceforge.net/ede.shtml
 #
-LOADPATH= ../ ../  ../../eieio/  ../../speedbar/
+LOADPATH= ../ ../ ../../../  ../../eieio/\
+   
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../cedet-remove-builtin.el"
 EMACS=@echo "    > $@";emacs
@@ -31,7 +32,7 @@ clean-autoloads:
 
 .PHONY: autoloads
 autoloads: 
-	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn (require (quote cedet-compat)) (require (quote mode-local)) (setq generated-autoload-file "$(abspath $(LOADDEFS))"))' -f batch-update-autoloads $(abspath $(LOADDIRS))
 
 
 %-wy.el: %.wy
@@ -39,7 +40,7 @@ autoloads:
 
 .PHONY: lang
 lang: $(addsuffix -wy.elc, $(basename $(lang_SEMANTIC_GRAMMAR)))
-lang: PRELOADS=cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
+lang: PRELOADS=cedet-devel-load cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
 lang: EMACSFLAGS+= --eval '(setq max-specpdl-size 1500 max-lisp-eval-depth 700)'
 %.elc: %.el

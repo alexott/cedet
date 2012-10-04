@@ -292,6 +292,7 @@ Argument COMMAND is the command to use for compiling the target."
 	 "MCU" (oref board mcu)
 	 "F_CPU" (oref board f_cpu)
 	 "PORT" (oref prefs port)
+	 "BOARD" (oref prefs board)
 	 "AVRDUDE_ARD_BAUDRATE" (oref board speed)
 	 "AVRDUDE_ARD_PROGRAMMER" (oref board protocol)
 	 "ARDUINO_MK" (ede-arduino-Arduino.mk)

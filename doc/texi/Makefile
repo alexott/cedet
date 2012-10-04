@@ -15,13 +15,12 @@ cogre-doc_TEXINFOS=cogre.texi
 ede-doc_TEXINFOS=ede.texi
 srecode-doc_TEXINFOS=srecode.texi
 eieio-doc_TEXINFOS=eieio.texi
-speedbar-doc_TEXINFOS=speedbar.texi
 VERSION=1.0
 DISTDIR=$(top)CEDET-doc-$(VERSION)
 
 
 
-all: cedet.info cogre.info ede.info srecode.info eieio.info speedbar.info semantic-doc
+all: cedet.info cogre.info ede.info srecode.info eieio.info semantic-doc
 
 cedet.info: $(CEDET-overview_TEXINFOS)
 	$(MAKEINFO) $<
@@ -38,9 +37,6 @@ srecode.info: $(srecode-doc_TEXINFOS)
 eieio.info: $(eieio-doc_TEXINFOS)
 	$(MAKEINFO) $<
 
-speedbar.info: $(speedbar-doc_TEXINFOS)
-	$(MAKEINFO) $<
-
 .PHONY:semantic-doc
 semantic-doc:
 	$(MAKE) -C semantic
@@ -54,10 +50,10 @@ clean:
 
 .PHONY: dist
 
-dist: cedet.info cogre.info ede.info srecode.info eieio.info speedbar.info
+dist: cedet.info cogre.info ede.info srecode.info eieio.info
 	rm -rf $(DISTDIR)
 	mkdir $(DISTDIR)
-	cp $(CEDET-overview_TEXINFOS) cedet.info* $(cogre-doc_TEXINFOS) cogre.info* $(ede-doc_TEXINFOS) ede.info* $(srecode-doc_TEXINFOS) srecode.info* $(eieio-doc_TEXINFOS) eieio.info* $(speedbar-doc_TEXINFOS) speedbar.info* $(ede_FILES) $(DISTDIR)
+	cp $(CEDET-overview_TEXINFOS) cedet.info* $(cogre-doc_TEXINFOS) cogre.info* $(ede-doc_TEXINFOS) ede.info* $(srecode-doc_TEXINFOS) srecode.info* $(eieio-doc_TEXINFOS) eieio.info* $(ede_FILES) $(DISTDIR)
 	$(MAKE) -C semantic $(MFLAGS) DISTDIR=$(DISTDIR)/semantic dist
 	tar -cvzf $(DISTDIR).tar.gz $(DISTDIR)
 	rm -rf $(DISTDIR)

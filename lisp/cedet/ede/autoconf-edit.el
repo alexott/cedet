@@ -26,7 +26,9 @@
 ;; for Emacses w/out autoconf mode built in.
 
 ;;; Code:
-(require 'autoconf)
+(unless (and (= emacs-major-version 23)
+	     (= emacs-minor-version 1))
+  (require 'autoconf))
 (declare-function ede-srecode-setup "ede/srecode")
 (declare-function ede-srecode-insert "ede/srecode")
 

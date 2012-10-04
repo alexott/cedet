@@ -13,7 +13,7 @@ top=../../../
 ede_FILES=Project.ede Makefile
 
 analyze_LISP=complete.el debug.el fcn.el refs.el
-LOADPATH= ../../../speedbar/ ../../../eieio/ ../../ ../../
+LOADPATH= ../../../eieio/ ../../ ../../
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/semantic/analyze
 

@@ -19,9 +19,9 @@
 @end macro
 
 @c To be used within the glossary section.
-@macro keyword{kw}
+@macro kwItem{kw}
+@item @b{\kw\}
 @anchor{\kw\}
-@b{\kw\}
 @end macro
 
 @c Simple macro to help document obsoleted functions.

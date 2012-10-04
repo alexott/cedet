@@ -540,7 +540,7 @@ local variable."
 This is because a string such as com.java.pgk.Class doesn't show up
 as a hierarchy from the JAR files in the regular typecache, but we
 can find it as a string directly from our directory and jar files."
-  (if (not (and (featurep 'semanticdb) semanticdb-current-database))
+  (if (not (and (featurep 'semantic/db) semanticdb-current-database))
       nil ;; No DB, no search
     ;; Else, try a few things.
     (or (semanticdb-typecache-find-default type path find-file-match)
@@ -832,7 +832,7 @@ represent jar files."
 	   (ans nil)
 	   )
       ;; Get a list of paths together
-      (dolist (P (append edepaths edeclasspath))
+      (dolist (P (append edepaths edeclasspath semanticdb-javap-classpath))
 	(cond
 	 ;; Somtimes a null gets in.  Ignore it.
 	 ((null P)

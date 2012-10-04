@@ -5,7 +5,7 @@
 # EDE is the Emacs Development Environment.
 # http://cedet.sourceforge.net/ede.shtml
 #
-LOADPATH= ../speedbar/ ../eieio/ ./ ./ 
+LOADPATH= ../eieio/ ./ ./ 
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../cedet-remove-builtin.el"
 EMACS=@echo "    > $@";emacs
@@ -30,7 +30,7 @@ clean-autoloads:
 
 .PHONY: autoloads
 autoloads: 
-	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(setq generated-autoload-file "$(abspath $(LOADDEFS))")' -f batch-update-autoloads $(abspath $(LOADDIRS))
+	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn (require (quote cedet-compat)) (require (quote mode-local)) (setq generated-autoload-file "$(abspath $(LOADDEFS))"))' -f batch-update-autoloads $(abspath $(LOADDIRS))
 
 
 %.elc: %.el

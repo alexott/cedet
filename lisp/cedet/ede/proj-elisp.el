@@ -330,7 +330,7 @@ Lays claim to all .elc files that match .el files in this target."
 		("require" . "$(foreach r,$(1),(require (quote $(r))))"))
    :commands
    '("$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) \
---eval '(setq generated-autoload-file \"$(abspath $(LOADDEFS))\")' \
+--eval '(progn (require (quote cedet-compat)) (require (quote mode-local)) (setq generated-autoload-file \"$(abspath $(LOADDEFS))\"))' \
 -f batch-update-autoloads $(abspath $(LOADDIRS))")
    :rules (list (ede-makefile-rule "clean-autoloads" :target "clean-autoloads" :phony t :rules '("rm -f $(LOADDEFS)")))
    :sourcetype '(ede-source-emacs)

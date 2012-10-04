@@ -89,6 +89,11 @@
 %package wisent-python-wy
 %provide semantic/wisent/python-wy
 
+%{
+(declare-function wisent-python-reconstitute-function-tag "semantic/wisent/python")
+(declare-function wisent-python-reconstitute-class-tag "semantic/wisent/python")
+}
+
 %languagemode python-mode
 
 ;; The default start symbol

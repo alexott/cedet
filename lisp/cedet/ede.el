@@ -358,8 +358,8 @@ Argument MENU-DEF specifies the menu being created."
    (easy-menu-create-menu
     "Configurations"
     (let* ((obj (ede-current-project))
-	   (conf (oref obj configurations))
-	   (cdef (oref obj configuration-default))
+	   (conf (when obj (oref obj configurations)))
+	   (cdef (when obj (oref obj configuration-default)))
 	   (menu nil))
       (dolist (C conf)
 	(setq menu (cons (vector C (list 'ede-project-configurations-set C)
