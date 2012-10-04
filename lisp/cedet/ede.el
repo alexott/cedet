@@ -382,9 +382,7 @@ but can also be used interactively."
   (oset (ede-current-project) configuration-default newconfig)
   (message "%s will now build in %s mode."
 	   (object-name (ede-current-project))
-	   newconfig)
-  )
-	   
+	   newconfig))
 
 (defun ede-customize-forms-menu (menu-def)
   "Create a menu of the project, and targets that can be customized.
@@ -883,7 +881,7 @@ a string \"y\" or \"n\", which answers the y/n question done interactively."
 
   (project-add-file target (buffer-file-name))
   (setq ede-object nil)
-  
+
   ;; Setup buffer local variables.
   (ede-initialize-state-current-buffer)
 
@@ -1428,7 +1426,7 @@ is the project to use, instead of `ede-current-project'."
     ;; This is a heavy hammer, but will apply variables properly
     ;; based on stacking between the toplevel and child projects.
     (ede-map-buffers 'ede-apply-project-local-variables)
-    
+
     value))
 
 (defun ede-apply-project-local-variables (&optional buffer)

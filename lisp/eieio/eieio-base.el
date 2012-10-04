@@ -230,9 +230,8 @@ Signal an error if the object in FILENAME is not a constructor
 for CLASS.  Optional ALLOW-SUBCLASS says that it is ok for
 `eieio-peristent-read' to load in subclasses of class instead of
 being pendantic."
-  (when (not class)
-    (message "Unsafe call to `eieio-persistent-read'.")
-    )
+  (unless class
+    (message "Unsafe call to `eieio-persistent-read'."))
   (when (and class (not (class-p class)))
     (signal 'wrong-type-argument (list 'class-p class)))
   (let ((ret nil)
@@ -272,16 +271,14 @@ identified, and needing more object creation."
   (let ((objclass (nth 0 inputlist))
 	(objname (nth 1 inputlist))
 	(slots (nthcdr 2 inputlist))
-	(createslots nil)
-	)
-    
+	(createslots nil))
+
     ;; If OBJCLASS is an eieio autoload object, then we need to load it.
     (eieio-class-un-autoload objclass)
 
     (while slots
       (let ((name (car slots))
-	    (value (car (cdr slots)))
-	    )
+	    (value (car (cdr slots))))
 
 	;; Make sure that the value proposed for SLOT is valid.
 	;; In addition, strip out quotes, list functions, and update
@@ -366,7 +363,7 @@ Secondarilly, any text properties will be stripped from strings."
 		    (nreverse objlist)))
 		 (t
 		  proposed-value))))
-	 
+
 	 ((stringp proposed-value)
 	  ;; Else, check for strings, remove properties.
 	  (substring-no-properties proposed-value))

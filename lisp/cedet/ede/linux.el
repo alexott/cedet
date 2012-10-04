@@ -302,4 +302,4 @@ Argument COMMAND is the command to use for compiling the target."
 ;; generated-autoload-load-name: "ede/linux"
 ;; End:
 
-;;; ede-linux.el ends here
+;;; ede/linux.el ends here
