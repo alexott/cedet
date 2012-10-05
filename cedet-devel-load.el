@@ -61,58 +61,64 @@
 		Info-default-directory-list)))
   )
 
-(require 'cedet) ;; Get standard CEDET variables loaded.
+;; Skip the rest if we just want to absolute minimum (during compilation).
+(unless (bound-and-true-p cedet-minimum-setup)
 
-;; Load in COMPAT code - This is because NEW CEDET code may use this
-;; for compatibility reasons, but Emacs integrated code removes it.
-(require 'cedet-compat)
+  (require 'cedet) ;; Get standard CEDET variables loaded.
 
-;; Load the canned configurations
-(require 'semantic/canned-configs)
+  ;; Load in COMPAT code - This is because NEW CEDET code may use this
+  ;; for compatibility reasons, but Emacs integrated code removes it.
+  (require 'cedet-compat)
 
-;; Add some autoloads by hand due to:
-;;  New code
-;;  Things disabled by core Emacs
-;;
-;;  @TODO - generate autoloads.
-(autoload 'semantic-default-elisp-setup "semantic/bovine/el"
-  "Setup hook function for Emacs Lisp files and Semantic.")
 
-;; Get SRecode initialized
-(require 'srecode)
-(require 'srecode/map) ;; Get the srecode load-path filled in.
 
-(let ((CEDETDIR (file-name-directory
-		 (or load-file-name (buffer-file-name)))))
-  (add-to-list 'srecode-map-load-path (expand-file-name "etc/srecode" CEDETDIR))
+  ;; Load the canned configurations
+  (require 'semantic/canned-configs)
 
-  )
+  ;; Add some autoloads by hand due to:
+  ;;  New code
+  ;;  Things disabled by core Emacs
+  ;;
+  ;;  @TODO - generate autoloads.
+  (autoload 'semantic-default-elisp-setup "semantic/bovine/el"
+    "Setup hook function for Emacs Lisp files and Semantic.")
 
-;; Currently, Emacs proper doesn't track EIEIO methods.  Until it
-;; does, we have to advice `describe-variable' and `describe-function'
-;; for EIEIO methods to get better help buffers.
+  ;; Get SRecode initialized
+  (require 'srecode)
+  (require 'srecode/map) ;; Get the srecode load-path filled in.
 
-(require 'advice)
-(require 'eieio-opt)
+  (let ((CEDETDIR (file-name-directory
+		   (or load-file-name (buffer-file-name)))))
+    (add-to-list 'srecode-map-load-path (expand-file-name "etc/srecode" CEDETDIR))
 
-(defadvice describe-variable (around eieio-describe activate)
-  "Display the full documentation of FUNCTION (a symbol).
+    )
+
+  ;; Currently, Emacs proper doesn't track EIEIO methods.  Until it
+  ;; does, we have to advice `describe-variable' and `describe-function'
+  ;; for EIEIO methods to get better help buffers.
+
+  (require 'advice)
+  (require 'eieio-opt)
+
+  (defadvice describe-variable (around eieio-describe activate)
+    "Display the full documentation of FUNCTION (a symbol).
 Returns the documentation as a string, also."
-  (if (class-p (ad-get-arg 0))
-      (eieio-describe-class (ad-get-arg 0))
-    ad-do-it))
-
-(defadvice describe-function (around eieio-describe activate)
-  "Display the full documentation of VARIABLE (a symbol).
-Returns the documentation as a string, also."
-  (if (generic-p (ad-get-arg 0))
-      (eieio-describe-generic (ad-get-arg 0))
     (if (class-p (ad-get-arg 0))
-	(eieio-describe-constructor (ad-get-arg 0))
-      ad-do-it)))
+	(eieio-describe-class (ad-get-arg 0))
+      ad-do-it))
 
-;; This adds further formatting and hyperlinks.
-(add-hook 'temp-buffer-show-hook 'eieio-help-mode-augmentation-maybee t)
+  (defadvice describe-function (around eieio-describe activate)
+    "Display the full documentation of VARIABLE (a symbol).
+Returns the documentation as a string, also."
+    (if (generic-p (ad-get-arg 0))
+	(eieio-describe-generic (ad-get-arg 0))
+      (if (class-p (ad-get-arg 0))
+	  (eieio-describe-constructor (ad-get-arg 0))
+	ad-do-it)))
+
+  ;; This adds further formatting and hyperlinks.
+  (add-hook 'temp-buffer-show-hook 'eieio-help-mode-augmentation-maybee t)
+)
 
 (provide 'cedet-devel-load)
 
