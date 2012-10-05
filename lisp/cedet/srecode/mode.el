@@ -402,6 +402,10 @@ programming modes."
 (srecode-add-code-generator 'srecode-document-insert-comment "Comments" "C")
 (srecode-add-code-generator 'srecode-insert-getset "Get/Set" "G")
 
+;; Only needed for Emacs 23.1
+;;;###autoload
+(add-to-list 'auto-mode-alist '("\\.srt$" . srecode-template-mode))
+
 (provide 'srecode/mode)
 
 ;; Local variables:
