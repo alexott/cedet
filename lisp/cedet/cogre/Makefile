@@ -9,7 +9,8 @@ LOADPATH= ../ ../ ../../../  ../../eieio/\
    
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../cedet-remove-builtin.el"
-EMACS=@echo "   > $@"; emacs
+EMACS=@echo "    > $@";emacs
+AUTOGENFLAGS=-L ../ --eval '(progn (require (quote cedet-compat)) (require (quote mode-local)))'
 
 top=../../
 ede_FILES=Project.ede Makefile
@@ -35,7 +36,7 @@ clean-autoloads:
 
 .PHONY: autoloads
 autoloads: 
-	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn (require (quote cedet-compat)) (require (quote mode-local)) (setq generated-autoload-file "$(abspath $(LOADDEFS))"))' -f batch-update-autoloads $(abspath $(LOADDIRS))
+	$(EMACS) $(EMACSFLAGS) $(AUTOGENFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)) (setq generated-autoload-file "$(abspath $(LOADDEFS))"))' -f batch-update-autoloads $(abspath $(LOADDIRS))
 
 
 %-wy.el: %.wy

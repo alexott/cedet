@@ -8,6 +8,7 @@
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../../cedet-remove-builtin.el"
 EMACS=@echo "    > $@";emacs
+AUTOGENFLAGS=-L ../../ --eval '(progn (require (quote cedet-compat)) (require (quote mode-local)))'
 
 top=../../../
 ede_FILES=Project.ede Makefile
