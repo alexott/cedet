@@ -326,7 +326,6 @@ Lays claim to all .elc files that match .el files in this target."
    :name "emacs"
    :variables '(("EMACS" . "emacs")
 		("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)'")
-		("AUTOGENFLAGS" . "")
 		("require" . "$(foreach r,$(1),(require (quote $(r))))"))
    :commands
    '("$(EMACS) $(EMACSFLAGS) $(AUTOGENFLAGS) $(addprefix -L ,$(LOADPATH)) \
