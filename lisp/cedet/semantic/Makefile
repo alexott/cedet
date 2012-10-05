@@ -80,7 +80,7 @@ maintenance: PRELOADS=cedet-compat
 metagrammar: $(addsuffix -wy.elc, $(basename $(metagrammar_SEMANTIC_GRAMMAR)))
 metagrammar: PRELOADS=cedet-devel-load cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
-metagrammar: EMACSFLAGS+= --eval '(setq max-specpdl-size 1500 max-lisp-eval-depth 700)'
+metagrammar: EMACSFLAGS+= --eval '(setq max-specpdl-size 1500 max-lisp-eval-depth 700 cedet-minimum-setup t)'
 .PHONY:wisent
 wisent:
 	$(MAKE) -C wisent
