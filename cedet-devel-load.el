@@ -59,18 +59,16 @@
     (setq Info-directory-list
 	  (cons (expand-file-name "doc/info" CEDETDIR)
 		Info-default-directory-list)))
+
+  ;; Load in COMPAT code - This is because NEW CEDET code may use this
+  ;; for compatibility reasons, but Emacs integrated code removes it.
+  (require 'cedet-compat)
   )
 
 ;; Skip the rest if we just want to absolute minimum (during compilation).
 (unless (bound-and-true-p cedet-minimum-setup)
 
   (require 'cedet) ;; Get standard CEDET variables loaded.
-
-  ;; Load in COMPAT code - This is because NEW CEDET code may use this
-  ;; for compatibility reasons, but Emacs integrated code removes it.
-  (require 'cedet-compat)
-
-
 
   ;; Load the canned configurations
   (require 'semantic/canned-configs)
