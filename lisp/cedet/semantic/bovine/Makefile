@@ -8,6 +8,7 @@
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../../cedet-remove-builtin.el"
 EMACS=@echo "    > $@";emacs
+AUTOGENFLAGS=-L ../../ --eval '(progn (require (quote cedet-compat)) (require (quote mode-local)))'
 
 top=../../../
 ede_FILES=Project.ede Makefile
@@ -32,7 +33,7 @@ all: by bovinator languages
 by: $(addsuffix -by.elc, $(basename $(by_SEMANTIC_GRAMMAR)))
 by: PRELOADS=cedet-devel-load cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
-by: EMACSFLAGS+= --eval '(setq max-specpdl-size 1500 max-lisp-eval-depth 700)'
+by: EMACSFLAGS+= --eval '(setq max-specpdl-size 1500 max-lisp-eval-depth 700 cedet-minimum-setup t)'
 %.elc: %.el
 	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 

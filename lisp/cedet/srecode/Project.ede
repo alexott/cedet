@@ -26,5 +26,7 @@
    )
   :metasubproject 't
   :variables '(("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)' -l \"../../../cedet-remove-builtin.el\"")
-	       ("EMACS" . "@echo \"    > $@\";emacs"))
+	       ("EMACS" . "@echo \"    > $@\";emacs")
+	       ;; This is a hack we still need for Emacs 23.1
+	       ("AUTOGENFLAGS" . "-L ../ --eval '(progn (require (quote cedet-compat)) (require (quote mode-local)))'"))
   )

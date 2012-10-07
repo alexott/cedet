@@ -9,7 +9,8 @@ LOADPATH= ../ ../ ../../../  ../../eieio/\
    
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../../cedet-remove-builtin.el"
-EMACS=@echo "   > $@"; emacs
+EMACS=@echo "    > $@";emacs
+AUTOGENFLAGS=-L ../ --eval '(progn (require (quote cedet-compat)) (require (quote mode-local)))'
 
 top=../../
 ede_FILES=Project.ede Makefile
@@ -35,7 +36,7 @@ clean-autoloads:
 
 .PHONY: autoloads
 autoloads: 
-	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn (require (quote cedet-compat)) (require (quote mode-local)) (setq generated-autoload-file "$(abspath $(LOADDEFS))"))' -f batch-update-autoloads $(abspath $(LOADDIRS))
+	$(EMACS) $(EMACSFLAGS) $(AUTOGENFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)) (setq generated-autoload-file "$(abspath $(LOADDEFS))"))' -f batch-update-autoloads $(abspath $(LOADDIRS))
 
 
 %-wy.el: %.wy
@@ -45,7 +46,7 @@ autoloads:
 wy: $(addsuffix -wy.elc, $(basename $(wy_SEMANTIC_GRAMMAR)))
 wy: PRELOADS=cedet-devel-load cedet-compat semantic/grammar semantic/bovine/grammar semantic/wisent/grammar
 
-wy: EMACSFLAGS+= --eval '(setq max-specpdl-size 1500 max-lisp-eval-depth 700)'
+wy: EMACSFLAGS+= --eval '(setq max-specpdl-size 1500 max-lisp-eval-depth 700 cedet-minimum-setup t)'
 %.elc: %.el
 	$(EMACS) $(EMACSFLAGS) $(addprefix -L ,$(LOADPATH)) --eval '(progn $(call require, $(PRELOADS)))' -f batch-byte-compile $^
 

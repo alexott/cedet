@@ -28,40 +28,11 @@
 ;;
 ;;; USAGE:
 ;;
-;; Step 1:  Compile CEDET in a fresh Emacs:
-;;
 ;;     emacs -Q -l cedet-build.el -f cedet-build
 ;;     
 ;;       or, if -Q isn't supported
 ;;
 ;;     emacs -q --no-site-file -l cedet-build.el -f cedet-build
-;;
-;;       or, if you have minimal make available, this is in the Makefile
-;;
-;;     make ebuild
-;;
-;;   or
-;;
-;;     Eval this buffer and then start compilation:
-;;
-;;     M-x eval-buffer
-;;     M-x cedet-build-in-default-emacs
-;;
-;;   or
-;;
-;;     if this is an incremental build, you can do:
-;;
-;;     M-x eval-buffer
-;;     M-x cedet-build-in-this-emacs
-;;
-;;     If EIEIO needs recompile, it will switch to compiling in
-;;     a subprocess with `cedet-build-in-default-emacs'.
-;;
-;; Step 2: Check Output.
-;;
-;;   If Compilation of grammars exceeds Emacs' stack size, exit Emacs,
-;;   and re-run the compilation steps above.  Once most of CEDET is
-;;   compiled, this problem goes away.
 
 
 ;;; Code:
@@ -149,53 +120,50 @@ OVERRIDE-CHECK to override cedet short-cicuit."
 	(cedet-build-msg "not needed\n")))
     )
 
-  ;;(load-file "lisp/common/cedet-autogen.el")
-
   ;; Get eieio loaddefs
   (cedet-build-msg "Step 2: Creating autoloads ...\n")
-  (cedet-build-msg "Step 2.1: EIEIO Autloads...")
+  (cedet-build-msg "Step 2.1: EIEIO Autoloads...")
   (cedet-build-autoloads-for-dir "lisp/eieio/" ".")
   (cedet-build-msg "done.\n")
 
-  ;; Autoloads for common
-  (cedet-build-msg "Step 2.2: common Autloads...")
-  (cedet-build-autoloads-for-dir "lisp/common/" ".")
-  (cedet-build-msg "done.\n")
-
   ;; Get core CEDET autoloads built...
-  (cedet-build-msg "Step 2.3: CEDET Autloads...")
+  (cedet-build-msg "Step 2.2: CEDET Autoloads...")
   (cedet-build-autoloads-for-dir "lisp/cedet/" ".")
   (cedet-build-msg "done.\n")
 
   ;; Get EDE autoloads built...
-  (cedet-build-msg "Step 2.4: EDE Autloads...")
+  (cedet-build-msg "Step 2.3: EDE Autoloads...")
   (cedet-build-autoloads-for-dir "lisp/cedet/ede/" ".")
   (cedet-build-msg "done.\n")
 
   ;; Get Semantic autoloads built...
-  (cedet-build-msg "Step 2.5: Semantic Autloads...")
+  (cedet-build-msg "Step 2.4: Semantic Autoloads...")
   (cedet-build-autoloads-for-dir "lisp/cedet/semantic/" "." "./bovine" "./wisent" "./analyze" "./decorate" "./ectags" "./symref")
   (cedet-build-msg "done.\n")
 
   ;; Get SRecode autoloads built...
-  (cedet-build-msg "Step 2.6: SRecode Autloads...")
+  (cedet-build-msg "Step 2.5: SRecode Autoloads...")
   (cedet-build-autoloads-for-dir "lisp/cedet/srecode/" ".")
   (cedet-build-msg "done.\n")
 
   ;; Get Cogre autoloads built...
-  (cedet-build-msg "Step 2.7: COGRE Autloads...")
+  (cedet-build-msg "Step 2.6: COGRE Autoloads...")
   (cedet-build-autoloads-for-dir "lisp/cedet/cogre/" ".")
   (cedet-build-msg "done.\n")
 
   ;; Speedbar
-  (cedet-build-msg "Step 2.8: Speedbar Autloads...")
+  (cedet-build-msg "Step 2.7: Speedbar Autoloads...")
   (cedet-build-autoloads-for-dir "lisp/speedbar/" ".")
   (cedet-build-msg "done.\n")
 
   ;; Fire up CEDET and EDE
   (cedet-build-msg "Step 3: initialize CEDET from external repository ...")
-  (save-excursion
-    (load-file (expand-file-name "cedet-devel-load.el" cedet-build-location)))
+  
+  (setq cedet-minimum-setup t)
+  (load-file (expand-file-name "cedet-devel-load.el" cedet-build-location))
+  ;; Set srecode-map-load-path to nil, otherwise the setter function
+  ;; for it will break the build.
+  (setq srecode-map-load-path nil)
 
   (cedet-build-msg "done\nStep 4: Turning on EDE and Semantic ...")
   (save-excursion
@@ -252,6 +220,9 @@ OVERRIDE-CHECK to override cedet short-cicuit."
       ;; If it is an elisp target, then do that work here.
       (let ((ans (save-excursion
 		   (project-compile-target targ))))
+	(switch-to-buffer "*CEDET BYTECOMPILE*")
+	(delete-other-windows)
+	(redisplay)
 	(if (and (consp ans)
 		 (numberp (car ans)))
 	    (cedet-build-msg "%d compiled, %d up to date.\n"
