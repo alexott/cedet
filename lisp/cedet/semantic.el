@@ -898,7 +898,8 @@ Throw away all the old tags, and recreate the tag database."
     ;; and Semantic are both enabled.  Is there a better way?
     (define-key map [menu-bar cedet-menu]
       (list 'menu-item "Development" cedet-menu-map
-	    :enable (quote (not (bound-and-true-p global-ede-mode)))))
+	    :enable (quote (and (not (bound-and-true-p global-ede-mode))
+				(semantic-active-p)))))
     ;; (define-key km "-"    'senator-fold-tag)
     ;; (define-key km "+"    'senator-unfold-tag)
     map))
@@ -978,53 +979,54 @@ Throw away all the old tags, and recreate the tag database."
   (define-key cedet-menu-map [semantic-force-refresh]
     '(menu-item "Reparse Buffer" semantic-force-refresh
 		:help "Force a full reparse of the current buffer"
-		:visible semantic-mode))
+		:visible (semantic-active-p)))
   (define-key cedet-menu-map [semantic-edit-menu]
     `(menu-item "Edit Tags" ,edit-menu
-		:visible semantic-mode))
+		:visible (semantic-active-p)))
   (define-key cedet-menu-map [navigate-menu]
     `(menu-item "Navigate Tags" ,navigate-menu
-		:visible semantic-mode))
+		:visible (semantic-active-p)))
   (define-key cedet-menu-map [semantic-options-separator]
-    '("--"))
+    '(menu-item "--" nil
+		:visible (semantic-active-p)))
   (define-key cedet-menu-map [global-semantic-highlight-func-mode]
     '(menu-item "Highlight Current Function" global-semantic-highlight-func-mode
 		:help "Highlight the tag at point"
-		:visible semantic-mode
+		:visible (semantic-active-p)
 		:button (:toggle . global-semantic-highlight-func-mode)))
   (define-key cedet-menu-map [global-semantic-stickyfunc-mode]
     '(menu-item "Stick Top Tag to Headerline" global-semantic-stickyfunc-mode
 		:help "Stick the tag scrolled off the top of the buffer into the header line"
-		:visible semantic-mode
+		:visible (semantic-active-p)
 		:button (:toggle . (bound-and-true-p
 				    global-semantic-stickyfunc-mode))))
   (define-key cedet-menu-map [global-semantic-decoration-mode]
     '(menu-item "Decorate Tags" global-semantic-decoration-mode
 		:help "Decorate tags based on tag attributes"
-		:visible semantic-mode
+		:visible (semantic-active-p)
 		:button (:toggle . (bound-and-true-p
 				    global-semantic-decoration-mode))))
   (define-key cedet-menu-map [global-semantic-idle-completions-mode]
     '(menu-item "Show Tag Completions" global-semantic-idle-completions-mode
 		:help "Show tag completions when idle"
-		:visible semantic-mode
+		:visible (semantic-active-p)
 		:enable global-semantic-idle-scheduler-mode
 		:button (:toggle . global-semantic-idle-completions-mode)))
   (define-key cedet-menu-map [global-semantic-idle-summary-mode]
     '(menu-item "Show Tag Summaries" global-semantic-idle-summary-mode
 		:help "Show tag summaries when idle"
-		:visible semantic-mode
+		:visible (semantic-active-p)
 		:enable global-semantic-idle-scheduler-mode
 		:button (:toggle . global-semantic-idle-summary-mode)))
   (define-key cedet-menu-map [global-semantic-idle-scheduler-mode]
     '(menu-item "Reparse When Idle" global-semantic-idle-scheduler-mode
 		:help "Keep a buffer's parse tree up to date when idle"
-		:visible semantic-mode
+		:visible (semantic-active-p)
 		:button (:toggle . global-semantic-idle-scheduler-mode)))
   (define-key cedet-menu-map [global-semanticdb-minor-mode]
     '(menu-item "Semantic Database" global-semanticdb-minor-mode
 		:help "Store tag information in a database"
-		:visible semantic-mode
+		:visible (semantic-active-p)
 		:button (:toggle . global-semanticdb-minor-mode))))
 
 ;; The `semantic-mode' command, in conjuction with the
@@ -1118,7 +1120,9 @@ Semantic mode.
 	(add-hook 'completion-at-point-functions
 		  'semantic-completion-at-point-function)
 	(if global-ede-mode
-	    (define-key cedet-menu-map [cedet-menu-separator] '("--")))
+	    (define-key cedet-menu-map [cedet-menu-separator]
+	      '(menu-item "--" nil
+			  :visible (semantic-active-p))))
 	(dolist (b (buffer-list))
 	  (with-current-buffer b
 	    (semantic-new-buffer-fcn))))
