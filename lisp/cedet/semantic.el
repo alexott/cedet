@@ -322,6 +322,11 @@ a parse of the buffer.")
   "Return non-nil if the current buffer was set up for parsing."
   semantic-new-buffer-fcn-was-run)
 
+(defsubst semantic-error-if-unparsed ()
+  "Raise an error if current buffer was not parsed by Semantic."
+  (unless semantic-new-buffer-fcn-was-run
+    (error "Buffer was not parsed by Semantic.")))
+
 (defsubst semantic--umatched-syntax-needs-refresh-p  ()
   "Return non-nil if the unmatched syntax cache needs a refresh.
 That is, if it is dirty or if the current parse tree isn't up to date."
