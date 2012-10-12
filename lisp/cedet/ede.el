@@ -565,8 +565,7 @@ an EDE controlled project."
       ;; Turn on global-ede-mode
       (progn
 	(if semantic-mode
-	    (define-key cedet-menu-map [cedet-menu-separator]
-	      '(menu-item "--" nil :visible (semantic-active-p))))
+	    (define-key cedet-menu-map [cedet-menu-separator] '("--")))
 	(add-hook 'semanticdb-project-predicate-functions 'ede-directory-project-p)
 	(add-hook 'semanticdb-project-root-functions 'ede-toplevel-project-or-nil)
 	(add-hook 'ecb-source-path-functions 'ede-ecb-project-paths)
