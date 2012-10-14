@@ -476,6 +476,7 @@ TEXT, BOUND, NOERROR, and COUNT arguments are interpreted."
   "Navigate to the next Semantic tag.
 Return the tag or nil if at end of buffer."
   (interactive)
+  (semantic-error-if-unparsed)
   (let ((pos (point))
         (tag (semantic-current-tag))
         where)
@@ -515,6 +516,7 @@ Return the tag or nil if at end of buffer."
   "Navigate to the previous Semantic tag.
 Return the tag or nil if at beginning of buffer."
   (interactive)
+  (semantic-error-if-unparsed)
   (let ((pos (point))
         (tag (semantic-current-tag))
         where)
@@ -684,6 +686,7 @@ Of the form (BUFFER STARTPOS INDEX REGEX COMPLIST...)")
 If optional argument CYCLE-ONCE is non-nil, only cycle through the list
 of completions once, doing nothing where there are no more matches."
   (interactive)
+  (semantic-error-if-unparsed)
   (let ((symstart (senator-current-symbol-start))
         regex complst)
     (if symstart
@@ -859,6 +862,7 @@ The popup menu displays all of the possible completions for the symbol
 it was invoked on.  To automatically split large menus this function
 use `imenu--mouse-menu' to handle the popup menu."
   (interactive)
+  (semantic-error-if-unparsed)
   (let ((symstart (senator-current-symbol-start))
         symbol regexp complst
         ;; Turn off tag jumping for this menu.
@@ -1105,6 +1109,7 @@ If that parent which is only a reference in the function tag
 is found, we can jump to it.
 Some tags such as includes have other reference features."
   (interactive)
+  (semantic-error-if-unparsed)
   (let ((result (semantic-up-reference (or tag (semantic-current-tag)))))
     (if (not result)
         (error "No up reference found")
