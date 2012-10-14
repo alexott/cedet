@@ -48,24 +48,37 @@
 
 (defun semantic-python-get-system-include-path ()
   "Evaluate some Python code that determines the system include path."
-  (python-proc)
-  (if python-buffer
-      (with-current-buffer python-buffer
-	(set (make-local-variable 'python-preoutput-result) nil)
-	(python-send-string
-	 "import sys; print '_emacs_out ' + '\\0'.join(sys.path)")
-	(accept-process-output (python-proc) 2)
-	(if python-preoutput-result
-	    (split-string python-preoutput-result "[\0\n]" t)
-	  ;; Try a second, Python3k compatible shot
-	  (python-send-string
-	   "import sys; print('_emacs_out ' + '\\0'.join(sys.path))")
-	  (accept-process-output (python-proc) 2)
-	  (if python-preoutput-result
-	      (split-string python-preoutput-result "[\0\n]" t)
-	    (message "Timeout while querying Python for system include path.")
-	    nil)))
-    (message "Python seems to be unavailable on this system.")))
+  (if (fboundp 'python-shell-internal-send-string)
+      (delq nil
+	    (mapcar
+	     (lambda (dir)
+	       (when (file-directory-p dir)
+		 dir))
+	     (split-string
+	      (python-shell-internal-send-string
+	       "import sys;print ('\\n'.join(sys.path))")
+	      "\n" t)))
+    ;; Old code, kept for compatibility.  This will be removed
+    ;; eventually; until then, compile this without warnings.
+    (with-no-warnings
+      (python-proc)
+      (if python-buffer
+	  (with-current-buffer python-buffer
+	    (set (make-local-variable 'python-preoutput-result) nil)
+	    (python-send-string
+	     "import sys; print '_emacs_out ' + '\\0'.join(sys.path)")
+	    (accept-process-output (python-proc) 2)
+	    (if python-preoutput-result
+		(split-string python-preoutput-result "[\0\n]" t)
+	      ;; Try a second, Python3k compatible shot
+	      (python-send-string
+	       "import sys; print('_emacs_out ' + '\\0'.join(sys.path))")
+	      (accept-process-output (python-proc) 2)
+	      (if python-preoutput-result
+		  (split-string python-preoutput-result "[\0\n]" t)
+		(message "Timeout while querying Python for system include path.")
+		nil)))
+	(message "Python seems to be unavailable on this system.")))))
 
 (defcustom-mode-local-semantic-dependency-system-include-path
   python-mode semantic-python-dependency-system-include-path
