@@ -40,11 +40,9 @@
 (require 'eieio-base)
 (require 'eieio-custom)
 (require 'semantic)
+(require 'cogre/picture-hack)
 
 (declare-function cogre-mode "cogre/mode")
-
-(eval-when-compile
-  (require 'cogre/picture-hack))
 
 ;;; Code:
 
@@ -334,7 +332,6 @@ Optional argument GRAPH-CLASS indicates the type of graph to create."
 		    (cogre-base-graph name :name name))))
     (setq cogre-graph newgraph)
     ;;(toggle-read-only 1)
-    (require 'cogre/mode)
     (cogre-mode)
     ))
 
@@ -497,7 +494,6 @@ Returns a list of return values from each call of function."
 This could be as simple as displaying the current state,
 customizing the object, or performing some complex task."
   (let ((b (current-buffer)))
-    (require 'eieio-custom)
     (customize-object element)
     (setq cogre-custom-originating-graph-buffer b))
   )
