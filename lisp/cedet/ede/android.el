@@ -26,11 +26,8 @@
 (require 'cedet-android)
 (require 'ede)
 (require 'semantic/analyze)
-
-(eval-when-compile
-  (require 'sgml-mode)
-  ;; Not available in Emacs 22
-  (require 'nxml-mode nil t))
+(require 'sgml-mode)
+(require 'nxml-mode nil t)
 
 ;;; Code:
 (defvar ede-android-project-list nil

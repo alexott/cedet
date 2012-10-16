@@ -34,6 +34,7 @@
 (require 'semantic/ctxt)
 (require 'semantic/format)
 (require 'semantic/idle)
+(require 'help-fns)
 
 ;; If CEDET wasn't compiled yet, we need to load the fallback grammar.
 (or (require 'semantic/grammar-wy nil t)
@@ -51,6 +52,9 @@
   (require 'semantic/db)
   (or (require 'semantic/grammar-wy nil t)
       (require 'semantic/gram-wy-fallback)))
+
+(declare-function semantic-grammar-wy--install-parser
+		  "semantic/gram-wy-fallback")
 
 
 ;;;;
@@ -1642,6 +1646,12 @@ Select the buffer containing the tag's definition, and move point there."
     (",$9" . "Match Value: Value from match list in slot 9")
     )
   "Association of syntax elements, and the corresponding help.")
+
+(declare-function eldoc-function-argstring "eldoc")
+(declare-function eldoc-docstring-format-sym-doc "eldoc")
+(declare-function eldoc-last-data-store "eldoc")
+(declare-function eldoc-get-fnsym-args-string "eldoc")
+(declare-function eldoc-get-var-docstring "eldoc")
 
 (defun semantic-grammar-eldoc-get-macro-docstring (macro expander)
   "Return a one-line docstring for the given grammar MACRO.

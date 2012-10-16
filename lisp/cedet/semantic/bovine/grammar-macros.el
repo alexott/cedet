@@ -34,8 +34,7 @@
 
 ;;; Code:
 
-(eval-when-compile
-  (require 'mode-local))
+(require 'mode-local)
 
 (defun bovine-grammar-EXPAND (bounds nonterm)
   "Expand call to EXPAND grammar macro.

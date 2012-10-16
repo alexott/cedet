@@ -35,17 +35,11 @@
 ;;; History:
 ;;
 
-(require 'semantic)
-(require 'semantic/bovine)
 (require 'semantic/bovine/f90-by)
-(require 'semantic/find)
+(require 'semantic/ctxt)
 (require 'semantic/decorate/mode)
-(require 'backquote)
 
 (eval-when-compile
-  (require 'mode-local)
-  (require 'semantic/ctxt)
-  (require 'semantic/decorate)
   (require 'semantic/dep)
   (require 'f90))
 

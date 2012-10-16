@@ -181,7 +181,8 @@ ROOTPROJ is nil, sinc there is only one project for a directory tree."
   (interactive)
   (project-compile-project (ede-current-project) "make all upload"))
 
-(eval-when-compile (require 'term))
+;; Autoloaded through `serial-term'
+(declare-function term-line-mode "term")
 
 (defun cedet-arduino-serial-monitor ()
   "Start up a serial monitor for a running arduino board.
