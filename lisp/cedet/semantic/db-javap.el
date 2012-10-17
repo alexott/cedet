@@ -822,7 +822,7 @@ represent jar files."
 	   ;; Try EDE's classpath feature
 	   (edeclasspath (when ede-object-project
 			   (ede-java-classpath ede-object-project)))
-
+	   (core-jar (cedet-java-find-jdk-core-jar))
 	   ;; Try JDEE to see if it knows
 	   ;; (jdeep - what to put here??)
 	   ;; Try our classpath
@@ -832,10 +832,10 @@ represent jar files."
 	   (ans nil)
 	   )
       ;; Get a list of paths together
-      (dolist (P (append edepaths edeclasspath semanticdb-javap-classpath))
+      (dolist (P (append core-jar edepaths edeclasspath semanticdb-javap-classpath))
 	(cond
-	 ;; Somtimes a null gets in.  Ignore it.
-	 ((null P)
+	 ;; Somtimes a null or non-string gets in.  Ignore it.
+	 ((or (null P) (not (stringp P)))
 	  nil)
 	 ;; A directory can be returned as a string.  Should we make a
 	 ;; special dir for this???  @TODO
