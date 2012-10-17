@@ -225,10 +225,10 @@ File name is rt.jar on Linux & Windows, and classes.jar on Mac OS X")
 (defun cedet-java-try-to-list-jdk-dirs (basedirs all-res)
   "Searches for JDKs in specified directories (basedirs) and using specified regexes (all-res)"
   (let (rt-path
-	(bdirs (copy-list basedirs)))
+	(bdirs (copy-sequence basedirs)))
     (while (and (null rt-path) (not (null bdirs)))
       (when (file-exists-p (car bdirs))
-	(let* ((res (copy-list all-res)))
+	(let* ((res (copy-sequence all-res)))
 	  (while (and (null rt-path) (not (null res)))
 	    (let ((files (directory-files (car bdirs) t (car res))))
 	      (while (and (null rt-path) (not (null files)))
