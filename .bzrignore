@@ -13,3 +13,6 @@ ChangeLog
 test-p.el
 tests/cedet/cogre/Subclass.dot
 doc/info/dir
+*-compile-script
+*-make-script
+*-loaddefs.el

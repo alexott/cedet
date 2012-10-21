@@ -21,7 +21,7 @@
    (ede-proj-target-elisp "proj-project"
     :name "proj-project"
     :path ""
-    :source '("proj.el" "pmake.el" "pconf.el" "proj-elisp.el" "proj-misc.el" "proj-obj.el" "proj-prog.el" "proj-archive.el" "proj-shared.el" "proj-info.el" "proj-scheme.el" "proj-aux.el" "proj-comp.el")
+    :source '("proj.el" "pmake.el" "pconf.el" "proj-elisp.el" "proj-misc.el" "proj-obj.el" "proj-prog.el" "proj-archive.el" "proj-shared.el" "proj-info.el" "proj-scheme.el" "proj-aux.el" "proj-comp.el" "proj-maven2.el")
     :aux-packages '("cedet-compat" "cedet" "eieio")
     :pre-load-packages '("cedet-compat")
     )

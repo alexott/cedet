@@ -106,7 +106,7 @@
 ;; Because there is one root project file, and no sub project files,
 ;; we need a special root-finding function.
 
-;;;###autoloa d
+;;;###autoload
 (defun ede-maven2-project-root (&optional dir)
   "Get the root directory for DIR."
   (when (not dir) (setq dir default-directory))
@@ -134,7 +134,7 @@ DIR is the directory to search from."
     ans))
 
 
-;;;###autoloa d
+;;;###autoload
 (defun ede-maven2-load (dir &optional rootproj)
   "Return a Maven Project object if there is a match.
 Return nil if there isn't one.
@@ -170,9 +170,10 @@ All directories need at least one target.")
   "EDE Maven Project target for Misc files.
 All directories need at least one target.")
 
-;;;###autoloa d
+;;;###autoload
 (defclass ede-maven2-project (ede-project)
   ((file-header-line :initform ";; EDE Maven2 project wrapper")
+   (classpath :initform nil)
    )
   "Project Type for Maven2 based Java projects."
   :method-invocation-order :depth-first)
@@ -194,6 +195,10 @@ All directories need at least one target.")
 
 (defvar ede-maven2-compile-command "mvn install"
   "Compile command for Maven2 project")
+
+;; TODO: make it defcustom...
+(defvar ede-maven2-maven-command "mvn"
+  "Executabe, that will be executed as maven")
 
 (defmethod project-compile-project ((obj ede-maven2-project) &optional command)
   "Compile the entire current project OBJ.
@@ -274,21 +279,62 @@ If one doesn't exist, create a new one for this directory."
       )
     ans))
 
+;; TODO: how to cache results? Store them in the slot, and recalculate only if pom.xml was changed?
+(defmethod ede-java-classpath ((proj ede-maven2-project))
+  "Get classpath for maven project"
+  (if (oref proj classpath)
+      (oref proj classpath)
+    (let* ((default-directory (ede-project-root-directory proj))
+	   (buff (get-buffer-create " *mvn-query*"))
+	   (outfile "mvn-classpath")
+	   (options `(,nil ,nil ,nil "dependency:build-classpath"
+			   ,(concat "-Dmdep.outputFile=" outfile)))
+	   (err 0)
+	   ;; TODO: rewrite to find-file, etc.
+	   ;; how to handle this for top level projects, when 'mvn-classpath' files are
+	   ;; created in subdirectories?
+	   (output (with-current-buffer buff
+		     (condition-case nil
+			 (setq err (apply 'call-process ede-maven2-maven-command options))
+		       (error
+			nil))
+		     (prog1
+			 (if (and (zerop err) (file-exists-p outfile))
+			     (progn
+			       (erase-buffer)
+			       (insert-file-contents outfile)
+			       (delete-file outfile)
+			       (buffer-string))
+			   nil)
+		       (kill-buffer buff)))))
+      (when output
+	(let* ((cp (split-string output ":")))
+	  (oset proj classpath cp)
+;;	  (message "cp=%s" cp)
+	  cp)))))
+
 ;;; UTILITIES SUPPORT.
 ;;
 
-;;;###autoloa d
+;;;###autoload
 (ede-add-project-autoload
  (ede-project-autoload "maven2"
 		       :name "MAVEN2"
-		       :file 'ede-proj-maven2
+		       :file 'ede/proj-maven2
 		       :proj-file "pom.xml"
 		       :proj-root 'ede-maven2-project-root
 		       :load-type 'ede-maven2-load
 		       :class-sym 'ede-maven2-project
-		       :new-p nil))
+		       :new-p nil
+		       :safe-p t
+		       ))
 
 (provide 'ede/proj-maven2)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "ede/proj-maven2"
+;; End:
 
 ;;; ede/proj-maven2.el ends here
 
