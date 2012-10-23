@@ -279,38 +279,41 @@ If one doesn't exist, create a new one for this directory."
       )
     ans))
 
+(defconst proj-maven2-outfile-name "mvn-classpath")
+
 ;; TODO: how to cache results? Store them in the slot, and recalculate only if pom.xml was changed?
 (defmethod ede-java-classpath ((proj ede-maven2-project))
   "Get classpath for maven project"
   (if (oref proj classpath)
       (oref proj classpath)
     (let* ((default-directory (ede-project-root-directory proj))
-	   (buff (get-buffer-create " *mvn-query*"))
-	   (outfile "mvn-classpath")
 	   (options `(,nil ,nil ,nil "dependency:build-classpath"
-			   ,(concat "-Dmdep.outputFile=" outfile)))
+			   ,(concat "-Dmdep.outputFile=" proj-maven2-outfile-name)))
 	   (err 0)
-	   ;; TODO: rewrite to find-file, etc.
-	   ;; how to handle this for top level projects, when 'mvn-classpath' files are
-	   ;; created in subdirectories?
-	   (output (with-current-buffer buff
-		     (condition-case nil
-			 (setq err (apply 'call-process ede-maven2-maven-command options))
-		       (error
-			nil))
-		     (prog1
-			 (if (and (zerop err) (file-exists-p outfile))
-			     (progn
-			       (erase-buffer)
-			       (insert-file-contents outfile)
-			       (delete-file outfile)
-			       (buffer-string))
-			   nil)
-		       (kill-buffer buff)))))
-      (when output
-	(let* ((cp (split-string output ":")))
-	  (oset proj classpath cp)
-;;	  (message "cp=%s" cp)
+	   )
+      (condition-case niloutfile
+	  (setq err (apply 'call-process ede-maven2-maven-command options))
+	(error 1))
+      (when (zerop err)
+	(let ((files (cedet-files-list-recursively default-directory proj-maven2-outfile-name))
+	      cp)
+	  (dolist (F files)
+	    (save-excursion
+	      (condition-case nil
+		  (let* ((output (with-temp-buffer
+				 (insert-file-contents F)
+				 (buffer-string)))
+		       (cp-list (if output (split-string output ":") nil)))
+		  (when (file-exists-p F)
+		    (delete-file F)
+		    (when (and output cp-list)
+		      (dolist (C cp-list)
+			(add-to-list 'cp C)))))
+		(error (when (file-exists-p F)
+			 (delete-file F))
+		       nil))))
+	  (when cp
+	    (oset proj classpath cp))
 	  cp)))))
 
 ;;; UTILITIES SUPPORT.
