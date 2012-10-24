@@ -106,7 +106,7 @@ called in a dereference sequence.")
    (prefixclass :initarg :prefixclass
 		:type list
 		:documentation "Tag classes expected at this context.
-These are clases for tags, such as 'function, or 'variable.")
+These are classes for tags, such as 'function, or 'variable.")
    (prefixtypes :initarg :prefixtypes
 	   :type list
 	   :documentation "List of tags defining types for :prefix.
@@ -527,7 +527,7 @@ Returns an object based on symbol `semantic-analyze-context'."
 	 (function nil)
 	 (fntag nil)
 	 arg fntagend argtag
-	 assign asstag
+	 assign asstag newseq
 	 )
 
     ;; Pattern for Analysis:
@@ -601,16 +601,25 @@ Returns an object based on symbol `semantic-analyze-context'."
 
       (if debug-on-error
 	  (catch 'unfindable
-	    ;; If debug on error is on, allow debugging in this fcn.
 	    (setq prefix (semantic-analyze-find-tag-sequence
-			  prefix scope 'prefixtypes 'unfindable)))
+			  prefix scope 'prefixtypes 'unfindable))
+	    ;; Dereference Alias if necessary
+	    (when (setq newseq
+			(semantic-analyze-dereference-alias prefix))
+	      (setq prefix (semantic-analyze-find-tag-sequence
+			    newseq scope 'prefixtypes 'unfindable))))
 	;; Debug on error is off.  Capture errors and move on
 	(condition-case err
 	    ;; NOTE: This line is duplicated in
 	    ;;       semantic-analyzer-debug-global-symbol
 	    ;;       You will need to update both places.
-	    (setq prefix (semantic-analyze-find-tag-sequence
-			  prefix scope 'prefixtypes))
+	    (progn
+	      (setq prefix (semantic-analyze-find-tag-sequence
+			    prefix scope 'prefixtypes))
+	      (when (setq newseq
+			  (semantic-analyze-dereference-alias prefix))
+		(setq prefix (semantic-analyze-find-tag-sequence
+			      newseq scope 'prefixtypes))))
 	  (error (semantic-analyze-push-error err))))
       )
 
@@ -679,6 +688,28 @@ Returns an object based on symbol `semantic-analyze-context'."
     ;; Return our context.
     context-return))
 
+(defun semantic-analyze-dereference-alias (taglist)
+  "Dereference any aliases in TAGLIST.
+Returns a sequence of names from TAGLIST with dereferenced
+aliases, which can the be fed again into
+`semantic-analyze-find-tag-sequence'.  TAGLIST can also contain
+normal strings.  Function returns `nil' if no aliases are found."
+  (let (flag sequence)
+    (dolist (cur taglist)
+      (setq sequence
+	    (append sequence
+		    (if (and (semantic-tag-p cur)
+			     (eq (semantic-tag-get-attribute cur :kind) 'alias))
+			(progn
+			  (setq flag t)
+			  (semantic-analyze-split-name
+			   (semantic-tag-name 
+			    (car (semantic-tag-get-attribute cur :members)))))
+		      (if (semantic-tag-p cur)
+			  (semantic-tag-name cur)
+			(list cur))))))
+    (when flag
+	sequence)))
 
 (defun semantic-adebug-analyze (&optional ctxt)
   "Perform `semantic-analyze-current-context'.
