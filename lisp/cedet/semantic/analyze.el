@@ -603,7 +603,8 @@ Returns an object based on symbol `semantic-analyze-context'."
 	  (catch 'unfindable
 	    (setq prefix (semantic-analyze-find-tag-sequence
 			  prefix scope 'prefixtypes 'unfindable))
-	    ;; Dereference Alias if necessary
+	    ;; If there's an alias, dereference it and analyze
+	    ;; sequence again.
 	    (when (setq newseq
 			(semantic-analyze-dereference-alias prefix))
 	      (setq prefix (semantic-analyze-find-tag-sequence
@@ -689,27 +690,19 @@ Returns an object based on symbol `semantic-analyze-context'."
     context-return))
 
 (defun semantic-analyze-dereference-alias (taglist)
-  "Dereference any aliases in TAGLIST.
-Returns a sequence of names from TAGLIST with dereferenced
-aliases, which can the be fed again into
-`semantic-analyze-find-tag-sequence'.  TAGLIST can also contain
-normal strings.  Function returns `nil' if no aliases are found."
-  (let (flag sequence)
-    (dolist (cur taglist)
-      (setq sequence
-	    (append sequence
-		    (if (and (semantic-tag-p cur)
-			     (eq (semantic-tag-get-attribute cur :kind) 'alias))
-			(progn
-			  (setq flag t)
-			  (semantic-analyze-split-name
-			   (semantic-tag-name 
-			    (car (semantic-tag-get-attribute cur :members)))))
-		      (if (semantic-tag-p cur)
-			  (semantic-tag-name cur)
-			(list cur))))))
-    (when flag
-	sequence)))
+  "Dereference first tag in TAGLIST if it is an alias.
+Returns a sequence of names which can then be fed again into
+`semantic-analyze-find-tag-sequence'.
+Returns nil if no alias was found."
+  (when (eq (semantic-tag-get-attribute (car taglist) :kind) 'alias)
+    (let ((tagname
+	   (semantic-analyze-split-name
+	    (semantic-tag-name 
+	     (car (semantic-tag-get-attribute (car taglist) :members))))))
+      (append (if (listp tagname)
+		  tagname
+		(list tagname))
+	      (cdr taglist)))))
 
 (defun semantic-adebug-analyze (&optional ctxt)
   "Perform `semantic-analyze-current-context'.
