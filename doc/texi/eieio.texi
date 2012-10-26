@@ -595,7 +595,7 @@ This is the default.
 @item :depth-first
 Search for methods in the class hierarchy in a depth first order.
 @item :c3
-Searches for methods in in a learnarized way that most closely matches
+Searches for methods in in a linearized way that most closely matches
 what CLOS does when a monotonic class structure is defined.
 @end table
 
@@ -1010,7 +1010,7 @@ This is the default.
 @item :depth-first
 Search for methods in the class hierarchy in a depth first order.
 @item :c3
-Searches for methods in in a learnarized way that most closely matches
+Searches for methods in in a linearized way that most closely matches
 what CLOS does when CLOS when a monotonic class structure is defined.
 
 This is derived from the Dylan language documents by
@@ -1409,7 +1409,7 @@ Read a persistent object from @var{filename}, and return it.
 Signal an error if the object in @var{FILENAME} is not a constructor
 for @var{CLASS}.  Optional @var{allow-subclass} says that it is ok for
 @code{eieio-peristent-read} to load in subclasses of class instead of
-being pendantic."
+being pedantic."
 @end defun
 
 @node eieio-named
@@ -1552,7 +1552,7 @@ a class.  In a program, pass it a string with the name of a class, a
 class symbol, or an object.  The resulting buffer will display all slot
 names.
 
-Additionally, all methods defined to have functionality on this class is
+Additionally, all methods defined to have functionality on this class are
 displayed.
 
 @node Documentation
