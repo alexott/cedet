@@ -103,5 +103,8 @@ itest-automake-batch:
 itest-android-batch:
 	cd $(CURDIR)/tests;./cit-test.sh Android --batch
 
+itest-stl-batch:
+	$(EMACS) $(EMACSFLAGS) -l cedet-devel-load.el -l $(CURDIR)/tests/cedet/semantic/stltest.el
+
 showversion:
 	@$(EMACS) -Q --batch --eval '$(SHOWVERSION)'
