@@ -129,6 +129,7 @@ If a default starting DIR is not specified, the current buffer's
 	(file-name-as-directory
 	 (buffer-substring (point) (point-at-eol)))))))
 
+;;;###autoload
 (defun cedet-gnu-global-version-check (&optional noerror)
   "Check the version of the installed GNU Global command.
 If optional programmatic argument NOERROR is non-nil,
