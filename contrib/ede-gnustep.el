@@ -73,7 +73,7 @@
 (eval-and-compile 
   (require 'ede)
   (require 'ede/proj)
-  (require 'makefile-edit)
+  (require 'semantic/edit)
   ;; to easy parsing of GNUmakefiles
   (require 'semantic)
   (require 'semantic/find)
@@ -944,8 +944,8 @@ Argument COMMAND is the command to use for compiling the target."
 ;;; Target type specific autogenerating gobbldegook.
 ;; I would implement the ede-proj interface.
 (eval-when-compile
-  (require 'ede-pmake "ede/pmake.el")
-  (require 'ede-pconf "ede/pconf.el"))
+  (require 'ede/pmake)
+  (require 'ede/pconf))
 
 (defmethod ede-proj-dist-makefile ((this ede-step-project))
   "Return the name of the Makefile with the DIST target in it for THIS."

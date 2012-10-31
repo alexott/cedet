@@ -11,8 +11,7 @@ ede_FILES=Project.ede Makefile
 
 misc_AUX=ChangeLog
 EMACS=emacs
-LOADPATH= ../common/  ../ede/ ../semantic/ ../eieio/\
-    ../semantic/bovine/ ../speedbar/ ../semantic/wisent/
+LOADPATH= ../obsolete/lisp/cedet ../lisp/cedet 
 LOADDEFS=contrib-loaddefs.el
 LOADDIRS=.
 init_LISP=cedet-contrib-load.el
@@ -24,8 +23,6 @@ wy_SEMANTIC_GRAMMAR_EL=wisent-csharp-wy.el wisent-ruby-wy.el wisent-php-wy.el
 lisp_LISP=wisent-csharp.el semantic-tag-folding.el eassist.el wisent-ruby.el wisent-php.el ede-gnustep.el semantic-ectag-scala.el
 VERSION=1.1
 DISTDIR=$(top)Contrib-$(VERSION)
-
-
 
 all: autoloads init setup wy lisp
 
@@ -65,9 +62,8 @@ wy: $(wy_SEMANTIC_GRAMMAR)
 	@for loadpath in . ${LOADPATH}; do \
 	   echo "(add-to-list 'load-path \"$$loadpath\")" >> grammar-make-script; \
 	done;
-	@echo "(require 'semantic-load)" >> grammar-make-script
-	@echo "(require 'semantic-grammar)" >> grammar-make-script
-	"$(EMACS)" -batch --no-site-file -l grammar-make-script -f semantic-grammar-batch-build-packages $^
+	@echo "(require 'semantic/grammar)" >> grammar-make-script
+	"$(EMACS)" -batch --no-site-file -l ../cedet-devel-load.el -l grammar-make-script -f semantic-grammar-batch-build-packages $^
 
 .PHONY: lisp
 lisp: $(lisp_LISP)
@@ -79,7 +75,7 @@ lisp: $(lisp_LISP)
 	   echo "(load \"$$preload\")" >> $@-compile-script; \
 	done;
 	@echo "(setq debug-on-error t)" >> $@-compile-script
-	"$(EMACS)" $(EMACSFLAGS) -l $@-compile-script -f batch-byte-compile $^
+	"$(EMACS)" $(EMACSFLAGS) -l ../cedet-devel-load.el -l $@-compile-script -f batch-byte-compile $^
 
 tags: 
 
