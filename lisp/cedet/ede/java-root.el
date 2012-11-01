@@ -404,8 +404,9 @@ This knows details about or source tree."
 	(dir (file-name-directory (oref proj file)))
 	(ret nil))
     (dolist (P (oref proj localclasspath))
-      (setq ret (cons (expand-file-name P dir) ret))
-      )
+      (if (compare-strings P 0 1 "/" 0 1)
+	  (setq ret (cons (expand-file-name (substring P 1) dir) ret))
+	(setq ret (cons (expand-file-name P dir) ret))))
     (append (nreverse ret) (oref proj classpath))))
 
 (provide 'ede/java-root)
