@@ -398,13 +398,14 @@ This knows details about or source tree."
 ;; The following code is specific to setting up header files,
 ;; include lists, and Preprocessor symbol tables.
 
+;; @TODO: should we cache result? or calculate it on project's creation?
 (defmethod ede-java-classpath ((proj ede-java-root-project))
   "Return the classpath for this project."
   (let ((lf (oref proj locate-fcn))
 	(dir (file-name-directory (oref proj file)))
 	(ret nil))
     (dolist (P (oref proj localclasspath))
-      (if (compare-strings P 0 1 "/" 0 1)
+      (if (string= "/" (substring P 0 1))
 	  (setq ret (cons (expand-file-name (substring P 1) dir) ret))
 	(setq ret (cons (expand-file-name P dir) ret))))
     (append (nreverse ret) (oref proj classpath))))
