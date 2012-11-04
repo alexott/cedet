@@ -982,14 +982,17 @@ Calculate the cache if there isn't one."
   "Calculate the completions for prefix from completionlist.
 Output must be in semanticdb Find result format."
   ;; Must output in semanticdb format
+  (unless completionlist
+    (setq completionlist
+	  (or (oref obj cache)
+	      (semantic-collector-calculate-cache obj))))
   (let ((table (with-current-buffer (oref obj buffer)
 		 semanticdb-current-table))
 	(result (semantic-find-tags-for-completion
 		 prefix
 		 ;; To do this kind of search with a pre-built completion
 		 ;; list, we need to strip it first.
-		 (semanticdb-strip-find-results completionlist)))
-	)
+		 (semanticdb-strip-find-results completionlist))))
     (if result
 	(list (cons table result)))))
 
@@ -1340,7 +1343,10 @@ a collector, and tracking tables of completion to display."
 
 (defmethod semantic-displayor-scroll-request ((obj semantic-displayor-abstract))
   "A request to for the displayor to scroll the completion list (if needed)."
-  (scroll-other-window))
+  (with-selected-window (get-buffer-window "*Completions*")
+    (if (posn-at-point (point-max))
+	(goto-char (point-min))
+      (scroll-up))))
 
 (defmethod semantic-displayor-focus-previous ((obj semantic-displayor-abstract))
   "Set the current focus to the previous item."
