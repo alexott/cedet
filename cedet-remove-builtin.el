@@ -27,9 +27,11 @@
   The 'cedet' package itself is implicitly included.")
 
 (defun cedet-remove-builtin ()
-  "Force any built-in CEDET to be removed from the load path.
-Force all symbols that belong to CEDET to be unloaded.
-This is a needed first step in getting CEDET installed from outside sources."
+  "Force any CEDET package on load-path to be removed.
+Force all symbols that belong to CEDET to be unloaded.  This
+should also (hopefully) remove additional CEDET installations
+installed through package managers or similar.  This is a needed
+first step in getting CEDET installed from outside sources."
   (interactive)
   (when (featurep 'cedet)
     (error "Cannot unload builtin CEDET since it is already loaded."))
@@ -40,10 +42,12 @@ This is a needed first step in getting CEDET installed from outside sources."
 	     (symbol-name package))))
 
   ;; Remove from load-path.
-  (let* ((clp (locate-library "cedet"))
-	 (root (when clp (directory-file-name (file-name-directory clp))))
-	 )
-    (setq load-path (delete root load-path)))
+  (let (clp)
+    (while (setq clp (locate-library "cedet"))
+      (setq load-path (delete (directory-file-name (file-name-directory clp))
+			      load-path))
+      (setq load-path (delete (file-name-directory (file-name-directory clp))
+			      load-path))))
 
   ;; Find ALL autoloaded symbols related to CEDET, and delete them.
   (dolist (R (append '(cedet) cedet-remove-builtin-package-list))
