@@ -91,8 +91,8 @@ names in scope."
 (add-hook 'java-mode-hook 'wisent-java-default-setup)
 
 ;;;###autoload
-(eval-after-load "semanticdb"
-  '(require 'semanticdb-javap)
+(eval-after-load "semantic/db"
+  '(require 'semantic/db-javap)
   )
 
 ;;; Overridden Semantic API.
