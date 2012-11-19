@@ -103,6 +103,30 @@
 
 ;;; Code:
 
+(defgroup ede-maven2 nil
+  "Emacs Development Environment. Maven2 options"
+  :group 'ede
+  :group 'tools
+  :group 'extensions)
+
+(defcustom ede-maven2-execute-mvn-to-get-classpath t
+  "Defines, should we execute Maven to get classpath information or not."
+  :group 'ede-maven2
+  :require 'ede/proj-maven2
+  :type 'boolean)
+
+(defcustom ede-maven2-maven-command "mvn"
+  "Executabe, that will be executed as maven"
+  :group 'ede-maven2
+  :require  'ede/proj-maven2
+  :type 'string)
+
+(defcustom ede-maven2-compile-command "mvn install"
+  "Compile command for Maven2 project"
+  :group 'ede-maven2
+  :require  'ede/proj-maven2
+  :type 'string)
+
 ;; Because there is one root project file, and no sub project files,
 ;; we need a special root-finding function.
 
@@ -170,13 +194,6 @@ All directories need at least one target.")
 ;;  - 1st one tries to find the "root project" and compile it
 ;;  - 2nd 2 compiles the child project the current file is a member of
 ;;maven error messages are recognized by emacs23
-
-(defvar ede-maven2-compile-command "mvn install"
-  "Compile command for Maven2 project")
-
-;; TODO: make it defcustom...
-(defvar ede-maven2-maven-command "mvn"
-  "Executabe, that will be executed as maven")
 
 (defmethod project-compile-project ((obj ede-maven2-project) &optional command)
   "Compile the entire current project OBJ.
@@ -262,7 +279,8 @@ If one doesn't exist, create a new one for this directory."
 ;; TODO: how to cache results? Store them in the slot, and recalculate only if pom.xml was changed?
 (defmethod ede-java-classpath ((proj ede-maven2-project))
   "Get classpath for maven project"
-  (if (oref proj classpath)
+  (if (or (not ede-maven2-execute-mvn-to-get-classpath)
+	  (oref proj classpath))
       (oref proj classpath)
     (let* ((default-directory (ede-project-root-directory proj))
 	   (options `(,nil ,nil ,nil "dependency:build-classpath"
