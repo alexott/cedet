@@ -109,30 +109,10 @@
 ;;;###autoload
 (defun ede-maven2-project-root (&optional dir)
   "Get the root directory for DIR."
-  (when (not dir) (setq dir default-directory))
-  (let ((ans nil))
-    (while (and dir (not ans))
-      (when (file-exists-p (expand-file-name "pom.xml" dir))
-        (setq ans dir))
-      (setq dir (ede-up-directory dir)))
-    ans))
+  (ede-find-project-root "pom.xml" dir))
 
 (defvar ede-maven2-project-list nil
   "List of projects created by option `ede-proj-maven2'.")
-
-(defun ede-maven2-file-existing (dir)
-  "Find a maven project in the list of maven projects.
-DIR is the directory to search from."
-  ;;TODO this is cloned from ede-emacs-file-existing, should be refactorable
-  (let ((projs ede-maven2-project-list)
-        (ans nil))
-    (while (and projs (not ans))
-      (let ((root (ede-project-root-directory (car projs))))
-        (when (string-match (concat "^" (regexp-quote root)) dir)
-          (setq ans (car projs))))
-      (setq projs (cdr projs)))
-    ans))
-
 
 ;;;###autoload
 (defun ede-maven2-load (dir &optional rootproj)
@@ -140,7 +120,7 @@ DIR is the directory to search from."
 Return nil if there isn't one.
 Argument DIR is the directory it is created for.
 ROOTPROJ is nil, since there is only one project."
-  (or (ede-maven2-file-existing dir)
+  (or (ede-files-find-existing dir ede-maven2-project-list)
       ;; Doesn't already exist, so lets make one.
        (let ((this
              (ede-maven2-project "Maven"
@@ -153,10 +133,7 @@ ROOTPROJ is nil, since there is only one project."
          (ede-add-project-to-global-list this)
          ;;TODO the above seems to be done somewhere else, maybe ede-load-project-file
          ;; this seems to lead to multiple copies of project objects in ede-projects
-         this
-        )
-      )
-)
+         this)))
 
 
 (defclass ede-maven2-target-java (ede-target)
@@ -171,9 +148,10 @@ All directories need at least one target.")
 All directories need at least one target.")
 
 ;;;###autoload
-(defclass ede-maven2-project (ede-project)
-  ((file-header-line :initform ";; EDE Maven2 project wrapper")
-   (classpath :initform nil)
+(defclass ede-maven2-project (ede-project eieio-instance-tracker)
+  ((tracking-symbol :initform 'ede-maven2-project-list)
+   (file-header-line :initform ";; EDE Maven2 project wrapper")
+   (classpath :initform nil :type list)
    )
   "Project Type for Maven2 based Java projects."
   :method-invocation-order :depth-first)
