@@ -21,14 +21,14 @@
    (ede-proj-target-elisp "proj-project"
     :name "proj-project"
     :path ""
-    :source '("proj.el" "pmake.el" "pconf.el" "proj-elisp.el" "proj-misc.el" "proj-obj.el" "proj-prog.el" "proj-archive.el" "proj-shared.el" "proj-info.el" "proj-scheme.el" "proj-aux.el" "proj-comp.el" "proj-maven2.el")
+    :source '("proj.el" "pmake.el" "pconf.el" "proj-elisp.el" "proj-misc.el" "proj-obj.el" "proj-prog.el" "proj-archive.el" "proj-shared.el" "proj-info.el" "proj-scheme.el" "proj-aux.el" "proj-comp.el" "proj-maven2.el" "proj-lein2.el" "proj-ant.el")
     :aux-packages '("cedet-compat" "cedet" "eieio")
     :pre-load-packages '("cedet-compat")
     )
    (ede-proj-target-elisp "projects"
     :name "projects"
     :path ""
-    :source '("project-am.el" "cpp-root.el" "emacs.el" "linux.el" "generic.el" "java-root.el")
+    :source '("project-am.el" "cpp-root.el" "emacs.el" "linux.el" "generic.el" "java-root.el" "jvm-base.el")
     :aux-packages '("cedet-compat" "cedet" "eieio")
     :pre-load-packages '("cedet-compat")
     )
@@ -44,10 +44,7 @@
   :web-site-directory "../www"
   :web-site-file "ede.shtml"
   :ftp-upload-site "/ftp@upload.sourceforge.net:/incoming"
-  :variables '(("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)' -l \"../../../cedet-remove-builtin.el\"")
-	       ("EMACS" . "@echo \"    > $@\";emacs")
-	       ;; This is a hack we still need for Emacs 23.1
-	       ("AUTOGENFLAGS" . "-L ../ --eval '(progn (require (quote cedet-compat)) (require (quote mode-local)))'"))
+  :variables '(("EMACSFLAGS" . "-batch --no-site-file --eval '(setq debug-on-error t)' -l \"../../../cedet-remove-builtin.el\"") ("EMACS" . "@echo \"    > $@\";emacs") ("AUTOGENFLAGS" . "-L ../ --eval '(progn (require (quote cedet-compat)) (require (quote mode-local)))'"))
   :configuration-variables 'nil
   :metasubproject 't
   )

@@ -98,8 +98,7 @@
 
 ;; - an auxilary project file, like ede-simple could be an useful option
 
-(require 'ede)
-(require 'cedet-files)
+(require 'ede/jvm-base)
 
 ;;; Code:
 
@@ -120,6 +119,8 @@
   :group 'ede-maven2
   :require  'ede/proj-maven2
   :type 'string)
+
+;; TODO: add defcustom for default maven options (for all commands)
 
 (defcustom ede-maven2-compile-command "mvn install"
   "Compile command for Maven2 project"
@@ -148,169 +149,48 @@ ROOTPROJ is nil, since there is only one project."
       ;; Doesn't already exist, so lets make one.
        (let ((this
              (ede-maven2-project "Maven"
-                                 :name "maven dir" ; make fancy name from dir here.
+                                 :name "maven dir" ; TODO: make fancy name from dir here.
                                  :directory dir
-                                 :file
-                                 (expand-file-name "pom.xml" dir)
+                                 :file (expand-file-name "pom.xml" dir)
+				 :current-target "package"
                                  )))
-         ;; (message "adding %s to global proj list" this)
          (ede-add-project-to-global-list this)
          ;;TODO the above seems to be done somewhere else, maybe ede-load-project-file
          ;; this seems to lead to multiple copies of project objects in ede-projects
-         this)))
-
-
-(defclass ede-maven2-target-java (ede-target)
-  ()
-  "EDE Maven Project target for Java code.
-All directories need at least one target.")
-
-
-(defclass ede-maven2-target-misc (ede-target)
-  ()
-  "EDE Maven Project target for Misc files.
-All directories need at least one target.")
+	 this)))
 
 ;;;###autoload
-(defclass ede-maven2-project (ede-project eieio-instance-tracker)
+(defclass ede-maven2-project (ede-jvm-base-project eieio-instance-tracker)
   ((tracking-symbol :initform 'ede-maven2-project-list)
    (file-header-line :initform ";; EDE Maven2 project wrapper")
-   (classpath :initform nil :type list)
    )
   "Project Type for Maven2 based Java projects."
   :method-invocation-order :depth-first)
 
-
-(defmethod initialize-instance ((this ede-maven2-project)
-                                &rest fields)
-  "Make sure the :targets is setup."
-  (call-next-method)
-  (unless (slot-boundp this 'targets)
-    (oset this :targets nil))
-  )
-
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;;the 3 compile methods below currently do much the same thing.
+;;the 2 compile methods below currently do much the same thing.
 ;;  - 1st one tries to find the "root project" and compile it
-;;  - 2nd 2 compiles the child project the current file is a member of
+;;  - 2nd compiles the child project the current file is a member of
 ;;maven error messages are recognized by emacs23
 
-(defmethod project-compile-project ((obj ede-maven2-project) &optional command)
+(defmethod project-compile-project ((proj ede-maven2-project) &optional command)
   "Compile the entire current project OBJ.
 Argument COMMAND is the command to use when compiling."
   ;; we need to be in the proj root dir for this to work
-  (let ((default-directory (ede-project-root-directory obj)))
-    (compile ede-maven2-compile-command)))
+  (let ((default-directory (ede-project-root-directory proj)))
+    (compile (combine-and-quote-strings
+	      (append (list ede-maven2-maven-command "-B" (oref proj :current-target))
+		      (oref proj :target-options))))))
 
-
-(defmethod project-compile-target ((obj ede-maven2-target-java) &optional command)
-  "Compile the current target OBJ.
-Argument COMMAND is the command to use for compiling the target."
-  (let* ((default-directory (ede-maven2-project-root (oref obj :path))))
-    (compile ede-maven2-compile-command)))
-
-(defmethod project-compile-target ((obj ede-maven2-target-misc) &optional command)
-  "Compile the current target OBJ.
-Argument COMMAND is the command to use for compiling the target."
-  (let* ((default-directory (ede-maven2-project-root (oref obj :path))))
-    (compile ede-maven2-compile-command)))
-
-;;; File Stuff
-;;
- (defmethod ede-project-root-directory ((this ede-maven2-project)
-                                       &optional file)
-   "Return the root for THIS Maven project with file."
-;;   (file-name-directory (oref this file))
-   (oref this :directory)
-   )
-
-
- (defmethod ede-project-root ((this ede-maven2-project))
-   "Return my root."
-   this)
-
- (defmethod ede-find-subproject-for-directory ((proj ede-maven2-project)
-                                              dir)
-   "Return PROJ, for handling all subdirs below DIR."
-   proj)
-
-;;; TARGET MANAGEMENT
-;;
-
-;;im not sure maven targets should look like this at all.
-;;
-
-(defun ede-maven2-find-matching-target (class dir targets)
-  "Find a target that is a CLASS and is in DIR in the list of TARGETS."
-  (let ((match nil))
-    (dolist (T targets)
-      (when (and (object-of-class-p T class)
-                 (string= (oref T :path) dir))
-        (setq match T)
-      ))
-    match))
-
-(defmethod ede-find-target ((proj ede-maven2-project) buffer)
-  "Find an EDE target in PROJ for BUFFER.
-If one doesn't exist, create a new one for this directory."
-  (let* ((ext (file-name-extension (buffer-file-name buffer)))
-         (cls (cond ((not ext)
-                     'ede-maven2-target-misc)
-                    ((string-match "java" ext)
-                     'ede-maven2-target-java)
-                    (t 'ede-maven2-target-misc)))
-         (targets (oref proj targets))
-         (dir default-directory)
-         (ans (ede-maven2-find-matching-target cls dir targets))
-         )
-    (when (not ans)
-      (setq ans (make-instance
-                 cls
-                 :name (file-name-nondirectory
-                        (directory-file-name dir))
-                 :path dir
-                 :source nil))
-      (object-add-to-list proj :targets ans)
-      )
-    ans))
-
+;;; Classpath-related...
 (defconst proj-maven2-outfile-name "mvn-classpath")
 
-;; TODO: how to cache results? Store them in the slot, and recalculate only if pom.xml was changed?
 (defmethod ede-java-classpath ((proj ede-maven2-project))
   "Get classpath for maven project"
-  (if (or (not ede-maven2-execute-mvn-to-get-classpath)
-	  (oref proj classpath))
-      (oref proj classpath)
-    (let* ((default-directory (ede-project-root-directory proj))
-	   (options `(,nil ,nil ,nil "dependency:build-classpath"
-			   ,(concat "-Dmdep.outputFile=" proj-maven2-outfile-name)))
-	   (err 0)
-	   )
-      (condition-case niloutfile
-	  (setq err (apply 'call-process ede-maven2-maven-command options))
-	(error 1))
-      (when (zerop err)
-	(let ((files (cedet-files-list-recursively default-directory proj-maven2-outfile-name))
-	      cp)
-	  (dolist (F files)
-	    (save-excursion
-	      (condition-case nil
-		  (let* ((output (with-temp-buffer
-				 (insert-file-contents F)
-				 (buffer-string)))
-		       (cp-list (if output (split-string output ":") nil)))
-		  (when (file-exists-p F)
-		    (delete-file F)
-		    (when (and output cp-list)
-		      (dolist (C cp-list)
-			(add-to-list 'cp C)))))
-		(error (when (file-exists-p F)
-			 (delete-file F))
-		       nil))))
-	  (when cp
-	    (oset proj classpath cp))
-	  cp)))))
+  (ede-jvm-get-classpath-from-command proj ede-maven2-execute-mvn-to-get-classpath
+				      proj-maven2-outfile-name ede-maven2-maven-command
+				      `(,nil ,nil ,nil "--batch-mode" "dependency:build-classpath"
+					     ,(concat "-Dmdep.outputFile=" proj-maven2-outfile-name))))
 
 ;;; UTILITIES SUPPORT.
 ;;
