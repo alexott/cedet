@@ -79,6 +79,7 @@
 ;;hierarchy and build the root project, rather than the current one.
 
 ;;should  ede-parent-project be made generic?
+;; TODO: yes! in this case, it will possible to use information from parent tag in pom.xml
 
 ;; In the end more things are desired from proper emacs maven support.
 
@@ -97,6 +98,8 @@
 ;; all src files will belong to all maven targets.
 
 ;; - an auxilary project file, like ede-simple could be an useful option
+
+;; - ede configurations == maven profiles
 
 (require 'ede/jvm-base)
 
@@ -120,13 +123,11 @@
   :require  'ede/proj-maven2
   :type 'string)
 
-;; TODO: add defcustom for default maven options (for all commands)
-
-(defcustom ede-maven2-compile-command "mvn install"
-  "Compile command for Maven2 project"
+(defcustom ede-maven2-maven-options '("-B")
+  "Maven's command line options"
   :group 'ede-maven2
   :require  'ede/proj-maven2
-  :type 'string)
+  :type 'list)
 
 ;; Because there is one root project file, and no sub project files,
 ;; we need a special root-finding function.
@@ -153,16 +154,21 @@ ROOTPROJ is nil, since there is only one project."
                                  :directory dir
                                  :file (expand-file-name "pom.xml" dir)
 				 :current-target "package"
+				 :pom nil ; TODO: replace with call to pom.el
                                  )))
          (ede-add-project-to-global-list this)
-         ;;TODO the above seems to be done somewhere else, maybe ede-load-project-file
+         ;; TODO: the above seems to be done somewhere else, maybe ede-load-project-file
          ;; this seems to lead to multiple copies of project objects in ede-projects
+	 ;; TODO: call rescan project to setup all data
 	 this)))
 
 ;;;###autoload
 (defclass ede-maven2-project (ede-jvm-base-project eieio-instance-tracker)
   ((tracking-symbol :initform 'ede-maven2-project-list)
    (file-header-line :initform ";; EDE Maven2 project wrapper")
+   (pom :initform nil
+	:initarg :pom
+	:documentation "Parsed pom.xml file")
    )
   "Project Type for Maven2 based Java projects."
   :method-invocation-order :depth-first)
@@ -174,12 +180,14 @@ ROOTPROJ is nil, since there is only one project."
 ;;maven error messages are recognized by emacs23
 
 (defmethod project-compile-project ((proj ede-maven2-project) &optional command)
-  "Compile the entire current project OBJ.
+  "Compile the entire current project PROJ.
 Argument COMMAND is the command to use when compiling."
   ;; we need to be in the proj root dir for this to work
   (let ((default-directory (ede-project-root-directory proj)))
     (compile (combine-and-quote-strings
-	      (append (list ede-maven2-maven-command "-B" (oref proj :current-target))
+	      (append (list ede-maven2-maven-command)
+		      ede-maven2-maven-options
+		      (list (oref proj :current-target))
 		      (oref proj :target-options))))))
 
 ;;; Classpath-related...
@@ -191,6 +199,24 @@ Argument COMMAND is the command to use when compiling."
 				      proj-maven2-outfile-name ede-maven2-maven-command
 				      `(,nil ,nil ,nil "--batch-mode" "dependency:build-classpath"
 					     ,(concat "-Dmdep.outputFile=" proj-maven2-outfile-name))))
+
+;; TODO: really should be based on content of pom.xml file. But we need parser for it...
+;; TODO: add caching...
+(defmethod ede-source-paths ((proj ede-maven2-project) mode)
+  "Get the base to all source trees in the current project for MODE."
+  (let ((dir (ede-project-root-directory proj)))
+    (mapcar (lambda (x) (concat dir x))
+	    (cond
+	     ((eq mode 'java-mode) '("src/main/java" "src/test/java"))
+	     ((eq mode 'clojure-mode) '("src/main/clojure" "src/test/clojure"))))))
+
+;; TODO: re-implement when pom.xml parser will be available
+(defmethod project-rescan ((proj ede-maven2-project))
+  "Rescan the EDE proj project THIS."
+  (when (ede-jvm-base-file-updated-p proj)
+    ;; TODO: fill information
+    (oset proj :pom nil)
+    ))
 
 ;;; UTILITIES SUPPORT.
 ;;

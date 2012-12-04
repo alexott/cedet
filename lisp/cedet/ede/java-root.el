@@ -332,7 +332,7 @@ Each directory needs a project file to control it.")
 (defmethod ede-find-target ((proj ede-java-root-project) buffer)
   "Find an EDE target in PROJ for BUFFER.
 If one doesn't exist, create a new one for this directory."
-  (let* ((targets (oref proj targets))
+  (let* ((targets (oref proj :targets))
 	 (dir default-directory)
 	 (ans (object-assoc dir :path targets))
 	 )
@@ -359,12 +359,12 @@ If one doesn't exist, create a new one for this directory."
 This knows details about or source tree."
   (let ((ans (call-next-method))) ;; using locatedb, etc
     (unless ans
-      (let* ((lf (oref proj locate-fcn))
-	     (dir (file-name-directory (oref proj file))))
+      (let* ((lf (oref proj :locate-fcn))
+	     (dir (file-name-directory (oref proj :file))))
 	(if lf
 	    (setq ans (funcall lf name dir))
-	  (let ((src (oref proj srcroot))
-		(dir (file-name-directory (oref proj file)))
+	  (let ((src (oref proj :srcroot))
+		(dir (file-name-directory (oref proj :file)))
 		(tmp nil))
 
 	    ;; Search srcroot
@@ -391,7 +391,7 @@ This knows details about or source tree."
 
 (defmethod ede-project-root-directory ((this ede-java-root-project))
   "Return my root."
-  (file-name-directory (oref this file)))
+  (file-name-directory (oref this :file)))
 
 ;;; JAVA SPECIFIC CODE
 ;;
@@ -401,14 +401,19 @@ This knows details about or source tree."
 ;; @TODO: should we cache result? or calculate it on project's creation?
 (defmethod ede-java-classpath ((proj ede-java-root-project))
   "Return the classpath for this project."
-  (let ((lf (oref proj locate-fcn))
-	(dir (file-name-directory (oref proj file)))
+  (let ((lf (or (oref proj :locate-fcn) #'expand-file-name))
+	(dir (file-name-directory (oref proj :file)))
 	(ret nil))
-    (dolist (P (oref proj localclasspath))
+    (dolist (P (oref proj :localclasspath))
       (if (string= "/" (substring P 0 1))
-	  (setq ret (cons (expand-file-name (substring P 1) dir) ret))
-	(setq ret (cons (expand-file-name P dir) ret))))
-    (append (nreverse ret) (oref proj classpath))))
+	  (setq ret (cons (funcall lf (substring P 1) dir) ret))
+	(setq ret (cons (funcall lf P dir) ret))))
+    (append (nreverse ret) (oref proj :classpath))))
+
+(defmethod ede-source-paths ((proj ede-java-root-project) mode)
+  "Get the base to all source trees in the current project."
+  (let ((dir (file-name-directory (oref proj :file))))
+    (mapcar (lambda (x) (concat dir x)) (oref proj :srcroot))))
 
 (provide 'ede/java-root)
 

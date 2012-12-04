@@ -77,7 +77,7 @@ ROOTPROJ is nil, since there is only one project."
   :method-invocation-order :depth-first)
 
 (defmethod project-compile-project ((proj ede-lein2-project) &optional command)
-  "Compile the entire current project OBJ.
+  "Compile the entire current project PROJ.
 Argument COMMAND is the command to use when compiling."
   ;; we need to be in the proj root dir for this to work
   (let ((default-directory (ede-project-root-directory proj)))
@@ -94,6 +94,22 @@ Argument COMMAND is the command to use when compiling."
 				      proj-lein2-outfile-name ede-lein2-lein-command
 				      `(,nil ,nil ,nil "classpath"
 					     ,proj-lein2-outfile-name)))
+
+;; TODO: really should be based on content of project.clj file. But we need parser for it...
+(defmethod ede-source-paths ((proj ede-lein2-project) mode)
+  "Get the base to all source trees in the current project for MODE."
+  (let ((dir (ede-project-root-directory proj)))
+    (mapcar (lambda (x) (concat dir x))
+	    (cond
+	     ((eq mode 'java-mode) '("src-java"))
+	     ((eq mode 'clojure-mode) '("src" "test"))))))
+
+;; TODO: re-implement when pom.xml parser will be available
+(defmethod project-rescan ((proj ede-lein2-project))
+  "Rescan the EDE proj project THIS."
+  (when (ede-jvm-base-file-updated-p proj)
+    ;; TODO: fill information
+    ))
 
 ;;;###autoload
 (ede-add-project-autoload

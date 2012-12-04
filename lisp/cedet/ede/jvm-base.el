@@ -40,6 +40,10 @@
   "Base project class for JVM-base projects."
   :method-invocation-order :depth-first)
 
+(defmethod ede-java-classpath ((proj ede-jvm-base-project))
+  "Generic implementation for JVM-based projects"
+  (oref proj :classpath))
+
 (defmethod initialize-instance ((this ede-jvm-base-project)
                                 &rest fields)
   "Make sure the :targets is setup."
@@ -89,7 +93,8 @@ If one doesn't exist, create a new one for this directory."
 (defmethod project-compile-target ((obj ede-jvm-base-target) &optional command)
   "Compile the current target OBJ.
 Argument COMMAND is the command to use for compiling the target."
-  (project-compile-project (oref obj :project) command))
+  (when (oref obj :project)
+    (project-compile-project (oref obj :project) command)))
 
 ;;; File Stuff
 ;;
