@@ -272,7 +272,8 @@ ROOTPROJ is nil, since there is only one project."
 ;; level include paths, and PreProcessor macro tables.
 
 (defclass ede-cpp-root-target (ede-target)
-  ()
+  ((project :initform nil
+	    :initarg :project))
   "EDE cpp-root project target.
 All directories need at least one target.")
 
@@ -339,6 +340,15 @@ The function symbol must take two arguments:
 It should return the fully qualified file name passed in from NAME.  If that file does not
 exist, it should return nil."
 	       )
+   (compile-command :initarg :compile-command
+		    :initform nil
+		    :type (or null string function)
+		    :documentation
+		    "Compilation command that will be used for this project.
+It could be string or function that will accept proj argument and should return string.
+The string will be passed to 'compuile' function that will be issued in root
+directory of project."
+		    )
    )
   "EDE cpp-root project class.
 Each directory needs a project file to control it.")
@@ -404,7 +414,8 @@ If one doesn't exist, create a new one for this directory."
                  :name (file-name-nondirectory
 			(directory-file-name dir))
 		 :path dir
-		 :source nil))
+		 :source nil
+		 :project proj))
       (object-add-to-list proj :targets ans)
       )
     ans))
@@ -521,6 +532,29 @@ Also set up the lexical preprocessor map."
 (defmethod ede-preprocessor-map ((this ede-cpp-root-target))
   "Get the pre-processor map for project THIS."
   (ede-preprocessor-map  (ede-target-parent this)))
+
+(defmethod project-compile-project ((proj ede-cpp-root-project) &optional command)
+  "Compile the entire current project PROJ.
+Argument COMMAND is the command to use when compiling."
+  ;; we need to be in the proj root dir for this to work
+  (let* ((cmd (oref proj :compile-command))
+	 (ov (oref proj :local-variables))
+	 (lcmd (when ov (cdr (assoc 'compile-command ov))))
+	 (cmd-str (cond
+		   ((stringp cmd) cmd)
+		   ((functionp cmd) (funcall cmd proj))
+		   ((stringp lcmd) lcmd)
+		   ((functionp lcmd) (funcall lcmd proj)))))
+    (when cmd-str
+	(let ((default-directory (ede-project-root-directory proj)))
+	(compile cmd-str)))))
+
+(defmethod project-compile-target ((obj ede-cpp-root-target) &optional command)
+  "Compile the current target OBJ.
+Argument COMMAND is the command to use for compiling the target."
+  (when (oref obj :project)
+    (project-compile-project (oref obj :project) command)))
+
 
 ;;; Quick Hack
 (defun ede-create-lots-of-projects-under-dir (dir projfile &rest attributes)
