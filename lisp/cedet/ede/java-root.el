@@ -119,7 +119,7 @@
 ;; 	     t)
 ;;
 
-(require 'ede)
+(require 'ede/jvm-base)
 
 ;;; Code:
 
@@ -233,7 +233,7 @@ ROOTPROJ is nil, since there is only one project."
   "EDE java-root project target.
 All directories need at least one target.")
 
-(defclass ede-java-root-project (ede-project eieio-instance-tracker)
+(defclass ede-java-root-project (ede-jvm-base-project eieio-instance-tracker)
   ((tracking-symbol :initform 'ede-java-root-project-list)
    (srcroot :initarg :srcroot
 	    :initform nil
@@ -245,14 +245,6 @@ This directory is used as part of the class path when searching for
 symbols within this project.
 Use this if the root of your project is not the same as the root of
 your java sources.")
-   (classpath :initarg :classpath
-	      :initform nil
-	      :type list
-	      :documentation
-	      "The default classpath used within a project of absolute path names.
-This classpath is appended to LOCALCLASSPATH when searching for
-symbols.  The current project's java source root is always searched
-before this classpath.")
    (localclasspath :initarg :localclasspath
 		   :initform nil
 		   :type list

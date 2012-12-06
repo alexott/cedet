@@ -25,7 +25,11 @@
 (defclass ede-jvm-base-project (ede-project)
   ((classpath :initform nil
 	      :initarg :classpath ;; for projects, that can't detect classpath automatically
-	      :type list)
+	      :type list
+	      :documentation
+	      "Classpath that is either detected automatically, or set by user, depending
+on project's type."
+	      )
    (file-mod-time :initform 0)
    (current-target :initform ""
 		   :initarg :current-target
