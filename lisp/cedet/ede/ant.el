@@ -31,19 +31,19 @@
 (defcustom ede-ant-ant-command "ant"
   "Executabe, that will be executed as Ant"
   :group 'ede-ant
-  :require  'ede/proj-ant
+  :require  'ede/ant
   :type 'string)
 
 (defcustom ede-ant-ant-options '("-noinput" "-e")
   "Ant's command-line options"
   :group 'ede-ant
-  :require 'ede/proj-ant
+  :require 'ede/ant
   :type 'list)
 
 (defcustom ede-ant-execute-ant-to-get-info t
   "Defines, should we execute Ant to get project's information or not."
   :group 'ede-ant
-  :require 'ede/proj-ant
+  :require 'ede/ant
   :type 'boolean)
 
 ;;;###autoload
@@ -165,7 +165,7 @@ Argument COMMAND is the command to use when compiling."
 (ede-add-project-autoload
  (ede-project-autoload "ant"
 		       :name "Ant"
-		       :file 'ede/proj-ant
+		       :file 'ede/ant
 		       :proj-file ede-ant-project-file-name
 		       :proj-root 'ede-ant-project-root
 		       :load-type 'ede-ant-load
@@ -174,11 +174,11 @@ Argument COMMAND is the command to use when compiling."
 		       :safe-p t
 		       ))
 
-(provide 'ede/proj-ant)
+(provide 'ede/ant)
 
 ;; Local variables:
 ;; generated-autoload-file: "loaddefs.el"
-;; generated-autoload-load-name: "ede/proj-ant"
+;; generated-autoload-load-name: "ede/ant"
 ;; End:
 
-;;; proj-ant.el ends here
+;;; ant.el ends here

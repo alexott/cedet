@@ -31,13 +31,13 @@
 (defcustom ede-lein2-execute-lein-to-get-classpath t
   "Defines, should we execute Lein to get classpath information or not."
   :group 'ede-lein2
-  :require 'ede/proj-lein2
+  :require 'ede/lein2
   :type 'boolean)
 
 (defcustom ede-lein2-lein-command "lein"
   "Executabe, that will be executed as lein"
   :group 'ede-lein2
-  :require  'ede/proj-lein2
+  :require  'ede/lein2
   :type 'string)
 
 ;;;###autoload
@@ -86,14 +86,14 @@ Argument COMMAND is the command to use when compiling."
 		      (oref proj :target-options))))))
 
 ;;; Classpath-related stuff
-(defconst proj-lein2-outfile-name "lein-classpath")
+(defconst lein2-outfile-name "lein-classpath")
 
 (defmethod ede-java-classpath ((proj ede-lein2-project))
   "Get classpath for Lein project"
   (ede-jvm-get-classpath-from-command proj ede-lein2-execute-lein-to-get-classpath
-				      proj-lein2-outfile-name ede-lein2-lein-command
+				      lein2-outfile-name ede-lein2-lein-command
 				      `(,nil ,nil ,nil "classpath"
-					     ,proj-lein2-outfile-name)))
+					     ,lein2-outfile-name)))
 
 ;; TODO: really should be based on content of project.clj file. But we need parser for it...
 (defmethod ede-source-paths ((proj ede-lein2-project) mode)
@@ -115,7 +115,7 @@ Argument COMMAND is the command to use when compiling."
 (ede-add-project-autoload
  (ede-project-autoload "lein2"
 		       :name "Lein2"
-		       :file 'ede/proj-lein2
+		       :file 'ede/lein2
 		       :proj-file ede-lein2-project-file-name
 		       :proj-root 'ede-lein2-project-root
 		       :load-type 'ede-lein2-load
@@ -124,11 +124,11 @@ Argument COMMAND is the command to use when compiling."
 		       :safe-p t
 		       ))
 
-(provide 'ede/proj-lein2)
+(provide 'ede/lein2)
 
 ;; Local variables:
 ;; generated-autoload-file: "loaddefs.el"
-;; generated-autoload-load-name: "ede/proj-lein2"
+;; generated-autoload-load-name: "ede/lein2"
 ;; End:
 
-;;; proj-lein2.el ends here
+;;; lein2.el ends here

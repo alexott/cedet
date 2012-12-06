@@ -114,19 +114,19 @@
 (defcustom ede-maven2-execute-mvn-to-get-classpath t
   "Defines, should we execute Maven to get classpath information or not."
   :group 'ede-maven2
-  :require 'ede/proj-maven2
+  :require 'ede/maven2
   :type 'boolean)
 
 (defcustom ede-maven2-maven-command "mvn"
   "Executabe, that will be executed as maven"
   :group 'ede-maven2
-  :require  'ede/proj-maven2
+  :require  'ede/maven2
   :type 'string)
 
 (defcustom ede-maven2-maven-options '("-B")
   "Maven's command line options"
   :group 'ede-maven2
-  :require  'ede/proj-maven2
+  :require  'ede/maven2
   :type 'list)
 
 ;; Because there is one root project file, and no sub project files,
@@ -138,7 +138,7 @@
   (ede-find-project-root "pom.xml" dir))
 
 (defvar ede-maven2-project-list nil
-  "List of projects created by option `ede-proj-maven2'.")
+  "List of projects created by option `ede-maven2'.")
 
 ;;;###autoload
 (defun ede-maven2-load (dir &optional rootproj)
@@ -191,14 +191,14 @@ Argument COMMAND is the command to use when compiling."
 		      (oref proj :target-options))))))
 
 ;;; Classpath-related...
-(defconst proj-maven2-outfile-name "mvn-classpath")
+(defconst maven2-outfile-name "mvn-classpath")
 
 (defmethod ede-java-classpath ((proj ede-maven2-project))
   "Get classpath for maven project"
   (ede-jvm-get-classpath-from-command proj ede-maven2-execute-mvn-to-get-classpath
-				      proj-maven2-outfile-name ede-maven2-maven-command
+				      maven2-outfile-name ede-maven2-maven-command
 				      `(,nil ,nil ,nil "--batch-mode" "dependency:build-classpath"
-					     ,(concat "-Dmdep.outputFile=" proj-maven2-outfile-name))))
+					     ,(concat "-Dmdep.outputFile=" maven2-outfile-name))))
 
 ;; TODO: really should be based on content of pom.xml file. But we need parser for it...
 ;; TODO: add caching...
@@ -225,7 +225,7 @@ Argument COMMAND is the command to use when compiling."
 (ede-add-project-autoload
  (ede-project-autoload "maven2"
 		       :name "MAVEN2"
-		       :file 'ede/proj-maven2
+		       :file 'ede/maven2
 		       :proj-file "pom.xml"
 		       :proj-root 'ede-maven2-project-root
 		       :load-type 'ede-maven2-load
@@ -234,12 +234,12 @@ Argument COMMAND is the command to use when compiling."
 		       :safe-p t
 		       ))
 
-(provide 'ede/proj-maven2)
+(provide 'ede/maven2)
 
 ;; Local variables:
 ;; generated-autoload-file: "loaddefs.el"
-;; generated-autoload-load-name: "ede/proj-maven2"
+;; generated-autoload-load-name: "ede/maven2"
 ;; End:
 
-;;; ede/proj-maven2.el ends here
+;;; ede/maven2.el ends here
 
