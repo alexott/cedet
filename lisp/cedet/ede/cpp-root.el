@@ -277,6 +277,7 @@ ROOTPROJ is nil, since there is only one project."
   "EDE cpp-root project target.
 All directories need at least one target.")
 
+;;;###autoload
 (defclass ede-cpp-root-project (ede-project eieio-instance-tracker)
   ((tracking-symbol :initform 'ede-cpp-root-project-list)
    (include-path :initarg :include-path
