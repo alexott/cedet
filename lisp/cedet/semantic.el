@@ -937,7 +937,8 @@ Throw away all the old tags, and recreate the tag database."
     '("--"))
   (define-key edit-menu [senator-yank-tag]
     '(menu-item "Yank Tag" senator-yank-tag
-		:enable (not (ring-empty-p senator-tag-ring))
+		:enable (and (boundp 'senator-tag-ring)
+			     (not (ring-empty-p senator-tag-ring)))
 		:help "Yank the head of the tag ring into the buffer"))
   (define-key edit-menu [senator-copy-tag-to-register]
     '(menu-item "Copy Tag To Register" senator-copy-tag-to-register
