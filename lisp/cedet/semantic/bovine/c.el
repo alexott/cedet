@@ -2165,14 +2165,18 @@ actually in their parent which is not accessible.")
 	  (princ "\n")))
 
       (princ "\n\nMacro Summary:\n")
+
       (when semantic-lex-c-preprocessor-symbol-file
-	(princ "\n  Your CPP table is primed from these files:\n")
+	(princ "\n  Your CPP table is primed from these system files:\n")
 	(dolist (file semantic-lex-c-preprocessor-symbol-file)
 	  (princ "    ")
 	  (princ file)
 	  (princ "\n")
 	  (princ "    in table: ")
-	  (princ (object-print (semanticdb-file-table-object file)))
+	  (let ((fto (semanticdb-file-table-object file)))
+	    (if fto
+		(princ (object-print fto))
+	      (princ "No Table")))
 	  (princ "\n")
 	  ))
 
@@ -2187,7 +2191,7 @@ actually in their parent which is not accessible.")
 	  ))
 
       (when semantic-lex-c-preprocessor-symbol-map
-	(princ "\n  User symbol map:\n")
+	(princ "\n  User symbol map (primed from system files):\n")
 	(dolist (S semantic-lex-c-preprocessor-symbol-map)
 	  (princ "    ")
 	  (princ (car S))
