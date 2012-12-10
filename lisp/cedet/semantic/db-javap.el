@@ -765,9 +765,14 @@ to some class in JARFILE."
     (save-current-buffer
       (set-buffer javapbuff)
       (goto-char (point-min))
-      ;; The first line says "Compiled from ..." or some-such.
-      (insert "// ")
-
+      ;; The first line can say "Compiled from ..." or some-such.
+      (let* ((case-fold-search nil)
+	     (p (search-forward "Compiled from" nil t)))
+	(when (and p (numberp p))
+	  (goto-char p)
+	  (beginning-of-line)
+	  (insert "// ")))
+      
       ;; strip out fully qualified part of class- and interface names
       (save-excursion
 	(goto-char (point-min))
