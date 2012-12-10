@@ -135,7 +135,9 @@ other desired outcome.")
    (dirinode :documentation "The inode id for :directory.")
    (file :type string
 	 :initarg :file
-	 :documentation "File name where this project is stored.")
+	 :documentation "The File uniquely tagging this project instance.
+For some project types, this will be the file that stores the project configuration.
+In other projects types, this file is merely a unique identifier to this type of project.")
    (rootproject ; :initarg - no initarg, don't save this slot!
     :initform nil
     :type (or null ede-project-placeholder-child)
@@ -353,12 +355,12 @@ All specific project types must derive from this project."
 (defun ede-load-cache ()
   "Load the cache of EDE projects."
   (save-excursion
-    (let ((cachebuffer nil))
+    (let ((cachebuffer (get-buffer-create "*ede cache*")))
       (condition-case nil
-	  (progn
-	    (setq cachebuffer
-		  (find-file-noselect ede-project-placeholder-cache-file t))
-	    (set-buffer cachebuffer)
+	  (with-current-buffer cachebuffer
+	    (erase-buffer)
+	    (when (file-exists-p ede-project-placeholder-cache-file)
+	      (insert-file-contents ede-project-placeholder-cache-file))
 	    (goto-char (point-min))
 	    (let ((c (read (current-buffer)))
 		  (new nil)
