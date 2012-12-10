@@ -233,6 +233,7 @@ ROOTPROJ is nil, since there is only one project."
   "EDE java-root project target.
 All directories need at least one target.")
 
+;;;###autoload
 (defclass ede-java-root-project (ede-jvm-base-project eieio-instance-tracker)
   ((tracking-symbol :initform 'ede-java-root-project-list)
    (srcroot :initarg :srcroot
