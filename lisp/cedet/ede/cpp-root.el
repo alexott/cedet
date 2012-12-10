@@ -492,15 +492,6 @@ This is for project include paths and spp source files."
 
     filename))
 
-(defmethod ede-set-project-variables ((project ede-cpp-root-project) &optional buffer)
-  "Set variables local to PROJECT in BUFFER.
-Also set up the lexical preprocessor map."
-  (call-next-method)
-  (when (and (featurep 'semantic/bovine/c) (featurep 'semantic/lex-spp))
-    (setq semantic-lex-spp-project-macro-symbol-obarray
-	  (semantic-lex-make-spp-table (oref project spp-table)))
-    ))
-
 (defmethod ede-system-include-path ((this ede-cpp-root-project))
   "Get the system include path used by project THIS."
   (oref this system-include-path))
