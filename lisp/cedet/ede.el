@@ -1377,15 +1377,14 @@ and <root>/doc for doc sources."
 (defun ede-apply-preprocessor-map ()
   "Apply preprocessor tables onto the current buffer."
   (when (and ede-object
-	     (boundp 'semantic-lex-spp-macro-symbol-obarray)
-	     semantic-lex-spp-macro-symbol-obarray)
+	     (boundp 'semantic-lex-spp-project-macro-symbol-obarray))
     (let* ((objs ede-object)
 	   (map (ede-preprocessor-map (if (consp objs)
 					  (car objs)
 					objs))))
       (when map
 	;; We can't do a require for the below symbol.
-	(setq semantic-lex-spp-macro-symbol-obarray
+	(setq semantic-lex-spp-project-macro-symbol-obarray
 	      (semantic-lex-make-spp-table map)))
       (when (consp objs)
 	(message "Choosing preprocessor syms for project %s"
