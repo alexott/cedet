@@ -101,6 +101,20 @@ classpath.")
   "EDE Ant project class."
   :method-invocation-order :depth-first)
 
+(defmethod initialize-instance ((this ede-ant-project)
+                                &rest fields)
+  "Make sure the :targets is setup."
+  (call-next-method)
+  (when (and (or (not (slot-boundp this :file))
+		 (not (oref this :file)))
+	     (oref this :directory))
+    (oset this :file (expand-file-name ede-ant-project-file-name (oref this :directory))))
+  (when (and (or (not (slot-boundp this :directory))
+		 (not (oref this :directory)))
+	     (oref this :file))
+    (oset this :directory (file-name-directory (oref this :file))))
+  )
+
 (defmethod project-compile-project ((proj ede-ant-project) &optional command)
   "Compile the entire current project Proj.
 Argument COMMAND is the command to use when compiling."
