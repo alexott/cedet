@@ -76,6 +76,14 @@ ROOTPROJ is nil, since there is only one project."
   "EDE Leiningen2 project class."
   :method-invocation-order :depth-first)
 
+(defmethod initialize-instance ((this ede-lein2-project)
+                                &rest fields)
+  "Make sure the all slots are setup."
+  (call-next-method)
+  (ede-normalize-file/directory this ede-lein2-project-file-name)
+  ;; TODO: add analysis of project.clj
+  )
+
 (defmethod project-compile-project ((proj ede-lein2-project) &optional command)
   "Compile the entire current project PROJ.
 Argument COMMAND is the command to use when compiling."
