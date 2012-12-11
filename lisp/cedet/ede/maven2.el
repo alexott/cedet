@@ -154,7 +154,6 @@ ROOTPROJ is nil, since there is only one project."
                                  :directory dir
                                  :file (expand-file-name "pom.xml" dir)
 				 :current-target "package"
-				 :pom nil ; TODO: replace with call to pom.el
                                  )))
          (ede-add-project-to-global-list this)
          ;; TODO: the above seems to be done somewhere else, maybe ede-load-project-file
@@ -172,6 +171,14 @@ ROOTPROJ is nil, since there is only one project."
    )
   "Project Type for Maven2 based Java projects."
   :method-invocation-order :depth-first)
+
+(defmethod initialize-instance ((this ede-maven2-project)
+                                &rest fields)
+  "Make sure the all targets as setup."
+  (call-next-method)
+  (ede-normalize-file/directory this "pom.xml")
+  ;; TODO: add analysis of pom.xml
+  )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;the 2 compile methods below currently do much the same thing.
