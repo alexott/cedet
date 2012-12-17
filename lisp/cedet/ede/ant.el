@@ -175,7 +175,7 @@ This knows details about or source tree."
   (let ((ans (call-next-method))) ;; using locatedb, etc
     (unless ans
       (let* ((dir (ede-project-root-directory proj))
-	     (src (oref proj :srcroot))
+	     (src (or (oref proj :srcroot) '("")))
 	     (tname (expand-file-name name dir)))
 	(if (file-exists-p tname)
 	    (setq ans tname))
