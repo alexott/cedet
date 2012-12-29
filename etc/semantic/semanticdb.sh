@@ -33,6 +33,11 @@
 # If you move this script from its original location, you have to set
 # CEDET_PATH to the CEDET directory.
 
+if [ -z "$1" ]; then
+    echo "Usage: `basename $0` list-of-files+"
+    exit 1
+fi
+
 if [ -z "$CEDET_PATH" ]; then
     echo CEDET_PATH not set. Guessing path from script source.
     loadpath="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
@@ -48,8 +53,6 @@ else
     emacs="$EMACS"
 fi
 
-files=$*
-
-exec $emacs -batch -l "${loadpath}/lisp/cedet/semantic/db-mk.el" $files
+exec $emacs -batch -l "${loadpath}/lisp/cedet/semantic/db-mk.el" $*
 
 #end
