@@ -30,8 +30,6 @@
 
 ;;; Code
 ;;
-(require 'semantic/db)
-
 (if (not noninteractive)
     (error "You should not load semanticdb-mk interactively."))
 
