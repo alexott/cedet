@@ -1373,6 +1373,11 @@ and <root>/doc for doc sources."
 ;; C/C++
 (defun ede-apply-preprocessor-map ()
   "Apply preprocessor tables onto the current buffer."
+  ;; TODO - what if semantic-mode isn't enabled?
+  ;; what if we never want to load a C mode? Does this matter?
+  ;; Note: This require is needed for the case where EDE ends up
+  ;; in the hook order before Semantic based hooks.
+  (require 'semantic/lex-spp)
   (when (and ede-object
 	     (boundp 'semantic-lex-spp-project-macro-symbol-obarray))
     (let* ((objs ede-object)
