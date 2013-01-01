@@ -509,11 +509,18 @@ This is for project include paths and spp source files."
 	      (table (when expfile
 		       (semanticdb-file-table-object expfile)))
 	      )
-	 (if (not table)
-	     (message "Cannot find file %s in project." F)
+	 (cond 
+	  ((not (file-exists-p expfile))
+	   (message "Cannot find file %s in project." F))
+	  ((string= expfile (buffer-file-name))
+	   ;; Don't include this file in it's own spp table.
+	   )
+	  ((not table)
+	   (message "No db table available for %s." expfile))
+	  (t
 	   (when (semanticdb-needs-refresh-p table)
 	     (semanticdb-refresh-table table))
-	   (setq spp (append spp (oref table lexical-table))))))
+	   (setq spp (append spp (oref table lexical-table)))))))
      (oref this spp-files))
     spp))
 
