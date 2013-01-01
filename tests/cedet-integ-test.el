@@ -118,6 +118,7 @@
 (require 'cit-externaldb)
 (require 'cit-android)
 (require 'cit-arduino)
+(require 'cit-cpproot)
 (require 'cit-dist)
 
 (defvar cedet-integ-target (expand-file-name "edeproj" cedet-integ-base)
@@ -219,27 +220,42 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
 
   (let ((ede-auto-add-method 'never))
     (global-ede-mode 1)
-    ;; Do an EDE Android project. Use cedet-android.el for project fabrication.
+    ;; Do an EDE Arduino project.
     (cit-ede-arduino-test)
 
     (cit-finish-message "PASSED" "Arduino")
     ))
 
+(defun cedet-integ-test-cpproot ()
+  "Run the CEDET integration test using the Android style project."
+  (interactive)
+
+  (let ((ede-auto-add-method 'never))
+    (global-ede-mode 1)
+    ;; Do an EDE cpproot project. 
+    (cit-ede-cpproot-test)
+
+    (cit-finish-message "PASSED" "cpproot")
+    ))
+
 (defun cit-finish-message (message style)
   "Display a MESSAGE that some test is now finished.
 Argument STYLE is the type of build done."
-  (let ((b (set-buffer (get-buffer-create "*PASSED*"))))
-    (erase-buffer)
-    (insert "\n\n  PASSED!\n\n  Make Style: ")
-    (insert (format "%S" style) "\n")
-    (insert "\n\nWaiting 5 seconds before exiting with positive exit status.\n")
-    (switch-to-buffer b)
-    ;; Now wait.
-    (sit-for 5)
-    ;; 1 means GOOD to the shell script, since any other emacs exit
-    ;; mechanism will be 0. (ie - click on the X in the corner.)
-    (kill-emacs 1)
-    ))
+  ;; Do a message in case we're in batch mode
+  (message "PASSED! -- Make Style: %S" style)
+  (unless noninteractive
+    (let ((b (set-buffer (get-buffer-create "*PASSED*"))))
+      (erase-buffer)
+      (insert "\n\n  PASSED!\n\n  Make Style: ")
+      (insert (format "%S" style) "\n")
+      (insert "\n\nWaiting 5 seconds before exiting with positive exit status.\n")
+      (switch-to-buffer b)
+      ;; Now wait.
+      (sit-for 5)))
+  ;; 1 means GOOD to the shell script, since any other emacs exit
+  ;; mechanism will be 0. (ie - click on the X in the corner.)
+  (kill-emacs 1)
+  )
 
 (defun cit-make-dir (dir)
   "Make directory DIR if it doesn't exist."
