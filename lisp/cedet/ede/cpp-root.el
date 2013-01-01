@@ -242,11 +242,11 @@ ROOTPROJ is nil, since there is only one project."
 (ede-add-project-autoload
  (ede-project-autoload "cpp-root"
 		       :name "CPP ROOT"
-		       :file 'ede-cpp-root
+		       :file 'ede/cpp-root
 		       :proj-file 'ede-cpp-root-project-file-for-dir
 		       :proj-root 'ede-cpp-root-project-root
 		       :load-type 'ede-cpp-root-load
-		       :class-sym 'ede-cpp-root
+		       :class-sym 'ede-cpp-root-project
 		       :new-p nil
 		       :safe-p t)
  ;; When a user creates one of these, it should override any other project
@@ -377,7 +377,7 @@ Each directory needs a project file to control it.")
     (when (or (not (file-exists-p f))
 	      (file-directory-p f))
       (delete-instance this)
-      (error ":file for ede-cpp-root must be a file"))
+      (error ":file for ede-cpp-root-project must be a file"))
     (oset this :file f)
     (oset this :directory (file-name-directory f))
     (ede-project-directory-remove-hash (file-name-directory f))
