@@ -135,8 +135,7 @@ Return nil if there isn't one.
 Argument DIR is the directory it is created for.
 ROOTPROJ is nil, sinc there is only one project for a directory tree."
   (let* ((root (ede-arduino-root dir))
-	 (proj (and root (ede-directory-get-open-project root)))
-	 (prefs (ede-arduino-sync)))
+	 (proj (and root (ede-directory-get-open-project root))))
     (if proj
 	proj
 
@@ -392,8 +391,7 @@ Emacs back to the Arduino IDE."
 	 (stats (file-attributes prefsfile))
 	 (size (nth 7 stats))
 	 (mod (nth 5 stats))
-	 (board nil)
-	 (kill nil))
+	 (board nil))
 
     (when (not ede-arduino-active-prefs)
       (setq ede-arduino-active-prefs (ede-arduino-prefs "Arduino Preferences")))
@@ -427,16 +425,16 @@ Emacs back to the Arduino IDE."
 	      (file-name-as-directory
 	       (expand-file-name
 		(buffer-substring-no-properties (point) (point-at-eol)))))
+	)
 
-	(when kill (kill-buffer buff))
+      (kill-buffer buff)
 
-	(oset ede-arduino-active-prefs boardobj
-	      (ede-arduino-board-data board))
+      (oset ede-arduino-active-prefs boardobj (ede-arduino-board-data board))
 
-	(oset ede-arduino-active-prefs prefssize size)
-	(oset ede-arduino-active-prefs timestamp mod)
+      (oset ede-arduino-active-prefs prefssize size)
+      (oset ede-arduino-active-prefs timestamp mod)
 	
-	))))
+      )))
 
 ;;; Arduino Intuition
 ;;
@@ -565,14 +563,14 @@ If LIBRARY is not provided as an argument, just return the library directory."
 (defun ede-arduino-board-data (boardname)
   "Read in the data from baords.txt for BOARDNAME.
 Data returned is the intputs needed for the Makefile."
-  (let* ((buff (get-buffer-create "*arduino scratch*"))
-	 (name nil)
-	 (protocol nil)
-	 (speed nil)
-	 (size nil)
-	 (mcu nil)
-	 (f_cpu nil)
-	 (core nil))
+  (let ((buff (get-buffer-create "*arduino boards*"))
+	(name nil)
+	(protocol nil)
+	(speed nil)
+	(size nil)
+	(mcu nil)
+	(f_cpu nil)
+	(core nil))
 
     (with-current-buffer buff
       (erase-buffer)
@@ -612,18 +610,19 @@ Data returned is the intputs needed for the Makefile."
       (when (not (re-search-forward (concat "^" boardname ".build.core=") nil t))
 	(error "Cannot find %s.build.core looking up board" boardname))
       (setq core (buffer-substring-no-properties (point) (point-at-eol)))
+      )
 
-      (kill-buffer buff)
+    (kill-buffer buff)
 
-      (ede-arduino-board boardname
-			 :name name
-			 :protocol protocol
-			 :speed speed
-			 :maximum-size size
-			 :mcu mcu
-			 :f_cpu f_cpu
-			 :core core)
-      )))
+    (ede-arduino-board boardname
+		       :name name
+		       :protocol protocol
+		       :speed speed
+		       :maximum-size size
+		       :mcu mcu
+		       :f_cpu f_cpu
+		       :core core)
+    ))
 
 (provide 'ede/arduino)
 
