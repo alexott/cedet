@@ -1,6 +1,6 @@
 ;;; cedet-contrib-load.el --- Autoload definitions for cedet contrib
 
-;;; Copyright (C) 2004 Eric Ludlam
+;;; Copyright (C) 2004, 2012 Eric Ludlam
 
 ;; Author: Eric Ludlam <zappo@gnu.org>
 
@@ -29,7 +29,7 @@
 
 ;;; Contrib autoloads
 ;;
-(load "contrib/loaddefs" nil t)
+(load "contrib/contrib-loaddefs" nil t)
 
 (provide 'cedet-contrib-load)
 
