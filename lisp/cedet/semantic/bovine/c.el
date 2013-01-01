@@ -159,13 +159,14 @@ part of the preprocessor map.")
 		    (error (message "Error updating tables for %S"
 				    (object-name table)))))
 		(setq filemap (append filemap (oref table lexical-table)))
-		;; Update symbol obarray
-		(setq-mode-local c-mode
-				 semantic-lex-spp-macro-symbol-obarray
-				 (semantic-lex-make-spp-table
-				  (append semantic-lex-c-preprocessor-symbol-map-builtin
-					  semantic-lex-c-preprocessor-symbol-map
-					  filemap)))))))))))
+		)))))
+      ;; Update symbol obarray
+      (setq-mode-local c-mode
+		       semantic-lex-spp-macro-symbol-obarray
+		       (semantic-lex-make-spp-table
+			(append semantic-lex-c-preprocessor-symbol-map-builtin
+				semantic-lex-c-preprocessor-symbol-map
+				filemap))))))
 
 ;; Make sure the preprocessor symbols are set up when mode-local kicks
 ;; in.
@@ -2201,25 +2202,27 @@ actually in their parent which is not accessible.")
 	  ))
 
       (when (and (boundp 'ede-object)
-		 ede-object
-		 (arrayp semantic-lex-spp-project-macro-symbol-obarray))
+		 ede-object)
 	(princ "\n  Project symbol map:\n")
 	(when (and (boundp 'ede-object) ede-object)
-	  (princ "      Your project symbol map is derived from the EDE object:\n      ")
+	  (princ "      Your project symbol map is also derived from the EDE object:\n      ")
 	  (princ (object-print ede-object)))
 	(princ "\n\n")
-	(let ((macros nil))
-	  (mapatoms
-	   #'(lambda (symbol)
-	       (setq macros (cons symbol macros)))
-	   semantic-lex-spp-project-macro-symbol-obarray)
-	  (dolist (S macros)
-	    (princ "    ")
-	    (princ (symbol-name S))
-	    (princ " = ")
-	    (princ (symbol-value S))
-	    (princ "\n")
-	    )))
+	(if (arrayp semantic-lex-spp-project-macro-symbol-obarray)
+	    (let ((macros nil))
+	      (mapatoms
+	       #'(lambda (symbol)
+		   (setq macros (cons symbol macros)))
+	       semantic-lex-spp-project-macro-symbol-obarray)
+	      (dolist (S macros)
+		(princ "    ")
+		(princ (symbol-name S))
+		(princ " = ")
+		(princ (symbol-value S))
+		(princ "\n")
+		))
+	  ;; Else, not map
+	  (princ "    No Symbols.\n")))
 
       (princ "\n\n  Use: M-x semantic-lex-spp-describe RET\n")
       (princ "\n  to see the complete macro table.\n")
