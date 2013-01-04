@@ -1,6 +1,6 @@
 ;;; semantic/db-find.el --- Searching through semantic databases.
 
-;; Copyright (C) 2000-2012 Free Software Foundation, Inc.
+;; Copyright (C) 2000-2013 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
@@ -1285,7 +1285,7 @@ associated with that tag should be loaded into a buffer."
   (semanticdb-find-tags-collector
    (lambda (table tags)
      (semanticdb-find-tags-external-children-of-type-method table type tags))
-   path find-file-match))
+   path find-file-match t))
 
 (defun semanticdb-find-tags-subclasses-of-type
   (type &optional path find-file-match)
