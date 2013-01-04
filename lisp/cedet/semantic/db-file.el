@@ -1,6 +1,6 @@
 ;;; semantic/db-file.el --- Save a semanticdb to a cache file.
 
-;;; Copyright (C) 2000-2005, 2007-2012  Free Software Foundation, Inc.
+;;; Copyright (C) 2000-2005, 2007-2013  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
@@ -44,6 +44,8 @@
 (defcustom semanticdb-default-save-directory
   (locate-user-emacs-file "semanticdb" ".semanticdb")
   "Directory name where semantic cache files are stored.
+By default, it is either ~/.emacs.d/semanticdb, or ~/.semanticdb depending
+on which exists.
 If this value is nil, files are saved in the current directory.  If the value
 is a valid directory, then it overrides `semanticdb-default-file-name' and
 stores caches in a coded file name in this directory."
