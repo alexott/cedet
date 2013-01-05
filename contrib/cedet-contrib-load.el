@@ -1,6 +1,6 @@
 ;;; cedet-contrib-load.el --- Autoload definitions for cedet contrib
 
-;;; Copyright (C) 2004, 2012 Eric Ludlam
+;;; Copyright (C) 2004, 2012, 2013 Eric Ludlam
 
 ;; Author: Eric Ludlam <zappo@gnu.org>
 
@@ -29,7 +29,21 @@
 
 ;;; Contrib autoloads
 ;;
-(load "contrib/contrib-loaddefs" nil t)
+(unless (featurep 'cedet-devel-load)
+  (error "CEDET must be loaded to use CEDET's contrib utilities."))
+
+;; This file must be in the same directory as all the files that
+;; it is preparing for use.
+(let ((CEDETCONTRIBDIR (file-name-directory
+			(or load-file-name (buffer-file-name)))))
+
+  (add-to-list 'load-path CEDETCONTRIBDIR)
+
+  (message "Installing CEDET contrib packages in %s" CEDETCONTRIBDIR)
+
+)
+
+(load "contrib-loaddefs" nil t)
 
 (provide 'cedet-contrib-load)
 
