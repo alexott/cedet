@@ -108,6 +108,19 @@ INSTALL:
 
 -----------
 
+- Install CEDET CONTRIB files into your emacs init files (.emacs)
+
+  When you install CEDET standalone, you have the option of also
+  installing CEDET's "contrib" files.  These are additional programs
+  that work with CEDET for which Authors were unable to provide
+  copyright to the FSF for inclusion into Emacs.  They are kept
+  separately, and must be installed separately.
+
+-----------
+;; Load CEDET CONTRIB.
+(load-file "/home/user/cedet/cedet-contrib-load.el")
+-----------
+
 
 BUGS/COMMENTS
 
