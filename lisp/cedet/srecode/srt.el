@@ -105,4 +105,9 @@ MODE - The mode of this buffer.  If not declared yet, guess."
 
 (provide 'srecode/srt)
 
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "srecode/srt"
+;; End:
+
 ;;; srecode/srt.el ends here
