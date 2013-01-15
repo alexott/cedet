@@ -244,7 +244,7 @@ This class will cache data derived during various searches.")
 	   (let ((tab-idx (semanticdb-get-table-index tab)))
 	     ;; Not a full reset?
 	     (when (oref tab-idx type-cache)
-	       (require 'db-typecache)
+	       (require 'semantic/db-typecache)
 	       (semanticdb-typecache-notify-reset
 		(oref tab-idx type-cache)))
 	     )))
