@@ -24,7 +24,6 @@
 (require 'srecode/compile)
 (require 'srecode/ctxt)
 (require 'srecode/template)
-(require 'srecode/srt)
 
 (require 'semantic)
 (require 'semantic/analyze)
