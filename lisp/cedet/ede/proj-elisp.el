@@ -1,6 +1,6 @@
 ;;; ede-proj-elisp.el --- EDE Generic Project Emacs Lisp support
 
-;; Copyright (C) 1998-2005, 2007-2012  Free Software Foundation, Inc.
+;; Copyright (C) 1998-2005, 2007-2013  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: project, make
@@ -194,7 +194,8 @@ is found, such as a `-version' variable, or the standard header."
 		    (goto-char (match-beginning 1))
 		    (insert version)))))
 	  (setq vs (cdr vs)))
-	(if (not match) (call-next-method)))))
+	;; The next method will include comments such as "Version:"
+	(call-next-method))))
 
 
 ;;; Makefile generation functions
