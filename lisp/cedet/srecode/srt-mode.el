@@ -187,7 +187,7 @@ we can tell font lock about them.")
   "Keymap used in srecode mode.")
 
 ;;;###autoload
-(define-derived-mode srecode-template-mode fundamental-mode "SRecorder"
+(define-derived-mode srecode-template-mode fundamental-mode "SRecode"
   "Major-mode for writing SRecode macros."
   (set (make-local-variable 'comment-start) ";;")
   (set (make-local-variable 'comment-end) "")
