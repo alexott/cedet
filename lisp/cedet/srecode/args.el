@@ -1,6 +1,6 @@
 ;;; srecode/args.el --- Provide some simple template arguments
 
-;; Copyright (C) 2007-2012  Free Software Foundation, Inc.
+;; Copyright (C) 2007-2013  Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -155,6 +155,25 @@ do not contain any text from preceding or following text."
     (if (or (file-exists-p "CVS")
 	    (file-exists-p "RCS"))
 	(srecode-dictionary-show-section dict "RCS")
+      )))
+
+;;; :project ARGUMENT HANDLING
+;;
+;; When the :project argument is required, fill the dictionary with
+;; information that the current project (from EDE) might know
+(defun srecode-semantic-handle-:project (dict)
+  "Add macros into the dictionary DICT based on the current ede project."
+  (when (ede-toplevel)
+    (let* ((projecttop (ede-toplevel-project default-directory))
+	   (bfn (buffer-file-name))
+	   (dir (file-name-directory bfn))
+	   (relfname (file-relative-name bfn projecttop))
+	   (reldir (file-relative-name dir projecttop))
+	   )
+      (srecode-dictionary-set-value dict "PROJECT_FILENAME" relfname)
+      (srecode-dictionary-set-value dict "PROJECT_DIRECTORY" reldir)
+      (srecode-dictionary-set-value dict "PROJECT_NAME" (ede-name (ede-toplevel)))
+      (srecode-dictionary-set-value dict "PROJECT_VERSION" (oref (ede-toplevel) :version))
       )))
 
 ;;; :system ARGUMENT HANDLING
