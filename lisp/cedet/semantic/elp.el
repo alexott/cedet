@@ -391,7 +391,7 @@ Argument POINT is where to get the data from."
   "dump out the current DATA table using PREFIX before each line."
   (let* ((elpd (oref data sorted))
 	 (spaces (make-string (- (length prefix) 2) ? ))
-	 )
+	 (inhibit-read-only t))
     (data-debug-insert-simple-thing
      "Calls\t Total Time\t Avg Time/Call\tName"
      spaces " " 'underline)
@@ -414,55 +414,56 @@ Argument POINT is where to get the data from."
   )
 
 (defmethod data-debug/eieio-insert-slots ((data semantic-elp-data)
-					   prefix)
+					  prefix)
   "Show the fields of ELP data in an adebug buffer.
 Ignore the usual, and format a nice table."
-  (data-debug-insert-thing (object-name-string data)
-			   prefix
-			   "Name: ")
-  (let* ((cl (object-class data))
-	 (cv (class-v cl)))
-    (data-debug-insert-thing (class-constructor cl)
+  (let ((inhibit-read-only t))
+    (data-debug-insert-thing (object-name-string data)
 			     prefix
-			     "Class: ")
-    )
+			     "Name: ")
+    (let* ((cl (object-class data))
+	   (cv (class-v cl)))
+      (data-debug-insert-thing (class-constructor cl)
+			       prefix
+			       "Class: ")
+      )
 
-  (data-debug-insert-thing (oref data :total)
-			   prefix
-			   "Total Time Spent: ")
+    (data-debug-insert-thing (oref data :total)
+			     prefix
+			     "Total Time Spent: ")
 
-  (let ((s (oref data sort))
-	)
-    ;; Show how it's sorted:
-    (let ((start (point))
-	  (end nil)
+    (let ((s (oref data sort))
 	  )
-      (insert prefix "Sort Method: " (symbol-name s))
-      (setq end (point))
-      ;; (data-debug-insert-thing s prefix "Sort Method: ")
-      (put-text-property start end 'ddebug data)
-      (put-text-property start end 'ddebug-noexpand t)
-      (put-text-property start end 'ddebug-indent(length prefix))
-      (put-text-property start end 'ddebug-prefix prefix)
-      (put-text-property start end 'ddebug-function
-			 'semantic-elp-change-sort-adebug)
-      (put-text-property start end 'help-echo
-			 "Change the Sort by selecting twice.")
-      (insert "\n"))
+      ;; Show how it's sorted:
+      (let ((start (point))
+	    (end nil)
+	    )
+	(insert prefix "Sort Method: " (symbol-name s))
+	(setq end (point))
+	;; (data-debug-insert-thing s prefix "Sort Method: ")
+	(put-text-property start end 'ddebug data)
+	(put-text-property start end 'ddebug-noexpand t)
+	(put-text-property start end 'ddebug-indent(length prefix))
+	(put-text-property start end 'ddebug-prefix prefix)
+	(put-text-property start end 'ddebug-function
+			   'semantic-elp-change-sort-adebug)
+	(put-text-property start end 'help-echo
+			   "Change the Sort by selecting twice.")
+	(insert "\n"))
 
-    ;; How to sort the raw data
-    (semantic-elp-change-sort data)
-    )
-  ;; Display
-  (semantic-elp-dump-table data prefix)
-  )
+      ;; How to sort the raw data
+      (semantic-elp-change-sort data)
+      )
+    ;; Display
+    (semantic-elp-dump-table data prefix)
+    ))
 
 (defun semantic-elp-change-sort-adebug (point)
   "Change the sort function here.  Redisplay.
 Argument POINT is where the text is."
   (let* ((data (get-text-property point 'ddebug))
 	 (prefix (get-text-property point 'ddebug-prefix))
-	 )
+	 (inhibit-read-only t))
     ;; Get rid of the old table.
     (data-debug-contract-current-line)
     ;; Change it
@@ -619,10 +620,12 @@ Argument NAME is the name to give the ELP data object."
     (oset ctxttime :total (semantic-elapsed-time start stop))
     ;; Complete!
     (semantic-elp-complete-enable)
-    (progn
-      (setq start (current-time))
-      (setq completion (semantic-analyze-possible-completions ctxt))
-      (setq stop (current-time)))
+    (condition-case nil
+	(progn
+	  (setq start (current-time))
+	  (setq completion (semantic-analyze-possible-completions ctxt))
+	  (setq stop (current-time)))
+      (error (setq stop (current-time))))
     (semantic-elp-results "complete")
     (setq completiontime semantic-elp-last-results)
     (oset completiontime :total (semantic-elapsed-time start stop))
@@ -638,10 +641,10 @@ Argument NAME is the name to give the ELP data object."
 		   :ctxttime	   ctxttime
 		   :completiontime completiontime
 		   )))
-      (data-debug-show elpobj)
       (setq semantic-elp-last-run elpobj)
+      (data-debug-show elpobj)
       (let ((saveas (read-file-name "Save Profile to: " (expand-file-name "~/")
-				    "semantic-elp" nil "semantic-elp")))
+				    nil nil "semantic-elp")))
 	(oset elpobj :file saveas)
 	(eieio-persistent-save elpobj)
 	)
@@ -671,7 +674,7 @@ Argument NAME is the name to give the ELP data object."
       (data-debug-show elpobj)
       (setq semantic-elp-last-run elpobj)
       (let ((saveas (read-file-name "Save Profile to: " (expand-file-name "~/")
-				    "semantic-elp" nil "semantic-elp")))
+				    nil nil "semantic-elp")))
 	(oset elpobj :file saveas)
 	(eieio-persistent-save elpobj)
 	)
@@ -707,10 +710,10 @@ The expectation is that you will edit this fcn with different
 		   :total          (semantic-elapsed-time totalstart totalstop)
 		   :time	   time
 		   :answer         ans)))
-      (data-debug-show elpobj)
       (setq semantic-elp-last-run elpobj)
+      (data-debug-show elpobj)
       (let ((saveas (read-file-name "Save Profile to: " (expand-file-name "~/")
-				    "semantic-elp" nil "semantic-elp")))
+				    nil nil "semantic-elp")))
 	(oset elpobj :file saveas)
 	(eieio-persistent-save elpobj)
 	)
@@ -753,7 +756,7 @@ The expectation is that you will edit this fcn with different
       (data-debug-show elpobj)
       (setq semantic-elp-last-run elpobj)
 ;;(let ((saveas (read-file-name "Save Profile to: " (expand-file-name "~/")
-;;				    "semantic-elp" nil "semantic-elp")))
+;;				    nil nil "semantic-elp")))
 ;;	(oset elpobj :file saveas)
 ;;	(eieio-persistent-save elpobj)
 ;;	)
