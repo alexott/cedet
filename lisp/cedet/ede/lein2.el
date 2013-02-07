@@ -1,4 +1,4 @@
-;; Copyright (C) 2012 Free Software Foundation, Inc.
+;; Copyright (C) 2012, 2013 Free Software Foundation, Inc.
 
 ;; Author: Alex Ott <alexott@gmail.com>
 
@@ -130,7 +130,8 @@ Argument COMMAND is the command to use when compiling."
 		       :class-sym 'ede-lein2-project
 		       :new-p nil
 		       :safe-p t
-		       ))
+		       )
+ 'generic)
 
 (provide 'ede/lein2)
 

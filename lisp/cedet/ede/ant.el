@@ -1,4 +1,4 @@
-;; Copyright (C) 2012 Free Software Foundation, Inc.
+;; Copyright (C) 2012, 2013 Free Software Foundation, Inc.
 
 ;; Author: Alex Ott <alexott@gmail.com>
 
@@ -204,7 +204,8 @@ This knows details about or source tree."
 		       :class-sym 'ede-ant-project
 		       :new-p nil
 		       :safe-p t
-		       ))
+		       )
+ 'generic)
 
 (provide 'ede/ant)
 

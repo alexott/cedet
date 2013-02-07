@@ -1,4 +1,4 @@
-;; Copyright (C) 2008, 2009, 2012 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2012, 2013 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; Joakim Verona <joakim@verona.se>
@@ -239,7 +239,8 @@ Argument COMMAND is the command to use when compiling."
 		       :class-sym 'ede-maven2-project
 		       :new-p nil
 		       :safe-p t
-		       ))
+		       )
+ 'generic)
 
 (provide 'ede/maven2)
 
