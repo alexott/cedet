@@ -163,18 +163,23 @@ do not contain any text from preceding or following text."
 ;; information that the current project (from EDE) might know
 (defun srecode-semantic-handle-:project (dict)
   "Add macros into the dictionary DICT based on the current ede project."
-  (when (ede-toplevel)
-    (let* ((projecttop (ede-toplevel-project default-directory))
-	   (bfn (buffer-file-name))
-	   (dir (file-name-directory bfn))
-	   (relfname (file-relative-name bfn projecttop))
-	   (reldir (file-relative-name dir projecttop))
-	   )
-      (srecode-dictionary-set-value dict "PROJECT_FILENAME" relfname)
-      (srecode-dictionary-set-value dict "PROJECT_DIRECTORY" reldir)
-      (srecode-dictionary-set-value dict "PROJECT_NAME" (ede-name (ede-toplevel)))
-      (srecode-dictionary-set-value dict "PROJECT_VERSION" (oref (ede-toplevel) :version))
-      )))
+  (let* ((bfn (buffer-file-name))
+	 (dir (file-name-directory bfn)))
+    (if (ede-toplevel)
+	(let* ((projecttop (ede-toplevel-project default-directory))
+	       (relfname (file-relative-name bfn projecttop))
+	       (reldir (file-relative-name dir projecttop))
+	       )
+	  (srecode-dictionary-set-value dict "PROJECT_FILENAME" relfname)
+	  (srecode-dictionary-set-value dict "PROJECT_DIRECTORY" reldir)
+	  (srecode-dictionary-set-value dict "PROJECT_NAME" (ede-name (ede-toplevel)))
+	  (srecode-dictionary-set-value dict "PROJECT_VERSION" (oref (ede-toplevel) :version))
+	  )
+      ;; If there is no EDE project, then put in some base values.
+      (srecode-dictionary-set-value dict "PROJECT_FILENAME" bfn)
+      (srecode-dictionary-set-value dict "PROJECT_DIRECTORY" dir)
+      (srecode-dictionary-set-value dict "PROJECT_NAME" "N/A")
+      (srecode-dictionary-set-value dict "PROJECT_VERSION" "1.0"))))
 
 ;;; :system ARGUMENT HANDLING
 ;;
