@@ -108,6 +108,18 @@ INSTALL:
 
 -----------
 
+- For Package Maintainers: Unpack CEDET sources
+
+  Do not put the copy of CEDET's standalone sources under Emacs' lisp
+  directory.  If you do, Emacs will attempt to add too much into the
+  load-path, and this will not work.
+
+  When installing CEDET standalone sources over an existing Emacs, put the
+  sources outside of Emacs' regular load path.  Use the install
+  instructions above for initializing CEDET use in Emacs.
+
+  https://sourceforge.net/tracker/?func=detail&atid=117886&aid=3585232&group_id=17886
+
 - Install CEDET CONTRIB files into your emacs init files (.emacs)
 
   When you install CEDET standalone, you have the option of also
