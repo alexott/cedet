@@ -469,11 +469,10 @@ unterminated syntax."
     (widen)
     (when (or (< end start) (> end (point-max)))
       (error "Invalid parse region bounds %S, %S" start end))
-    (nreverse
-     (semantic-repeat-parse-whole-stream
+    (semantic-repeat-parse-whole-stream
       (or (cdr (assq start semantic-lex-block-streams))
 	  (semantic-lex start end depth))
-      nonterminal returnonerror))))
+      nonterminal returnonerror)))
 
 ;;; Parsing functions
 ;;
@@ -759,7 +758,7 @@ This function returns semantic tags without overlays."
                                   tag 'reparse-symbol nonterm))
                              tag)
                          (semantic--tag-expand tag))
-                    result (append tag result))
+                    result (append result tag))
             ;; No error in this case, a purposeful nil means don't
             ;; store anything.
             )
