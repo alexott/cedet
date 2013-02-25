@@ -421,7 +421,7 @@ Ignore the usual, and format a nice table."
     (data-debug-insert-thing (eieio-object-name-string data)
 			     prefix
 			     "Name: ")
-    (let* ((cl (object-class data))
+    (let* ((cl (eieio-object-class data))
 	   (cv (class-v cl)))
       (data-debug-insert-thing (class-constructor cl)
 			       prefix

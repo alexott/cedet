@@ -330,14 +330,14 @@ Argument MENU-DEF is the menu definition to use."
    (easy-menu-create-menu
     "Project Forms"
     (let* ((obj (ede-current-project))
-	   (class (if obj (object-class obj)))
+	   (class (if obj (eieio-object-class obj)))
 	   (menu nil))
       (condition-case err
 	  (progn
 	    (while (and class (slot-exists-p class 'menu))
 	      ;;(message "Looking at class %S" class)
 	      (setq menu (append menu (oref class menu))
-		    class (class-parent class))
+		    class (eieio-class-parent class))
 	      (if (listp class) (setq class (car class))))
 	    (append
 	     '( [ "Add Target" ede-new-target (ede-current-project) ]
@@ -730,7 +730,7 @@ Optional argument NAME is the name to give this project."
 			   'name
 			   (let* ((l ede-project-class-files)
 				  (cp (ede-current-project))
-				  (cs (when cp (object-class cp)))
+				  (cs (when cp (eieio-object-class cp)))
 				  (r nil))
 			     (while l
 			       (if cs
@@ -782,7 +782,7 @@ Optional argument NAME is the name to give this project."
 				:targets nil)))
 	 (inits (oref obj initializers)))
     ;; Force the name to match for new objects.
-    (object-set-name-string nobj (oref nobj :name))
+    (eieio-object-set-name-string nobj (oref nobj :name))
     ;; Handle init args.
     (while inits
       (eieio-oset nobj (car inits) (car (cdr inits)))

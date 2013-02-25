@@ -1180,7 +1180,7 @@ These collectors track themselves on a per-buffer basis."
   (let ((old nil)
 	(bl semantic-collector-per-buffer-list))
     (while (and bl (null old))
-      (if (eq (object-class (car bl)) this)
+      (if (eq (eieio-object-class (car bl)) this)
 	  (setq old (car bl))))
     (unless old
       (let ((new (call-next-method)))

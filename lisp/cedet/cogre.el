@@ -557,7 +557,7 @@ If GRAPH is nil, use the current graph."
   "Initialize ELT's name before the main FIELDS are initialized."
   (unless cogre-loading-from-file
     (let ((n (oref elt name-default)))
-      (object-set-name-string elt n)))
+      (eieio-object-set-name-string elt n)))
   (call-next-method))
 
 (defmethod initialize-instance :AFTER ((elt cogre-graph-element) fields)
