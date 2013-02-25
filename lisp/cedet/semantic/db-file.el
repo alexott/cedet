@@ -318,7 +318,7 @@ Argument OBJ is the object to write."
 	 (data-debug-new-buffer (concat "*SEMANTICDB ERROR*"))
 	 (data-debug-insert-thing obj "*" "")
 	 (setq semanticdb-data-debug-on-write-error nil))
-       (message "Error Writing Table: %s" (object-name obj))
+       (message "Error Writing Table: %s" (eieio-object-name obj))
        (error "%S" (car (cdr tableerror)))))
 
     ;; Clear the dirty bit.

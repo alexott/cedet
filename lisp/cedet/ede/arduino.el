@@ -349,7 +349,7 @@ Argument COMMAND is the command to use for compiling the target."
       (if (file-exists-p sketch)
 	  sketch
 	(error "Cannot guess primary sketch file for project %s"
-	       (object-name proj))))))
+	       (eieio-object-name proj))))))
 
 ;;; Arduino Preferences
 ;;

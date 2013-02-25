@@ -382,7 +382,7 @@ but can also be used interactively."
 			    (oref proj configuration-default)))))
   (oset (ede-current-project) configuration-default newconfig)
   (message "%s will now build in %s mode."
-	   (object-name (ede-current-project))
+	   (eieio-object-name (ede-current-project))
 	   newconfig))
 
 (defun ede-customize-forms-menu (menu-def)
@@ -889,7 +889,7 @@ a string \"y\" or \"n\", which answers the y/n question done interactively."
   (when (not ede-object)
     (error "Can't add %s to target %s: Wrong file type"
 	   (file-name-nondirectory (buffer-file-name))
-	   (object-name target)))
+	   (eieio-object-name target)))
   (ede-apply-target-options))
 
 (defun ede-remove-file (&optional force)
@@ -983,12 +983,12 @@ Argument PROMPT is the prompt to use when querying the user for a target."
 (defmethod project-add-file ((ot ede-target) file)
   "Add the current buffer into project project target OT.
 Argument FILE is the file to add."
-  (error "add-file not supported by %s" (object-name ot)))
+  (error "add-file not supported by %s" (eieio-object-name ot)))
 
 (defmethod project-remove-file ((ot ede-target) fnnd)
   "Remove the current buffer from project target OT.
 Argument FNND is an argument."
-  (error "remove-file not supported by %s" (object-name ot)))
+  (error "remove-file not supported by %s" (eieio-object-name ot)))
 
 (defmethod project-edit-file-target ((ot ede-target))
   "Edit the target OT associated with this file."
@@ -996,45 +996,45 @@ Argument FNND is an argument."
 
 (defmethod project-new-target ((proj ede-project) &rest args)
   "Create a new target.  It is up to the project PROJ to get the name."
-  (error "new-target not supported by %s" (object-name proj)))
+  (error "new-target not supported by %s" (eieio-object-name proj)))
 
 (defmethod project-new-target-custom ((proj ede-project))
   "Create a new target.  It is up to the project PROJ to get the name."
-  (error "New-target-custom not supported by %s" (object-name proj)))
+  (error "New-target-custom not supported by %s" (eieio-object-name proj)))
 
 (defmethod project-delete-target ((ot ede-target))
   "Delete the current target OT from its parent project."
-  (error "add-file not supported by %s" (object-name ot)))
+  (error "add-file not supported by %s" (eieio-object-name ot)))
 
 (defmethod project-compile-project ((obj ede-project) &optional command)
   "Compile the entire current project OBJ.
 Argument COMMAND is the command to use when compiling."
-  (error "compile-project not supported by %s" (object-name obj)))
+  (error "compile-project not supported by %s" (eieio-object-name obj)))
 
 (defmethod project-compile-target ((obj ede-target) &optional command)
   "Compile the current target OBJ.
 Argument COMMAND is the command to use for compiling the target."
-  (error "compile-target not supported by %s" (object-name obj)))
+  (error "compile-target not supported by %s" (eieio-object-name obj)))
 
 (defmethod project-debug-target ((obj ede-target))
   "Run the current project target OBJ in a debugger."
-  (error "debug-target not supported by %s" (object-name obj)))
+  (error "debug-target not supported by %s" (eieio-object-name obj)))
 
 (defmethod project-run-target ((obj ede-target))
   "Run the current project target OBJ."
-  (error "run-target not supported by %s" (object-name obj)))
+  (error "run-target not supported by %s" (eieio-object-name obj)))
 
 (defmethod project-make-dist ((this ede-project))
   "Build a distribution for the project based on THIS project."
-  (error "Make-dist not supported by %s" (object-name this)))
+  (error "Make-dist not supported by %s" (eieio-object-name this)))
 
 (defmethod project-dist-files ((this ede-project))
   "Return a list of files that constitute a distribution of THIS project."
-  (error "Dist-files is not supported by %s" (object-name this)))
+  (error "Dist-files is not supported by %s" (eieio-object-name this)))
 
 (defmethod project-rescan ((this ede-project))
   "Rescan the EDE project THIS."
-  (error "Rescanning a project is not supported by %s" (object-name this)))
+  (error "Rescanning a project is not supported by %s" (eieio-object-name this)))
 
 (defun ede-ecb-project-paths ()
   "Return a list of all paths for all active EDE projects.
@@ -1390,7 +1390,7 @@ and <root>/doc for doc sources."
 	      (semantic-lex-make-spp-table map)))
       (when (consp objs)
 	(message "Choosing preprocessor syms for project %s"
-		 (object-name (car objs)))))))
+		 (eieio-object-name (car objs)))))))
 
 (defmethod ede-system-include-path ((this ede-project))
   "Get the system include path used by project THIS."

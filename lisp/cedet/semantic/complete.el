@@ -1522,7 +1522,7 @@ one in the source buffer."
 	  (insert (semantic-format-tag-summarize tag nil t) "\n\n")
 	  (when table
 	    (insert "From table: \n")
-	    (insert (object-name table) "\n\n"))
+	    (insert (eieio-object-name table) "\n\n"))
 	  (when buf
 	    (insert "In buffer: \n\n")
 	    (insert (format "%S" buf)))

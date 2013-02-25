@@ -157,7 +157,7 @@ part of the preprocessor map.")
 		      ;; not be in a buffer.
 		      (semanticdb-refresh-table table t)
 		    (error (message "Error updating tables for %S"
-				    (object-name table)))))
+				    (eieio-object-name table)))))
 		(setq filemap (append filemap (oref table lexical-table)))
 		)))))
       ;; Update symbol obarray

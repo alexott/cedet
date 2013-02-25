@@ -190,7 +190,7 @@ If one doesn't exist, create it."
       (oref obj index)
     (let ((idx nil))
       (setq idx (funcall semanticdb-default-find-index-class
-			 (concat (object-name obj) " index")
+			 (concat (eieio-object-name obj) " index")
 			 ;; Fill in the defaults
 		         :table obj
 			 ))

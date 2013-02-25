@@ -919,7 +919,7 @@ but should be good enough for debugging assertions."
   (if (< (length result) 2)
       (concat "#<FIND RESULT "
 	      (mapconcat (lambda (a)
-			   (concat "(" (object-name (car a) ) " . "
+			   (concat "(" (eieio-object-name (car a) ) " . "
 				   "#<TAG LIST " (number-to-string (length (cdr a))) ">)"))
 			 result
 			 " ")
