@@ -418,7 +418,7 @@ Argument POINT is where to get the data from."
   "Show the fields of ELP data in an adebug buffer.
 Ignore the usual, and format a nice table."
   (let ((inhibit-read-only t))
-    (data-debug-insert-thing (object-name-string data)
+    (data-debug-insert-thing (eieio-object-name-string data)
 			     prefix
 			     "Name: ")
     (let* ((cl (object-class data))
