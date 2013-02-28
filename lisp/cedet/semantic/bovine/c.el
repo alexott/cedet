@@ -1968,7 +1968,7 @@ have to be wrapped in that namespace."
     ;; If we have a function parent, then that implies we can
     (if p
  	;; Append a new tag THIS into our space.
-	(cons (semantic-tag-new-variable "this" p nil)
+	(cons (semantic-tag-new-variable "this" p nil :pointer 1)
 	      origvar)
       ;; No parent, just return the usual
       origvar)))
