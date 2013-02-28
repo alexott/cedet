@@ -1961,15 +1961,17 @@ have to be wrapped in that namespace."
   "Do what `semantic-get-local-variables' does, plus add `this' if needed."
   (let* ((origvar (semantic-get-local-variables-default))
 	 (ct (semantic-current-tag))
-	 (p (semantic-tag-function-parent ct)))
+	 (p (when (semantic-tag-of-class-p ct 'function)
+	      (or (semantic-tag-function-parent ct)
+		  (car-safe (semantic-find-tags-by-type
+			     "class" (semantic-find-tag-by-overlay)))))))
     ;; If we have a function parent, then that implies we can
-    (if (and p (semantic-tag-of-class-p ct 'function))
-	;; Append a new tag THIS into our space.
+    (if p
+ 	;; Append a new tag THIS into our space.
 	(cons (semantic-tag-new-variable "this" p nil)
 	      origvar)
       ;; No parent, just return the usual
-      origvar)
-    ))
+      origvar)))
 
 (define-mode-local-override semantic-idle-summary-current-symbol-info
   c-mode ()
