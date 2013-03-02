@@ -44,6 +44,29 @@ Autoload cookies:
   If your file has circular dependencies and you want to resolve
   compile warnings, use 'declare-function'.
 
+Compatibility
+
+  Your code should work on Emacs 23.2 and newer.  The Buildbot at
+
+  http://www.randomsample.de/cedet-buildbot
+
+  will compile all new revisions on several Emacs versions, and also
+  run the unit and integration tests.  If something fails, it will
+  send you an e-mail.
+
+Compiler Warnings
+
+  Our goal is that CEDET compiles on the current Emacs stable release
+  without warnings.  Even if you know that a warning is harmless, you
+  should change your code so that it compiles without it.  Otherwise,
+  new and possibly serious warnings will become harder to spot.
+
+  As a last resort, you can use the `with-no-warnings' macro to wrap
+  problematic code, but then you should document why you have to use
+  it.
+
+  Warnings on older Emacs versions or on current Emacs trunk are OK,
+  as long as you are sure that they don't indicate real problems.
 
 Checking code into BZR:
 
@@ -54,5 +77,3 @@ Checking code into BZR:
   Having good check-in comments expressing exactly which functions
   where modified and why can be very helpful later when trying to
   determine why a change was made.
-
-
