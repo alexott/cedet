@@ -5,7 +5,6 @@ including:
 
    EIEIO -    CLOS layer for Emacs Lisp
    Semantic - Parser Infrastructure for Emacs
-   Speedbar - Everything browser
    EDE -      File manager/ Makefile generator
    SRecode -  Template manager/ code generator
    COGRE -    Connected Graph Editor
@@ -126,7 +125,10 @@ INSTALL:
   installing CEDET's "contrib" files.  These are additional programs
   that work with CEDET for which Authors were unable to provide
   copyright to the FSF for inclusion into Emacs.  They are kept
-  separately, and must be installed separately.
+  separately, and must be compiled and installed separately.  First
+  you have to compile them by entering the 'contrib' directory and
+  simply call 'make'.  You can then load them in your init file by
+  doing
 
 -----------
 ;; Load CEDET CONTRIB.
