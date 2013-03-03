@@ -1,7 +1,7 @@
 ;;; semantic-tag-folding.el --- semantic decoration style to enable folding of semantic tags
 ;; Time-stamp: <2010-09-15 16:20:59 (lluis)>
 
-;;; Copyright (C) 2005, 2009, 2010 Suraj Acharya
+;;; Copyright (C) 2005, 2009, 2010, 2013 Suraj Acharya
 
 ;; Author: Suraj Acharya <sacharya@cs.indiana.edu>
 
@@ -118,14 +118,12 @@ Clicking on a + or - in the fringe will fold that tag."
          (global-semantic-tag-folding-mode (if val 1 -1))))
 
 ;;;###autoload
-(defun global-semantic-tag-folding-mode (&optional arg)
+(define-minor-mode global-semantic-tag-folding-mode
   "Toggle global use of option `semantic-tag-folding-mode'.
-If ARG is positive, enable, if it is negative, disable.
-If ARG is nil, then toggle."
-  (interactive "P")
-  (setq global-semantic-tag-folding-mode
-        (semantic-toggle-minor-mode-globally
-         'semantic-tag-folding-mode arg)))
+If ARG is positive or nil, enable, if it is negative, disable."
+  :global t :group 'semantic :group 'semantic-modes
+  (semantic-toggle-minor-mode-globally
+   'semantic-tag-folding-mode (if global-semantic-tag-folding-mode 1 -1)))
 
 (defcustom semantic-tag-folding-mode-hook nil
   "*Hook run at the end of function `semantic-tag-folding-mode'."
