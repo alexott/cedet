@@ -361,6 +361,7 @@ development version.
 If you want to use the version of CEDET that comes with Emacs, then
 move on to the next section.
 
+@enumerate
 @item Configuration
 
 To turn on basic Semantic parsing of your files and several
