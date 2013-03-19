@@ -11,7 +11,7 @@ including:
 
 REQUIREMENTS:
 
-   The full CEDET suite requires Emacs 23.1 or newer.
+   The full CEDET suite requires Emacs 23.2 or newer.
 
    Compilation of CEDET currently requires GNU Make.
 
@@ -51,6 +51,36 @@ INSTALL:
 
   manually as root or via sudo.
 
+- Install CEDET into your Emacs init files (.emacs):
+
+  You only have to load the cedet-devel-load.el file that ships with
+  the CEDET development version. You should place the `load-file'
+  command near the beginning of your init file, otherwise parts of
+  CEDET like EIEIO might already be loaded. For more details on any
+  topic, see the info file common/cedet.info.
+
+-----------
+;; Load CEDET.
+;; See cedet/common/cedet.info for configuration details.
+;; IMPORTANT: Tou must place this *before* any CEDET component (including
+;; EIEIO) gets activated by another package (Gnus, auth-source, ...).
+(load-file "/home/user/cedet/cedet-devel-load.el")
+
+;; Add further minor-modes to be enabled by semantic-mode.
+;; See doc-string of `semantic-default-submodes' for other things
+;; you can use here.
+(add-to-list 'semantic-default-submodes 'global-semantic-idle-summary-mode t)
+(add-to-list 'semantic-default-submodes 'global-semantic-idle-completions-mode t)
+(add-to-list 'semantic-default-submodes 'global-cedet-m3-minor-mode t)
+
+;; Enable Semantic
+(semantic-mode 1)
+
+;; Enable EDE (Project Management) features
+(global-ede-mode 1)
+
+-----------
+
 - Build Issues
 
   If running MAKE fails due to other issues such as bad loaddef files,
@@ -75,37 +105,6 @@ INSTALL:
   updating their timestamps through
 
     make touch-makefiles
-
-- Install CEDET into your Emacs init files (.emacs):
-
-  You only have to load the cedet-devel-load.el file that ships with
-  the CEDET development version. You should place the `load-file'
-  command near the beginning of your init file, otherwise parts of
-  CEDET like EIEIO might already be loaded. For more details on any
-  topic, see the info file common/cedet.info.
-
------------
-;; Load CEDET.
-;; See cedet/common/cedet.info for configuration details.
-;; IMPORTANT: For Emacs >= 23.2, you must place this *before* any
-;; CEDET component (including EIEIO) gets activated by another 
-;; package (Gnus, auth-source, ...).
-(load-file "/home/user/cedet/cedet-devel-load.el")
-
-;; Add further minor-modes to be enabled by semantic-mode.
-;; See doc-string of `semantic-default-submodes' for other things
-;; you can use here.
-(add-to-list 'semantic-default-submodes 'global-semantic-idle-summary-mode t)
-(add-to-list 'semantic-default-submodes 'global-semantic-idle-completions-mode t)
-(add-to-list 'semantic-default-submodes 'global-cedet-m3-minor-mode t)
-
-;; Enable Semantic
-(semantic-mode 1)
-
-;; Enable EDE (Project Management) features
-(global-ede-mode 1)
-
------------
 
 - For Package Maintainers: Unpack CEDET sources
 
