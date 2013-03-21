@@ -53,11 +53,17 @@ INSTALL:
 
 - Install CEDET into your Emacs init files (.emacs):
 
-  You only have to load the cedet-devel-load.el file that ships with
-  the CEDET development version. You should place the `load-file'
-  command near the beginning of your init file, otherwise parts of
-  CEDET like EIEIO might already be loaded. For more details on any
-  topic, see the info file common/cedet.info.
+  To enable the CEDET development version in Emacs you need to
+  override the CEDET that comes with Emacs.  To do that, load the
+  cedet-devel-load.el file that is next to this INSTALL file.
+
+  You should place the `cedet-devel-load.el' command near the
+  beginning of your init file, otherwise parts of CEDET like EIEIO
+  might already be loaded from core Emacs. For more details on other
+  configuration options topic, see the info file common/cedet.info.
+
+  This code snippet can be copied into your .emacs file to enable the
+  development version of cedet, and turn on all the features.'
 
 -----------
 ;; Load CEDET.
