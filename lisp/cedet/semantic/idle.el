@@ -434,16 +434,27 @@ datasets."
 
 (defun semantic-idle-scheduler-work-parse-neighboring-files ()
   "Parse all the files in similar directories to buffers being edited."
-  ;; Let's check to see if EDE matters.
-  (let ((ede-auto-add-method 'never))
-    (dolist (a auto-mode-alist)
-      (when (eq (cdr a) major-mode)
-	(dolist (file (directory-files default-directory t (car a) t))
-	  (semantic-throw-on-input 'parsing-mode-buffers)
-	  (save-excursion
-	    (semanticdb-file-table-object file)
-	    ))))
-    ))
+  ;; Let's tell EDE to ignore all the files we're about to load
+  (let ((ede-auto-add-method 'never)
+	(matching-auto-mode-patterns nil))
+    ;; Collect all patterns matching files of the same mode we edit.
+    (mapc (lambda (pat) (and (eq (cdr pat) major-mode)
+			     (push (car pat) matching-auto-mode-patterns)))
+	  auto-mode-alist)
+    ;; Loop over all files, and if one matches our mode, we force its
+    ;; table to load.
+    (dolist (file (directory-files default-directory t ".*" t))
+      (catch 'found
+	(mapc (lambda (pat)
+		(semantic-throw-on-input 'parsing-mode-buffers)
+		;; We use string-match instead of passing the pattern
+		;; into directory files, because some patterns don't
+		;; work with directory files.
+		(and (string-match pat file)
+		     (save-excursion
+		       (semanticdb-file-table-object file))
+		     (throw 'found t)))
+	      matching-auto-mode-patterns)))))
 
 
 ;;; REPARSING
