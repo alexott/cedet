@@ -115,11 +115,7 @@ Options in CLOS not supported in EIEIO:
 
 Due to the way class options are set up, you can add any tags you wish,
 and reference them using the function `class-option'."
-  ;; We must `eval-and-compile' this so that when we byte compile
-  ;; an eieio program, there is no need to load it ahead of time.
-  ;; It also provides lots of nice debugging errors at compile time.
-  `(eval-and-compile
-     (eieio-defclass ',name ',superclass ',slots ',options-and-doc)))
+  `(eieio-defclass ',name ',superclass ',slots ',options-and-doc))
 
 
 ;;; CLOS style implementation of object creators.
