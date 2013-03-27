@@ -1,6 +1,6 @@
 ;;; cedet-devel-load.el --- Use CEDET from SourceForge, not Emacs
 
-;; Copyright (C) 2011 by Eric M. Ludlam
+;; Copyright (C) 2011, 2013 by Eric M. Ludlam
 
 ;; This file is not part of Emacs, and will STAY a part of CEDET/Standalone
 
@@ -86,10 +86,12 @@
   (require 'srecode/map) ;; Get the srecode load-path filled in.
 
   (let ((CEDETDIR (file-name-directory
-		   (or load-file-name (buffer-file-name)))))
+		   (or load-file-name (buffer-file-name))))
+	(REMOVEME (expand-file-name "srecode" data-directory)))
+    ;; Add in the devel data directory.
     (add-to-list 'srecode-map-load-path (expand-file-name "etc/srecode" CEDETDIR))
-
-    )
+    ;; Remove the system level data directory.
+    (setq srecode-map-load-path (remove REMOVEME srecode-map-load-path)))
 
   ;; Currently, Emacs proper doesn't track EIEIO methods.  Until it
   ;; does, we have to advice `describe-variable' and `describe-function'
