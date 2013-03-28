@@ -1,6 +1,6 @@
 ;;; cedet-integ-test.el --- CEDET full integration tests.
 
-;; Copyright (C) 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -183,9 +183,6 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
     ;; 8 a) Try out gnu-global and other external databases.
     (cit-externaldb-test)
 
-    ;; 2 e) srecode map manipulation
-    (cit-srecode-map-test)
-
     ;; Do some more with Emacs Lisp.
     (cit-srecode-fill-el make-type)
 
@@ -234,6 +231,12 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
     (global-ede-mode 1)
     ;; Do an EDE cpproot project. 
     (cit-ede-cpproot-test)
+
+    ;; 2 e) srecode map manipulation
+    ;; Note on this:  This test used to be in the test for Makefile or
+    ;; Automake projects, but it does not depend on that project
+    ;; type.  Moving it here so it is faster to get to.
+    (cit-srecode-map-test)    
 
     (cit-finish-message "PASSED" "cpproot")
     ))
