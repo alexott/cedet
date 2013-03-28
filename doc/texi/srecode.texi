@@ -86,7 +86,7 @@ ease.
 * Developing Template Functions:: How to write your own template insert functions.
 * Template Naming Conventions:: Creating a set of core templates
 * Inserting Tag Lists::         Inserting Semantic tags via templates
-* Application Writing::         Writing an @srecode{}r application
+* Application Writing::         Writing an @srecode{} application
 * GNU Free Documentation License:: The license for this documentation.
 * Index::
 @end menu
@@ -180,7 +180,7 @@ If you were to update @code{declaration:function} in your user
 template file, then you would get this new template instead of the one
 that comes with @srecode{}.  Higher level applications should always
 use @code{declaration:function} when generating their own code, so
-higher level templates will then adopt your changes to
+higher level templates will then adopt user template changes to
 @code{declaration:function} into themselves.
 
 You can also override variables.  Core variables are stored in the
@@ -486,6 +486,18 @@ Example:
 set escape_start "$"
 set escape_end "$"
 @end example
+
+If you need to insert the characters that belong to the variables
+@code{escape_start} or @code{escape_end}, then place those into
+a variable, and use that variable.  For example
+
+@example
+set escape_start "$"
+set escape_end "$"
+set DOLLAR "$"
+@end example
+
+
 @item mode
 This is the major mode, as a string with the full Emacs Lisp symbol in
 it.  All templates in this file will be installed into the template
@@ -540,12 +552,9 @@ Set the ``project'' special variable to a directory name.  Only files
 under that directory will be able to access the templates in that
 file.
 
-Any template file that has a project specified will get have a
+Any template file that has a project specified will get a
 priority that is set between SRecode base templates, and user defined
 templates.
-
-Templates can be compiled via a project system, such as EDE.  EDE
-loaded templates will get a @var{project} set automatically.
 
 Example:
 @example
@@ -553,16 +562,6 @@ set project "/tmp/testproject"
 @end example
 
 @end table
-
-If you need to insert the characters that belong to the variables
-@code{escape_start} or @code{escape_end}, then place those into
-a variable.  For example
-
-@example
-set escape_start "$"
-set escape_end "$"
-set DOLLAR "$"
-@end example
 
 @node Automatic Loop Variables
 @subsection Automatic Loop Variables
