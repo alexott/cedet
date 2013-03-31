@@ -236,7 +236,7 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
     ;; Note on this:  This test used to be in the test for Makefile or
     ;; Automake projects, but it does not depend on that project
     ;; type.  Moving it here so it is faster to get to.
-    (cit-srecode-map-test)    
+    (cit-srecode-map-test)
 
     (cit-finish-message "PASSED" "cpproot")
     ))
@@ -272,7 +272,24 @@ Append FILENAME to the target directory."
 
 (defun cit-srecode-fill-with-stuff (filename tags &rest
 					     empty-dict-entries)
-  "Fill up FILENAME with some TAGS.
+  "Fill up FILENAME with some TAGS, and check the results.
+Argument FILENAME is the file to fill up.
+Argument TAGS is the list of tags to insert into FILENAME.
+EMPTY-DICT-ENTRIES are dictionary entries for the EMPTY fill macro."
+  (let ((post-empty-tags (apply 'cit-srecode-fill-with-stuff-notest
+				filename tags
+				empty-dict-entries)))
+
+    ;; Make sure the tags we have are the same as the tags we tried
+    ;; to insert.
+    (cit-srecode-verify-tags (semantic-fetch-tags)
+			     tags
+			     post-empty-tags)
+    ))
+
+(defun cit-srecode-fill-with-stuff-notest (filename tags &rest
+						    empty-dict-entries)
+  "Fill up FILENAME with some TAGS.  Do not check the results.
 Argument FILENAME is the file to fill up.
 Argument TAGS is the list of tags to insert into FILENAME.
 EMPTY-DICT-ENTRIES are dictionary entries for the EMPTY fill macro."
@@ -304,14 +321,7 @@ EMPTY-DICT-ENTRIES are dictionary entries for the EMPTY fill macro."
     ;;
     (cit-srecode-insert-taglist tags)
 
-    ;; Make sure the tags we have are the same as the tags we tried
-    ;; to insert.
-    (cit-srecode-verify-tags (semantic-fetch-tags)
-			     tags
-			     post-empty-tags)
-
-
-    ))
+    post-empty-tags))
 
 (defun cit-srecode-insert-taglist (tags)
   "Insert the list of TAGS at point in buffer."
@@ -388,7 +398,13 @@ are found, but don't error if they are not their."
        ))
     
     (setq actual (cdr actual))
-    ))
+    )
+  (when expected
+    (data-debug-new-buffer "*Test Failure*")
+    (data-debug-insert-thing expected ">" "")
+    (error "After scanning Actual tags, %d expected tags were still left!"
+	   (length expected)))
+  )
 
 (defun cit-compile-and-wait (&optional ARGS)
   "Compile our current project, but wait for it to finish.
