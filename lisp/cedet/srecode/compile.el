@@ -202,8 +202,9 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
   (unless (semantic-active-p)
     (error "You have to activate semantic-mode to compile SRecode templates"))
   (require 'srecode/insert)
-  (message "Compiling template %s..."
-	   (file-name-nondirectory (buffer-file-name)))
+  (when (called-interactively-p 'interactive)
+    (message "Compiling template %s..."
+	     (file-name-nondirectory (buffer-file-name))))
   (let ((tags (semantic-fetch-tags))
 	(tag nil)
 	(class nil)
@@ -288,10 +289,11 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
        )
       ;; Continue
       (setq tags (cdr tags)))
-
+    
     ;; MSG - Before install since nreverse whacks our list.
-    (message "%d templates compiled for %s"
-	     (length table) mode)
+    (when (called-interactively-p 'interactive)
+      (message "%d templates compiled for %s"
+	       (length table) mode))
 
     ;;
     ;; APPLY TO MODE
@@ -316,12 +318,14 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
 	    (if (stringp project)
 		(setq priority (+ 50 defaultdelta))
 	      (setq priority (+ 80 defaultdelta))))
-	  (message "Templates %s has estimated priority of %d"
-		   (file-name-nondirectory (buffer-file-name))
-		   priority))
-      (message "Compiling templates %s priority %d... done!"
-	       (file-name-nondirectory (buffer-file-name))
-	       priority))
+	  (when (called-interactively-p 'interactive)
+	    (message "Templates %s has estimated priority of %d"
+		     (file-name-nondirectory (buffer-file-name))
+		     priority)))
+      (when (called-interactively-p 'interactive)
+	(message "Compiling templates %s priority %d... done!"
+		 (file-name-nondirectory (buffer-file-name))
+		 priority)))
 
     ;; Save it up!
     (srecode-compile-template-table table mode priority application framework project vars)
