@@ -81,7 +81,7 @@ utest:
 utest-batch:
 	$(EMACS) $(EMACSFLAGS) -l cedet-devel-load.el --eval '$(UTEST)' -f cedet-utest-batch
 
-itest: itest-make itest-automake itest-cpproot
+itest: itest-make itest-automake itest-cpproot itest-javaroot
 
 itest-make:
 	cd $(CURDIR)/tests;./cit-test.sh Make
@@ -92,13 +92,16 @@ itest-automake:
 itest-cpproot:
 	cd $(CURDIR)/tests;./cit-test.sh cpproot
 
+itest-javaroot:
+	cd $(CURDIR)/tests;./cit-test.sh javaroot
+
 itest-android:
 	cd $(CURDIR)/tests;./cit-test.sh Android
 
 itest-arduino:
 	cd $(CURDIR)/tests;./cit-test.sh Arduino
 
-itest-batch: itest-make-batch itest-automake-batch itest-cpproot-batch
+itest-batch: itest-make-batch itest-automake-batch itest-cpproot-batch itest-javaroot-batch
 
 itest-make-batch:
 	cd $(CURDIR)/tests;./cit-test.sh Make --batch
@@ -108,6 +111,9 @@ itest-automake-batch:
 
 itest-cpproot-batch:
 	cd $(CURDIR)/tests;./cit-test.sh cpproot --batch
+
+itest-javaroot-batch:
+	cd $(CURDIR)/tests;./cit-test.sh javaroot --batch
 
 itest-android-batch:
 	cd $(CURDIR)/tests;./cit-test.sh Android --batch
