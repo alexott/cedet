@@ -16,3 +16,4 @@ doc/info/dir
 *-compile-script
 *-make-script
 *-loaddefs.el
+*.class
