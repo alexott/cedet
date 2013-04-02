@@ -4,13 +4,6 @@
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
-(eval-and-compile
-  ;; Other package depend on this value at compile time via inversion.
-
-  (defvar cit-version "1.0"
-    "Current version of Semantic.")
-
-  )
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
 ;; published by the Free Software Foundation; either version 2, or (at
@@ -119,6 +112,7 @@
 (require 'cit-android)
 (require 'cit-arduino)
 (require 'cit-cpproot)
+(require 'cit-javaroot)
 (require 'cit-dist)
 
 (defvar cedet-integ-target (expand-file-name "edeproj" cedet-integ-base)
@@ -239,6 +233,18 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
     (cit-srecode-map-test)
 
     (cit-finish-message "PASSED" "cpproot")
+    ))
+
+(defun cedet-integ-test-javaroot ()
+  "Run the CEDET integration test using the Android style project."
+  (interactive)
+
+  (let ((ede-auto-add-method 'never))
+    (global-ede-mode 1)
+    ;; Do an EDE cpproot project. 
+    (cit-ede-javaroot-test)
+
+    (cit-finish-message "PASSED" "javaroot")
     ))
 
 (defun cit-finish-message (message style)
