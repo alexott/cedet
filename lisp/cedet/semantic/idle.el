@@ -851,17 +851,18 @@ visible, then highlight it."
 	 )
     (cond ((semantic-overlay-p region)
 	   (with-current-buffer (semantic-overlay-buffer region)
-	     (goto-char (semantic-overlay-start region))
-	     (when (pos-visible-in-window-p
-		    (point) (get-buffer-window (current-buffer) 'visible))
-	       (if (< (semantic-overlay-end region) (point-at-eol))
-		   (pulse-momentary-highlight-overlay
-		    region semantic-idle-symbol-highlight-face)
-		 ;; Not the same
-		 (pulse-momentary-highlight-region
-		  (semantic-overlay-start region)
-		  (point-at-eol)
-		  semantic-idle-symbol-highlight-face)))
+	     (save-excursion
+	       (goto-char (semantic-overlay-start region))
+	       (when (pos-visible-in-window-p
+		      (point) (get-buffer-window (current-buffer) 'visible))
+		 (if (< (semantic-overlay-end region) (point-at-eol))
+		     (pulse-momentary-highlight-overlay
+		      region semantic-idle-symbol-highlight-face)
+		   ;; Not the same
+		   (pulse-momentary-highlight-region
+		    (semantic-overlay-start region)
+		    (point-at-eol)
+		    semantic-idle-symbol-highlight-face))))
 	     ))
 	  ((vectorp region)
 	   (let ((start (aref region 0))
