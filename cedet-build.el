@@ -1,6 +1,6 @@
 ;;; cedet-build.el --- Build CEDET within Emacs.
 
-;; Copyright (C) 2008, 2009, 2012 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2012, 2013 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -169,9 +169,10 @@ OVERRIDE-CHECK to override cedet short-cicuit."
   (save-excursion
     ;; Enable EDE and Semantic
     (global-ede-mode 1)
-    (semantic-mode 1)
     ;;Disable most new buffer setup functions to speed things up.
     (setq semantic-new-buffer-setup-functions nil)
+    ;; Enable Semantic
+    (semantic-mode 1)
     ;; Disable using cached files for parse results.
     (setq semanticdb-new-database-class 'semanticdb-project-database)    
     ;; Require grammar compilation.
