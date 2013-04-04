@@ -266,8 +266,7 @@ setup to use Semantic."
   :type 'hook)
 
 (defcustom semantic-new-buffer-setup-functions
-  '((emacs-lisp-mode . semantic-default-elisp-setup)
-    (c-mode . semantic-default-c-setup)
+  '((c-mode . semantic-default-c-setup)
     (c++-mode . semantic-default-c-setup)
     (arduino-mode . semantic-default-c-setup)
     (html-mode . semantic-default-html-setup)
