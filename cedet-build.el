@@ -110,15 +110,26 @@ OVERRIDE-CHECK to override cedet short-cicuit."
 
   ;; Get EIEIO built first.
   (save-excursion
-    (let ((src "lisp/eieio/eieio.el") (dst "eieio/eieio.elc"))
+    (let ((src "lisp/eieio/eieio.el") (dst "lisp/eieio/eieio.elc")
+	  (core "lisp/eieio/eieio-core.el") (coredst "lisp/eieio/eieio-core.elc"))
+      (if (file-newer-than-file-p core coredst)
+	  (progn
+	    (when (featurep 'eieio-core)
+	      (error "You should not recompile EIEIO after it has been loaded"))
+	    (byte-compile-file core)
+	    (load-file coredst)
+	    (cedet-build-msg "(core) done ..."))
+	(cedet-build-msg "(core) not needed...")
+	(load-file coredst))
+
       (if (file-newer-than-file-p src dst)
 	  (progn
 	    (when (featurep 'eieio)
 	      (error "You should not recompile EIEIO after it has been loaded"))
 	    (byte-compile-file src)
-	    (cedet-build-msg "done\n"))
-	(cedet-build-msg "not needed\n")))
-    )
+	    (cedet-build-msg "(eieio) done\n"))
+	(cedet-build-msg "(eieio) not needed\n"))
+      ))
 
   ;; Get eieio loaddefs
   (cedet-build-msg "Step 2: Creating autoloads ...\n")
