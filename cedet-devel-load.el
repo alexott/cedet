@@ -78,8 +78,8 @@
   ;;  Things disabled by core Emacs
   ;;
   ;;  @TODO - generate autoloads.
-  (autoload 'semantic-default-elisp-setup "semantic/bovine/el"
-    "Setup hook function for Emacs Lisp files and Semantic.")
+  ;;(autoload 'semantic-default-elisp-setup "semantic/bovine/el"
+  ;;  "Setup hook function for Emacs Lisp files and Semantic.")
 
   ;; Get SRecode initialized
   (require 'srecode)
