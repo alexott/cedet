@@ -172,20 +172,24 @@ OVERRIDE-CHECK to override cedet short-cicuit."
   
   (setq cedet-minimum-setup t)
   (load-file (expand-file-name "cedet-devel-load.el" cedet-build-location))
-  ;; Set srecode-map-load-path to nil, otherwise the setter function
-  ;; for it will break the build.
-  (setq srecode-map-load-path nil)
 
   (cedet-build-msg "done\nStep 4: Turning on EDE and Semantic ...")
   (save-excursion
-    ;; Enable EDE and Semantic
+    ;; Disable saving EDE's cache file.
+    (setq ede-project-placeholder-cache-file nil)
+    ;; Enable EDE
     (global-ede-mode 1)
+    ;; Set srecode-map-load-path to nil, otherwise the setter function
+    ;; for it will break the build.
+    (setq srecode-map-load-path nil)
+    ;; Disable all saves from SRecode
+    (setq srecode-map-save-file nil)
     ;;Disable most new buffer setup functions to speed things up.
     (setq semantic-new-buffer-setup-functions nil)
+    ;; Disable using cached files for parse results.
+    (setq-default semanticdb-new-database-class 'semanticdb-project-database)    
     ;; Enable Semantic
     (semantic-mode 1)
-    ;; Disable using cached files for parse results.
-    (setq semanticdb-new-database-class 'semanticdb-project-database)    
     ;; Require grammar compilation.
     (require 'semantic/ede-grammar)
     (require 'semantic/wisent))
