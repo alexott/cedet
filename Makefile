@@ -39,6 +39,9 @@ INFODIR=$(CURDIR)/doc/info
 
 all: showversion clean-autoloads autoloads touch-makefiles compile info install-info
 
+ebuild:
+	$(EMACS) -Q --batch -l cedet-build.el -f cedet-build
+
 compile:
 	$(MAKE) -C lisp
 
