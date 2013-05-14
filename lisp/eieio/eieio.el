@@ -508,7 +508,7 @@ If REPLACEMENT-ARGS is non-nil, then use them instead of
 arguments passed in at the top level.
 
 Use `next-method-p' to find out if there is a next method to call."
-  (if (not (bound-and-true-p scoped-class))
+  (if (not (eieio--scoped-class))
       (error "`call-next-method' not called within a class specific method"))
   (if (and (/= eieio-generic-call-key method-primary)
 	   (/= eieio-generic-call-key method-static))
@@ -522,11 +522,10 @@ Use `next-method-p' to find out if there is a next method to call."
       (let* ((eieio-generic-call-next-method-list
 	      (cdr eieio-generic-call-next-method-list))
 	     (eieio-generic-call-arglst newargs)
-	     (scoped-class (cdr next))
 	     (fcn (car next))
 	     )
-	(apply fcn newargs)
-	))))
+	(eieio--with-scoped-class (cdr next)
+	  (apply fcn newargs)) ))))
 
 ;;; Here are some CLOS items that need the CL package
 ;;
@@ -599,7 +598,7 @@ Called from the constructor routine.")
 (defmethod shared-initialize ((obj eieio-default-superclass) slots)
   "Set slots of OBJ with SLOTS which is a list of name/value pairs.
 Called from the constructor routine."
-  (let ((scoped-class (eieio--object-class obj)))
+  (eieio--with-scoped-class (eieio--object-class obj)
     (while slots
       (let ((rn (eieio-initarg-to-attribute (eieio--object-class obj)
 					    (car slots))))
@@ -621,27 +620,27 @@ call `shared-initialize' yourself, or you can call `call-next-method'
 to have this constructor called automatically.  If these steps are
 not taken, then new objects of your class will not have their values
 dynamically set from SLOTS."
-    ;; First, see if any of our defaults are `lambda', and
-    ;; re-evaluate them and apply the value to our slots.
-    (let* ((scoped-class (class-v (eieio--object-class this)))
-	   (slot (eieio--class-public-a scoped-class))
-	   (defaults (eieio--class-public-d scoped-class)))
-      (while slot
-	;; For each slot, see if we need to evaluate it.
-	;;
-	;; Paul Landes said in an email:
-	;; > CL evaluates it if it can, and otherwise, leaves it as
-	;; > the quoted thing as you already have.  This is by the
-	;; > Sonya E. Keene book and other things I've look at on the
-	;; > web.
-	(let ((dflt (eieio-default-eval-maybe (car defaults))))
-	  (when (not (eq dflt (car defaults)))
-	    (eieio-oset this (car slot) dflt) ))
-	;; Next.
-	(setq slot (cdr slot)
-	      defaults (cdr defaults))))
-    ;; Shared initialize will parse our slots for us.
-    (shared-initialize this slots))
+  ;; First, see if any of our defaults are `lambda', and
+  ;; re-evaluate them and apply the value to our slots.
+  (let* ((this-class (class-v (eieio--object-class this)))
+	 (slot (eieio--class-public-a this-class))
+	 (defaults (eieio--class-public-d this-class)))
+    (while slot
+      ;; For each slot, see if we need to evaluate it.
+      ;;
+      ;; Paul Landes said in an email:
+      ;; > CL evaluates it if it can, and otherwise, leaves it as
+      ;; > the quoted thing as you already have.  This is by the
+      ;; > Sonya E. Keene book and other things I've look at on the
+      ;; > web.
+      (let ((dflt (eieio-default-eval-maybe (car defaults))))
+	(when (not (eq dflt (car defaults)))
+	  (eieio-oset this (car slot) dflt) ))
+      ;; Next.
+      (setq slot (cdr slot)
+	    defaults (cdr defaults))))
+  ;; Shared initialize will parse our slots for us.
+  (shared-initialize this slots))
 
 (defgeneric slot-missing (object slot-name operation &optional new-value)
   "Method invoked when an attempt to access a slot in OBJECT fails.")
