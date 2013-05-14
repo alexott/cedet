@@ -99,6 +99,32 @@ default setting for optimization purposes.")
 (defvar eieio-default-superclass nil)
 
 ;;;
+;; Class currently in scope.
+;;
+;; When invoking methods, the running method needs to know which class
+;; is currently in scope.  Generally this is the class of the method
+;; being called, but 'call-next-method' needs to query this state,
+;; and change it to be then next super class up.
+;;
+;; Thus, the scoped class is a stack that needs to be managed.
+
+(defvar eieio--scoped-class-stack nil
+  "A stack of the classes currently in scope during method invocation.")
+
+(defun eieio--scoped-class ()
+  "Return the class currently in scope, or nil."
+  (car-safe eieio--scoped-class-stack))
+
+(defmacro eieio--with-scoped-class (class &rest forms)
+  "Set CLASS as the currently scoped class while executing FORMS."
+  `(unwind-protect
+       (progn
+	 (push ,class eieio--scoped-class-stack)
+	 ,@forms)
+     (pop eieio--scoped-class-stack)))
+(put 'eieio--with-scoped-class 'lisp-indent-function 1)
+
+;;;
 ;; Field Accessors
 ;;
 (defmacro eieio--define-field-accessors (prefix fields)
@@ -450,7 +476,7 @@ See `defclass' for more information."
 		    (setf (eieio--class-children (class-v (car pname)))
 			  (cons cname (eieio--class-children (class-v (car pname))))))
 		  ;; Get custom groups, and store them into our local copy.
-		  (mapc (lambda (g) (add-to-list 'groups g))
+		  (mapc (lambda (g) (pushnew g groups :test #'equal))
 			(class-option (car pname) :custom-groups))
 		  ;; save parent in child
 		  (setf (eieio--class-parent newc) (cons (car pname) (eieio--class-parent newc))))
@@ -629,7 +655,7 @@ See `defclass' for more information."
 			     prot initarg alloc 'defaultoverride skip-nil)
 
 	;; We need to id the group, and store them in a group list attribute.
-	(mapc (lambda (cg) (add-to-list 'groups cg)) customg)
+	(mapc (lambda (cg) (pushnew cg groups :test 'equal)) customg)
 
 	;; Anyone can have an accessor function.  This creates a function
 	;; of the specified name, and also performs a `defsetf' if applicable
@@ -764,8 +790,7 @@ See `defclass' for more information."
     ;; Save the file location where this class is defined.
     (let ((fname (if load-in-progress
 		     load-file-name
-		   buffer-file-name))
-	  loc)
+		   buffer-file-name)))
       (when fname
 	(when (string-match "\\.elc\\'" fname)
 	  (setq fname (substring fname 0 (1- (length fname)))))
@@ -773,7 +798,7 @@ See `defclass' for more information."
 
     ;; We have a list of custom groups.  Store them into the options.
     (let ((g (class-option-assoc options :custom-groups)))
-      (mapc (lambda (cg) (add-to-list 'g cg)) groups)
+      (mapc (lambda (cg) (pushnew cg g :test 'equal)) groups)
       (if (memq :custom-groups options)
 	  (setcar (cdr (memq :custom-groups options)) g)
 	(setq options (cons :custom-groups (cons g options)))))
@@ -1192,15 +1217,15 @@ IMPL is the symbol holding the method implementation."
 
 	    ;; It is ok, do the call.
 	    ;; Fill in inter-call variables then evaluate the method.
-	    (let ((scoped-class ',class)
-		  (eieio-generic-call-next-method-list nil)
+	    (let ((eieio-generic-call-next-method-list nil)
 		  (eieio-generic-call-key method-primary)
 		  (eieio-generic-call-methodname ',method)
 		  (eieio-generic-call-arglst local-args)
 		  )
-	      ,(if (< emacs-major-version 24)
-		  `(apply ,(list 'quote impl) local-args)
-		`(apply #',impl local-args))
+	      (eieio--with-scoped-class ',class
+		,(if (< emacs-major-version 24)
+		     `(apply ,(list 'quote impl) local-args)
+		   `(apply #',impl local-args)))
 	      ;(,impl local-args)
 	      )))))))
 
@@ -1445,33 +1470,33 @@ Fills in OBJ's SLOT with VALUE."
 Fills in the default value in CLASS' in SLOT with VALUE."
   (eieio--check-type class-p class)
   (eieio--check-type symbolp slot)
-  (let* ((scoped-class class)
-	 (c (eieio-slot-name-index class nil slot)))
-    (if (not c)
-	;; It might be missing because it is a :class allocated slot.
-	;; Let's check that info out.
-	(if (setq c (eieio-class-slot-name-index class slot))
-	    (progn
-	      ;; Oref that slot.
-	      (eieio-validate-class-slot-value class c value slot)
-	      (aset (eieio--class-class-allocation-values (class-v class)) c
-		    value))
-	  (signal 'invalid-slot-name (list (eieio-class-name class) slot)))
-      (eieio-validate-slot-value class c value slot)
-      ;; Set this into the storage for defaults.
-      (setcar (nthcdr (- c 3) (eieio--class-public-d (class-v class)))
-	      value)
-      ;; Take the value, and put it into our cache object.
-      (eieio-oset (eieio--class-default-object-cache (class-v class))
-		  slot value)
-      )))
+  (eieio--with-scoped-class class
+    (let* ((c (eieio-slot-name-index class nil slot)))
+      (if (not c)
+	  ;; It might be missing because it is a :class allocated slot.
+	  ;; Let's check that info out.
+	  (if (setq c (eieio-class-slot-name-index class slot))
+	      (progn
+		;; Oref that slot.
+		(eieio-validate-class-slot-value class c value slot)
+		(aset (eieio--class-class-allocation-values (class-v class)) c
+		      value))
+	    (signal 'invalid-slot-name (list (eieio-class-name class) slot)))
+	(eieio-validate-slot-value class c value slot)
+	;; Set this into the storage for defaults.
+	(setcar (nthcdr (- c 3) (eieio--class-public-d (class-v class)))
+		value)
+	;; Take the value, and put it into our cache object.
+	(eieio-oset (eieio--class-default-object-cache (class-v class))
+		    slot value)
+	))))
 
 
 ;;; EIEIO internal search functions
 ;;
 (defun eieio-slot-originating-class-p (start-class slot)
   "Return non-nil if START-CLASS is the first class to define SLOT.
-This is for testing if `scoped-class' is the class that defines SLOT
+This is for testing if the class currently in scope is the class that defines SLOT
 so that we can protect private slots."
   (let ((par (eieio-class-parents-fast start-class))
 	(ret t))
@@ -1489,7 +1514,7 @@ so that we can protect private slots."
 The slot is a symbol which is installed in CLASS by the `defclass'
 call.  OBJ can be nil, but if it is an object, and the slot in question
 is protected, access will be allowed if OBJ is a child of the currently
-`scoped-class'.
+scoped class.
 If SLOT is the value created with :initarg instead,
 reverse-lookup that name, and recurse with the associated slot value."
   ;; Removed checks to outside this call
@@ -1501,14 +1526,14 @@ reverse-lookup that name, and recurse with the associated slot value."
 	 ((not (get fsym 'protection))
 	  (+ 3 fsi))
 	 ((and (eq (get fsym 'protection) 'protected)
-	       (bound-and-true-p scoped-class)
-	       (or (child-of-class-p class scoped-class)
+	       (eieio--scoped-class)
+	       (or (child-of-class-p class (eieio--scoped-class))
 		   (and (eieio-object-p obj)
 			(child-of-class-p class (eieio--object-class obj)))))
 	  (+ 3 fsi))
 	 ((and (eq (get fsym 'protection) 'private)
-	       (or (and (bound-and-true-p scoped-class)
-			(eieio-slot-originating-class-p scoped-class slot))
+	       (or (and (eieio--scoped-class)
+			(eieio-slot-originating-class-p (eieio--scoped-class) slot))
 		   eieio-initializing-object))
 	  (+ 3 fsi))
 	 (t nil))
@@ -1539,14 +1564,14 @@ reverse-lookup that name, and recurse with the associated slot value."
 If SET-ALL is non-nil, then when a default is nil, that value is
 reset.  If SET-ALL is nil, the slots are only reset if the default is
 not nil."
-  (let ((scoped-class (eieio--object-class obj))
-	(eieio-initializing-object t)
-	(pub (eieio--class-public-a (class-v (eieio--object-class obj)))))
-    (while pub
-      (let ((df (eieio-oref-default obj (car pub))))
-	(if (or df set-all)
-	    (eieio-oset obj (car pub) df)))
-      (setq pub (cdr pub)))))
+  (eieio--with-scoped-class (eieio--object-class obj)
+    (let ((eieio-initializing-object t)
+	  (pub (eieio--class-public-a (class-v (eieio--object-class obj)))))
+      (while pub
+	(let ((df (eieio-oref-default obj (car pub))))
+	  (if (or df set-all)
+	      (eieio-oset obj (car pub) df)))
+	(setq pub (cdr pub))))))
 
 (defun eieio-initarg-to-attribute (class initarg)
   "For CLASS, convert INITARG to the actual attribute name.
@@ -1817,23 +1842,23 @@ This should only be called from a generic function."
     (let ((rval nil) (lastval nil) (rvalever nil) (found nil))
       (while lambdas
 	(if (car lambdas)
-	    (let* ((scoped-class (cdr (car lambdas)))
-		   (eieio-generic-call-key (car keys))
-		   (has-return-val
-		    (or (= eieio-generic-call-key method-primary)
-			(= eieio-generic-call-key method-static)))
-		   (eieio-generic-call-next-method-list
-		    ;; Use the cdr, as the first element is the fcn
-		    ;; we are calling right now.
-		    (when has-return-val (cdr primarymethodlist)))
-		   )
-	      (setq found t)
-	      ;;(setq rval (apply (car (car lambdas)) newargs))
-	      (setq lastval (apply (car (car lambdas)) newargs))
-	      (when has-return-val
-	      	(setq rval lastval
-	      	      rvalever t))
-	      ))
+	    (eieio--with-scoped-class (cdr (car lambdas))
+	      (let* ((eieio-generic-call-key (car keys))
+		     (has-return-val
+		      (or (= eieio-generic-call-key method-primary)
+			  (= eieio-generic-call-key method-static)))
+		     (eieio-generic-call-next-method-list
+		      ;; Use the cdr, as the first element is the fcn
+		      ;; we are calling right now.
+		      (when has-return-val (cdr primarymethodlist)))
+		     )
+		(setq found t)
+		;;(setq rval (apply (car (car lambdas)) newargs))
+		(setq lastval (apply (car (car lambdas)) newargs))
+		(when has-return-val
+		  (setq rval lastval
+			rvalever t))
+		)))
 	(setq lambdas (cdr lambdas)
 	      keys (cdr keys)))
       (if (not found)
@@ -1894,37 +1919,37 @@ for this common case to improve performance."
 
     ;; Now loop through all occurrences forms which we must execute
     ;; (which are happily sorted now) and execute them all!
-    (let* ((rval nil) (lastval nil) (rvalever nil)
-	   (scoped-class (cdr lambdas))
-	   (eieio-generic-call-key method-primary)
-	   ;; Use the cdr, as the first element is the fcn
-	   ;; we are calling right now.
-	   (eieio-generic-call-next-method-list (cdr primarymethodlist))
-	   )
+    (eieio--with-scoped-class (cdr lambdas)
+      (let* ((rval nil) (lastval nil) (rvalever nil)
+	     (eieio-generic-call-key method-primary)
+	     ;; Use the cdr, as the first element is the fcn
+	     ;; we are calling right now.
+	     (eieio-generic-call-next-method-list (cdr primarymethodlist))
+	     )
 
-      (if (or (not lambdas) (not (car lambdas)))
+	(if (or (not lambdas) (not (car lambdas)))
 
-	  ;; No methods found for this impl...
-	  (if (eieio-object-p (car args))
-	      (setq rval (apply 'no-applicable-method (car args) method args)
-		    rvalever t)
-	    (signal
-	     'no-method-definition
-	     (list method args)))
+	    ;; No methods found for this impl...
+	    (if (eieio-object-p (car args))
+		(setq rval (apply 'no-applicable-method (car args) method args)
+		      rvalever t)
+	      (signal
+	       'no-method-definition
+	       (list method args)))
 
-	;; Do the regular implementation here.
+	  ;; Do the regular implementation here.
 
-	(run-hook-with-args 'eieio-pre-method-execution-functions
-			    lambdas)
+	  (run-hook-with-args 'eieio-pre-method-execution-functions
+			      lambdas)
 
-	(setq lastval (apply (car lambdas) newargs))
-	(setq rval lastval
-	      rvalever t)
-	)
+	  (setq lastval (apply (car lambdas) newargs))
+	  (setq rval lastval
+		rvalever t)
+	  )
 
-      ;; Right Here... it could be that lastval is returned when
-      ;; rvalever is nil.  Is that right?
-      rval)))
+	;; Right Here... it could be that lastval is returned when
+	;; rvalever is nil.  Is that right?
+	rval))))
 
 (defun eieiomt-method-list (method key class)
   "Return an alist list of methods lambdas.
@@ -2029,8 +2054,7 @@ CLASS is the class this method is associated with."
 	(when (string-match "\\.elc$" fname)
 	  (setq fname (substring fname 0 (1- (length fname)))))
 	(setq loc (get method-name 'method-locations))
-	(add-to-list 'loc
-		     (list class fname))
+	(pushnew (list class fname) loc :test 'equal)
 	(put method-name 'method-locations loc)))
     ;; Now optimize the entire obarray
     (if (< key method-num-lists)
