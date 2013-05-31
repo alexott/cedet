@@ -1,6 +1,6 @@
 ;;; ede/android.el --- Support Android code projects
 ;;
-;; Copyright (C) 2011, 2012 Eric M. Ludlam
+;; Copyright (C) 2011, 2012, 2013 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;;
@@ -26,11 +26,8 @@
 (require 'cedet-android)
 (require 'ede)
 (require 'semantic/analyze)
-
-(eval-when-compile
-  (require 'sgml-mode)
-  ;; Not available in Emacs 22
-  (require 'nxml-mode nil t))
+(require 'sgml-mode)
+(require 'nxml-mode nil t)
 
 ;;; Code:
 (defvar ede-android-project-list nil
@@ -143,13 +140,16 @@ All directories with filesshould have at least one target.")
 ;;;###autoload
 (defclass ede-android-project (ede-project eieio-instance-tracker)
   ((tracking-symbol :initform 'ede-android-project-list)
-   (keybindings :initform (("S" . ede-android-visit-strings)))
+   (keybindings :initform (("S" . ede-android-visit-strings)
+			   ("U" . ede-android-install)))
    (menu :initform
 	 (
+	  [ "Upload/Install to Device" ede-android-install ]
+	  [ "Start Debug Proxy (DDMS)" cedet-android-start-ddms ]
+	  "---"
 	  [ "Visit strings.xml" ede-android-visit-strings ]
 	  [ "Edit Projectfile" ede-edit-file-target
 	    (ede-buffer-belongs-to-project-p) ]
-	  [ "Start Debug Proxy (DDMS)" cedet-android-start-ddms ]
 	  "--"
 	  [ "Update Version" ede-update-version ede-object ]
 	  [ "Version Control Status" ede-vc-project-directory ede-object ]
@@ -180,7 +180,7 @@ All directories with filesshould have at least one target.")
     (oset this :targets nil))
   ;; In case the defaults change, force the known configurations
   ;; of android to be setup here.
-  (oset this configurations '("debug" "install" "release"))
+  (oset this configurations '("debug" "release" "instrument"))
   (oset this configuration-default "debug")
   ;; If our manifest file doesn't exist, then the user has called
   ;; ede-new, and we need to call android to fill in our template directory.
@@ -324,13 +324,22 @@ For Android projects, look to the SDK android.jar."
   ;; @TODO - does the local project get some libs or jars or something?
   (list (cedet-android-sdk-jar)))
 
+;;; Extra Compile Commands
+;;
+(defun ede-android-install ()
+  "Compile the current project, and install the result to a device.
+Uses an active configuration and adds the INSTALL target."
+  (interactive)
+  (project-compile-project (ede-current-project) " install"))
+
 ;;; Basic Compile/Debug Commands
 ;;
 (defmethod project-compile-project ((proj ede-android-project) &optional command)
   "Compile the Android project with ant.
 Argument COMMAND is the command to use when compiling."
   (let ((default-directory (ede-project-root-directory proj)))
-    (compile (concat "ant clean " (oref proj configuration-default)))))
+    (compile (concat "ant clean " (oref proj configuration-default)
+		     (or command "")))))
   
 (defmethod project-compile-target ((proj ede-android-target-java) &optional command)
   "Compile the current Android java target with ant on the project.

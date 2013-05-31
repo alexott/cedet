@@ -35,17 +35,11 @@
 ;;; History:
 ;;
 
-(require 'semantic)
-(require 'semantic/bovine)
 (require 'semantic/bovine/f90-by)
-(require 'semantic/find)
+(require 'semantic/ctxt)
 (require 'semantic/decorate/mode)
-(require 'backquote)
 
 (eval-when-compile
-  (require 'mode-local)
-  (require 'semantic/ctxt)
-  (require 'semantic/decorate)
   (require 'semantic/dep)
   (require 'f90))
 
@@ -527,9 +521,10 @@ A Component is a part of TAG which itself may be a TAG."
 (defun semantic-default-f90-setup ()
   "Set up a buffer for semantic parsing of the F90 language."
   (semantic-f90-by--install-parser)
-  (modify-syntax-entry ?%  "."  f90-mode-syntax-table)
-  (modify-syntax-entry ?>  "."  f90-mode-syntax-table)
-  (modify-syntax-entry ?&  " "  f90-mode-syntax-table)
+  (setq semantic-lex-syntax-modifications
+	'((?% ".")
+	  (?> ".")
+	  (?& ".")))
   ;; Commented out lines below are generally considered optional
   ;; See the Emacs Doc for the symbols used below
   (setq semantic-symbol->name-assoc-list '( (variable . "Variables")

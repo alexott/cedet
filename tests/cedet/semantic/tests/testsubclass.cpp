@@ -95,11 +95,11 @@ moose deer::alces::createMoose()
 
   doLatinStuff(MooseVariableName);
   
-  tmp = this.f// -1-
+  tmp = this->f// -1-
     // #1# ( "fAlcesBool" "fIsValid" "fLatin" )
     ;
 
-  itmp = this.f// -2-
+  itmp = this->f// -2-
     // #2# ( "fAlcesInt" "fGreek" "fIsProtectedInt" )
     ;
 
@@ -210,21 +210,21 @@ int otherFunction()
 
 bool sneaky::antelope::testAccess() //^7^
 {
-  this.// -12-
+  this->// -12-
     // #12# ( "fAntyPrivate" "fAntyProtected" "fAntyPublic" "fQuadProtected" "fQuadPublic" "testAccess" )
     ;
 }
 
 bool sneaky::jackalope::testAccess() //^8^
 {
-  this.// -13-
+  this->// -13-
     // #13# ( "fBunnyPrivate" "fBunnyProtected" "fBunnyPublic" "fQuadProtected" "fQuadPublic" "testAccess" )
     ;
 }
 
 bool sneaky::bugalope::testAccess() //^9^
 {
-  this.// -14-
+  this->// -14-
     // #14# ( "fBugPrivate" "fBugProtected" "fBugPublic" "fQuadPublic" "testAccess" )
     ;
 }
@@ -239,3 +239,13 @@ namespace deer {
   }
 }
 
+// Test 'this' in inline methods
+// See rev. 8488f.
+class outer {
+  int asdf;
+  int qwer;
+  char inlineMethod(void) {
+    this->// -16-
+      // #16# ( "asdf" "inlineMethod" "qwer" )
+  }
+};

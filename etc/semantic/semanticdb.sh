@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # semanticdb.sh --- Build a semantic cache for input arguments
 #
 # Copyright (C) 2002, 2004 Eric M. Ludlam
@@ -30,29 +30,29 @@
 # a tool that accesses database files without having to visit all the files, 
 # however, you should use this script BEFORE starting Emacs.
 #
+# If you move this script from its original location, you have to set
+# CEDET_PATH to the CEDET directory.
 
-if [ -z "$SEMANTIC_PATH" ]; then
-    # Use reverse sort to sneakilly get the most recent version number.
-    shopt -s nullglob
-    # The extra * allow the shell to strip out junk
-    files=`ls -d ~/lisp/cedet/semantic*/ ~/lisp/cedet-*/semantic/ ~/cedet/semantic*/ ~/cedet-*/semantic/`
-    for i in $files; do
-        if [ -d $i ]; then
-          loadpath=$i
-        fi
-    done
+if [ -z "$1" ]; then
+    echo "Usage: `basename $0` list-of-files+"
+    exit 1
+fi
+
+if [ -z "$CEDET_PATH" ]; then
+    echo CEDET_PATH not set. Guessing path from script source.
+    loadpath="$( cd "$( dirname "${BASH_SOURCE[0]}" )/../.." && pwd )"
 else
     loadpath="$SEMANTIC_PATH"
 fi
 
-if [ -z "$SEMANTIC_EMACS" ]; then
+echo Using CEDET path $loadpath
+
+if [ -z "$EMACS" ]; then
     emacs="emacs"
 else
-    emacs="$SEMANTIC_EMACS"
+    emacs="$EMACS"
 fi
 
-files=$*
-
-exec $emacs -batch -l "${loadpath}/semantic/db-mk.el" $files
+exec $emacs -batch -l "${loadpath}/lisp/cedet/semantic/db-mk.el" $*
 
 #end

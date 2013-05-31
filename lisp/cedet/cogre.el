@@ -1,11 +1,11 @@
 ;;; cogre.el --- COnnected GRaph Editor for Emacs
 
-;;; Copyright (C) 2001, 2002, 2003, 2005, 2007, 2008, 2009, 2010, 2012 Eric M. Ludlam
+;;; Copyright (C) 2001, 2002, 2003, 2005, 2007, 2008, 2009, 2010, 2012, 2013 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: graph, oop, extensions, outlines
 
-(defvar cogre-version "1.1"
+(defvar cogre-version "1.2"
   "Current version of Cogre.")
 
 ;; This file is not part of GNU Emacs.
@@ -40,11 +40,9 @@
 (require 'eieio-base)
 (require 'eieio-custom)
 (require 'semantic)
+(require 'cogre/picture-hack)
 
 (declare-function cogre-mode "cogre/mode")
-
-(eval-when-compile
-  (require 'cogre/picture-hack))
 
 ;;; Code:
 
@@ -334,7 +332,6 @@ Optional argument GRAPH-CLASS indicates the type of graph to create."
 		    (cogre-base-graph name :name name))))
     (setq cogre-graph newgraph)
     ;;(toggle-read-only 1)
-    (require 'cogre/mode)
     (cogre-mode)
     ))
 
@@ -497,7 +494,6 @@ Returns a list of return values from each call of function."
 This could be as simple as displaying the current state,
 customizing the object, or performing some complex task."
   (let ((b (current-buffer)))
-    (require 'eieio-custom)
     (customize-object element)
     (setq cogre-custom-originating-graph-buffer b))
   )
@@ -561,7 +557,7 @@ If GRAPH is nil, use the current graph."
   "Initialize ELT's name before the main FIELDS are initialized."
   (unless cogre-loading-from-file
     (let ((n (oref elt name-default)))
-      (object-set-name-string elt n)))
+      (eieio-object-set-name-string elt n)))
   (call-next-method))
 
 (defmethod initialize-instance :AFTER ((elt cogre-graph-element) fields)

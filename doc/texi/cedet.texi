@@ -15,7 +15,7 @@
 @copying
 This manual documents @cedet{}, a collection of other tools.
 
-Copyright @copyright{} 2007, 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
+Copyright @copyright{} 2007, 2008, 2009, 2010, 2011, 2012, 2013 Eric M. Ludlam
 
 @quotation
 Permission is granted to copy, distribute and/or modify this document
@@ -199,11 +199,8 @@ which allows easy creation of dialog box style UIs.  A series of base
 classes allows the creation of Emacs centric tools, wrapping up the
 details of persistence, instance tracking, or instance inheritance.
 
-@eieio{} also includes several stray tools, such as @file{tree.el}
-for drawing tree diagrams, @file{chart.el} for drawing charts,
-@file{linemark.el} for managing visible bookmarks programatically, and
-@file{lmcompile.el}, which is a linemark tool that puts out bookmarks
-for compiler error hits.
+@eieio{} also includes an example tool, @file{chart.el} for drawing
+simple charts.
 
 Lastly, @eieio{} has baseclasses for writing @speedbar{} interfaces.
 Take an existing object hierarchy and inherit from these baseclasses
@@ -335,27 +332,11 @@ Some of the libraries are:
 @itemize @file
 @item cedet-edebug.el
 Collection of extensions to support custom @cedet{} datatypes.
-@item ezimage.el
-Support for covering text in an Emacs buffer with an image.  This is
-based on text patterns, and is portable across most versions of Emacs
-and XEmacs.
-
-Using ezimage allows you to write a text based UI, and then enhance it
-with images afterwards, allowing your UI to work well in a text
-frame, in addition to looking pretty spiff in a graphical frame.
 @item pulse.el
 Simple way to briefly highlight a region or line.  For Emacs 22, it
 will pulse the line, with the color drifting from one shade to
 another.  For older versions Emacs, it will just highlight the line
 briefly.
-@item fame.el
-Support for @code{message} channels, allowing a program to provide a
-wide range of messages, and allowing a user to configure which set
-they want to see.
-@item inversion.el
-Revision management system.  Allows you to use @code{require} syntax
-for a specific version of some tool.  If the tool is not compatible
-with your desired version, a signal is thrown.
 @item mode-local.el
 Specify functions that have different behaviors based on major-mode,
 or variables with different local values based on major mode.  Setting
@@ -367,69 +348,24 @@ inherits some C configurations.  You can also run code, or access
 variables from other modes by with a temorary scoped setting.
 
 mode local is used extensively throughout the @semantic{} package.
-@item pprint.el
-A pretty printer for Emacs Lisp code.  Use it to dump out large
-complex datastructures.
-@item sformat.el
-A Super Format function.  Define lists of associations between letters
-and values, and then create format strings with % tokens for any
-letter.
-
-sformat is used in the semantic document package to construct complex
-documentation strings.
-@item working.el
-Display a working message, or a ``percentage done'' style bar in the
-mini-buffer.  Tasks that take a long time can use working to provide
-user feedback explaining a delay.
 @end itemize
 
 @node Installation/Basic Configuration
 @chapter Installation and Basic Configuration
 
-A compilation centric version of the @cedet{} installation is in the
-INSTALL file in the top level @cedet{} directory.
+If your are compiling @cedet{} from the cedet bzr repository on
+sourceforge, please see the INSTALL file in the repository for
+directions to overriding the CEDET that comes with Emacs with the
+development version.
+
+If you want to use the version of CEDET that comes with Emacs, then
+move on to the next section.
 
 @enumerate
-@item Compile @cedet{}
-
-@example
-make
-@end example
-
-or 
-
-@example
-make EMACS=<your favorite emacs>
-@end example
-
-CEDET is designed to be used `in-place' so you do not have to call
-`make install' afterwards.
-
-If you do not have @code{make} installed on your system, or if you
-cannot get the @file{Makefile}s to work, then you can use the all
-Emacs solution in @file{cedet-build.el} which is found in the
-toplevel @cedet directory.
-
-Read the Commentary section of @file{cedet-build.el} for details on
-using this method.
-
-@item Install .emacs hooks
-
-Load @cedet{} in your @file{.emacs} file.  You do not need to install
-all of cedet into any magic Emacs controlled directories, or modify
-your loadpath.  The @cedet{} bootstrap file will automatically update
-your load path, and load all the autoload files.  The cedet
-configuration will load a minimum set of files in.
-
-@example
-;; Load CEDET
-(load-file "~/cedet-VERSION/cedet-devel-load.el")
-@end example
-
 @item Configuration
 
-Here is a very basic setup for your @file{.emacs} file.  Add this
-after loading @file{cedet-devel-load.el}.
+To turn on basic Semantic parsing of your files and several
+development modes, you can use this configuration:
 
 @example
 ;; Add further minor-modes to be enabled by semantic-mode.
@@ -446,9 +382,9 @@ after loading @file{cedet-devel-load.el}.
 (global-ede-mode 1)
 @end example
 
-You will likely need to configure @cedet{} to your application.  Visit
-the other chapters in this manual for samples to get some ideas on
-possible configuration scenarios.
+You will likely need to configure @cedet{} to your specific use.
+Visit the other chapters in this manual for samples to get some ideas
+on possible configuration scenarios.
 
 @item Contribute to @cedet{}
 
@@ -530,6 +466,7 @@ In addition to the basic @cedet{} configuration, you will likely want to
 add the following Semantic configuration to your @file{.emacs} file.
 
 @example
+(require 'semantic/canned-configs)
 (semantic-load-enable-minimum-features)
 @end example
 
@@ -540,12 +477,14 @@ If you would like to use more of the Semantic tools for your coding in
 Java, you may want to enable this instead:
 
 @example
+(require 'semantic/canned-configs)
 (semantic-load-enable-code-helpers)
 @end example
 
 or the fancier
 
 @example
+(require 'semantic/canned-configs)
 (semantic-load-enable-guady-code-helpers)
 @end example
 
@@ -582,12 +521,14 @@ In addition to the basic @cedet{} configuration, you will likely want to
 add the following Semantic configuration to your @file{.emacs} file.
 
 @example
+(require 'semantic/canned-configs)
 (semantic-load-enable-code-helpers)
 @end example
 
 or the fancier
 
 @example
+(require 'semantic/canned-configs)
 (semantic-load-enable-guady-code-helpers)
 @end example
 
@@ -631,6 +572,7 @@ want to add the following @semantic{} configuration to your
 @file{.emacs} file.
 
 @example
+(require 'semantic/canned-configs)
 (semantic-load-enable-code-helpers)
 @end example
 
@@ -656,6 +598,7 @@ need to start by augmenting the basic @cedet{} install in your
 @file{.emacs} file with:
 
 @example
+(require 'semantic/canned-configs)
 (semantic-load-enable-code-helpers)
 @end example
 
@@ -663,6 +606,7 @@ Basic code helpers enable idle parsing and summary mode.  To get
 idle-completions mode, and some more decorative features, use:
 
 @example
+(require 'semantic/canned-configs)
 (semantic-load-enable-guady-code-helpers)
 @end example
 

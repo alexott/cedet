@@ -1,10 +1,10 @@
 ;;; cedet-contrib.el --- Setup CEDET's contrib environment
 
-;;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2012 Eric Ludlam
+;;; Copyright (C) 2004, 2005, 2006, 2007, 2008, 2009, 2010, 2012, 2013 Eric Ludlam
 
 ;; Author: Eric Ludlam <zappo@gnu.org>
 
-(defvar cedet-contrib-version "1.1"
+(defvar cedet-contrib-version "1.2"
   "Current version of contributed libraries.")
 
 ;; CEDET is free software; you can redistribute it and/or modify

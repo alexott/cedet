@@ -134,6 +134,8 @@ DOT is a part of GraphVis."
       (find-file fname))
     ))
 
+(declare-function ps-do-despool "ps-print")
+
 ;;;###autoload
 (defun cogre-export-dot-postscript-print ()
   "Print the current graph.
@@ -141,6 +143,7 @@ This is done by exporting the current COGRE graph to DOT, then
 convert that to Postscript before printing.
 DOT is a part of GraphVis."
   (interactive)
+  (require 'ps-print)
   ;; Make sure things are installed ok.
   (cedet-graphviz-dot-version-check)
   ;; Run dot to create the file.  The graph was already

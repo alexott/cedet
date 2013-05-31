@@ -35,8 +35,8 @@
 	 (class (object-class original))
 	 (fromdisk (eieio-persistent-read file class))
 	 (cv (class-v class))
-	 (slot-names  (aref cv class-public-a))
-	 (slot-deflt  (aref cv class-public-d))
+	 (slot-names  (eieio--class-public-a cv))
+	 (slot-deflt  (eieio--class-public-d cv))
 	 )
     (unless (object-of-class-p fromdisk class)
       (error "Persistent class %S != original class %S"

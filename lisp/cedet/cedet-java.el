@@ -197,74 +197,97 @@ Examples:
   :group 'java
   :type 'string)
 
-(defun cedet-java-find-jdk ()
+(defvar cedet-java-core-jar-name (if (eq system-type 'darwin)
+				     "Contents/Classes/classes.jar"
+				   (concat (file-name-as-directory
+					    (concat (file-name-as-directory "jre") "lib"))
+					   "rt.jar"))
+  "Name of Java core jar file.
+File name is rt.jar on Linux & Windows, and classes.jar on Mac OS X")
+
+(defun cedet-java-create-rt-file-name (path)
+  "Constructs name for file with core libraries, depending on operating system."
+  (when (stringp path)
+    (concat (file-name-as-directory path) cedet-java-core-jar-name)))
+
+(defun cedet-java-check-symlinks (fname)
+  "Tries to find JAVA_HOME using information from symlinks (Linux & Mac OS X)"
+  (when (and (stringp fname) (file-exists-p fname) (file-symlink-p fname))
+    (let* ((full-name (file-chase-links fname))
+	   (old-cfs case-fold-search)
+	   (case-fold-search t)
+	   (pos (string-match "/bin/java$" full-name))
+	   (rt-name (when pos (cedet-java-create-rt-file-name
+			       (substring full-name 0 pos)))))
+      (setq case-fold-search old-cfs)
+      rt-name)))
+
+(defun cedet-java-try-to-list-jdk-dirs (basedirs all-res)
+  "Searches for JDKs in specified directories (basedirs) and using specified regexes (all-res)"
+  (let (rt-path
+	(bdirs (copy-sequence basedirs)))
+    (while (and (null rt-path) (not (null bdirs)))
+      (when (file-exists-p (car bdirs))
+	(let* ((res (copy-sequence all-res)))
+	  (while (and (null rt-path) (not (null res)))
+	    (let ((files (directory-files (car bdirs) t (car res))))
+	      (while (and (null rt-path) (not (null files)))
+		(when (and (car files) (file-directory-p (car files)))
+		  (let ((fname (cedet-java-create-rt-file-name (car files))))
+		    (when (and fname (file-exists-p fname))
+		      (setq rt-path fname))))
+		(setq files (cdr files))))
+	    (setq res (cdr res)))))
+      (setq bdirs (cdr bdirs)))
+    rt-path))
+
+(defvar cedet-java-jdk-core-jar nil
+  "Variable to cache calculated JDK core jar.")
+
+(defun cedet-java-find-jdk-core-jar ()
   "Return the location of the JDK core .jar file."
-  (let ((javahome (getenv "JAVA_HOME"))
-	)
-    (cond
+  (if cedet-java-jdk-core-jar
+      cedet-java-jdk-core-jar
+      (let* (rt-path
+	     (funcs (list
+		     (lambda () (cedet-java-create-rt-file-name cedet-java-jdk-root))
+		     (lambda () (cedet-java-create-rt-file-name (getenv "JAVA_HOME")))
+		     (lambda () (cedet-java-create-rt-file-name (getenv "JDK_HOME")))
+		     (lambda () (cedet-java-check-symlinks "/etc/alternatives/java"))
+		     (lambda () (cedet-java-check-symlinks "/usr/bin/java"))
+		     ;; Linux...
+		     (lambda () (cedet-java-try-to-list-jdk-dirs '("/usr/lib/jvm" "/usr/local/lib/jvm")
+								 '("default-java" ".*sun.*" ".*jdk.*" ".*gcj.*")))
+		     ;; Mac OS X
+		     (lambda () (cedet-java-try-to-list-jdk-dirs '("/Library/Java/JavaVirtualMachines/"
+								   "/System/Library/Java/JavaVirtualMachines/")
+								 '(".*[jJ][dD][kK].*")))
+		     ;; TODO: Check Windows (How it will behave on Non-English Windows?)
+		     ;; TODO: can we get default paths via env variables?
+		     (lambda () (cedet-java-try-to-list-jdk-dirs '("c:/program files/java/")
+								 '(".*jdk.*" ".*jre.*")))
+		     )))
+	(while (and (null rt-path) funcs)
+	  (let* ((func (car funcs))
+		 (rp (when (and func (functionp func))
+		       (funcall func))))
+	    (when (and rp (stringp rp) (file-exists-p rp))
+	      (setq rt-path rp))
+	    (setq funcs (cdr funcs))))
+	(setq cedet-java-jdk-core-jar rt-path)
+	rt-path)))
 
-     ;; User specified.
-     (cedet-java-jdk-root
-      (expand-file-name "jre/lib/rt.jar" cedet-java-jdk-root))
-
-     ;; WITH ORACLE Environment Variable
-     (javahome
-      (expand-file-name "jre/lib/rt.jar" javahome))
-
-     ;; MACOS
-     ((eq system-type 'darwin)
-      (let* ((libtmp "/Library/Java/JavaVirtualMachines/")
-	     (libtmpb  (expand-file-name "JDK" libtmp))
-	     (lib (if (file-exists-p libtmpb) libtmpb libtmp))
-	     (file "Contents/Classes/classes.jar")
-	     (dirf (directory-files lib nil ".jdk" nil)))
-	;; The first match in dirf is the oldest (alpha sort = oldest # first)
-	(expand-file-name file (expand-file-name (car (last dirf)) lib))))
-     
-     ;; WINDOWS
-     ((eq system-type 'windows-nt)
-      (let* ((lib "c:/program files/java/jre/lib/")
-	     (file "rt.jar"))
-	;; The first match in dirf is the oldest (alpha sort = oldest # first)
-	(expand-file-name file lib)))
-      
-     ;; Misc Unix (tested on Linux)
-     ;; /usr/lib/jvm/java-6-sun/jre/lib/rt.jar
-     ;; /usr/lib/jvm/java-6-openjdk/jre/lib/rt.jar
-     (t
-      (let ((basedirs '("/usr/lib/jvm" "/usr/local/lib/jvm"))
-	    (dflt "default-java")
-	    (jdks '("sun" "openjdk" "gcj"))
-	    dirs
-	    (file "jre/lib/rt.jar")
-	    base jdk)
-	;; Find base dir
-	(while (and (not base) basedirs)
-	  (when (file-exists-p (car basedirs))
-	    (setq base (car basedirs))))
-	(catch 'nojdk
-	  ;; Find the right JDK to use.
-	  (if (file-exists-p (expand-file-name dflt base))
-	      (expand-file-name file (expand-file-name dflt base))
-	    (throw 'nojdk nil))
-	  ;; No magic default via OS.  Use directory-files.
-	  (while (and jdks (not jdk))
-	    ;; Should we call cedet-java-get-version, and use that in
-	    ;; our query???	    
-	    (setq dirs (directory-files base nil (car jdks) nil))
-	    (when (and dirs (file-exists-p (expand-file-name (car (last dirs)) base)))
-	      (setq jdk (car (last dirs)))))
-	  (unless jdk (throw 'nojdk nil))
-	  ;; Full expand
-	  (expand-file-name file (expand-file-name jdk base)))))
-     )))
+(defun cedet-java-find-jdk-home ()
+  "Return the location of the JDK HOME."
+  (let ((jdk-core-jar (cedet-java-find-jdk-core-jar)))
+    (when jdk-core-jar
+      (substring jdk-core-jar 0 (- (length jdk-core-jar) (length cedet-java-core-jar-name))))))
 
 (defun cedet-java-describe ()
   "Describe the discernable java environment."
   (interactive)
 
   (with-output-to-temp-buffer "*CEDET Java Environment*"
-
     (princ "CEDET Java Operational Environment:\n\n")
     (princ "Current Java Version: ")
     (princ (cedet-java-get-version))
@@ -295,8 +318,8 @@ Examples:
 	  (princ "\n"))))
 
     ;; JDK home
-    (princ "\n\nJava JDK core Jar file: \n  ")
-    (let ((jdkhome (cedet-java-find-jdk)))
+    (princ "\n\nJava JDK Core Jar File: \n  ")
+    (let ((jdkhome (cedet-java-find-jdk-core-jar)))
       (princ (or jdkhome "No JDK Found.
    Set cedet-java-jdk-root to a valid jdk root.\n")))
     ))

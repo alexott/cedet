@@ -4,7 +4,7 @@
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax tools
-;; Version: 2.0
+;; Version: 2.2
 
 ;; This file is part of GNU Emacs.
 
@@ -38,7 +38,7 @@
 (require 'semantic/tag)
 (require 'semantic/lex)
 
-(defvar semantic-version "2.1beta"
+(defvar semantic-version "2.2"
   "Current version of Semantic.")
 
 (declare-function inversion-test "inversion")
@@ -385,7 +385,7 @@ to use Semantic, and `semantic-init-hook' is run."
   "When non-nil, activate the interactive parsing debugger.
 Do not set this yourself.  Call `semantic-debug'.")
 
-(defun semantic-elapsed-time (start end)
+(defsubst semantic-elapsed-time (start end)
   "Copied from elp.el.  Was `elp-elapsed-time'.
 Arguments START and END bound the time being calculated."
   (float-time (time-subtract end start)))
@@ -469,11 +469,10 @@ unterminated syntax."
     (widen)
     (when (or (< end start) (> end (point-max)))
       (error "Invalid parse region bounds %S, %S" start end))
-    (nreverse
-     (semantic-repeat-parse-whole-stream
+    (semantic-repeat-parse-whole-stream
       (or (cdr (assq start semantic-lex-block-streams))
 	  (semantic-lex start end depth))
-      nonterminal returnonerror))))
+      nonterminal returnonerror)))
 
 ;;; Parsing functions
 ;;
@@ -759,7 +758,7 @@ This function returns semantic tags without overlays."
                                   tag 'reparse-symbol nonterm))
                              tag)
                          (semantic--tag-expand tag))
-                    result (append tag result))
+                    result (append result tag))
             ;; No error in this case, a purposeful nil means don't
             ;; store anything.
             )
@@ -903,7 +902,8 @@ Throw away all the old tags, and recreate the tag database."
     ;; and Semantic are both enabled.  Is there a better way?
     (define-key map [menu-bar cedet-menu]
       (list 'menu-item "Development" cedet-menu-map
-	    :enable (quote (not (bound-and-true-p global-ede-mode)))))
+	    :enable (quote (not (and menu-bar-mode
+				     (bound-and-true-p global-ede-mode))))))
     ;; (define-key km "-"    'senator-fold-tag)
     ;; (define-key km "+"    'senator-unfold-tag)
     map))
@@ -937,7 +937,8 @@ Throw away all the old tags, and recreate the tag database."
     '("--"))
   (define-key edit-menu [senator-yank-tag]
     '(menu-item "Yank Tag" senator-yank-tag
-		:enable (not (ring-empty-p senator-tag-ring))
+		:enable (and (boundp 'senator-tag-ring)
+			     (not (ring-empty-p senator-tag-ring)))
 		:help "Yank the head of the tag ring into the buffer"))
   (define-key edit-menu [senator-copy-tag-to-register]
     '(menu-item "Copy Tag To Register" senator-copy-tag-to-register

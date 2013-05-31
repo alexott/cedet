@@ -195,6 +195,10 @@ Buffer based features related to change hooks is handled one level up."
     ;; area.  Return value is not important.
     ))
 
+(declare-function data-debug-new-buffer "data-debug")
+(declare-function data-debug-insert-stuff-list "data-debug")
+(declare-function data-debug-insert-thing dictionary "data-debug")
+
 (defun srecode-insert-show-error-report (dictionary format &rest args)
   "Display an error report based on DICTIONARY, FORMAT and ARGS.
 This is intended to diagnose problems with failed template
@@ -805,7 +809,7 @@ Arguments ESCAPE-START and ESCAPE-END are the current escape sequences in use."
     (srecode-insert-report-error
      dict
      "Only section dictionaries allowed for `%s'"
-     (object-name-string sti)))
+     (eieio-object-name-string sti)))
 
   ;; Output the code from the sub-template.
   (srecode-insert-method (slot-value sti slot) dict))
@@ -862,7 +866,7 @@ Return the remains of INPUT."
   (let* ((out (srecode-compile-split-code tag input STATE
 					  (oref ins :object-name))))
     (oset ins template (srecode-template
-			(object-name-string ins)
+			(eieio-object-name-string ins)
 			:context nil
 			:args nil
 			:code (cdr out)))

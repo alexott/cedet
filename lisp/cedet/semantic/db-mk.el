@@ -30,23 +30,18 @@
 
 ;;; Code
 ;;
-(require 'semantic/db)
-
 (if (not noninteractive)
-    (error "You should not load semanticdb-mk interactivly."))
+    (error "You should not load semanticdb-mk interactively."))
 
-;; Find our source directory
-(let (fname semanticdir cedetdir loadfile)
+;; Load cedet-devel-load.el
+(load-file
+ (expand-file-name
+  "cedet-devel-load.el"
+  (concat
+   (file-name-directory load-file-name) "../../../")))
 
-  (setq fname load-file-name)
-  (setq semanticdir (file-name-directory fname))
-  (setq cedetdir (expand-file-name (concat semanticdir "../common/")))
-  (setq loadfile (concat cedetdir "cedet.el"))
-
-  (load-file loadfile))
-
-;; Turn on semanticdb
-(global-semanticdb-minor-mode 1)
+;; Activate Semantic
+(semantic-mode 1)
 
 ;; Process loaded buffers from the command line.
 (let ((args command-line-args))
@@ -68,11 +63,13 @@
 	(let* ((buffer (find-file-noselect (car args)))
 	       (tags nil))
 	  (set-buffer buffer)
-	  (setq tags (semantic-fetch-tags))
+	  (condition-case nil
+	      (setq tags (semantic-fetch-tags))
+	    (error nil))
 	  (princ (length tags))
-	  (princ " tags found .\n"))
-	(setq args (cdr args))))
-    ))
+	  (princ " tags found .\n")
+	  (kill-buffer buffer))
+	(setq args (cdr args))))))
 
 ;; Save the databases.
 (semanticdb-save-all-db)

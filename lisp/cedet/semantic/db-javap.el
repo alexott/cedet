@@ -85,10 +85,13 @@ including the current package onto the path.  See
       (let ((defaultpath (semanticdb-find-translate-path-includes-default path))
 	    (javapath (semanticdb-javap-dir-to-compound-table default-directory))
 	    ;; Any other packages w/ this name known in classpath or to EDE?
-	    (similarpath (semanticdb-javap-paths-for-package (current-buffer))))
+	    (similarpath (semanticdb-javap-paths-for-package (current-buffer)))
+            ;; Look for always accessible package - java.lang.*
+            (langpath (semanticdb-javap-paths-for-java-lang)))
 	;; If this is a dup, remove.
 	(setq similarpath (remq javapath similarpath))
-	(append defaultpath (list javapath) similarpath)
+	
+	(append (list langpath) defaultpath (list javapath) similarpath)
 	))))
 
 ;;; ANALYZER HACKS
@@ -229,11 +232,12 @@ and returning that tag instead."
   "Convert the FILE name into a tag.
 DB is the database or table with a proxy to place on the tag.
 Assume a file foo.java will become a class called foo."
-  (let* ((base (file-name-sans-extension (file-name-nondirectory file)))
-	 (tag (semantic-tag-new-type base "class" nil nil)))
-    (semantic--tag-put-property tag :packagedir (semanticdb-table-java-package db))
-    (semantic-tag-set-proxy tag (oref db :proxy) file)
-    tag))
+  (when (stringp file)
+    (let* ((base (file-name-sans-extension (file-name-nondirectory file)))
+	   (tag (semantic-tag-new-type base "class" nil nil)))
+      (semantic--tag-put-property tag :packagedir (semanticdb-table-java-package db))
+      (semantic-tag-set-proxy tag (oref db :proxy) file)
+      tag)))
 
 (defmethod semanticdb-find-tags-by-name-method ((table semanticdb-table-java-directory) name &optional tags)
   "In TABLE, find all occurrences of tags with NAME.
@@ -543,9 +547,14 @@ can find it as a string directly from our directory and jar files."
   (if (not (and (featurep 'semantic/db) semanticdb-current-database))
       nil ;; No DB, no search
     ;; Else, try a few things.
-    (or (semanticdb-typecache-find-default type path find-file-match)
-	(semanticdb-javap-typecache-find-by-include-hack
-	 type (or path semanticdb-current-table) find-file-match))))
+    (let ((lang-map (semanticdb-javap-get-java-lang-classes-map)))
+      (when (and lang-map (stringp type))
+	(setq type (gethash type lang-map type)))
+      (when (and lang-map (listp type))
+	(setq type (gethash (car type) lang-map type)))
+      (or (semanticdb-typecache-find-default type path find-file-match)
+	  (semanticdb-javap-typecache-find-by-include-hack
+	   type (or path semanticdb-current-table) find-file-match)))))
 
 (defun semanticdb-javap-typecache-find-by-include-hack (type &optional path find-file-match)
   "Search through java DIRECTORY databases for TYPE based on PATH.
@@ -665,12 +674,12 @@ tables of classes based on files, not files in a directory.
 DIR is a package name, such as 'java/net' which contains classes.
 We assume that java classes are rooted to be base of the jar file they
 are extracted from, so no prefixes are added."
-  (or
-   ;; Raw classes come in w/out the .class extension, so if there is an extension, remove it.
-   (object-assoc (concat (file-name-sans-extension dir) ".class") :filename (oref dbc tables))
-   ;; The dir may be a directory, so check that too.
-   (object-assoc dir :directory (oref dbc tables))))
-
+  (when (stringp dir)
+    (or
+     ;; Raw classes come in w/out the .class extension, so if there is an extension, remove it.
+     (object-assoc (concat (file-name-sans-extension dir) ".class") :filename (oref dbc tables))
+     ;; The dir may be a directory, so check that too.
+     (object-assoc dir :directory (oref dbc tables)))))
 
 (defmethod semanticdb-create-table ((db semanticdb-java-jar-database) dirorfile)
   "Create a new table in DB for DIR and return it.
@@ -679,61 +688,64 @@ creates tables of classes based on files, not files in a directory.
 The class of DB contains the class name for the type of table to create.
 If the table for DIR exists, return it.
 If the table for DIR does not exist, create one."
-  (let ((newtab (semanticdb-file-table db dirorfile)))
-    (unless newtab
-      (let ((matchingfiles (or (semanticdb-java-jar-package-files db dirorfile)
-			       (semanticdb-java-jar-package-one-file
-				db dirorfile)))
-	    (matchingpkg (semanticdb-java-jar-package-packages db dirorfile)))
-	(when matchingfiles
-	  ;; Only make a table if there are any matching files in it.
-	  (if (= (length matchingfiles) 1)
-	      ;; If there is only one table, create a jar-file table.
-	      (setq newtab (funcall (oref db new-table-class)
-				    (car matchingfiles)
-				    :filename (car matchingfiles)))
-	    ;; If there are multiple files, then we want a directory
-	    ;; The file extractor restricts itself to .class, so no dups?
-	    (setq newtab (funcall (oref db new-table-dir-class)
-				  dirorfile
-				  :directory dirorfile))
-	    (oset newtab filenamecache
-		  (mapcar 'file-name-nondirectory matchingfiles))
-	    (oset newtab packagenamecache matchingpkg)
-	    )
-	  (oset newtab parent-db db)
-	  (object-add-to-list db 'tables newtab t)
-	  )))
-    newtab))
+  (when (stringp dirorfile)
+    (let ((newtab (semanticdb-file-table db dirorfile)))
+      (unless newtab
+	(let ((matchingfiles (or (semanticdb-java-jar-package-files db dirorfile)
+				 (semanticdb-java-jar-package-one-file db dirorfile)))
+	      (matchingpkg (semanticdb-java-jar-package-packages db dirorfile)))
+	  (when matchingfiles
+	    ;; Only make a table if there are any matching files in it.
+	    (if (= (length matchingfiles) 1)
+		;; If there is only one table, create a jar-file table.
+		(setq newtab (funcall (oref db new-table-class)
+				      (car matchingfiles)
+				      :filename (car matchingfiles)))
+	      ;; If there are multiple files, then we want a directory
+	      ;; The file extractor restricts itself to .class, so no dups?
+	      (setq newtab (funcall (oref db new-table-dir-class)
+				    dirorfile
+				    :directory dirorfile))
+	      (oset newtab filenamecache
+		    (mapcar 'file-name-nondirectory matchingfiles))
+	      (oset newtab packagenamecache matchingpkg)
+	      )
+	    (oset newtab parent-db db)
+	    (object-add-to-list db 'tables newtab t)
+	    )))
+      newtab)))
 
 (defmethod semanticdb-java-jar-package-files ((dbc semanticdb-java-jar-database) dir)
   "Get the file class names from DBC that match DIR."
-  (setq dir (file-name-as-directory dir))
-  (let ((ans nil))
-    (dolist (F (oref dbc jarfilecache))
-      (when (string-match (concat "^" (regexp-quote dir) "[a-zA-Z_]*\\.class$")
-			  F)
-	(push F ans)))
-    (nreverse ans)))
+  (when (stringp dir)
+    (setq dir (file-name-as-directory dir))
+    (let ((ans nil))
+      (dolist (F (oref dbc jarfilecache))
+	(when (string-match (concat "^" (regexp-quote dir) "[a-zA-Z_]*\\.class$")
+			    F)
+	  (push F ans)))
+      (nreverse ans))))
 
 (defmethod semanticdb-java-jar-package-one-file ((dbc semanticdb-java-jar-database) file)
   "Get the file class names from DBC that match FILE.
 File should exclude an extension, as .class will be added."
-  (let ((ans nil))
-    (dolist (F (oref dbc jarfilecache))
-      (when (string-match (concat "^" (regexp-quote file) "\\.class$") F)
-	(push F ans)))
-    (nreverse ans)))
+  (when (stringp file)
+    (let ((ans nil))
+      (dolist (F (oref dbc jarfilecache))
+	(when (string-match (concat "^" (regexp-quote file) "\\.class$") F)
+	  (push F ans)))
+      (nreverse ans))))
 
 (defmethod semanticdb-java-jar-package-packages ((dbc semanticdb-java-jar-database) dir)
   "Get the package names from DBC that match DIR.
 DIR may already have some .class files in it (see `semanticdb-java-jar-package-files')
 while also having sub-packages."
-  (let ((ans nil))
-    (dolist (F (oref dbc jarfilecache))
-      (when (string-match (concat "^" (regexp-quote dir) "\\w+/") F)
-	(add-to-list 'ans (match-string 0 F))))
-    (nreverse ans)))
+  (when (stringp dir)
+    (let ((ans nil))
+      (dolist (F (oref dbc jarfilecache))
+	(when (string-match (concat "^" (regexp-quote dir) "\\w+/") F)
+	  (add-to-list 'ans (match-string 0 F))))
+      (nreverse ans))))
 
 ;;; JAVAP CALLS
 ;;
@@ -753,9 +765,14 @@ to some class in JARFILE."
     (save-current-buffer
       (set-buffer javapbuff)
       (goto-char (point-min))
-      ;; The first line says "Compiled from ..." or some-such.
-      (insert "// ")
-
+      ;; The first line can say "Compiled from ..." or some-such.
+      (let* ((case-fold-search nil)
+	     (p (search-forward "Compiled from" nil t)))
+	(when (and p (numberp p))
+	  (goto-char p)
+	  (beginning-of-line)
+	  (insert "// ")))
+      
       ;; strip out fully qualified part of class- and interface names
       (save-excursion
 	(goto-char (point-min))
@@ -805,10 +822,63 @@ This will look across the classpath for all occurances of your package."
 	     ((semanticdb-java-jar-database-child-p P)
 	      (let ((tab (semanticdb-create-table P pkfile)))
 		(when tab (push tab ans))))
-	      
+
 	     (t (error "Unknown object in classpath: %S" P))))
 
 	  ans)))))
+
+(defconst semanticdb-javap-java-lang-name "java/lang"
+  "Name of java.lang package that is always imported")
+
+(defvar semanticdb-javap-java-lang-table nil
+  "Cached value of semanticdb table for java.lang package")
+
+(defun semanticdb-javap-paths-for-java-lang ()
+  "Scan the jdk jar file, if available, for java.lang.* classes and return a table for the package"
+  (if semanticdb-javap-java-lang-table
+      semanticdb-javap-java-lang-table
+    (let ((core-jar (cedet-java-find-jdk-core-jar)))
+      (when core-jar
+	(let* ((core-db (semanticdb-create-database semanticdb-java-jar-database core-jar))
+	       (java-lang-table (semanticdb-create-table core-db semanticdb-javap-java-lang-name)))
+	  (when java-lang-table
+	    (setq semanticdb-javap-java-lang-table java-lang-table))
+	  java-lang-table)))))
+
+(defvar semanticdb-javap-java-lang-classes nil
+  "Cache to store list of classes from java.lang package")
+
+;;;###autoload
+(defun semanticdb-javap-get-java-lang-classes ()
+  "Returns list of classes defined in java.lang package (in format for direct injection
+into the tags)"
+  (if semanticdb-javap-java-lang-classes
+      semanticdb-javap-java-lang-classes
+    (let ((core-db (semanticdb-create-database semanticdb-java-jar-database
+					       (cedet-java-find-jdk-core-jar))))
+      (when core-db
+	(let ((res (mapcar (lambda (x)
+			     (replace-regexp-in-string "/" "."
+						       (substring x 0 (- (length x) 6)))
+			     )
+			   (semanticdb-java-jar-package-files core-db semanticdb-javap-java-lang-name))))
+	  (setq semanticdb-javap-java-lang-classes res))))))
+
+(defvar semanticdb-javap-java-lang-classes-map nil
+  "")
+
+(defun semanticdb-javap-get-java-lang-classes-map ()
+  ""
+  (if semanticdb-javap-java-lang-classes-map
+      semanticdb-javap-java-lang-classes-map
+    (let* ((lang-classes (semanticdb-javap-get-java-lang-classes))
+	  (lang-map (make-hash-table :size (length lang-classes)
+				     :test 'equal)))
+      (when lang-classes
+	(dolist (L lang-classes)
+	  (puthash (replace-regexp-in-string ".*\\.\\([^.]*\\)$" "\\1" L) L lang-map))
+	(setq semanticdb-javap-java-lang-classes-map lang-map)
+	lang-map))))
 
 (defun semanticdb-javap-classpath-objects (buffer)
   "Return the classpath for BUFFER as a list of semanticdb objects and strings.
@@ -822,7 +892,7 @@ represent jar files."
 	   ;; Try EDE's classpath feature
 	   (edeclasspath (when ede-object-project
 			   (ede-java-classpath ede-object-project)))
-
+	   (core-jar (cedet-java-find-jdk-core-jar))
 	   ;; Try JDEE to see if it knows
 	   ;; (jdeep - what to put here??)
 	   ;; Try our classpath
@@ -832,10 +902,10 @@ represent jar files."
 	   (ans nil)
 	   )
       ;; Get a list of paths together
-      (dolist (P (append edepaths edeclasspath semanticdb-javap-classpath))
+      (dolist (P (append (list core-jar) edepaths edeclasspath semanticdb-javap-classpath))
 	(cond
-	 ;; Somtimes a null gets in.  Ignore it.
-	 ((null P)
+	 ;; Somtimes a null or non-string gets in.  Ignore it.
+	 ((or (null P) (not (stringp P)))
 	  nil)
 	 ;; A directory can be returned as a string.  Should we make a
 	 ;; special dir for this???  @TODO
@@ -923,5 +993,10 @@ for PACKAGEDIR.  The CLASSPATH can contain strings or javap database objects."
        ))))
 
 (provide 'semantic/db-javap)
+
+;; Local variables:
+;; generated-autoload-file: "loaddefs.el"
+;; generated-autoload-load-name: "semantic/db-javap"
+;; End:
 
 ;;; semanticdb-javap.el ends here

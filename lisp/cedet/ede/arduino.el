@@ -126,7 +126,7 @@ Consider expanding this at some later date."
 It is a file ending in .pde or .ino that has the same basename as
 the directory it is in.  Optional argument DIR is the directory
 to check."
-  (ede-arduino-root dir t))
+  (ede-arduino-root (or dir (expand-file-name default-directory)) t))
 
 ;;;###autoload
 (defun ede-arduino-load (dir &optional rootproj)
@@ -135,8 +135,7 @@ Return nil if there isn't one.
 Argument DIR is the directory it is created for.
 ROOTPROJ is nil, sinc there is only one project for a directory tree."
   (let* ((root (ede-arduino-root dir))
-	 (proj (and root (ede-directory-get-open-project root)))
-	 (prefs (ede-arduino-sync)))
+	 (proj (and root (ede-directory-get-open-project root))))
     (if proj
 	proj
 
@@ -181,7 +180,8 @@ ROOTPROJ is nil, sinc there is only one project for a directory tree."
   (interactive)
   (project-compile-project (ede-current-project) "make all upload"))
 
-(eval-when-compile (require 'term))
+;; Autoloaded through `serial-term'
+(declare-function term-line-mode "term")
 
 (defun cedet-arduino-serial-monitor ()
   "Start up a serial monitor for a running arduino board.
@@ -349,7 +349,7 @@ Argument COMMAND is the command to use for compiling the target."
       (if (file-exists-p sketch)
 	  sketch
 	(error "Cannot guess primary sketch file for project %s"
-	       (object-name proj))))))
+	       (eieio-object-name proj))))))
 
 ;;; Arduino Preferences
 ;;
@@ -380,6 +380,9 @@ Emacs back to the Arduino IDE."
 	(ede-arduino)
       (error "EDE cannot build/upload arduino projects without preferences from the arduino IDE")))
   (ede-arduino-read-prefs ede-arduino-preferences-file)
+  (when (interactive-p)
+      (require 'data-debug)
+      (data-debug-show-stuff ede-arduino-active-prefs "Arduino Prefs"))
   ede-arduino-active-prefs)
 
 (defun ede-arduino-read-prefs (prefsfile)
@@ -388,8 +391,7 @@ Emacs back to the Arduino IDE."
 	 (stats (file-attributes prefsfile))
 	 (size (nth 7 stats))
 	 (mod (nth 5 stats))
-	 (board nil)
-	 (kill nil))
+	 (board nil))
 
     (when (not ede-arduino-active-prefs)
       (setq ede-arduino-active-prefs (ede-arduino-prefs "Arduino Preferences")))
@@ -399,41 +401,40 @@ Emacs back to the Arduino IDE."
 	      (/= (or (oref ede-arduino-active-prefs prefssize) 0) size)
 	      (not (equal (oref ede-arduino-active-prefs timestamp) mod)))
 
-      (when (not buff)
-	(setq buff (find-file-noselect prefsfile)
-	      kill t))
+      (setq buff (get-buffer-create "*arduino prefs*"))
       (with-current-buffer buff
-	(save-excursion
+	(erase-buffer)
+	(insert-file-contents prefsfile)
 
-	  (goto-char (point-min))
-	  (when (not (re-search-forward "^serial.port=" nil t))
-	    (error "Cannot find serial.port from the arduino preferences"))
-	  (oset ede-arduino-active-prefs port
-		(buffer-substring-no-properties (point) (point-at-eol)))
+	(goto-char (point-min))
+	(when (not (re-search-forward "^serial.port=" nil t))
+	  (error "Cannot find serial.port from the arduino preferences"))
+	(oset ede-arduino-active-prefs port
+	      (buffer-substring-no-properties (point) (point-at-eol)))
 
-	  (goto-char (point-min))
-	  (when (not (re-search-forward "^board=" nil t))
-	    (error "Cannot find board from the arduino preferences"))
-	  (setq board (buffer-substring-no-properties (point) (point-at-eol)))
-	  (oset ede-arduino-active-prefs board board)
+	(goto-char (point-min))
+	(when (not (re-search-forward "^board=" nil t))
+	  (error "Cannot find board from the arduino preferences"))
+	(setq board (buffer-substring-no-properties (point) (point-at-eol)))
+	(oset ede-arduino-active-prefs board board)
 
-	  (goto-char (point-min))
-	  (when (not (re-search-forward "^sketchbook.path=" nil t))
-	    (error "Cannot find sketchbook.path from the arduino preferences"))
-	  (oset ede-arduino-active-prefs sketchbook
-		(file-name-as-directory
-		 (expand-file-name
-		  (buffer-substring-no-properties (point) (point-at-eol)))))
+	(goto-char (point-min))
+	(when (not (re-search-forward "^sketchbook.path=" nil t))
+	  (error "Cannot find sketchbook.path from the arduino preferences"))
+	(oset ede-arduino-active-prefs sketchbook
+	      (file-name-as-directory
+	       (expand-file-name
+		(buffer-substring-no-properties (point) (point-at-eol)))))
+	)
 
-	  (when kill (kill-buffer buff))
+      (kill-buffer buff)
 
-	  (oset ede-arduino-active-prefs boardobj
-		(ede-arduino-board-data board))
+      (oset ede-arduino-active-prefs boardobj (ede-arduino-board-data board))
 
-	  (oset ede-arduino-active-prefs prefssize size)
-	  (oset ede-arduino-active-prefs timestamp mod)
+      (oset ede-arduino-active-prefs prefssize size)
+      (oset ede-arduino-active-prefs timestamp mod)
 	
-	  )))))
+      )))
 
 ;;; Arduino Intuition
 ;;
@@ -482,22 +483,20 @@ This is also where Arduino.mk will be found."
 	(when (not (file-exists-p arduinofile))
 	  (error "Cannot find arduino command location"))
 
-	(let ((buff (get-file-buffer arduinofile))
-	      (kill nil))
-	  (when (not buff)
-	    (setq buff (find-file-noselect arduinofile)
-		  kill t))
+	(let ((buff (get-buffer-create "*arduino scratch*")))
 	  (with-current-buffer buff
-	    (save-excursion
-	      (goto-char (point-min))
+	    (erase-buffer)
+	    (insert-file-contents arduinofile)
 
-	      (when (not (re-search-forward "APPDIR=" nil t))
-		(error "Cannot find APPDIR from the arduino command"))
+	    (goto-char (point-min))
 
-	      (prog1
-		  (setq ede-arduino-appdir
-			(buffer-substring-no-properties (point) (point-at-eol)))
-		(when kill (kill-buffer buff))))))))))
+	    (when (not (re-search-forward "APPDIR=" nil t))
+	      (error "Cannot find APPDIR from the arduino command"))
+
+	    (prog1
+		(setq ede-arduino-appdir
+		      (buffer-substring-no-properties (point) (point-at-eol)))
+	      (kill-buffer buff))))))))
 
 (defun ede-arduino-Arduino.mk ()
   "Return the location of Arduino's makefile helper."
@@ -506,18 +505,13 @@ This is also where Arduino.mk will be found."
 (defun ede-arduino-Arduino-Version ()
   "Return the version of the installed Arduino."
   (let ((vfile (expand-file-name "lib/version.txt" (ede-arduino-find-install))))
-    (let ((buff (get-file-buffer vfile))
-	  (kill nil))
-      (when (not buff)
-	(setq buff (find-file-noselect vfile)
-	      kill t))
-      (prog1
-	  (with-current-buffer buff
-	    (save-excursion
-	      (goto-char (point-min))
-	      (buffer-substring-no-properties (point) (point-at-eol))
-	      ))
-	(if kill (kill-buffer buff))))))
+    (let ((buff (get-buffer-create "*arduino scratch*")))
+      (with-current-buffer buff
+	(erase-buffer)
+	(insert-file-contents vfile)
+	(goto-char (point-min))
+	(prog1 (buffer-substring-no-properties (point) (point-at-eol))
+	  (kill-buffer buff))))))
 	  
 (defun ede-arduino-boards.txt ()
   "Return the location of Arduino's boards.txt file."
@@ -569,69 +563,66 @@ If LIBRARY is not provided as an argument, just return the library directory."
 (defun ede-arduino-board-data (boardname)
   "Read in the data from baords.txt for BOARDNAME.
 Data returned is the intputs needed for the Makefile."
-  (let* ((buff (get-file-buffer (ede-arduino-boards.txt)))
-	 (kill nil)
-	 (name nil)
-	 (protocol nil)
-	 (speed nil)
-	 (size nil)
-	 (mcu nil)
-	 (f_cpu nil)
-	 (core nil))
-
-    (when (not buff)
-      (setq buff (find-file-noselect (ede-arduino-boards.txt))
-	    kill t))
+  (let ((buff (get-buffer-create "*arduino boards*"))
+	(name nil)
+	(protocol nil)
+	(speed nil)
+	(size nil)
+	(mcu nil)
+	(f_cpu nil)
+	(core nil))
 
     (with-current-buffer buff
-      (save-excursion
+      (erase-buffer)
+      (insert-file-contents (ede-arduino-boards.txt))
 
-	(goto-char (point-min))
-	(when (not (re-search-forward (concat "^" boardname ".name=") nil t))
-	  (error "Cannot find %s.name looking up board" boardname))
-	(setq name (buffer-substring-no-properties (point) (point-at-eol)))
+      (goto-char (point-min))
+      (when (not (re-search-forward (concat "^" boardname ".name=") nil t))
+	(error "Cannot find %s.name looking up board" boardname))
+      (setq name (buffer-substring-no-properties (point) (point-at-eol)))
 
-	(goto-char (point-min))
-	(when (not (re-search-forward (concat "^" boardname ".upload.protocol=") nil t))
-	  (error "Cannot find %s.upload.protocol looking up board" boardname))
-	(setq protocol (buffer-substring-no-properties (point) (point-at-eol)))
+      (goto-char (point-min))
+      (when (not (re-search-forward (concat "^" boardname ".upload.protocol=") nil t))
+	(error "Cannot find %s.upload.protocol looking up board" boardname))
+      (setq protocol (buffer-substring-no-properties (point) (point-at-eol)))
 
-	(goto-char (point-min))
-	(when (not (re-search-forward (concat "^" boardname ".upload.speed=") nil t))
-	  (error "Cannot find %s.upload.speed looking up board" boardname))
-	(setq speed (buffer-substring-no-properties (point) (point-at-eol)))
+      (goto-char (point-min))
+      (when (not (re-search-forward (concat "^" boardname ".upload.speed=") nil t))
+	(error "Cannot find %s.upload.speed looking up board" boardname))
+      (setq speed (buffer-substring-no-properties (point) (point-at-eol)))
 
-	(goto-char (point-min))
-	(when (not (re-search-forward (concat "^" boardname ".upload.maximum_size=") nil t))
-	  (error "Cannot find %s.upload.maximum_size looking up board" boardname))
-	(setq size (buffer-substring-no-properties (point) (point-at-eol)))
+      (goto-char (point-min))
+      (when (not (re-search-forward (concat "^" boardname ".upload.maximum_size=") nil t))
+	(error "Cannot find %s.upload.maximum_size looking up board" boardname))
+      (setq size (buffer-substring-no-properties (point) (point-at-eol)))
 
-	(goto-char (point-min))
-	(when (not (re-search-forward (concat "^" boardname ".build.mcu=") nil t))
-	  (error "Cannot find %s.build.mcu looking up board" boardname))
-	(setq mcu (buffer-substring-no-properties (point) (point-at-eol)))
+      (goto-char (point-min))
+      (when (not (re-search-forward (concat "^" boardname ".build.mcu=") nil t))
+	(error "Cannot find %s.build.mcu looking up board" boardname))
+      (setq mcu (buffer-substring-no-properties (point) (point-at-eol)))
 
-	(goto-char (point-min))
-	(when (not (re-search-forward (concat "^" boardname ".build.f_cpu=") nil t))
-	  (error "Cannot find %s.build.f_cpu looking up board" boardname))
-	(setq f_cpu (buffer-substring-no-properties (point) (point-at-eol)))
+      (goto-char (point-min))
+      (when (not (re-search-forward (concat "^" boardname ".build.f_cpu=") nil t))
+	(error "Cannot find %s.build.f_cpu looking up board" boardname))
+      (setq f_cpu (buffer-substring-no-properties (point) (point-at-eol)))
 
-	(goto-char (point-min))
-	(when (not (re-search-forward (concat "^" boardname ".build.core=") nil t))
-	  (error "Cannot find %s.build.core looking up board" boardname))
-	(setq core (buffer-substring-no-properties (point) (point-at-eol)))
+      (goto-char (point-min))
+      (when (not (re-search-forward (concat "^" boardname ".build.core=") nil t))
+	(error "Cannot find %s.build.core looking up board" boardname))
+      (setq core (buffer-substring-no-properties (point) (point-at-eol)))
+      )
 
-	(when kill (kill-buffer buff))
+    (kill-buffer buff)
 
-	(ede-arduino-board boardname
-			   :name name
-			   :protocol protocol
-			   :speed speed
-			   :maximum-size size
-			   :mcu mcu
-			   :f_cpu f_cpu
-			   :core core)
-	))))
+    (ede-arduino-board boardname
+		       :name name
+		       :protocol protocol
+		       :speed speed
+		       :maximum-size size
+		       :mcu mcu
+		       :f_cpu f_cpu
+		       :core core)
+    ))
 
 (provide 'ede/arduino)
 

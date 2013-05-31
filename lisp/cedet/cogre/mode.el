@@ -465,7 +465,7 @@ LINKTYPE is the eieio class name for the link to insert."
   "Delete the graph ELEMENT under the cursor."
   (interactive (list (cogre-element-at-point-interactive (point))))
   (if (or cogre-delete-dont-ask
-	  (y-or-n-p (format "Really delete %s? " (object-name element))))
+	  (y-or-n-p (format "Really delete %s? " (eieio-object-name element))))
       (let ((cogre-delete-dont-ask t))
 	(if (obj-of-class-p element cogre-node)
 	    (let ((el (oref cogre-graph elements))

@@ -27,7 +27,7 @@
 
 ;;; Code:
 
-(require 'semantic/lex)
+(require 'semantic)
 
 ;;; Prologue
 ;;

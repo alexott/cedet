@@ -1,6 +1,6 @@
 ;;; cedet-build.el --- Build CEDET within Emacs.
 
-;; Copyright (C) 2008, 2009, 2012 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2012, 2013 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -110,15 +110,26 @@ OVERRIDE-CHECK to override cedet short-cicuit."
 
   ;; Get EIEIO built first.
   (save-excursion
-    (let ((src "lisp/eieio/eieio.el") (dst "eieio/eieio.elc"))
+    (let ((src "lisp/eieio/eieio.el") (dst "lisp/eieio/eieio.elc")
+	  (core "lisp/eieio/eieio-core.el") (coredst "lisp/eieio/eieio-core.elc"))
+      (if (file-newer-than-file-p core coredst)
+	  (progn
+	    (when (featurep 'eieio-core)
+	      (error "You should not recompile EIEIO after it has been loaded"))
+	    (byte-compile-file core)
+	    (load-file coredst)
+	    (cedet-build-msg "(core) done ..."))
+	(cedet-build-msg "(core) not needed...")
+	(load-file coredst))
+
       (if (file-newer-than-file-p src dst)
 	  (progn
 	    (when (featurep 'eieio)
 	      (error "You should not recompile EIEIO after it has been loaded"))
 	    (byte-compile-file src)
-	    (cedet-build-msg "done\n"))
-	(cedet-build-msg "not needed\n")))
-    )
+	    (cedet-build-msg "(eieio) done\n"))
+	(cedet-build-msg "(eieio) not needed\n"))
+      ))
 
   ;; Get eieio loaddefs
   (cedet-build-msg "Step 2: Creating autoloads ...\n")
@@ -161,19 +172,24 @@ OVERRIDE-CHECK to override cedet short-cicuit."
   
   (setq cedet-minimum-setup t)
   (load-file (expand-file-name "cedet-devel-load.el" cedet-build-location))
-  ;; Set srecode-map-load-path to nil, otherwise the setter function
-  ;; for it will break the build.
-  (setq srecode-map-load-path nil)
 
   (cedet-build-msg "done\nStep 4: Turning on EDE and Semantic ...")
   (save-excursion
-    ;; Enable EDE and Semantic
+    ;; Disable saving EDE's cache file.
+    (setq ede-project-placeholder-cache-file nil)
+    ;; Enable EDE
     (global-ede-mode 1)
-    (semantic-mode 1)
+    ;; Set srecode-map-load-path to nil, otherwise the setter function
+    ;; for it will break the build.
+    (setq srecode-map-load-path nil)
+    ;; Disable all saves from SRecode
+    (setq srecode-map-save-file nil)
     ;;Disable most new buffer setup functions to speed things up.
     (setq semantic-new-buffer-setup-functions nil)
     ;; Disable using cached files for parse results.
-    (setq semanticdb-new-database-class 'semanticdb-project-database)    
+    (setq-default semanticdb-new-database-class 'semanticdb-project-database)    
+    ;; Enable Semantic
+    (semantic-mode 1)
     ;; Require grammar compilation.
     (require 'semantic/ede-grammar)
     (require 'semantic/wisent))

@@ -29,6 +29,8 @@
 ;;; Code:
 ;;
 
+(require 'semantic/fw)
+
 (eval-when-compile
   (require 'semantic/idle)
   (require 'semantic/edit))

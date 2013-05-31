@@ -1,5 +1,6 @@
 # Automatically Generated Makefile by EDE.
 # For use with: make
+# Relative File Name: cedet/ede/Makefile
 #
 # DO NOT MODIFY THIS FILE OR YOUR CHANGES MAY BE LOST.
 # EDE is the Emacs Development Environment.
@@ -18,7 +19,7 @@ LOADDEFS=loaddefs.el
 LOADDIRS=.
 ede_LISP=auto.el base.el custom.el dired.el source.el util.el system.el speedbar.el srecode.el files.el locate.el make.el shell.el android.el m3.el arduino.el
 proj-project_LISP=proj.el pmake.el pconf.el proj-elisp.el proj-misc.el proj-obj.el proj-prog.el proj-archive.el proj-shared.el proj-info.el proj-scheme.el proj-aux.el proj-comp.el
-projects_LISP=project-am.el cpp-root.el emacs.el linux.el generic.el java-root.el
+projects_LISP=project-am.el cpp-root.el emacs.el linux.el generic.el java-root.el jvm-base.el maven2.el lein2.el ant.el
 aux-lisp_LISP=autoconf-edit.el makefile-edit.el
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/cedet/ede

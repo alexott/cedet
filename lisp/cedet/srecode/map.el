@@ -215,7 +215,8 @@ Optional argument RESET forces a reset of the current map."
     ;; Eventually, I want to return many maps to search through.
     (list srecode-current-map)))
 
-(eval-when-compile (require 'data-debug))
+(declare-function data-debug-new-buffer "data-debug")
+(declare-function data-debug-insert-stuff-list "data-debug")
 
 (defun srecode-adebug-maps ()
   "Run ADEBUG on the output of `srecode-get-maps'."
@@ -362,6 +363,9 @@ Return non-nil if the map changed."
 	  (let ((semantic-init-hook nil))
 	    (semantic-new-buffer-fcn))
 	  )
+	;; Force semantic to be enabled in this buffer.
+	(unless (semantic-active-p)
+	  (semantic-new-buffer-fcn))
 
 	(semantic-fetch-tags)
 	(let* ((mode-tag

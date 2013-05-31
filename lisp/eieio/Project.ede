@@ -14,7 +14,7 @@
    (ede-proj-target-elisp "eieio"
     :name "eieio"
     :path ""
-    :source '("eieio.el" "eieio-opt.el" "eieio-custom.el" "eieio-doc.el" "eieio-base.el" "eieio-datadebug.el")
+    :source '("eieio-core.el" "eieio.el" "eieio-opt.el" "eieio-custom.el" "eieio-base.el" "eieio-datadebug.el")
     :aux-packages '("cedet-compat")
     :pre-load-packages '("cedet-compat")
     )
@@ -22,7 +22,7 @@
     :name "examples"
     :path ""
     :compiler 'ede-emacs-compiler
-    :source '("chart.el" "eieio-speedbar.el" "linemark.el" "eieio-xml.el")
+    :source '("chart.el" "eieio-speedbar.el" "linemark.el")
     :aux-packages '("cedet-compat" "linemark")
     :pre-load-packages '("cedet-compat")
     )

@@ -243,7 +243,7 @@ PREBUTTONTEXT is some text between prefix and the find results button."
   (let ((start (point))
 	(end nil)
 	(str (concat "(#<db/tag "
-		     (object-name-string (car dbtag))
+		     (eieio-object-name-string (car dbtag))
 		     " / "
 		     (semantic-format-tag-name (cdr dbtag) nil t)
 		     ")"))

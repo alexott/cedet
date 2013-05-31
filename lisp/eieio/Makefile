@@ -1,5 +1,6 @@
 # Automatically Generated Makefile by EDE.
 # For use with: make
+# Relative File Name: eieio/Makefile
 #
 # DO NOT MODIFY THIS FILE OR YOUR CHANGES MAY BE LOST.
 # EDE is the Emacs Development Environment.
@@ -16,8 +17,8 @@ ede_FILES=Project.ede Makefile
 
 LOADDEFS=loaddefs.el
 LOADDIRS=.
-eieio_LISP=eieio.el eieio-opt.el eieio-custom.el eieio-doc.el eieio-base.el eieio-datadebug.el
-examples_LISP=chart.el eieio-speedbar.el linemark.el eieio-xml.el
+eieio_LISP=eieio-core.el eieio.el eieio-opt.el eieio-custom.el eieio-base.el eieio-datadebug.el
+examples_LISP=chart.el eieio-speedbar.el linemark.el
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/eieio
 

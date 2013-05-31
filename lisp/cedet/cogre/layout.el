@@ -94,7 +94,7 @@ This function depends on graphviz `dot' program."
 		(oset cogrenode :position
 		      (vector (max 0 (floor (/ (- X HW) scalex)))
 			      (max 0 (floor (/ (- Y HH) scaley)))))
-		;;(message "Node %s at %S (%d -> %d)" (object-name cogrenode) (oref cogrenode :position) HW X)
+		;;(message "Node %s at %S (%d -> %d)" (eieio-object-name cogrenode) (oref cogrenode :position) HW X)
 		)
 	    ;; No match?
 	    (message "Could not find node for element %S" E)

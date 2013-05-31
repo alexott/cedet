@@ -129,6 +129,7 @@ If a default starting DIR is not specified, the current buffer's
 	(file-name-as-directory
 	 (buffer-substring (point) (point-at-eol)))))))
 
+;;;###autoload
 (defun cedet-gnu-global-version-check (&optional noerror)
   "Check the version of the installed GNU Global command.
 If optional programmatic argument NOERROR is non-nil,
@@ -137,7 +138,7 @@ return nil."
   (interactive)
   (require 'inversion)
   (let ((b (condition-case nil
-	       (cedet-gnu-global-call (list "--version"))
+	       (cedet-gnu-global-call (list "-q" "--version"))
 	     (error nil)))
 	(rev nil))
     (if (not b)
@@ -147,7 +148,7 @@ return nil."
 	  nil)
       (with-current-buffer b
 	(goto-char (point-min))
-	(re-search-forward "(?GNU GLOBAL)? \\([0-9.]+\\)" nil t)
+	(re-search-forward "^\\([0-9.]+\\)" nil t)
 	(setq rev (match-string 1))
 	(if (inversion-check-version rev nil cedet-global-min-version)
 	    (if noerror

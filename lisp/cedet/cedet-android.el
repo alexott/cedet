@@ -1,6 +1,6 @@
 ;;; cedet-android.el --- Misc android external application support
 ;;
-;; Copyright (C) 2011 Eric M. Ludlam
+;; Copyright (C) 2011, 2013 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;; X-RCS: $Id$
@@ -31,13 +31,12 @@
 (require 'inversion)
 
 (eval-when-compile
-  (require 'cedet-java)
-  (require 'shell))
+  (require 'cedet-java))
 
 (defvar cedet-android-sdk-adb-min-version "1.0.26"
   "Minimum version of the Android SDB ADB program required.")
 
-(defcustom cedet-android-sdk-root "~/src/android-sdk-linux_x86/"
+(defcustom cedet-android-sdk-root "~/src/android-sdk-linux/"
   "The root to the android SDK."
   :group 'android
   :type 'file)
@@ -247,11 +246,15 @@ return nil."
 ;;
 ;; Use a classic shell buffer to control your device.
 
+(declare-function shell-mode "shell")
+(declare-function comint-check-proc "comint")
+
 ;;;###autoload
 (defun cedet-android-adb-shell ()
   "Create an inferior shell for Android Debug Bridge."
   (interactive)
   (require 'shell)
+  (require 'comint)
   (let ((buffer (get-buffer-create "*Android Debug Bridge*")))
     ;; Pop to buffer, so that the buffer's window will be correctly set
     ;; when we call comint (so that comint sets the COLUMNS env var properly).

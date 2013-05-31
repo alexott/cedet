@@ -1,7 +1,7 @@
 ;;; semantic-tag-folding.el --- semantic decoration style to enable folding of semantic tags
 ;; Time-stamp: <2010-09-15 16:20:59 (lluis)>
 
-;;; Copyright (C) 2005, 2009, 2010 Suraj Acharya
+;;; Copyright (C) 2005, 2009, 2010, 2013 Suraj Acharya
 
 ;; Author: Suraj Acharya <sacharya@cs.indiana.edu>
 
@@ -118,14 +118,12 @@ Clicking on a + or - in the fringe will fold that tag."
          (global-semantic-tag-folding-mode (if val 1 -1))))
 
 ;;;###autoload
-(defun global-semantic-tag-folding-mode (&optional arg)
+(define-minor-mode global-semantic-tag-folding-mode
   "Toggle global use of option `semantic-tag-folding-mode'.
-If ARG is positive, enable, if it is negative, disable.
-If ARG is nil, then toggle."
-  (interactive "P")
-  (setq global-semantic-tag-folding-mode
-        (semantic-toggle-minor-mode-globally
-         'semantic-tag-folding-mode arg)))
+If ARG is positive or nil, enable, if it is negative, disable."
+  :global t :group 'semantic :group 'semantic-modes
+  (semantic-toggle-minor-mode-globally
+   'semantic-tag-folding-mode (if global-semantic-tag-folding-mode 1 -1)))
 
 (defcustom semantic-tag-folding-mode-hook nil
   "*Hook run at the end of function `semantic-tag-folding-mode'."
@@ -182,7 +180,7 @@ in Emacs 20.4."
             (let ((style (assoc "semantic-tag-folding" semantic-decoration-styles)))
               (when (not (cdr style))
                 (setcdr style t)
-                (semantic-decoration-mode-setup)))
+                (semantic-decoration-mode 1)))
           ;; else, turn on decoration mode with only semantic-tag-folding on
           (setq semantic-tag-folding-saved-decoration-styles semantic-decoration-styles)
           (setq semantic-decoration-styles semantic-tag-folding-decoration-style)
@@ -214,7 +212,7 @@ in Emacs 20.4."
       (let ((style (assoc "semantic-tag-folding" semantic-decoration-styles)))
         (when (not (cdr style))
           (setcdr style t)
-          (semantic-decoration-mode-setup)
+          (semantic-decoration-mode 1)
           )))
      ((and semantic-decoration-mode (not semantic-tag-folding-mode))
       ;; when turning on decorations with out tag folding, ensure that
@@ -222,7 +220,7 @@ in Emacs 20.4."
       (let ((style (assoc "semantic-tag-folding" semantic-decoration-styles)))
         (when (cdr style)
           (setcdr style nil)
-          (semantic-decoration-mode-setup)
+          (semantic-decoration-mode 1)
           )))
      ((and (not semantic-decoration-mode) semantic-tag-folding-mode)
       ;; if turning off decoration mode with semantic tag folding on,
@@ -235,7 +233,7 @@ in Emacs 20.4."
        (semantic-tag-folding-mode 1))))))
 
 ;;;###autoload
-(defun semantic-tag-folding-mode (&optional arg)
+(define-minor-mode semantic-tag-folding-mode
   "Minor mode mark semantic tags for folding.
 This mode will display +/- icons in the fringe.  Clicking on them
 will fold the current tag.
@@ -243,9 +241,8 @@ With prefix argument ARG, turn on if positive, otherwise off.  The
 minor mode can be turned on only if semantic feature is available and
 the current buffer was set up for parsing.  Return non-nil if the
 minor mode is enabled."
-  (interactive
-   (list (or current-prefix-arg
-             (if semantic-tag-folding-mode 0 1))))
+  :lighter nil
+  :keymap semantic-tag-folding-mode-map
   (setq semantic-tag-folding-mode
         (if arg
             (>
@@ -259,7 +256,7 @@ minor mode is enabled."
                (if semantic-tag-folding-mode "en" "dis")))
   semantic-tag-folding-mode)
 
-(semantic-add-minor-mode 'semantic-tag-folding-mode "" semantic-tag-folding-mode-map)
+(semantic-add-minor-mode 'semantic-tag-folding-mode "fold")
 
 
 (define-semantic-decoration-style semantic-tag-folding "Enables folding of tags.")

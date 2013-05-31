@@ -1,7 +1,7 @@
 ;;; eieio-testsinvoke.el -- eieio tests for method invokation
 
 ;;;
-;; Copyright (C) 2005, 2008, 2009, 2010 Eric M. Ludlam
+;; Copyright (C) 2005, 2008, 2009, 2010, 2013 Eric M. Ludlam
 ;;
 ;; Author: <zappo@gnu.org>
 ;; RCS: $Id: eieio-test-methodinvoke.el,v 1.12 2010-04-18 21:43:18 zappo Exp $
@@ -64,7 +64,7 @@
   "Store current invocation class symbol in the invocation order list."
   (let* ((keysym (aref [ :STATIC :BEFORE :PRIMARY :AFTER ]
 		       (or eieio-generic-call-key 0)))
-	 (c (list eieio-generic-call-methodname keysym scoped-class)))
+	 (c (list eieio-generic-call-methodname keysym (eieio--scoped-class))))
     (setq eieio-test-method-order-list
 	  (cons c eieio-test-method-order-list))))
 

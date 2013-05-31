@@ -1,6 +1,6 @@
 ;;; cedet-utests.el --- Run all unit tests in the CEDET suite.
 
-;; Copyright (C) 2008, 2009, 2010, 2012 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010, 2012, 2013 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -205,6 +205,9 @@ of just logging the error."
 	      ;; Disabling the srecoder map, we won't load a pre-existing one
 	      ;; and will be forced to bootstrap a new one.
 	      (setq srecode-map-save-file nil)
+
+	      ;; Disable saving EDE's cache file.
+	      (setq ede-project-placeholder-cache-file nil)
 
 	      ;; Run the tests
 	      (cedet-utest t)
