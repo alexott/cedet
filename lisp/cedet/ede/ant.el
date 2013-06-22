@@ -164,7 +164,7 @@ Argument COMMAND is the command to use when compiling."
 ;; TODO: extract targets, etc.
 (defmethod project-rescan ((proj ede-ant-project))
   "Rescan the EDE proj project THIS."
-  (when (ede-jvm-base-file-updated-p proj)
+  (when (ede-single-root-file-updated-p proj)
     ;; TODO: fill information
     ))
 

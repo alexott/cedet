@@ -115,7 +115,7 @@ Argument COMMAND is the command to use when compiling."
 ;; TODO: re-implement when pom.xml parser will be available
 (defmethod project-rescan ((proj ede-lein2-project))
   "Rescan the EDE proj project THIS."
-  (when (ede-jvm-base-file-updated-p proj)
+  (when (ede-single-root-file-updated-p proj)
     ;; TODO: fill information
     ))
 
