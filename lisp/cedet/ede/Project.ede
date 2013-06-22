@@ -28,7 +28,7 @@
    (ede-proj-target-elisp "projects"
     :name "projects"
     :path ""
-    :source '("project-am.el" "cpp-root.el" "emacs.el" "linux.el" "generic.el" "java-root.el" "single-root.el" "jvm-base.el" "maven2.el" "lein2.el" "ant.el")
+    :source '("project-am.el" "cpp-root.el" "emacs.el" "linux.el" "generic.el" "java-root.el" "single-root.el" "jvm-base.el" "maven2.el" "lein2.el" "ant.el" "rebar.el")
     :aux-packages '("cedet-compat" "cedet" "eieio")
     :pre-load-packages '("cedet-compat")
     )
