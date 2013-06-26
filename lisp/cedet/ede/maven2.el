@@ -124,7 +124,7 @@
   :type 'string)
 
 (defcustom ede-maven2-maven-options '("-B")
-  "Maven's command line options"
+  "Maven's default command line options"
   :group 'ede-maven2
   :require  'ede/maven2
   :type 'list)
@@ -153,12 +153,11 @@ ROOTPROJ is nil, since there is only one project."
                                  :name "maven dir" ; TODO: make fancy name from dir here.
                                  :directory dir
                                  :file (expand-file-name "pom.xml" dir)
-				 :current-target "package"
+				 :current-target '("package")
                                  )))
          (ede-add-project-to-global-list this)
          ;; TODO: the above seems to be done somewhere else, maybe ede-load-project-file
          ;; this seems to lead to multiple copies of project objects in ede-projects
-	 ;; TODO: call rescan project to setup all data
 	 this)))
 
 ;;;###autoload
@@ -177,6 +176,7 @@ ROOTPROJ is nil, since there is only one project."
   "Make sure the all targets as setup."
   (call-next-method)
   (ede-normalize-file/directory this "pom.xml")
+  ;; TODO: call rescan project to setup all data
   ;; TODO: add analysis of pom.xml
   )
 
@@ -194,7 +194,8 @@ Argument COMMAND is the command to use when compiling."
     (compile (combine-and-quote-strings
 	      (append (list ede-maven2-maven-command)
 		      ede-maven2-maven-options
-		      (list (oref proj :current-target))
+		      (oref proj :project-options)
+		      (oref proj :current-target)
 		      (oref proj :target-options))))))
 
 ;;; Classpath-related...
@@ -209,6 +210,7 @@ Argument COMMAND is the command to use when compiling."
 
 ;; TODO: really should be based on content of pom.xml file. But we need parser for it...
 ;; TODO: add caching...
+;; TODO: add more pre-defined types, like scala, groovy, etc.
 (defmethod ede-source-paths ((proj ede-maven2-project) mode)
   "Get the base to all source trees in the current project for MODE."
   (let ((dir (ede-project-root-directory proj)))

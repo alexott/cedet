@@ -22,6 +22,8 @@
 
 (require 'ede/single-root)
 
+;; TODO: https://twitter.com/5HT/status/348670556838719489 https://twitter.com/5HT/status/348672457357541376
+
 (defgroup ede-rebar nil
   "Emacs Development Environment. Rebar options"
   :group 'ede
@@ -33,6 +35,12 @@
   :group 'ede-rebar
   :require  'ede/rebar
   :type 'string)
+
+(defcustom ede-rebar-rebar-options nil
+  "Rebar's default command line options"
+  :group 'ede-rebar
+  :require  'ede/rebar
+  :type 'list)
 
 ;;;###autoload
 (defconst ede-rebar-project-file-name "rebar.config"
@@ -59,7 +67,7 @@ ROOTPROJ is nil, since there is only one project."
 				:name "Rebar dir" ; make fancy name from dir here.
 				:directory dir
 				:file (expand-file-name ede-rebar-project-file-name dir)
-				:current-target "compile"
+				:current-target '("compile")
 				:existing-targets '("compile" "ct" "eunit" "generate"
 						    "analyze" "check-deps" "get-deps"
 						    "clean" "build_plt" "check_plt"
@@ -91,11 +99,14 @@ Argument COMMAND is the command to use when compiling."
   ;; we need to be in the proj root dir for this to work
   (let ((default-directory (ede-project-root-directory proj)))
     (compile (combine-and-quote-strings
-	      (append (list ede-rebar-rebar-command (oref proj :current-target))
-		      (oref proj :target-options))))))
+	      (append (list ede-rebar-rebar-command)
+		      (oref proj :project-options)
+		      (oref proj :target-options)
+		      (oref proj :current-target))))))
 
 
 ;; TODO: really should be based on content of rebar.config file. But we need parser for it...
+;; TODO: could be also a C code...
 (defmethod ede-source-paths ((proj ede-rebar-project) mode)
   "Get the base to all source trees in the current project for MODE."
   (let ((dir (ede-project-root-directory proj)))

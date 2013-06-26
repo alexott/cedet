@@ -35,7 +35,7 @@
   :type 'string)
 
 (defcustom ede-ant-ant-options '("-noinput" "-e")
-  "Ant's command-line options"
+  "Ant's default command-line options"
   :group 'ede-ant
   :require 'ede/ant
   :type 'list)
@@ -116,7 +116,8 @@ Argument COMMAND is the command to use when compiling."
     (compile (combine-and-quote-strings
 	      (append (list ede-ant-ant-command)
 		      ede-ant-ant-options
-		      (list (oref proj :current-target))
+		      (oref proj :project-options)
+		      (oref proj :current-target)
 		      (oref proj :target-options))))))
 
 ;;; Classpath-related stuff

@@ -40,6 +40,12 @@
   :require  'ede/lein2
   :type 'string)
 
+(defcustom ede-lein2-lein-options nil
+  "Lein's default command line options"
+  :group 'ede-lein2
+  :require  'ede/lein2
+  :type 'list)
+
 ;;;###autoload
 (defconst ede-lein2-project-file-name "project.clj"
   "name of project file for Lein2 projects")
@@ -65,7 +71,7 @@ ROOTPROJ is nil, since there is only one project."
                                  :name "Leiningen dir" ; make fancy name from dir here.
                                  :directory dir
                                  :file (expand-file-name ede-lein2-project-file-name dir)
-				 :current-target "jar")))
+				 :current-target '("jar"))))
 	(ede-add-project-to-global-list this)
 	this)))
 
@@ -81,6 +87,7 @@ ROOTPROJ is nil, since there is only one project."
   "Make sure the all slots are setup."
   (call-next-method)
   (ede-normalize-file/directory this ede-lein2-project-file-name)
+  (oset this supports-multiple-commands-p nil)
   ;; TODO: add analysis of project.clj
   )
 
@@ -90,7 +97,11 @@ Argument COMMAND is the command to use when compiling."
   ;; we need to be in the proj root dir for this to work
   (let ((default-directory (ede-project-root-directory proj)))
     (compile (combine-and-quote-strings
-	      (append (list ede-lein2-lein-command (oref proj :current-target))
+	      (append (list ede-lein2-lein-command)
+		      ede-lein2-lein-options
+		      (oref proj :project-options)
+		      (when (oref proj :current-target)
+			(list (car (oref proj :current-target))))
 		      (oref proj :target-options))))))
 
 ;;; Classpath-related stuff

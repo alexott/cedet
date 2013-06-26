@@ -24,9 +24,13 @@
 ;;;###autoload
 (defclass ede-single-root-project (ede-project)
   ((file-mod-time :initform 0)
-   (current-target :initform ""
+   (supports-multiple-commands-p :initform t)
+   (project-options :initform nil
+		   :initarg :project-options
+		   :type list)
+   (current-target :initform nil
 		   :initarg :current-target
-		   :type string)
+		   :type list)
    (target-options :initform nil
 		   :initarg :target-options
 		   :type list)
@@ -36,6 +40,19 @@
    )
   "Base project class for projects with project file in root directory."
   :method-invocation-order :depth-first)
+
+;; DONE: flag, that specify that project supports multiple targets in one invocation
+;; DONE: we should be able to specify several targets in command-line?
+;; DONE: add slot for global options, like -o/-U for lein, -B for maven, etc. and
+;; corresponding function to setup them
+;; TODO: add method to change current target(s) in given project - it should use 
+;; TODO: add method to change target options?
+;; TODO: source directories should be a part of project? source directories are alists
+;; that maps mode to list of directories
+;; TODO: should we limit a choice of available global options?
+;; TODO: how source directories could be dynamic? Like, don't include test source code
+;; when we're editing the main source code, but include it when we edit test source code.
+;; Should we make a separate slot for "main" source code, and for "test" source code...
 
 (defmethod initialize-instance ((this ede-single-root-project)
                                 &rest fields)
