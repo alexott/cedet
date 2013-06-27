@@ -177,7 +177,10 @@ ROOTPROJ is nil, since there is only one project."
   (call-next-method)
   (ede-normalize-file/directory this "pom.xml")
   ;; TODO: call rescan project to setup all data
-  ;; TODO: add analysis of pom.xml
+  (oset this source-dirs '((java-mode "src/main/java" "src/test/java")
+			   (clojure-mode "src/main/clojure" "src/test/clojure")
+			   (scala-mode "src/main/scala" "src/test/scala")
+			   (groovy-mode "src/main/groovy" "src/test/groovy")))
   )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -208,22 +211,11 @@ Argument COMMAND is the command to use when compiling."
 				      `(,nil ,nil ,nil "--batch-mode" "dependency:build-classpath"
 					     ,(concat "-Dmdep.outputFile=" maven2-outfile-name))))
 
-;; TODO: really should be based on content of pom.xml file. But we need parser for it...
-;; TODO: add caching...
-;; TODO: add more pre-defined types, like scala, groovy, etc.
-(defmethod ede-source-paths ((proj ede-maven2-project) mode)
-  "Get the base to all source trees in the current project for MODE."
-  (let ((dir (ede-project-root-directory proj)))
-    (mapcar (lambda (x) (concat dir x))
-	    (cond
-	     ((eq mode 'java-mode) '("src/main/java" "src/test/java"))
-	     ((eq mode 'clojure-mode) '("src/main/clojure" "src/test/clojure"))))))
-
 ;; TODO: re-implement when pom.xml parser will be available
 (defmethod project-rescan ((proj ede-maven2-project))
   "Rescan the EDE proj project THIS."
   (when (ede-single-root-file-updated-p proj)
-    ;; TODO: fill information
+    ;; TODO: add analysis of pom.xml & fill information
     (oset proj :pom nil)
     ))
 

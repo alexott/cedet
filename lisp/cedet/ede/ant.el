@@ -126,7 +126,7 @@ Argument COMMAND is the command to use when compiling."
 (defmethod ede-java-classpath ((proj ede-ant-project))
   "Get classpath for Ant project"
   (let ((dir (ede-project-root-directory proj))
-	(ret nil))
+	ret)
     ;; TODO: do this expansion only once?
     (dolist (P (oref proj :localclasspath))
       (if (string= "/" (substring P 0 1))
@@ -135,32 +135,31 @@ Argument COMMAND is the command to use when compiling."
     (let ((cp (append (nreverse ret) (oref proj :classpath))))
       (if cp cp
 	;; hack, many Ant projects have libraries in 'lib' directory
-	(let ((jar-files (cedet-files-list-recursively (concat dir "lib") ".*\.jar$")))
+	(let ((jar-files (append (cedet-files-list-recursively (concat dir "lib") ".*\.jar$")
+				 (cedet-files-list-recursively (concat dir "libs") ".*\.jar$"))))
 	  (when jar-files
 	    (oset proj :classpath jar-files))
 	  jar-files)))))
 
 (defmethod ede-source-paths ((proj ede-ant-project) mode)
   "Get the base to all source trees in the current project."
-  (let ((dir (ede-project-root-directory proj)))
-    (if (oref proj :srcroot)
-	(mapcar (lambda (x) (concat dir x)) (oref proj :srcroot))
-      ;; hack, many Ant projects have src & test dirs, or src/java & src/test
-      (let* (src-dirs
-	     (src-dir1 (concat dir "src/"))
-	     (test-dir1 (concat dir "test/"))
-	     (src-dir2 (concat dir "src/java/"))
-	     (test-dir2 (concat dir "src/test/"))
-	     )
-	(if (file-exists-p src-dir2)
-	    (progn
-	      (add-to-list 'src-dirs src-dir2)
-	      (when (file-exists-p test-dir2) (add-to-list 'src-dirs test-dir2)))
-	    (progn
-	      (when (file-exists-p src-dir1) (add-to-list 'src-dirs src-dir1))
-	      (when (file-exists-p test-dir1) (add-to-list 'src-dirs test-dir1))))
-	;; TODO: add cache?
-	(nreverse src-dirs)))))
+  (let ((dir (ede-project-root-directory proj))
+	(src-dirs (call-next-method)))
+    (cond (src-dirs src-dirs)
+	  ((oref proj :srcroot) (mapcar (lambda (x) (concat dir x)) (oref proj :srcroot)))
+	   ;; hack, many Ant projects have src & test dirs, or src/java & src/test
+	  (t (let* ((src-dir1 (concat dir "src/"))
+		    (test-dir1 (concat dir "test/"))
+		    (src-dir2 (concat dir "src/java/"))
+		    (test-dir2 (concat dir "src/test/")))
+	       (if (file-accessible-directory-p src-dir2)
+		   (progn
+		     (add-to-list 'src-dirs src-dir2)
+		     (when (file-accessible-directory-p test-dir2) (add-to-list 'src-dirs test-dir2)))
+		 (progn
+		   (when (file-accessible-directory-p src-dir1) (add-to-list 'src-dirs src-dir1))
+		   (when (file-accessible-directory-p test-dir1) (add-to-list 'src-dirs test-dir1))))
+	       (nreverse src-dirs))))))
 
 ;; TODO: extract targets, etc.
 (defmethod project-rescan ((proj ede-ant-project))

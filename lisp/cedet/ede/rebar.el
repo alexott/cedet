@@ -91,6 +91,7 @@ ROOTPROJ is nil, since there is only one project."
   (call-next-method)
   (ede-normalize-file/directory this ede-rebar-project-file-name)
   ;; TODO: add analysis of rebar.config
+  (oset this source-dirs '((erlang-mode "src" "include" "test")))
   )
 
 (defmethod project-compile-project ((proj ede-rebar-project) &optional command)
@@ -103,15 +104,6 @@ Argument COMMAND is the command to use when compiling."
 		      (oref proj :project-options)
 		      (oref proj :target-options)
 		      (oref proj :current-target))))))
-
-
-;; TODO: really should be based on content of rebar.config file. But we need parser for it...
-;; TODO: could be also a C code...
-(defmethod ede-source-paths ((proj ede-rebar-project) mode)
-  "Get the base to all source trees in the current project for MODE."
-  (let ((dir (ede-project-root-directory proj)))
-    (mapcar (lambda (x) (concat dir x))
-	    '("src" "include" "test"))))
 
 ;; TODO: re-implement when rebar.config parser will be available
 (defmethod project-rescan ((proj ede-rebar-project))

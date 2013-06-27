@@ -88,7 +88,11 @@ ROOTPROJ is nil, since there is only one project."
   (call-next-method)
   (ede-normalize-file/directory this ede-lein2-project-file-name)
   (oset this supports-multiple-commands-p nil)
-  ;; TODO: add analysis of project.clj
+  ;; TODO: add analysis of project.clj by calling rescan?
+  ;; TODO: move to rescan later, and it should be based on content of project.clj
+  (oset this source-dirs '((java-mode "src-java" "java")
+			   (clojure-mode "src" "test")
+			   (clojurescript-mode "src-cljs")))
   )
 
 (defmethod project-compile-project ((proj ede-lein2-project) &optional command)
@@ -114,16 +118,7 @@ Argument COMMAND is the command to use when compiling."
 				      `(,nil ,nil ,nil "classpath"
 					     ,lein2-outfile-name)))
 
-;; TODO: really should be based on content of project.clj file. But we need parser for it...
-(defmethod ede-source-paths ((proj ede-lein2-project) mode)
-  "Get the base to all source trees in the current project for MODE."
-  (let ((dir (ede-project-root-directory proj)))
-    (mapcar (lambda (x) (concat dir x))
-	    (cond
-	     ((eq mode 'java-mode) '("src-java"))
-	     ((eq mode 'clojure-mode) '("src" "test"))))))
-
-;; TODO: re-implement when pom.xml parser will be available
+;; TODO: re-implement when project.clj parser will be available
 (defmethod project-rescan ((proj ede-lein2-project))
   "Rescan the EDE proj project THIS."
   (when (ede-single-root-file-updated-p proj)

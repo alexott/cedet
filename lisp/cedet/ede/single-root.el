@@ -23,20 +23,32 @@
 
 ;;;###autoload
 (defclass ede-single-root-project (ede-project)
-  ((file-mod-time :initform 0)
-   (supports-multiple-commands-p :initform t)
+  ((file-mod-time :initform 0
+		  :documentation "Modification time for project file")
+   (supports-multiple-commands-p :initform t
+				 :documentation "")
    (project-options :initform nil
 		   :initarg :project-options
-		   :type list)
+		   :type list
+		   :documentation "")
    (current-target :initform nil
 		   :initarg :current-target
-		   :type list)
+		   :type list
+		   :documentation "")
    (target-options :initform nil
 		   :initarg :target-options
-		   :type list)
+		   :type list
+		   :documentation "")
    (existing-targets :initform nil
 		     :initarg :existing-targets
-		     :type list)
+		     :type list
+		     :documentation "")
+   (source-dirs :initform nil
+		:initarg :source-dirs
+		:type list
+		:documentation "Alist that maps a major mode into list of directories with
+source code.  In most cases, project itself will generate it automatically, based on the
+content of project file.")
    )
   "Base project class for projects with project file in root directory."
   :method-invocation-order :depth-first)
@@ -47,7 +59,7 @@
 ;; corresponding function to setup them
 ;; TODO: add method to change current target(s) in given project - it should use 
 ;; TODO: add method to change target options?
-;; TODO: source directories should be a part of project? source directories are alists
+;; DONE: source directories should be a part of project? source directories are alists
 ;; that maps mode to list of directories
 ;; TODO: should we limit a choice of available global options?
 ;; TODO: how source directories could be dynamic? Like, don't include test source code
@@ -122,6 +134,17 @@ Argument COMMAND is the command to use for compiling the target."
   "Return PROJ, for handling all subdirs below DIR."
   proj)
 
+(defmethod ede-source-paths ((proj ede-single-root-project) mode)
+  "Get the base to all source trees in the current project for MODE."
+  (let ((dir (ede-project-root-directory proj))
+	(src-dirs (assoc mode (oref proj source-dirs))))
+    (when src-dirs
+      (remove nil
+	      (mapcar (lambda (x)
+			(let ((dir-name (concat dir x)))
+			  (when (file-accessible-directory-p dir-name)
+			    dir-name)))
+		      (cdr src-dirs))))))
 
 ;;; Utility functions
 (defun ede-single-root-get-mod-time (file)
