@@ -165,7 +165,7 @@ Argument COMMAND is the command to use when compiling."
 (defmethod project-rescan ((proj ede-ant-project))
   "Rescan the EDE proj project THIS."
   (when (ede-single-root-file-updated-p proj)
-    ;; TODO: fill information
+    ;; TODO: fill information, like 'existing-targets, etc.
     ))
 
 ;; How to handle, when we have several files with the same name?

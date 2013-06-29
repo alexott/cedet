@@ -71,7 +71,11 @@ ROOTPROJ is nil, since there is only one project."
                                  :name "Leiningen dir" ; make fancy name from dir here.
                                  :directory dir
                                  :file (expand-file-name ede-lein2-project-file-name dir)
-				 :current-targets '("jar"))))
+				 :current-targets '("jar")
+				 ;; TODO: should be determined automatically, based on
+				 ;; project's content
+				 :existing-targets '("jar" "install" "clean" "test"
+						     "uberjar" "deps" "check" "run" "javac"))))
 	(ede-add-project-to-global-list this)
 	this)))
 

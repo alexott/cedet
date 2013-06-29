@@ -154,7 +154,9 @@ ROOTPROJ is nil, since there is only one project."
                                  :directory dir
                                  :file (expand-file-name "pom.xml" dir)
 				 :current-targets '("package")
-                                 )))
+				 ;; TODO: should be determined automatically, based on
+				 ;; project's content
+				 :existing-targets '("package" "install" "clean" "test"))))
          (ede-add-project-to-global-list this)
          ;; TODO: the above seems to be done somewhere else, maybe ede-load-project-file
          ;; this seems to lead to multiple copies of project objects in ede-projects

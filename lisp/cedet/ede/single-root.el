@@ -159,34 +159,48 @@ Argument COMMAND is the command to use for compiling the target."
     (> (ede-single-root-get-mod-time (oref proj file))
        (oref proj file-mod-time))))
 
-;; TODO: allow to specify a slot with possible completions?
-;; TODO: should we allow to enter arbitrary strings, or we should enforce selection from
-;; given list?
-(defun ede-single-project-read-list-from-minibufer (proj slot descr &optional one-value?)
+(defun ede-single-project-read-string-with-compl (prompt &optional compls require-match?)
+  "Reads string from minubufer using completions if they're specified"
+  (if compls
+      (completing-read prompt compls nil require-match?)
+    (read-from-minibuffer prompt)))
+
+(defun ede-single-project-read-list-from-minibufer (proj slot descr
+							 &optional one-value? compl-slot-or-list)
   (if (and proj (symbolp slot) (slot-exists-p proj slot))
-      (let (lst
-	    (str (read-from-minibuffer (format "Enter the first %s (ENTER to finish): " descr))))
+      (let* (lst
+	     (compls (cond ((and (symbolp compl-slot-or-list)
+				 (slot-exists-p proj compl-slot-or-list))
+			    (eieio-oref proj compl-slot-or-list))
+			   ((sequencep compl-slot-or-list) compl-slot-or-list)))
+	    (str (ede-single-project-read-string-with-compl (format "Enter the first %s (ENTER to finish): " descr)
+							    compls)))
 	(while (and str (not (= (length str) 0)))
 	  (setq lst (cons str lst))
 	  (if one-value?
 	      (setq str nil)
-	    (setq str (read-from-minibuffer (format "Enter the next %s (ENTER to finish): " descr)))))
+	    (setq str (ede-single-project-read-string-with-compl (format "Enter the next %s (ENTER to finish): " descr)
+								 compls))))
 	(eieio-oset proj slot (nreverse lst)))
     (message "There is no project, or slot '%s' doesn't exist in current project" slot)))
 
 (defun ede-single-project-set-current-targets ()
+  "Sets target(s) for current project."
   (interactive)
   (let ((proj (ede-current-project)))
     (ede-single-project-read-list-from-minibufer proj 'current-targets "target"
 						 (and proj (slot-exists-p proj 'supports-multiple-commands-p)
-						      (not (oref proj supports-multiple-commands-p))))))
+						      (not (oref proj supports-multiple-commands-p)))
+						 'existing-targets)))
 
 (defun ede-single-project-set-current-target-options ()
+  "Sets additional options for current target(s) in current project."
   (interactive)
   (let ((proj (ede-current-project)))
     (ede-single-project-read-list-from-minibufer proj 'target-options "target option")))
 
 (defun ede-single-project-set-project-options ()
+  "Sets a list of target-independent options for current project."
   (interactive)
   (let ((proj (ede-current-project)))
     (ede-single-project-read-list-from-minibufer proj 'project-options "project option")))
