@@ -67,7 +67,7 @@ ROOTPROJ is nil, since there is only one project."
 				:name "Rebar dir" ; make fancy name from dir here.
 				:directory dir
 				:file (expand-file-name ede-rebar-project-file-name dir)
-				:current-target '("compile")
+				:current-targets '("compile")
 				:existing-targets '("compile" "ct" "eunit" "generate"
 						    "analyze" "check-deps" "get-deps"
 						    "clean" "build_plt" "check_plt"
@@ -103,7 +103,7 @@ Argument COMMAND is the command to use when compiling."
 	      (append (list ede-rebar-rebar-command)
 		      (oref proj :project-options)
 		      (oref proj :target-options)
-		      (oref proj :current-target))))))
+		      (oref proj :current-targets))))))
 
 ;; TODO: re-implement when rebar.config parser will be available
 (defmethod project-rescan ((proj ede-rebar-project))

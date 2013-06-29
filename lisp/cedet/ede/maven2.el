@@ -153,7 +153,7 @@ ROOTPROJ is nil, since there is only one project."
                                  :name "maven dir" ; TODO: make fancy name from dir here.
                                  :directory dir
                                  :file (expand-file-name "pom.xml" dir)
-				 :current-target '("package")
+				 :current-targets '("package")
                                  )))
          (ede-add-project-to-global-list this)
          ;; TODO: the above seems to be done somewhere else, maybe ede-load-project-file
@@ -198,7 +198,7 @@ Argument COMMAND is the command to use when compiling."
 	      (append (list ede-maven2-maven-command)
 		      ede-maven2-maven-options
 		      (oref proj :project-options)
-		      (oref proj :current-target)
+		      (oref proj :current-targets)
 		      (oref proj :target-options))))))
 
 ;;; Classpath-related...

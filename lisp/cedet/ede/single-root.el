@@ -31,10 +31,10 @@
 		   :initarg :project-options
 		   :type list
 		   :documentation "")
-   (current-target :initform nil
-		   :initarg :current-target
-		   :type list
-		   :documentation "")
+   (current-targets :initform nil
+		    :initarg :current-targets
+		    :type list
+		    :documentation "")
    (target-options :initform nil
 		   :initarg :target-options
 		   :type list
@@ -57,8 +57,8 @@ content of project file.")
 ;; DONE: we should be able to specify several targets in command-line?
 ;; DONE: add slot for global options, like -o/-U for lein, -B for maven, etc. and
 ;; corresponding function to setup them
-;; TODO: add method to change current target(s) in given project - it should use 
-;; TODO: add method to change target options?
+;; DONE: add method to change current target(s) in given project - it should use 
+;; DONE: add method to change target options?
 ;; DONE: source directories should be a part of project? source directories are alists
 ;; that maps mode to list of directories
 ;; TODO: should we limit a choice of available global options?
@@ -158,6 +158,38 @@ Argument COMMAND is the command to use for compiling the target."
   (when proj
     (> (ede-single-root-get-mod-time (oref proj file))
        (oref proj file-mod-time))))
+
+;; TODO: allow to specify a slot with possible completions?
+;; TODO: should we allow to enter arbitrary strings, or we should enforce selection from
+;; given list?
+(defun ede-single-project-read-list-from-minibufer (proj slot descr &optional one-value?)
+  (if (and proj (symbolp slot) (slot-exists-p proj slot))
+      (let (lst
+	    (str (read-from-minibuffer (format "Enter the first %s (ENTER to finish): " descr))))
+	(while (and str (not (= (length str) 0)))
+	  (setq lst (cons str lst))
+	  (if one-value?
+	      (setq str nil)
+	    (setq str (read-from-minibuffer (format "Enter the next %s (ENTER to finish): " descr)))))
+	(eieio-oset proj slot (nreverse lst)))
+    (message "There is no project, or slot '%s' doesn't exist in current project" slot)))
+
+(defun ede-single-project-set-current-targets ()
+  (interactive)
+  (let ((proj (ede-current-project)))
+    (ede-single-project-read-list-from-minibufer proj 'current-targets "target"
+						 (and proj (slot-exists-p proj 'supports-multiple-commands-p)
+						      (not (oref proj supports-multiple-commands-p))))))
+
+(defun ede-single-project-set-current-target-options ()
+  (interactive)
+  (let ((proj (ede-current-project)))
+    (ede-single-project-read-list-from-minibufer proj 'target-options "target option")))
+
+(defun ede-single-project-set-project-options ()
+  (interactive)
+  (let ((proj (ede-current-project)))
+    (ede-single-project-read-list-from-minibufer proj 'project-options "project option")))
 
 (provide 'ede/single-root)
 

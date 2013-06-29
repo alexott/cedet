@@ -117,7 +117,7 @@ Argument COMMAND is the command to use when compiling."
 	      (append (list ede-ant-ant-command)
 		      ede-ant-ant-options
 		      (oref proj :project-options)
-		      (oref proj :current-target)
+		      (oref proj :current-targets)
 		      (oref proj :target-options))))))
 
 ;;; Classpath-related stuff

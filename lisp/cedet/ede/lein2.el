@@ -71,7 +71,7 @@ ROOTPROJ is nil, since there is only one project."
                                  :name "Leiningen dir" ; make fancy name from dir here.
                                  :directory dir
                                  :file (expand-file-name ede-lein2-project-file-name dir)
-				 :current-target '("jar"))))
+				 :current-targets '("jar"))))
 	(ede-add-project-to-global-list this)
 	this)))
 
@@ -104,8 +104,8 @@ Argument COMMAND is the command to use when compiling."
 	      (append (list ede-lein2-lein-command)
 		      ede-lein2-lein-options
 		      (oref proj :project-options)
-		      (when (oref proj :current-target)
-			(list (car (oref proj :current-target))))
+		      (when (oref proj :current-targets)
+			(list (car (oref proj :current-targets))))
 		      (oref proj :target-options))))))
 
 ;;; Classpath-related stuff
