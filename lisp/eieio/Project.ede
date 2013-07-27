@@ -22,8 +22,8 @@
     :name "examples"
     :path ""
     :compiler 'ede-emacs-compiler
-    :source '("chart.el" "eieio-speedbar.el" "linemark.el")
-    :aux-packages '("cedet-compat" "linemark")
+    :source '("chart.el" "eieio-speedbar.el")
+    :aux-packages '("cedet-compat")
     :pre-load-packages '("cedet-compat")
     )
    )

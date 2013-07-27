@@ -6,7 +6,7 @@
 # EDE is the Emacs Development Environment.
 # http://cedet.sourceforge.net/ede.shtml
 #
-LOADPATH= ../cedet/  ./
+LOADPATH= ../cedet/ 
 require=$(foreach r,$(1),(require (quote $(r))))
 EMACSFLAGS=-batch --no-site-file --eval '(setq debug-on-error t)' -l "../../cedet-remove-builtin.el"
 EMACS=@echo "    > $@";emacs
@@ -18,7 +18,7 @@ ede_FILES=Project.ede Makefile
 LOADDEFS=loaddefs.el
 LOADDIRS=.
 eieio_LISP=eieio-core.el eieio.el eieio-opt.el eieio-custom.el eieio-base.el eieio-datadebug.el
-examples_LISP=chart.el eieio-speedbar.el linemark.el
+examples_LISP=chart.el eieio-speedbar.el
 VERSION=1.1beta
 DISTDIR=$(top)cedet-topdir-$(VERSION)/eieio
 
