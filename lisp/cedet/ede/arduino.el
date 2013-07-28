@@ -380,7 +380,7 @@ Emacs back to the Arduino IDE."
 	(ede-arduino)
       (error "EDE cannot build/upload arduino projects without preferences from the arduino IDE")))
   (ede-arduino-read-prefs ede-arduino-preferences-file)
-  (when (interactive-p)
+  (when (called-interactively-p 'any)
       (require 'data-debug)
       (data-debug-show-stuff ede-arduino-active-prefs "Arduino Prefs"))
   ede-arduino-active-prefs)
