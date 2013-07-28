@@ -15,7 +15,7 @@
     :name "eieio"
     :path ""
     :source '("eieio-core.el" "eieio.el" "eieio-opt.el" "eieio-custom.el" "eieio-base.el" "eieio-datadebug.el")
-    :aux-packages '("cedet-compat")
+    :aux-packages '("cedet-compat" "eieio")
     :pre-load-packages '("cedet-compat")
     )
    (ede-proj-target-elisp "examples"
