@@ -504,7 +504,7 @@ if a cached copy of the return object is found."
 					     'current-context
 					     'exit-cache-zone)))
 	  ;; Check for interactivity
-	  (when (cedet-called-interactively-p 'any)
+	  (when (called-interactively-p 'any)
 	    (if answer
 		(semantic-analyze-pop-to-context answer)
 	      (message "No Context."))

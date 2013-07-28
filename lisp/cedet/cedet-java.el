@@ -87,7 +87,7 @@ return nil."
 	  (error "Version of Java is %s.  Need at least %s"
 		 rev cedet-java-min-version))
       ;; Else, return TRUE, as in good enough.
-      (when (cedet-called-interactively-p 'interactive)
+      (when (called-interactively-p 'interactive)
 	(message "Java %s  - Good enough." rev))
       t)))
 
@@ -100,7 +100,7 @@ Parses the java string with `cedet-java-version-regexp'."
 	(rev nil))
     (if (not b)
 	(progn
-	  (when (cedet-called-interactively-p 'interactive)
+	  (when (called-interactively-p 'interactive)
 	    (message "java not found."))
 	  nil)
       (with-current-buffer b

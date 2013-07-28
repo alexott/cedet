@@ -157,7 +157,7 @@ The returned buffer will be recycled in future calls to this function."
 		   )))
 	    (message "Exuberant CTags not found.  Found %s" whatver)
 	    nil)
-	(when (cedet-called-interactively-p 'interactive)
+	(when (called-interactively-p 'interactive)
 	  (message "Detected Exuberant CTags version : %s %s"
 		   str
 		   (if ropt
@@ -196,7 +196,7 @@ return nil."
 		     (semantic-ectags-test-version)
 		   (error nil))
 	       (semantic-ectags-test-version))))
-    (when (and res (cedet-called-interactively-p 'interactive))
+    (when (and res (called-interactively-p 'interactive))
       (message "Exuberent CTags %s  - Good enough for CEDET." (car (semantic-ectags-version))))))
 
 (provide 'semantic/ectags/util)

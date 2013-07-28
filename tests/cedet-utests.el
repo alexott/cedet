@@ -77,9 +77,6 @@
     ;; Files
     ("cedet file conversion" . cedet-files-utest)
 
-    ;; Compatability APIs
-    ("cedet compatability fcns" . cedet-compat-utest)
-
     ;;
     ;; EIEIO
     ;;
@@ -167,7 +164,7 @@ of just logging the error."
       ;; Cleanup stray input and events that are in the way.
       ;; Not doing this causes sit-for to not refresh the screen.
       ;; Doing this causes the user to need to press keys more frequently.
-      (when (and (cedet-called-interactively-p) (input-pending-p))
+      (when (and (called-interactively-p 'any) (input-pending-p))
 	(if (fboundp 'read-event)
 	    (read-event)
 	  (read-char)))

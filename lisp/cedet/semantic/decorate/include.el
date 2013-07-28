@@ -397,7 +397,7 @@ Argument EVENT is the mouse clicked event."
 		  (semanticdb-file-table-object file t))))
     (with-output-to-temp-buffer (help-buffer) ; "*Help*"
       (help-setup-xref (list #'semantic-decoration-include-describe)
-		       (cedet-called-interactively-p 'interactive))
+		       (called-interactively-p 'interactive))
       (princ "Include File: ")
       (princ (semantic-format-tag-name tag nil t))
       (princ "\n")
@@ -496,7 +496,7 @@ Argument EVENT is the mouse clicked event."
 	(mm major-mode))
     (with-output-to-temp-buffer (help-buffer) ; "*Help*"
       (help-setup-xref (list #'semantic-decoration-unknown-include-describe)
-		       (cedet-called-interactively-p 'interactive))
+		       (called-interactively-p 'interactive))
       (princ "Include File: ")
       (princ (semantic-format-tag-name tag nil t))
       (princ "\n\n")
@@ -580,7 +580,7 @@ Argument EVENT is the mouse clicked event."
 	 (mm major-mode))
     (with-output-to-temp-buffer (help-buffer) ; "*Help*"
       (help-setup-xref (list #'semantic-decoration-fileless-include-describe)
-		       (cedet-called-interactively-p 'interactive))
+		       (called-interactively-p 'interactive))
       (princ "Include Tag: ")
       (princ (semantic-format-tag-name tag nil t))
       (princ "\n\n")
@@ -621,7 +621,7 @@ Argument EVENT is the mouse clicked event."
   (let ((tag (semantic-current-tag)))
     (with-output-to-temp-buffer (help-buffer); "*Help*"
       (help-setup-xref (list #'semantic-decoration-unparsed-include-describe)
-		       (cedet-called-interactively-p 'interactive))
+		       (called-interactively-p 'interactive))
 
       (princ "Include File: ")
       (princ (semantic-format-tag-name tag nil t))
@@ -702,7 +702,7 @@ Argument EVENT describes the event that caused this function to be called."
 	 )
     (with-output-to-temp-buffer (help-buffer) ;"*Help*"
       (help-setup-xref (list #'semantic-decoration-all-include-summary)
-		       (cedet-called-interactively-p 'interactive))
+		       (called-interactively-p 'interactive))
 
       (princ "Include Summary for File: ")
       (princ (file-truename (buffer-file-name)))

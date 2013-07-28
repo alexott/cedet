@@ -969,7 +969,7 @@ the regular parser."
 (defun semantic-c-debug-mode-init (mm)
   "Debug mode init for major mode MM after we're done parsing now."
   (interactive (list semantic-c-debug-mode-init-last-mode))
-  (if (cedet-called-interactively-p 'interactive)
+  (if (called-interactively-p 'interactive)
       ;; Do the debug.
       (progn
 	(switch-to-buffer (get-buffer-create "*MODE HACK TEST*"))

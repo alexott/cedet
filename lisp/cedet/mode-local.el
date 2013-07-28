@@ -739,7 +739,7 @@ invoked interactively."
           #'(lambda (s) (get s 'mode-local-symbol-table))
           t (symbol-name major-mode))))
   (when (setq mode (intern-soft mode))
-    (mode-local-describe-bindings-1 mode (cedet-called-interactively-p 'any))))
+    (mode-local-describe-bindings-1 mode (called-interactively-p 'any))))
 
 ;; ;;; find-func support (Emacs 21.4, or perhaps 22.1)
 ;; ;;

@@ -105,7 +105,7 @@ return nil."
 	    (error "Version of Graphviz 'dot' is %s.  Need at least %s"
 		   rev cedet-graphviz-min-version))
 	;; Else, return TRUE, as in good enough.
-	(when (cedet-called-interactively-p 'interactive)
+	(when (called-interactively-p 'interactive)
 	  (message "Graphviz Version %s  - Good enough for CEDET." rev))
 	t))))
 

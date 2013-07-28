@@ -76,13 +76,13 @@ Convert the output tags into Semantic tags."
   (when (not semantic-ectags-lang)
     (error "Exuberant CTags support for Semantic not configured for %s"
            major-mode))
-  (let* ((semantic-ectags-collect-errors (cedet-called-interactively-p 'any))
+  (let* ((semantic-ectags-collect-errors (called-interactively-p 'any))
          (start (current-time))
          (tags
           (semantic-ectags-parse-file-with-mode (buffer-file-name) major-mode))
          (end (current-time)))
 
-    (when (cedet-called-interactively-p 'any)
+    (when (called-interactively-p 'any)
       (message "Parsed %d tags in %d seconds."
                (length tags)
                (semantic-elapsed-time start end))

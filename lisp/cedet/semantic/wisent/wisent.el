@@ -134,7 +134,7 @@ POSITIONS are available."
   "Toggle whether to issue more messages while parsing."
   (interactive)
   (setq wisent-parse-verbose-flag (not wisent-parse-verbose-flag))
-  (when (cedet-called-interactively-p 'interactive)
+  (when (called-interactively-p 'interactive)
     (message "More messages while parsing %sabled"
              (if wisent-parse-verbose-flag "en" "dis"))))
 

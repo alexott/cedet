@@ -84,7 +84,7 @@ Optional HEADERFCN should be called to insert a few bits of info first."
   (interactive (list (eieio-read-class "Class: ")))
   (with-output-to-temp-buffer (help-buffer) ;"*Help*"
     (help-setup-xref (list #'eieio-describe-class class headerfcn)
-		     (cedet-called-interactively-p 'interactive))
+		     (called-interactively-p 'interactive))
 
     (when headerfcn (funcall headerfcn))
     (prin1 class)
@@ -338,7 +338,7 @@ Also extracts information about all methods specific to this generic."
   (eieio--check-type generic-p generic)
   (with-output-to-temp-buffer (help-buffer) ; "*Help*"
     (help-setup-xref (list #'eieio-describe-generic generic)
-		     (cedet-called-interactively-p 'interactive))
+		     (called-interactively-p 'interactive))
 
     (prin1 generic)
     (princ " is a generic function")

@@ -177,62 +177,12 @@ Return a coding system between BEGIN and END."
 	  :test #'eq :from-end t)))))
   )
 
-
-(if (not (fboundp 'called-interactively-p))
-    (defmacro cedet-called-interactively-p (&optional arg)
-      "Compat function.  Calls `interactive-p'"
-      '(interactive-p))
-  ;; Else, it is defined, but perhaps too old?
-  (condition-case nil
-      (progn
-	;; This condition case also prevents this from running twice.
-	(called-interactively-p nil)
-	;; An alias for the real deal.
-	(defalias 'cedet-called-interactively-p 'called-interactively-p))
-    (error
-     ;; Create a new one
-     (defmacro cedet-called-interactively-p (&optional arg)
-       "Revised from the built-in version to accept an optional arg."
-       (case (eval arg)
-	 (interactive '(interactive-p))
-	 ((any nil) '(called-interactively-p))))
-     )))
-
 (when (and (= emacs-major-version 23)
 	   (= emacs-minor-version 1))
   (message "Loading CEDET fallback autoload library.")
   (require 'autoload
 	   (expand-file-name "../../etc/fallback-libraries/autoload.el"
 			     (file-name-directory load-file-name))))
-
-;;; TESTS
-;;
-;;;###autoload
-(defun cedet-compat-utest ()
-  "Test compatability functions."
-  (interactive)
-  (when (not noninteractive)
-    ;; Interactive tests need to be called interactively.
-    (call-interactively 'cedet-utest-interactivep))
-  ;; Other...
-  )
-
-(defun cedet-utest-interactivep ()
-  "Test that `cedet-called-interactively-p' works."
-  (interactive)
-  (unless (cedet-called-interactively-p 'interactive)
-    (error "Failed interactive test"))
-  (unless (cedet-called-interactively-p 'any)
-    (error "Failed interactive any test"))
-  (cedet-utest-interactivep-subfcn)
-  (message "All CEDET called-interactively tests pass."))
-
-(defun cedet-utest-interactivep-subfcn ()
-  "Test that `cedet-called-interactively-p' works noninteractively."
-  (when (cedet-called-interactively-p 'interactive)
-    (error "Failed non-interactive test"))
-  (when (cedet-called-interactively-p 'any)
-    (error "Failed non-interactive any test")))
 
 (provide 'cedet-compat)
 

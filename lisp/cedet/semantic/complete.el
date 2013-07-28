@@ -2174,7 +2174,7 @@ how completion options are displayed."
       (semantic-complete-inline-analyzer
        (semantic-analyze-current-context (point))))
   ;; Report a message if things didn't startup.
-  (if (and (cedet-called-interactively-p 'any)
+  (if (and (called-interactively-p 'any)
 	   (not (semantic-completion-inline-active-p)))
       (message "Inline completion not needed.")
     ;; Since this is most likely bound to something, and not used
@@ -2196,7 +2196,7 @@ to change how completion options are displayed."
       (semantic-complete-inline-analyzer-idle
        (semantic-analyze-current-context (point))))
   ;; Report a message if things didn't startup.
-  (if (and (cedet-called-interactively-p 'interactive)
+  (if (and (called-interactively-p 'interactive)
 	   (not (semantic-completion-inline-active-p)))
       (message "Inline completion not needed.")))
 
@@ -2243,7 +2243,7 @@ will perform the completion."
   (if (not (semantic-completion-inline-active-p))
       (semantic-complete-inline-tag-project))
   ;; Report a message if things didn't startup.
-  (if (and (cedet-called-interactively-p 'interactive)
+  (if (and (called-interactively-p 'interactive)
 	   (not (semantic-completion-inline-active-p)))
       (message "Inline completion not needed."))
   )

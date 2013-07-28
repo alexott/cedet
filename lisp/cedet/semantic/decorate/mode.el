@@ -340,7 +340,7 @@ Return non-nil if the decoration style is enabled."
         (when semantic-decoration-mode
           (semantic-decoration-mode -1)
           (semantic-decoration-mode 1))
-        (when (cedet-called-interactively-p 'interactive)
+        (when (called-interactively-p 'interactive)
           (message "Decoration style %s turned %s" (car style)
                    (if flag "on" "off"))))
       flag)))
