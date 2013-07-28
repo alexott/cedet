@@ -32,6 +32,8 @@
 
 (require 'ede)
 
+(declare-function data-debug-show-stuff "data-debug")
+
 ;;; Code:
 (defcustom ede-arduino-makefile-name "Makefile"
   "File name to use for generated Makefile."
