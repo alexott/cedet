@@ -88,14 +88,15 @@ Newer bzr commits should have proper names in them.")
 
 (defvar cuc-dirs
   (let ((pack cedet-packages)
-	(dirs nil))
+	(dirs nil)
+	loc)
     (while pack
-      (setq dirs
-	    (cons (file-name-directory (locate-library
-					(symbol-name (car (car pack)))))
-		  dirs)
-	    pack
-	    (cdr pack)))
+      (setq loc (locate-library
+		 (symbol-name (car (car pack)))))
+      (when loc
+	(setq dirs
+	      (cons (file-name-directory loc) dirs)))
+      (setq pack (cdr pack)))
     (let* ((base (file-name-directory (car dirs)))
 	   (root (file-name-directory (directory-file-name base)))
 	   )
@@ -103,17 +104,21 @@ Newer bzr commits should have proper names in them.")
     (nreverse dirs))
   "List of directories we need to change the ChangeLog in.")
 
-(defun cuc-update-changelog (dir)
+(defun cuc-update-changelog (dir &optional start-revision)
   "Update the changelog in DIR."
-  (interactive "DDir: ")
+  (interactive "DDir: \nP")
   (find-file (concat dir "ChangeLog"))
   (erase-buffer)
   (goto-char (point-min))
   (sit-for 0)
   (message "Calling bzr log on %s..."
 	   (file-name-nondirectory (directory-file-name dir)))
-  (call-process "bzr" nil (current-buffer) t
-		"log" "-n0" "-v" (expand-file-name (directory-file-name dir)))
+  (if (numberp start-revision)
+      (call-process "bzr" nil (current-buffer) t
+		    "log" "-n0" "-v" (expand-file-name (directory-file-name dir))
+		    "-r" (format "%d.." start-revision))
+    (call-process "bzr" nil (current-buffer) t
+		  "log" "-n0" "-v" (expand-file-name (directory-file-name dir))))
   ;; Symmetry makes things easier.
   (goto-char (point-max))
   (insert "------------------------------------------------------------")
