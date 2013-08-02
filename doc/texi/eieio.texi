@@ -257,7 +257,7 @@ textbook or tutorial first, especially if you only know OOP from
 languages like C++ or Java.  If on the other hand you are already
 familiar with CLOS, you should be aware that @eieio{} does not implement
 the full CLOS specificiation and also differs in some other aspects
-(@ref{Introduction}, and @ref{CLOS compatibility}).
+(@xref{Introduction}, and @ref{CLOS compatibility}).
 
 A @dfn{class} is a definition for organizing data and methods
 together.  An @eieio{} class has structures similar to the classes
