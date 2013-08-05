@@ -734,8 +734,9 @@ The class returned from the scope calculation is variable
 	(when (called-interactively-p 'any)
 	  (require 'eieio-datadebug)
 	  (data-debug-show scopecache))
-	;; Return ourselves
-	scopecache))))
+	;; Return ourselves, but make a clone first so that the caller
+	;; can reset the scope cache without affecting others.
+	(clone scopecache)))))
 
 (defun semantic-scope-find (name &optional class scope-in)
   "Find the tag with NAME, and optional CLASS in the current SCOPE-IN.
