@@ -912,7 +912,8 @@ represent jar files."
 	 ((file-directory-p P)
 	  (push P cpaths))
 	 ;; Jar files need a special database
-	 ((and (string= "jar" (file-name-extension P))
+	 ((and (or (string= "jar" (file-name-extension P))
+		   (string= "zip" (file-name-extension P)))
 	       (file-exists-p P))
 	  (push
 	   (semanticdb-create-database semanticdb-java-jar-database P)
