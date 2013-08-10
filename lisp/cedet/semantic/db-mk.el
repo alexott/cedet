@@ -75,3 +75,7 @@
 (semanticdb-save-all-db)
 
 ;; Done
+
+;; Local variables:
+;; byte-compile-warnings: (not unresolved)
+;; End:

@@ -96,7 +96,7 @@ in a buffer."
 		      (error "Nothing to complete")
 		    (:override))))
 	;; If interactive, display them.
-	(when (cedet-called-interactively-p 'any)
+	(when (called-interactively-p 'any)
 	  (with-output-to-temp-buffer "*Possible Completions*"
 	    (semantic-analyze-princ-sequence ans "" (current-buffer)))
 	  (shrink-window-if-larger-than-buffer
@@ -104,7 +104,7 @@ in a buffer."
 	ans))
     ;; Buffer was not parsed by Semantic.
     ;; Raise error if called interactively.
-    (when (cedet-called-interactively-p 'any)
+    (when (called-interactively-p 'any)
       (error "Buffer was not parsed by Semantic."))))
 
 (defun semantic-analyze-possible-completions-default (context &optional flags)

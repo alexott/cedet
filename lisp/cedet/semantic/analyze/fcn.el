@@ -165,7 +165,10 @@ SCOPE is the scope object with additional items in which to search for names."
 The TYPE field in a tag can be nil (return nil)
 or a string, or a non-positional tag."
   (cond ((semantic-tag-p type)
-	 (semantic-tag-name type))
+	 (if (semantic-tag-named-parent type)
+	     (semantic-analyze-unsplit-name `(,(semantic-tag-named-parent type)
+					      ,(semantic-tag-name type)))
+	   (semantic-tag-name type)))
 	((stringp type)
 	 type)
 	((listp type)
@@ -244,6 +247,8 @@ used by the analyzer debugger."
 	      )
 	  (semantic-scope-set-typecache scope nil)
 	  )))))
+
+(autoload 'semantic-tag-similar-p "semantic/tag-ls")
 
 (defun semantic-analyze-dereference-metatype-stack (type scope &optional type-declaration)
   "Dereference metatypes repeatedly until we hit a real TYPE.

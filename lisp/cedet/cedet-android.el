@@ -225,7 +225,7 @@ return nil."
 	(rev nil))
     (if (not b)
 	(progn
-	  (when (cedet-called-interactively-p 'interactive)
+	  (when (called-interactively-p 'interactive)
 	    (message "adb not found."))
 	  nil)
       (with-current-buffer b
@@ -238,7 +238,7 @@ return nil."
 	      (error "Version of Android Debug Bridge is %s.  Need at least %s"
 		     rev cedet-android-sdk-adb-min-version))
 	  ;; Else, return TRUE, as in good enough.
-	  (when (cedet-called-interactively-p 'interactive)
+	  (when (called-interactively-p 'interactive)
 	    (message "Android Debug Bridge %s  - Good enough." rev))
 	  t)))))
 

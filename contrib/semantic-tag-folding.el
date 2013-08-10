@@ -251,7 +251,7 @@ minor mode is enabled."
           (not semantic-tag-folding-mode)))
   (semantic-tag-folding-mode-setup)
   (run-hooks 'semantic-tag-folding-mode-hook)
-  (if (cedet-called-interactively-p)
+  (if (called-interactively-p 'any)
       (message "folding minor mode %sabled"
                (if semantic-tag-folding-mode "en" "dis")))
   semantic-tag-folding-mode)

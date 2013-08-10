@@ -188,7 +188,7 @@ If optional LEFT is non-nil insert spaces on left."
   "Toggle whether to report verbose information on generated parser."
   (interactive)
   (setq wisent-verbose-flag (not wisent-verbose-flag))
-  (when (cedet-called-interactively-p 'interactive)
+  (when (called-interactively-p 'interactive)
     (message "Verbose report %sabled"
              (if wisent-verbose-flag "en" "dis"))))
 

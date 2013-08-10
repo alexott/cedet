@@ -1256,14 +1256,14 @@ Use semantic tags to navigate."
 (defadvice beginning-of-defun (around senator activate)
   "Move backward to the beginning of a defun.
 If semantic tags are available, use them to navigate."
-  (if (and senator-minor-mode (cedet-called-interactively-p 'any))
+  (if (and senator-minor-mode (called-interactively-p 'any))
       (senator-beginning-of-defun (ad-get-arg 0))
     ad-do-it))
 
 (defadvice end-of-defun (around senator activate)
   "Move forward to next end of defun.
 If semantic tags are available, use them to navigate."
-  (if (and senator-minor-mode (cedet-called-interactively-p 'any))
+  (if (and senator-minor-mode (called-interactively-p 'any))
       (senator-end-of-defun (ad-get-arg 0))
     ad-do-it))
 
@@ -1271,7 +1271,7 @@ If semantic tags are available, use them to navigate."
   "Make text outside current defun invisible.
 The defun visible is the one that contains point or follows point.
 If semantic tags are available, use them to navigate."
-  (if (and senator-minor-mode (cedet-called-interactively-p 'any))
+  (if (and senator-minor-mode (called-interactively-p 'any))
       (senator-narrow-to-defun)
     ad-do-it))
 
@@ -1279,7 +1279,7 @@ If semantic tags are available, use them to navigate."
   "Put mark at end of this defun, point at beginning.
 The defun marked is the one that contains point or follows point.
 If semantic tags are available, use them to navigate."
-  (if (and senator-minor-mode (cedet-called-interactively-p 'any))
+  (if (and senator-minor-mode (called-interactively-p 'any))
       (senator-mark-defun)
     ad-do-it))
 
@@ -1287,7 +1287,7 @@ If semantic tags are available, use them to navigate."
   "Put mark at end of this defun, point at beginning.
 The defun marked is the one that contains point or follows point.
 If semantic tags are available, use them to navigate."
-  (if (and senator-minor-mode (cedet-called-interactively-p 'any))
+  (if (and senator-minor-mode (called-interactively-p 'any))
       (senator-mark-defun)
     ad-do-it))
 
@@ -1338,7 +1338,7 @@ used by add log.")
     (when ft
       (ring-insert senator-tag-ring ft)
       (kill-ring-save (semantic-tag-start ft) (semantic-tag-end ft))
-      (when (cedet-called-interactively-p 'interactive)
+      (when (called-interactively-p 'interactive)
         (message "Use C-y to yank text.  \
 Use `senator-yank-tag' for prototype insert.")))
     ft))
@@ -1352,7 +1352,7 @@ the kill ring.  Retrieve that text with \\[yank]."
   (let ((ct (senator-copy-tag))) ;; this handles the reparse for us.
     (kill-region (semantic-tag-start ct)
                  (semantic-tag-end ct))
-    (when (cedet-called-interactively-p 'interactive)
+    (when (called-interactively-p 'interactive)
       (message "Use C-y to yank text.  \
 Use `senator-yank-tag' for prototype insert."))))
 
@@ -1366,7 +1366,7 @@ yanked to."
       (let ((ft (ring-ref senator-tag-ring 0)))
           (semantic-foreign-tag-check ft)
           (semantic-insert-foreign-tag ft)
-          (when (cedet-called-interactively-p 'interactive)
+          (when (called-interactively-p 'interactive)
             (message "Use C-y to recover the yank the text of %s."
                      (semantic-tag-name ft))))))
 

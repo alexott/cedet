@@ -105,7 +105,7 @@ Return a fully qualified filename."
 	 (ans2 (mapcar (lambda (hit)
 			 (expand-file-name (car (split-string hit " "))))
 		       ans1)))
-    (when (cedet-called-interactively-p 'interactive)
+    (when (called-interactively-p 'interactive)
       (if ans2
 	  (if (= (length ans2) 1)
 	      (message "%s" (car ans2))
@@ -125,7 +125,7 @@ the error code."
       (set-buffer (cedet-cscope-call (list "-d" "-L" "-7" "moose")))
       (goto-char (point-min))
       (let ((ans (looking-at "[^ \n]*cscope: ")))
-	(if (cedet-called-interactively-p 'interactive)
+	(if (called-interactively-p 'interactive)
 	    (if ans
 		(message "No support for CScope in %s" default-directory)
 	      (message "CScope is supported in %s" default-directory))
@@ -146,7 +146,7 @@ return nil."
 	(rev nil))
     (if (not b)
 	(progn
-	  (when (cedet-called-interactively-p 'interactive)
+	  (when (called-interactively-p 'interactive)
 	    (message "CScope not found."))
 	  nil)
       (with-current-buffer b
@@ -159,7 +159,7 @@ return nil."
 	      (error "Version of CScope is %s.  Need at least %s"
 		     rev cedet-cscope-min-version))
 	  ;; Else, return TRUE, as in good enough.
-	  (when (cedet-called-interactively-p 'interactive)
+	  (when (called-interactively-p 'interactive)
 	    (message "CScope %s  - Good enough for CEDET." rev))
 	  t)))))
 

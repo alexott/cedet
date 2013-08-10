@@ -100,7 +100,7 @@ tag that contains point, and return that."
        target (lambda (start end prefix) (setq Lcount (1+ Lcount)))
        (semantic-tag-start tag)
        (semantic-tag-end tag))
-      (when (cedet-called-interactively-p 'interactive)
+      (when (called-interactively-p 'interactive)
 	(message "Found %d occurrences of %s in %.2f seconds"
 		 Lcount (semantic-tag-name target)
 		 (semantic-elapsed-time start (current-time))))

@@ -437,7 +437,7 @@ in to the created node."
 	   (n (apply 'make-instance nodetype (oref nodetype name-default)
 		     :position (vector x y)
 		     fields)))
-      (when (cedet-called-interactively-p 'any)
+      (when (called-interactively-p 'any)
 	(cogre-render n)
 	)
       ;; Return the node.
@@ -454,7 +454,7 @@ LINKTYPE is the eieio class name for the link to insert."
   (if (not linktype) (setq linktype cogre-link))
   (let ((l (make-instance linktype "Link" :start mark :end point)))
 
-    (when (cedet-called-interactively-p 'any)
+    (when (called-interactively-p 'any)
       (cogre-render l))
     l))
 
@@ -592,7 +592,7 @@ It will redraw the links too."
 		 (list e  (read-string "New Name: " name)))))
   (cogre-erase node)
   (oset node object-name (cogre-unique-name cogre-graph name))
-  (when (cedet-called-interactively-p 'any)
+  (when (called-interactively-p 'any)
     (cogre-render-node-after-erase node)
     (cogre-goto-element node)
     ;; If the user changes the name, update the peer.
@@ -608,7 +608,7 @@ It will redraw the links too."
 		 (list e  (read-string "New Package Name: " name)))))
   (cogre-erase node)
   (oset node package-name package)
-  (when (cedet-called-interactively-p 'any)
+  (when (called-interactively-p 'any)
     (cogre-render-node-after-erase node)
     (cogre-goto-element node)
     ;; If the user changes the name, update the peer.

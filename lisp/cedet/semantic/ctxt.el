@@ -168,8 +168,7 @@ Uses the bovinator with the special top-symbol `bovine-inner-scope'
 to collect tags, such as local variables or prototypes."
   ;; This assumes a bovine parser.  Make sure we don't do
   ;; anything in that case.
-  (when (and semantic--parse-table (not (eq semantic--parse-table t))
-	     (not (semantic-parse-tree-unparseable-p)))
+  (when (and semantic--parse-table (not (eq semantic--parse-table t)))
     (let ((vars (semantic-get-cache-data 'get-local-variables)))
       (if vars
 	  (progn
@@ -366,7 +365,7 @@ For example, in the C statement:
 If the cursor is on 'this', will move point to the ; after entry.")
 
 (defun semantic-ctxt-end-of-symbol-default (&optional point)
-  "Move poin to the end of the current symbol under POINT.
+  "Move point to the end of the current symbol under POINT.
 This will move past type/field names when applicable.
 Depends on `semantic-type-relation-separator-character', and will
 work on C like languages."
@@ -397,7 +396,6 @@ work on C like languages."
 				 t)
 			(error nil))
 		      (looking-at fieldsep1)))
-	       (setq symlist (list ""))
 	       (forward-sexp -1)
 	       ;; Skip array expressions.
 	       (while (looking-at "\\s(") (forward-sexp -1))
@@ -422,18 +420,18 @@ work on C like languages."
 
 		;; Skip the separator and the symbol.
 		(goto-char (match-end 0))
-		
+
 		(if (looking-at "\\w\\|\\s_")
 		    ;; Skip symbols
 		    (forward-sexp 1)
 		  ;; No symbol, exit the search...
 		  (setq continuesearch nil))
-		  
+
 		(setq end (point)))
-		
+
 	      ;; Cont...
 	      )
-	  
+
 	  ;; Restore position if we go to far....
 	  (error (goto-char end)) )
 

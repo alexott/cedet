@@ -80,17 +80,17 @@ based on `ede-locate-setup-options'."
     (while (and opts (not ans))
       (when (ede-locate-ok-in-project (car opts) root)
 	;; If interactive, check with the user.
-	(when (or (not (cedet-called-interactively-p 'any))
+	(when (or (not (called-interactively-p 'any))
 		  (y-or-n-p (format "Set project locator to %s? " (car opts))))
 	  (setq ans (car opts))))
       (setq opts (cdr opts)))
     ;; No match?  Always create the baseclass for the hashing tool.
     (when (not ans)
-      (when (cedet-called-interactively-p 'interactive)
+      (when (called-interactively-p 'interactive)
 	(message "Setting locator to ede-locate-base"))
       (setq ans 'ede-locate-base))
     (oset proj locate-obj (make-instance ans "Loc" :root root))
-    (when (cedet-called-interactively-p 'interactive)
+    (when (called-interactively-p 'interactive)
       (message "Setting locator to %s" ans))
     ))
 

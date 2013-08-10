@@ -65,7 +65,7 @@ negative, force off."
     (setq ede-dired-minor-mode nil)
     (error "Not in DIRED mode"))
   (unless (or (ede-directory-project-p default-directory)
-              (cedet-called-interactively-p 'any))
+              (called-interactively-p 'any))
     (setq ede-dired-minor-mode nil)))
 
 (defun ede-dired-add-to-target (target)

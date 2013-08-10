@@ -267,7 +267,7 @@ If TAG is not specified, use the tag at point."
 
     (with-output-to-temp-buffer (help-buffer)
       (help-setup-xref (list #'semantic-describe-buffer)
-                       (cedet-called-interactively-p 'interactive))
+                       (called-interactively-p 'interactive))
       (with-current-buffer standard-output
 	(princ "Semantic Configuration in ")
 	(princ (buffer-name buff))
@@ -351,7 +351,7 @@ NOTFIRST indicates that this was not the first call in the recursive use."
 			      'unmatched)))
 	    (setq o (cons (car over) o)))
 	  (setq over (cdr over)))
-	(when (cedet-called-interactively-p 'any)
+	(when (called-interactively-p 'any)
 	  (message "Remaining overlays: %S" o))))
   over)
 

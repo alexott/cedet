@@ -15,15 +15,15 @@
     :name "eieio"
     :path ""
     :source '("eieio-core.el" "eieio.el" "eieio-opt.el" "eieio-custom.el" "eieio-base.el" "eieio-datadebug.el")
-    :aux-packages '("cedet-compat")
+    :aux-packages '("cedet-compat" "eieio")
     :pre-load-packages '("cedet-compat")
     )
    (ede-proj-target-elisp "examples"
     :name "examples"
     :path ""
     :compiler 'ede-emacs-compiler
-    :source '("chart.el" "eieio-speedbar.el" "linemark.el")
-    :aux-packages '("cedet-compat" "linemark")
+    :source '("chart.el" "eieio-speedbar.el")
+    :aux-packages '("cedet-compat")
     :pre-load-packages '("cedet-compat")
     )
    )

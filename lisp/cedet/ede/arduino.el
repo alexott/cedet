@@ -32,6 +32,8 @@
 
 (require 'ede)
 
+(declare-function data-debug-show-stuff "data-debug")
+
 ;;; Code:
 (defcustom ede-arduino-makefile-name "Makefile"
   "File name to use for generated Makefile."
@@ -380,7 +382,7 @@ Emacs back to the Arduino IDE."
 	(ede-arduino)
       (error "EDE cannot build/upload arduino projects without preferences from the arduino IDE")))
   (ede-arduino-read-prefs ede-arduino-preferences-file)
-  (when (interactive-p)
+  (when (called-interactively-p 'any)
       (require 'data-debug)
       (data-debug-show-stuff ede-arduino-active-prefs "Arduino Prefs"))
   ede-arduino-active-prefs)

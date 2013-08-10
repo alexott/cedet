@@ -428,7 +428,7 @@ Return it as a list of lists.  Each entry is of the form:
     ;; DONE
     (setq out (nreverse out))
     ;; 4) Dump if in interactive mode.
-    (when (cedet-called-interactively-p 'interactive)
+    (when (called-interactively-p 'interactive)
       ;; Dump the output.
       (data-debug-show-stuff out "SortedInheritanceNodes"))
     out))
