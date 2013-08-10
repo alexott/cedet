@@ -38,13 +38,6 @@ on project's type."
   "Generic implementation for JVM-based projects"
   (oref proj :classpath))
 
-;; (defmethod initialize-instance ((this ede-jvm-base-project)
-;;                                 &rest fields)
-;;   "Make sure the :targets is setup."
-;;   (call-next-method)
-;;   (unless (slot-boundp this 'targets)
-;;     (oset this :targets nil)))
-
 ;;; TARGET MANAGEMENT
 ;;
 
