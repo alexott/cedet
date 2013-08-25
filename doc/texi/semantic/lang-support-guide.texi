@@ -1068,6 +1068,22 @@ tools such as imenu or speedbar.
 For more information,
 @inforef{top, the Grammar Framework Manual, grammar-fw}.
 
+@node Parser Backend Support
+@section Parser Backend Support
+
+Once you have written a grammar file that has been compiled into
+Emacs Lisp code, additional glue needs to be written to finish
+connecting the generated parser into the Emacs framework.
+
+Large portions of this glue is automatically generated, but will
+probably need additional modification to get things to work properly.
+
+Typically, a grammar file @file{foo.wy} will create the file
+@file{foo-wy.el}.  It is then useful to also create a file
+@file{wisent-foo.el} (or @file{semantic-foo.el}) to contain the parser
+back end, or the glue that completes the semantic support for the
+language.
+
 @node Parsing a language file
 @chapter Parsing a language file
 
@@ -1111,29 +1127,13 @@ Clearing the cache will force a complete reparse next time a token
 stream is requested.
 @end deffn
 
-@node Parser Backend Support
-@section Parser Backend Support
-
-Once you have written a grammar file that has been compiled into
-Emacs Lisp code, additional glue needs to be written to finish
-connecting the generated parser into the Emacs framework.
-
-Large portions of this glue is automatically generated, but will
-probably need additional modification to get things to work properly.
-
-Typically, a grammar file @file{foo.wy} will create the file
-@file{foo-wy.el}.  It is then useful to also create a file
-@file{wisent-foo.el} (or @file{semantic-foo.el}) to contain the parser
-back end, or the glue that completes the semantic support for the
-language.
-
 @menu
 * Example Backend File::
 * Tag Expansion::
 @end menu
 
 @node Example Backend File
-@subsection Example Backend File
+@section Example Backend File
 
 Typical structure for this file is:
 
@@ -1209,7 +1209,7 @@ Typical structure for this file is:
 @end example
 
 @node Tag Expansion
-@subsection Tag Expansion
+@section Tag Expansion
 
 In any language with compound tag types, you will need to implement
 an @emph{expand function}.  Once written, assign it to this variable.
