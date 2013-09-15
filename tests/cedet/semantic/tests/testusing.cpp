@@ -194,3 +194,15 @@ void unfoundfunc()
 
 }
 
+// Using statements can depend on previous ones...
+
+void acc_using()
+{
+  using namespace outer;
+  // This is effectively like 'using namespace outer::inner'
+  using namespace inner;
+
+  StructNested sn;
+  sn.//-18-
+    ; //#18# ( "one" "two" )
+}
