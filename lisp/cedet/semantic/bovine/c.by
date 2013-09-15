@@ -1184,6 +1184,7 @@ expr-binop
   | AMPERSAND
   | OR OR
   | OR
+  | MOD
  ;; There are more.
   ;
 
