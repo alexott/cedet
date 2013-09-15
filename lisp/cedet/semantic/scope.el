@@ -195,12 +195,18 @@ Use `semantic-ctxt-scoped-types' to find types."
 	  ;; Get this thing as a tag
 	  (let ((tmp (cond
 		      ((stringp (car sp))
-		       (semanticdb-typecache-find (car sp)))
-		       ;(semantic-analyze-find-tag (car sp) 'type))
+		       (or (semanticdb-typecache-find (car sp))
+			   ;; If we did not find it in the typecache,
+			   ;; look in the tags we found so far
+			   (car (semantic-deep-find-tags-by-name
+				 (car sp)
+				 code-scoped-types))))
 		      ((semantic-tag-p (car sp))
 		       (if (semantic-tag-prototype-p (car sp))
-			   (semanticdb-typecache-find (semantic-tag-name (car sp)))
-			   ;;(semantic-analyze-find-tag (semantic-tag-name (car sp)) 'type)
+			   (or (semanticdb-typecache-find (semantic-tag-name (car sp)))
+			       (car (semantic-deep-find-tags-by-name
+				     (semantic-tag-name (car sp))
+				     code-scoped-types)))
 			 (car sp)))
 		      (t nil))))
 	    (when tmp
