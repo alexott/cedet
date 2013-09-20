@@ -67,16 +67,16 @@ struct moose strct_fcn ( struct moose in, char *out);
 struct moose *var_one = NULL;
 /*
  * ## name "var_one"
- * ## summarize "Variables: struct moose* var_one"
- * ## prototype "struct moose* var_one"
+ * ## summarize "Variables: struct moose* var_one[=NULL]"
+ * ## prototype "struct moose* var_one[=NULL]"
  * ## uml-prototype "var_one : struct moose*"
  */
 
 const int var_two = 1;
 /*
  * ## name "var_two"
- * ## summarize "Variables: const int var_two"
- * ## prototype "const int var_two"
+ * ## summarize "Variables: const int var_two[=1]"
+ * ## prototype "const int var_two[=1]"
  * ## uml-prototype "var_two : int"
  */
 
