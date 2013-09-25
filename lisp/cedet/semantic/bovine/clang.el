@@ -264,7 +264,8 @@ con/destructors (according to PREFIX) and operators."
 		(call-process semantic-clang-binary nil t nil "--version")))
       (error "Could not call clang --version"))
     (goto-char (point-min))
-    (when (null (re-search-forward "clang version \\([0-9.]+\\)" nil t))
+    (when (null (or (re-search-forward "clang version \\([0-9.]+\\)" nil t)
+		    (re-search-forward "based on LLVM \\([0-9.]+\\)" nil t)))
       (error "Could not parse clang version string"))
     (match-string 1)))
 
