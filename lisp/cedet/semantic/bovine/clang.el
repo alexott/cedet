@@ -1,8 +1,12 @@
 ;;; semantic/bovine/clang.el --- Use 'clang' to provide completions for C/C++
 
-;; Copyright (C) 2011, 2012 David Engster
+;; Copyright (C) 2011, 2012, 2013 David Engster
 
 ;; Author: David Engster <deng@randomsample.de>
+
+;; This file is NOT part of GNU Emacs.
+
+;; !! IMPORTANT: DO NOT MERGE THIS FILE TO EMACS !!
 
 ;; This program is free software; you can redistribute it and/or
 ;; modify it under the terms of the GNU General Public License as
@@ -27,8 +31,7 @@
 ;;
 ;;  http://clang.llvm.org/
 ;;
-;; Currently only the newest version 2.9 from clang will work with
-;; this code.
+;; This needs at least clang v2.9 or newer.
 
 ;;; Usage:
 
@@ -64,6 +67,11 @@
 (defvar semantic-clang-temp-filename "__SEMANTIC_CLANG_TEMPFILE"
   "Filename used for temporary file.")
 
+(defvar semantic-clang-show-errors t
+  "Display errors issued by clang.")
+
+(defvar semantic-clang-system-includes nil)
+
 ;;;###autoload
 (defun semantic-clang-activate ()
   "Activate clang completions for C/C++."
@@ -73,6 +81,10 @@
        (inversion-check-version (semantic-clang-version-string) nil '(full 2 9))
        'outdated)
       (message "Need clang version 2.9 or newer"))
+
+  ;; Get system includes
+  (setq semantic-clang-system-includes (mapcar (lambda (x) (concat "-I" x))
+					       (semantic-clang-get-system-includes)))
 
   ;; Install the override
   (define-mode-local-override semantic-analyze-possible-completions
@@ -134,19 +146,26 @@ First group is the completion, second group the definition."
 	(message "Buffer's file name doesn't have a proper extension; cannot call clang.")
       (write-region txt nil tempfile nil 'nodisplay)
       (with-temp-buffer
-	(when (zerop
+	(let ((exitcode
 	       (apply 'call-process
 		      semantic-clang-binary nil t nil
-		       "-cc1" "-fsyntax-only" "-code-completion-at"
-		       (concat tempfile complete-pos)
-		       tempfile
-		       (append proj-args semantic-clang-arguments)))
-	  (goto-char (point-min))
-	  (while (re-search-forward
-		  (semantic-clang-completion-regexp ctext) nil t)
-	    (push
-	     (semantic-clang-generate-tag (match-string 1) (match-string 2))
-	     results))))
+		      "-cc1" "-fsyntax-only" "-code-completion-at"
+		      (concat tempfile complete-pos)
+		      tempfile
+		      (append semantic-clang-system-includes
+			      proj-args
+			      semantic-clang-arguments))))
+	  (when (and (> exitcode 0)
+		     semantic-clang-show-errors)
+	    (goto-char (point-min))
+	    (while (re-search-forward "fatal error: \\(.+\\)$" nil t)
+	      (message "Clang error: %s" (match-string 1)))))
+	(goto-char (point-min))
+	(while (re-search-forward
+		(semantic-clang-completion-regexp ctext) nil t)
+	  (push
+	   (semantic-clang-generate-tag (match-string 1) (match-string 2))
+	   results)))
       (delete-file tempfile))
     (semantic-clang-filter-results results desired-type desired-class prefix flags)))
 
@@ -249,6 +268,26 @@ con/destructors (according to PREFIX) and operators."
       (error "Could not parse clang version string"))
     (match-string 1)))
 
+(defun semantic-clang-get-system-includes ()
+  "Return list of system includes from clang compiler.
+Those have to be manually added when just calling the frontent
+via '-cc1', otherwise it won't find system headers."
+  ;; We have to compile a test file for this
+  (let (result)
+    (with-temp-buffer
+      (insert "int foo=0;\n")
+      (call-process-region (point-min) (point-max)
+			   semantic-clang-binary t t nil
+			   "-###" "-x" "c++" "-c" "-o" null-device "-")
+      (goto-char (point-min))
+      (while (search-forward "\"" nil t)
+	(when (looking-at "-internal-\\(externc-\\)?isystem\" \"")
+	  (goto-char (match-end 0))
+	  (push (buffer-substring (point)
+				  (1- (progn (search-forward "\"") (point))))
+		result))))
+    result))
+
 (defun semantic-clang-args-from-project ()
   "Return list of additional arguments for the compiler from the project.
 If the current buffer is part of an EDE project, return a list of
@@ -262,12 +301,14 @@ include directories (-I) and preprocessor symbols (-D)."
        ((ede-cpp-root-project-child-p proj)
 	(append
 	 (mapcar (lambda (inc) (concat "-I" inc))
-		 (append (oref proj include-path)
+		 (append (mapcar (lambda (x) (concat (ede-project-root-directory proj) x))
+				 (oref proj include-path))
 			 (oref proj system-include-path)))
 	 (mapcar (lambda (spp) (concat "-D" (car spp)
-				       (when (> (length (cdr spp)) 1)
-					 (concat "=" (cdr spp)))))
-		 (oref proj spp-table))))
+				       (when (cdr spp)
+					 (concat "=" (cadr spp)))))
+		 (oref proj spp-table))
+	 (list (concat "-I" (ede-project-root-directory proj)))))
        ;; For more general project types it's a bit more difficult.
        ((ede-proj-project-p proj)
 	;; Get the local and configuration variables.
@@ -278,12 +319,12 @@ include directories (-I) and preprocessor symbols (-D)."
 				       (cdr (oref tarproj configuration-variables))))))
 	  ;; Get includes and preprocessor symbols.
 	  (setq vars (apply 'append (mapcar 'split-string vars)))
-	  (delq nil
-		(mapcar (lambda (var)
-			  (when (string-match "^\\(-I\\|-D\\)" var)
-			    var))
-			vars))))))))
-
+	  (append (list (concat "-I" (ede-project-root-directory proj)))
+		  (delq nil
+			(mapcar (lambda (var)
+				  (when (string-match "^\\(-I\\|-D\\)" var)
+				    var))
+				vars)))))))))
 
 (provide 'semantic/bovine/clang)
 
