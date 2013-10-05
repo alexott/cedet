@@ -52,6 +52,7 @@
 (require 'ede)
 (require 'ede/proj)
 (require 'ede/cpp-root)
+(require 'ede/linux)
 (require 'semantic/analyze)
 (require 'semantic/analyze/complete)
 
@@ -310,6 +311,18 @@ include directories (-I) and preprocessor symbols (-D)."
 					 (concat "=" (cadr spp)))))
 		 (oref proj spp-table))
 	 (list (concat "-I" (ede-project-root-directory proj)))))
+       ;; Similarly for ede-linux-project
+       ((ede-linux-project-child-p proj)
+	(let* ((root (ede-project-root-directory proj))
+	       (dir (file-name-directory (buffer-file-name)))
+	       (rel-dir (substring dir (length root))))
+	  (append
+	   (list (format "-include%s/include/linux/kconfig.h" root))
+	   (mapcar (lambda (inc) (concat "-I" inc))
+		   (oref proj include-path))
+	   (list (concat "-I" root rel-dir)
+		 (concat "-I" (oref proj build-directory) rel-dir)
+		 "-D__KERNEL__"))))
        ;; For more general project types it's a bit more difficult.
        ((ede-proj-project-p proj)
 	;; Get the local and configuration variables.
