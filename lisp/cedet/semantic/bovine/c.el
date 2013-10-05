@@ -1120,7 +1120,8 @@ is its own toplevel tag.  This function will return (cons A B)."
 		       (semantic-tag-new-variable
 			(car cur)	;name
 			ty		;type
-			(if default
+			(if (and default
+				 (listp (cdr default)))
 			    (buffer-substring-no-properties
 			     (car default) (car (cdr default))))
 			:constant-flag (semantic-tag-variable-constant-p tag)
