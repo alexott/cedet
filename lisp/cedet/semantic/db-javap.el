@@ -882,9 +882,11 @@ into the tags)"
 
 (defun semanticdb-javap-file-is-jar (file-name)
   "Returns true if the file is java archive"
-  (let ((file-ext (downcase (file-name-extension file-name))))
-    (or (string= "jar" file-ext)
-	(string= "zip" file-ext))))
+  (let ((file-ext (file-name-extension file-name)))
+    (when (not (null file-ext))
+      (let ((dfile-ext (downcase file-ext)))
+	(or (string= "jar" dfile-ext)
+	    (string= "zip" dfile-ext))))))
 
 (defun semanticdb-javap-classpath-objects (buffer)
   "Return the classpath for BUFFER as a list of semanticdb objects and strings.
