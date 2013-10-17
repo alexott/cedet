@@ -137,7 +137,7 @@ The returned buffer will be recycled in future calls to this function."
 	  nil)
       (setq str (with-current-buffer b
 		  (goto-char (point-min))
-		  (if (re-search-forward "Exuberant Ctags \\([0-9.]+\\)\\(~svn[0-9]+\\)?," nil t)
+		  (if (re-search-forward "Exuberant Ctags \\(\\([0-9.]+\\)\\(~svn[0-9]+\\)?\\|Development\\)," nil t)
 		      (match-string 1)
 		    nil)
 		  )
@@ -177,7 +177,7 @@ The returned buffer will be recycled in future calls to this function."
     (require 'inversion)
     (when (not v)
       (error "Exuberant CTags not found.  Use M-x semantic-ectags-version RET"))
-    (when (inversion-check-version v nil semantic-ectags-min-version)
+    (when (and (inversion-check-version v nil semantic-ectags-min-version) (not (string= v "Development")))
       (error "Version of CTags is %s.  Need at least %s"
 	     v semantic-ectags-min-version))
     (when (not r)
