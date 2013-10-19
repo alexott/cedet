@@ -53,6 +53,6 @@ else
     emacs="$EMACS"
 fi
 
-exec $emacs -batch -l "${loadpath}/lisp/cedet/semantic/db-mk.el" $*
+exec $emacs -batch -l "${loadpath}/lisp/cedet/semantic/db-mk.el" "$@"
 
 #end

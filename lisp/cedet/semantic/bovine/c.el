@@ -1261,7 +1261,8 @@ Optional argument STAR and REF indicate the number of * and & in the typedef."
 			  (nth 10 tokenpart) ; initializers
 			  )
 		      (not (car (nth 3 tokenpart)))))
-		(fcnpointer (string-match "^\\*" (car tokenpart)))
+		(fcnpointer (and (> (length (car tokenpart)) 0)
+				 (= (aref (car tokenpart) 0) ?*)))
 		(fnname (if fcnpointer
 			    (substring (car tokenpart) 1)
 			  (car tokenpart)))
@@ -1269,69 +1270,79 @@ Optional argument STAR and REF indicate the number of * and & in the typedef."
 			      nil
 			    t))
 		)
-	   (if fcnpointer
-	       ;; Function pointers are really variables.
-	       (semantic-tag-new-variable
-		fnname
-		typedecl
-		nil
-		;; It is a function pointer
-		:functionpointer-flag t
-		)
-	     ;; The function
-	     (semantic-tag-new-function
-	      fnname
-	      (or typedecl		;type
-		  (cond ((car (nth 3 tokenpart) )
-			 "void")	; Destructors have no return?
-			(constructor
-			 ;; Constructors return an object.
-			 (semantic-tag-new-type
-			  ;; name
-			  (or (car semantic-c-classname)
-			      (let ((split (semantic-analyze-split-name-c-mode
-					    (car (nth 2 tokenpart)))))
-				(if (stringp split) split
-				  (car (last split)))))
-			  ;; type
-			  (or (cdr semantic-c-classname)
-			      "class")
-			  ;; members
-			  nil
-			  ;; parents
-			  nil
-			  ))
-			(t "int")))
-	      (nth 4 tokenpart)		;arglist
-	      :constant-flag (if (member "const" declmods) t nil)
-	      :typemodifiers (delete "const" declmods)
-	      :parent (car (nth 2 tokenpart))
-	      :destructor-flag (if (car (nth 3 tokenpart) ) t)
-	      :constructor-flag (if constructor t)
-	      :pointer (nth 7 tokenpart)
-	      :operator-flag operator
-	      ;; Even though it is "throw" in C++, we use
-	      ;; `throws' as a common name for things that toss
-	      ;; exceptions about.
-	      :throws (nth 5 tokenpart)
-	      ;; Reentrant is a C++ thingy.  Add it here
-	      :reentrant-flag (if (member "reentrant" (nth 6 tokenpart)) t)
-	      ;; A function post-const is funky.  Try stuff
-	      :methodconst-flag (if (member "const" (nth 6 tokenpart)) t)
-	      ;; prototypes are functions w/ no body
-	      :prototype-flag (if (nth 8 tokenpart) t)
-	      ;; Pure virtual
-	      :pure-virtual-flag (if (eq (nth 8 tokenpart) :pure-virtual-flag) t)
-	      ;; Template specifier.
-	      :template-specifier (nth 9 tokenpart)
-	      )))
-	 )
-	))
+	   ;; The function
+	   (semantic-tag-new-function
+	    fnname
+	    (or typedecl		;type
+		(cond ((car (nth 3 tokenpart) )
+		       "void")	; Destructors have no return?
+		      (constructor
+		       ;; Constructors return an object.
+		       (semantic-tag-new-type
+			;; name
+			(or (car semantic-c-classname)
+			    (let ((split (semantic-analyze-split-name-c-mode
+					  (car (nth 2 tokenpart)))))
+			      (if (stringp split) split
+				(car (last split)))))
+			;; type
+			(or (cdr semantic-c-classname)
+			    "class")
+			;; members
+			nil
+			;; parents
+			nil
+			))
+		      (t "int")))
+	    ;; Argument list can contain things like function pointers
+	    (semantic-c-reconstitute-function-arglist (nth 4 tokenpart))
+	    :constant-flag (if (member "const" declmods) t nil)
+	    :typemodifiers (delete "const" declmods)
+	    :parent (car (nth 2 tokenpart))
+	    :destructor-flag (if (car (nth 3 tokenpart) ) t)
+	    :constructor-flag (if constructor t)
+	    :function-pointer fcnpointer
+	    :pointer (nth 7 tokenpart)
+	    :operator-flag operator
+	    ;; Even though it is "throw" in C++, we use
+	    ;; `throws' as a common name for things that toss
+	    ;; exceptions about.
+	    :throws (nth 5 tokenpart)
+	    ;; Reentrant is a C++ thingy.  Add it here
+	    :reentrant-flag (if (member "reentrant" (nth 6 tokenpart)) t)
+	    ;; A function post-const is funky.  Try stuff
+	    :methodconst-flag (if (member "const" (nth 6 tokenpart)) t)
+	    ;; prototypes are functions w/ no body
+	    :prototype-flag (if (nth 8 tokenpart) t)
+	    ;; Pure virtual
+	    :pure-virtual-flag (if (eq (nth 8 tokenpart) :pure-virtual-flag) t)
+	    ;; Template specifier.
+	    :template-specifier (nth 9 tokenpart))))))
 
 (defun semantic-c-reconstitute-template (tag specifier)
   "Reconstitute the token TAG with the template SPECIFIER."
   (semantic-tag-put-attribute tag :template (or specifier ""))
   tag)
+
+(defun semantic-c-reconstitute-function-arglist (arglist)
+  "Reconstitute the argument list of a function.
+This currently only checks if the function expects a function
+pointer as argument."
+  (let (result)
+    (dolist (arg arglist)
+      ;; Names starting with a '*' denote a function pointer
+      (if (and (> (length (semantic-tag-name arg)) 0)
+	       (= (aref (semantic-tag-name arg) 0) ?*))
+	  (setq result
+		(append result
+			(list
+			 (semantic-tag-new-function
+			  (substring (semantic-tag-name arg) 1)
+			  (semantic-tag-type arg)
+			  (cadr (semantic-tag-attributes arg))
+			  :function-pointer t))))
+	(setq result (append result (list arg)))))
+    result))
 
 
 ;;; Override methods & Variables
@@ -1341,7 +1352,7 @@ Optional argument STAR and REF indicate the number of * and & in the typedef."
   "Convert TAG to a string that is the print name for TAG.
 Optional PARENT and COLOR are ignored."
   (let ((name (semantic-format-tag-name-default tag parent color))
-	(fnptr (semantic-tag-get-attribute tag :functionpointer-flag))
+	(fnptr (semantic-tag-get-attribute tag :function-pointer))
 	)
     (if (not fnptr)
 	name

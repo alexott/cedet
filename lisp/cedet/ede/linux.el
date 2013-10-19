@@ -32,6 +32,8 @@
 ;; * Add texinfo lookup options.
 ;; * Add website
 
+(eval-when-compile (require 'cl))
+
 (require 'ede)
 (require 'ede/make)
 
