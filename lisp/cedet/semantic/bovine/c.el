@@ -814,7 +814,7 @@ Use semantic-cpp-lexer for parsing text inside a CPP macro."
   ;; semantic-lex-spp-replace-or-symbol-or-keyword
   semantic-lex-symbol-or-keyword
   semantic-lex-charquote
-  semantic-lex-paren-or-list
+  semantic-lex-spp-paren-or-list
   semantic-lex-close-paren
   semantic-lex-ignore-comments
   semantic-lex-punctuation
