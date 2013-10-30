@@ -1176,11 +1176,7 @@ is its own toplevel tag.  This function will return (cons A B)."
 			     (nth 1 (car names)) ; name
 			     "typedef"
 			     (semantic-tag-type-members tag)
-			     ;; parent is just the name of what
-			     ;; is passed down as a tag.
-			     (list
-			      (semantic-tag-name
-			       (semantic-tag-type-superclasses tag)))
+			     nil
 			     :pointer
 			     (let ((stars (car (car (car names)))))
 			       (if (= stars 0) nil stars))
