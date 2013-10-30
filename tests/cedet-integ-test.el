@@ -447,7 +447,7 @@ Optional arguments can't be used."
 (defun cit-wait-for-compilation ()
   "Wait for a compilation to finish."
   (while compilation-in-progress
-    (accept-process-output)
+    (accept-process-output nil 1)
     ;; If sit for indicates that input is waiting, then
     ;; read and discard whatever it is that is going on.
     (when (not (sit-for 1))
