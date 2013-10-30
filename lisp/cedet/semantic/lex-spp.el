@@ -721,7 +721,8 @@ will return empty string instead.")
   "Find next macro which closes a scope through a close-paren.
 Returns position with the end of that macro."
   (let ((macros (semantic-lex-spp-macros))
-	(cmacro-regexp "\\("))
+	(cmacro-regexp "\\(")
+	(case-fold-search nil))
     ;; Build a regexp which search for all macros with a closing
     ;; paren, and search for it.
     (dolist (cur macros)
