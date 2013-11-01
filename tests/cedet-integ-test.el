@@ -183,6 +183,9 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
     ;; Do some texinfo documentation.
     (cit-srecode-fill-texi)
 
+    ;; Make sure this test has ended
+    (sleep-for 2)
+
     ;; Test out EDE project local variables
     (cit-proj-variables)
 
