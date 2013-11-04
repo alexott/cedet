@@ -93,13 +93,9 @@
 (require 'cogre)
 (require 'srecode/find)
 
-(eval-and-compile
-  (defvar cedet-integ-base
-    (if (eq system-type 'windows-nt)
-	(expand-file-name "CEDET_INTEG" temporary-file-directory)
-      "/tmp/CEDET_INTEG")
-    "Root of multiple project integration tests.")
-  )
+(defvar cedet-integ-base
+  (expand-file-name (make-temp-name "CEDET_INTEG-") temporary-file-directory)
+  "Root of multiple project integration tests.")
 
 (require 'cit-cpp)
 (require 'cit-symref)
@@ -193,6 +189,8 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
     (find-file (expand-file-name "README" cedet-integ-target))
     (cit-make-dist)
 
+    ;; Delete the temporary directory
+    (delete-directory cedet-integ-base t)
     (cit-finish-message "PASSED" make-type)
     ))
 
@@ -464,6 +462,8 @@ If optional INVERSE is non-nil, then throw an error if the
 compilation succeeded."
   (save-excursion
     (set-buffer "*compilation*")
+    (when noninteractive
+      (message (buffer-string)))
     (goto-char (point-max))
 
     (if (re-search-backward "Compilation exited abnormally " nil t)
