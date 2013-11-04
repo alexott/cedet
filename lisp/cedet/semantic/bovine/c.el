@@ -27,6 +27,7 @@
 
 (require 'semantic)
 (require 'semantic/analyze)
+(require 'semantic/analyze/refs)
 (require 'semantic/bovine)
 (require 'semantic/bovine/gcc)
 (require 'semantic/idle)
@@ -1225,6 +1226,45 @@ or \"struct\".")
     (if (= (length ans) 1)
 	name
       (delete "" ans))))
+
+(define-mode-local-override semantic-analyze-tag-references c-mode (tag &optional db)
+  "Analyze the references for TAG.
+Returns a class with information about TAG.
+
+Optional argument DB is a database.  It will be used to help
+locate TAG.
+
+Use `semantic-analyze-current-tag' to debug this fcn."
+  (when (not (semantic-tag-p tag))  (signal 'wrong-type-argument (list 'semantic-tag-p tag)))
+  (let ((allhits nil)
+	(scope nil)
+	(refs nil))
+    (save-excursion
+      (semantic-go-to-tag tag db)
+      (setq scope (semantic-calculate-scope))
+
+      (setq allhits (semantic--analyze-refs-full-lookup tag scope t))
+      
+      (when (or (zerop (semanticdb-find-result-length allhits))
+		(and (= (semanticdb-find-result-length allhits) 1)
+		     (eq (car (semanticdb-find-result-nth allhits 0)) tag)))
+	;; It found nothing or only itself - not good enough.  As a
+	;; last resort, let's remove all namespaces from the scope and
+	;; search again.
+	(oset scope parents
+	      (let ((parents (oref scope parents))
+		    newparents)
+		(dolist (cur parents)
+		  (unless (string= (semantic-tag-type cur) "namespace")
+		    (push cur newparents)))
+		newparents))
+	(setq allhits (semantic--analyze-refs-full-lookup tag scope t)))
+
+      (setq refs (semantic-analyze-references (semantic-tag-name tag)
+				    :tag tag
+				    :tagdb db
+				    :scope scope
+				    :rawsearchdata allhits)))))
 
 (defun semantic-c-reconstitute-token (tokenpart declmods typedecl)
   "Reconstitute a token TOKENPART with DECLMODS and TYPEDECL.
