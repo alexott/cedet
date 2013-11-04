@@ -463,7 +463,7 @@ compilation succeeded."
   (save-excursion
     (set-buffer "*compilation*")
     (when noninteractive
-      (message (buffer-string)))
+      (message "%s" (buffer-string)))
     (goto-char (point-max))
 
     (if (re-search-backward "Compilation exited abnormally " nil t)
