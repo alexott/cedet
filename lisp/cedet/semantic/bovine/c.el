@@ -1257,7 +1257,7 @@ Use `semantic-analyze-current-tag' to debug this fcn."
 		(dolist (cur parents)
 		  (unless (string= (semantic-tag-type cur) "namespace")
 		    (push cur newparents)))
-		newparents))
+		(reverse newparents)))
 	(setq allhits (semantic--analyze-refs-full-lookup tag scope t)))
 
       (setq refs (semantic-analyze-references (semantic-tag-name tag)
