@@ -93,13 +93,9 @@
 (require 'cogre)
 (require 'srecode/find)
 
-(eval-and-compile
-  (defvar cedet-integ-base
-    (if (eq system-type 'windows-nt)
-	(expand-file-name "CEDET_INTEG" temporary-file-directory)
-      "/tmp/CEDET_INTEG")
-    "Root of multiple project integration tests.")
-  )
+(defvar cedet-integ-base
+  (expand-file-name (make-temp-name "CEDET_INTEG-") temporary-file-directory)
+  "Root of multiple project integration tests.")
 
 (require 'cit-cpp)
 (require 'cit-symref)
@@ -183,6 +179,9 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
     ;; Do some texinfo documentation.
     (cit-srecode-fill-texi)
 
+    ;; Make sure this test has ended
+    (sleep-for 2)
+
     ;; Test out EDE project local variables
     (cit-proj-variables)
 
@@ -190,6 +189,8 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
     (find-file (expand-file-name "README" cedet-integ-target))
     (cit-make-dist)
 
+    ;; Delete the temporary directory
+    (delete-directory cedet-integ-base t)
     (cit-finish-message "PASSED" make-type)
     ))
 
@@ -447,7 +448,7 @@ Optional arguments can't be used."
 (defun cit-wait-for-compilation ()
   "Wait for a compilation to finish."
   (while compilation-in-progress
-    (accept-process-output)
+    (accept-process-output nil 1)
     ;; If sit for indicates that input is waiting, then
     ;; read and discard whatever it is that is going on.
     (when (not (sit-for 1))
@@ -461,6 +462,8 @@ If optional INVERSE is non-nil, then throw an error if the
 compilation succeeded."
   (save-excursion
     (set-buffer "*compilation*")
+    (when noninteractive
+      (message "%s" (buffer-string)))
     (goto-char (point-max))
 
     (if (re-search-backward "Compilation exited abnormally " nil t)

@@ -67,6 +67,17 @@
 ;;
 ;; Simplest case is a mix of slots with and without initargs.
 
+(defvar eieio-test-1
+  (expand-file-name (make-temp-name "test-ps1-") default-directory))
+(defvar eieio-test-2
+  (expand-file-name (make-temp-name "test-ps2-") default-directory))
+(defvar eieio-test-3
+  (expand-file-name (make-temp-name "test-ps3-") default-directory))
+(defvar eieio-test-4
+  (expand-file-name (make-temp-name "test-ps4-") default-directory))
+(defvar eieio-test-5
+  (expand-file-name (make-temp-name "test-ps5-") default-directory))
+
 (defclass persist-simple (eieio-persistent)
   ((slot1 :initarg :slot1
 	  :type symbol
@@ -79,7 +90,7 @@
 (defvar persist-simple-1 nil)
 (setq persist-simple-1
       (persist-simple "simple 1" :slot1 'goose :slot2 "testing"
-		      :file (concat default-directory "test-ps1.pt")))
+		      :file eieio-test-1))
 
 ;; When the slot w/out an initarg has not been changed
 (persist-test-save-and-compare persist-simple-1)
@@ -110,12 +121,12 @@ Assume SLOTVALUE is a symbol of some sort."
 
 (defvar persist-:printer-1 nil)
 (setq persist-:printer-1 (persist-:printer "persist" :slot1 'goose :slot2 "testing"
-			     :file (concat default-directory "test-ps2.pt")))
+			     :file eieio-test-2))
 
 (persist-test-save-and-compare persist-:printer-1)
 
 (let* ((find-file-hooks nil)
-       (tbuff (find-file-noselect "test-ps2.pt"))
+       (tbuff (find-file-noselect eieio-test-2))
        )
   (condition-case nil
       (unwind-protect
@@ -147,7 +158,7 @@ persistent class.")
 (setq persist-wos (persistent-with-objs-slot 
 		   "persist wos 1"
 		   :pnp (persist-not-persistent "pnp 1" :slot1 3)
-		   :file (concat default-directory "test-ps3.pt")))
+		   :file eieio-test-3))
 					     
 (persist-test-save-and-compare persist-wos)
 
@@ -172,7 +183,7 @@ persistent class.")
 (setq persist-woss (persistent-with-objs-slot-subs 
 		    "persist woss 1"
 		    :pnp (persist-not-persistent-subclass "pnps 1" :slot1 3)
-		    :file (concat default-directory "test-ps4.pt")))
+		    :file eieio-test-4))
 					     
 (persist-test-save-and-compare persist-woss)
 
@@ -191,11 +202,15 @@ persistent class.")
 		   :pnp (list (persist-not-persistent "pnp 1" :slot1 3)
 			      (persist-not-persistent "pnp 2" :slot1 4)
 			      (persist-not-persistent "pnp 3" :slot1 5))
-		   :file (concat default-directory "test-ps5.pt")))
+		   :file eieio-test-5))
 					     
 (persist-test-save-and-compare persist-wols)
 
-
+(delete-file eieio-test-1)
+(delete-file eieio-test-2)
+(delete-file eieio-test-3)
+(delete-file eieio-test-4)
+(delete-file eieio-test-5)
 
 (provide 'eieio-persist)
 
