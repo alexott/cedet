@@ -1889,28 +1889,27 @@ DO NOT return the list of tags encompassing point."
 	      (append tagreturn (list (semantic-tag-type
 				       (car (semanticdb-find-result-nth tmp idx))))))
 	(setq idx (1+ idx))))
-    ;; Use the encompassed types around point to also look for using statements.
-    ;;(setq tagreturn (cons "bread_name" tagreturn))
-    (while (cdr tagsaroundpoint)  ; don't search the last one
-      (setq tmp (semantic-find-tags-by-class 'using (semantic-tag-components (car tagsaroundpoint))))
-      (dolist (T tmp)
-	(setq tagreturn (cons (semantic-tag-type T) tagreturn))
-	)
-      (setq tagsaroundpoint (cdr tagsaroundpoint))
-      )
-    ;; If in a function...
-    (when (and (semantic-tag-of-class-p (car tagsaroundpoint) 'function)
-	       ;; ...search for using statements in the local scope...
-	       (setq tmp (semantic-find-tags-by-class
-			  'using
-			  (semantic-get-local-variables))))
-      ;; ... and add them.
-      (setq tagreturn
-	    (append tagreturn
-		    (mapcar 'semantic-tag-type tmp))))
+    ;; Use the encompassed types around point to also look for using
+    ;; statements.  If we deal with types, search inside members; for
+    ;; functions, we have to call `semantic-get-local-variables' to
+    ;; parse inside the function's body.
+    (dolist (cur tagsaroundpoint)
+      (cond
+       ((and (eq (semantic-tag-class cur) 'type)
+	     (setq tmp (semantic-find-tags-by-class
+			'using
+			(semantic-tag-components (car tagsaroundpoint)))))
+	(dolist (T tmp)
+	  (setq tagreturn (cons (semantic-tag-type T) tagreturn))))
+       ((and (semantic-tag-of-class-p (car (last tagsaroundpoint)) 'function)
+	     (setq tmp (semantic-find-tags-by-class
+			'using
+			(semantic-get-local-variables))))
+	(setq tagreturn
+	      (append tagreturn
+		      (mapcar 'semantic-tag-type tmp))))))
     ;; Return the stuff
-    tagreturn
-    ))
+    tagreturn))
 
 (define-mode-local-override semantic-ctxt-imported-packages c++-mode (&optional point)
   "Return the list of using tag types in scope of POINT."

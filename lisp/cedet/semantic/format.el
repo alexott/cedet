@@ -502,9 +502,9 @@ Optional argument COLOR means highlight the prototype with font-lock colors."
 	 (default (when (eq class 'variable)
 		    (let ((defval
 			    (semantic-tag-get-attribute tag :default-value)))
-		      (when defval
+		      (when (and defval (stringp defval))
 			(concat "[=" defval "]")))))
- 	 )
+	 )
     (if args
 	(setq args
 	      (concat " "
