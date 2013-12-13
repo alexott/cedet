@@ -195,7 +195,8 @@ Returns a table of all matching tags."
 	  ;; We should look up each tag one at a time, but I'm lazy!
 	  ;; Doing this may be good enough.
 	  (setq faketags (cons
-			  (semantic-tag T 'function :faux t)
+			  (semantic-tag-set-faux
+			   (semantic-tag T 'function))
 			  faketags))
 	  )
 	faketags))))
