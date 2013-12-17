@@ -137,7 +137,7 @@ The returned buffer will be recycled in future calls to this function."
 	  nil)
       (setq str (with-current-buffer b
 		  (goto-char (point-min))
-		  (if (re-search-forward "Exuberant Ctags \\(\\([0-9.]+\\)\\(~svn[0-9]+\\)?\\|Development\\)," nil t)
+		  (if (re-search-forward "Exuberant Ctags \\(?:\\([0-9.]+\\)\\(~svn[0-9]+\\)?\\|Development\\)," nil t)
 		      (match-string 1)
 		    nil)
 		  )
