@@ -25,7 +25,7 @@
 @copying
 This manual documents Application Development with Semantic.
 
-Copyright @copyright{} 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2012 Eric M. Ludlam
+Copyright @copyright{} 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2007, 2008, 2012, 2013 Eric M. Ludlam
 Copyright @copyright{} 2001, 2002, 2003, 2004 David Ponce
 Copyright @copyright{} 2002, 2003 Richard Y. Kim
 
@@ -1379,7 +1379,7 @@ captured.
 @anchor{bovinate}
 Bovinate the current buffer.  Show output in a temp buffer.
 Optional argument @var{CLEAR} will clear the cache before bovinating.
-If @var{CLEAR} is negative, it will do a full reparse, and also not display
+If @var{CLEAR} is negative, it will do a full reparse, and also display
 the output buffer.
 @end deffn
 

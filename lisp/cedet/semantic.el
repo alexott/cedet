@@ -393,7 +393,7 @@ Arguments START and END bound the time being calculated."
 (defun bovinate (&optional clear)
   "Parse the current buffer.  Show output in a temp buffer.
 Optional argument CLEAR will clear the cache before parsing.
-If CLEAR is negative, it will do a full reparse, and also not display
+If CLEAR is negative, it will do a full reparse, and also display
 the output buffer."
   (interactive "P")
   (if clear (semantic-clear-toplevel-cache))
