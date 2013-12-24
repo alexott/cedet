@@ -520,15 +520,22 @@ tag is not something you can complete from within TYPE."
 			    (list (semantic-tag-name type)
 				  (semantic-tag-name S))))
 		 ;; Search the typecache, first for the unqualified name
-		 (usingtypes (or
+		 (usingtype (or
 			      (semanticdb-typecache-find (semantic-tag-name S))
 			      ;; If that didn't return anything, use
 			      ;; fully qualified name
-			      (semanticdb-typecache-find fullname))))
-	    (when usingtypes
+			      (semanticdb-typecache-find fullname)))
+		 (filename (when usingtype (semantic-tag-file-name usingtype))))
+	    (when usingtype
 	      ;; Use recursion to examine that namespace or class
-	      (let ((tags (semantic-completable-tags-from-type usingtypes)))
-		(setq leftover (append tags leftover)))))
+	      (let ((tags (semantic-completable-tags-from-type usingtype)))
+		(if filename
+		    ;; If we have a filename, copy the tags with it
+		    (dolist (cur tags)
+		      (setq leftover (cons (semantic-tag-copy cur nil filename)
+					   leftover)))
+		  ;; Otherwise just run with it
+		  (setq leftover (append tags leftover))))))
 	(when (or (not (semantic-tag-of-class-p S 'function))
 		  (not (semantic-tag-function-parent S)))
 	  (setq leftover (cons S leftover)))))

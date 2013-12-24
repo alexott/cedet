@@ -1110,8 +1110,8 @@ functionname
   ;
 
 function-pointer
-  : LPAREN STAR symbol RPAREN
-    ( (concat "*" $3) )
+  : LPAREN STAR opt-symbol RPAREN
+    ( (concat "*" ,(car $3)) )
   | LPAREN symbol RPAREN
     ( $2 )
   ;
