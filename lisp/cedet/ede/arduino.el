@@ -517,12 +517,17 @@ This is also where Arduino.mk will be found."
 	(erase-buffer)
 	(insert-file-contents vfile)
 	(goto-char (point-min))
-	(prog1 (buffer-substring-no-properties (point) (point-at-eol))
-	  (kill-buffer buff))))))
+	(prog1
+	    (if (looking-at "[0-1]+:\\([.0-9]+\\)\\+")
+		(match-string 1)
+	      (buffer-substring-no-properties (point) (point-at-eol)))
+	  (kill-buffer buff)
+	  )))))
 	  
 (defun ede-arduino-boards.txt ()
   "Return the location of Arduino's boards.txt file."
-  (expand-file-name "hardware/arduino/boards.txt" (ede-arduino-find-install)))
+  (file-expand-wildcards
+   (expand-file-name "hardware/*/boards.txt" (ede-arduino-find-install))))
 
 (defun ede-arduino-libdir (&optional library)
   "Return the full file location of LIBRARY.
@@ -577,11 +582,15 @@ Data returned is the intputs needed for the Makefile."
 	(size nil)
 	(mcu nil)
 	(f_cpu nil)
-	(core nil))
+	(core nil)
+	(boardfiles (ede-arduino-boards.txt))
+	)
 
     (with-current-buffer buff
       (erase-buffer)
-      (insert-file-contents (ede-arduino-boards.txt))
+      (while boardfiles
+	(insert-file-contents (car boardfiles))
+	(setq boardfiles (cdr boardfiles)))
 
       (goto-char (point-min))
       (when (not (re-search-forward (concat "^" boardname ".name=") nil t))
