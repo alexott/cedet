@@ -226,8 +226,8 @@ Optional argument DESIRED-TYPE may be a non-type tag to analyze."
 ;; by an application that doesn't need to calculate the full
 ;; context.
 
-(define-overloadable-function semantic-analyze-find-tag-sequence (sequence &optional
-							      scope typereturn throwsym)
+(define-overloadable-function semantic-analyze-find-tag-sequence
+  (sequence &optional scope typereturn throwsym &rest flags)
   "Attempt to find all tags in SEQUENCE.
 Optional argument LOCALVAR is the list of local variables to use when
 finding the details on the first element of SEQUENCE in case
@@ -237,32 +237,42 @@ scoped.  These are not local variables, but symbols available in a structure
 which doesn't need to be dereferenced.
 Optional argument TYPERETURN is a symbol in which the types of all found
 will be stored.  If nil, that data is thrown away.
-Optional argument THROWSYM specifies a symbol the throw on non-recoverable error.")
+Optional argument THROWSYM specifies a symbol the throw on non-recoverable error.
+Remaining arguments FLAGS are additional flags to apply when searching.")
 
-(defun semantic-analyze-find-tag-sequence-default (sequence &optional
-							    scope typereturn
-							    throwsym)
+(defun semantic-analyze-find-tag-sequence-default
+  ;; Note: overloadable fcn uses &rest, but it is a list already, so we don't need
+  ;; to do that in the -default.
+  (sequence &optional scope typereturn throwsym flags)
   "Attempt to find all tags in SEQUENCE.
 SCOPE are extra tags which are in scope.
 TYPERETURN is a symbol in which to place a list of tag classes that
 are found in SEQUENCE.
-Optional argument THROWSYM specifies a symbol the throw on non-recoverable error."
+Optional argument THROWSYM specifies a symbol the throw on non-recoverable error.
+Remaining arguments FLAGS are additional flags to apply when searching.
+This function knows of flags:
+  'mustbeclassvariable"
   (let ((s sequence)			; copy of the sequence
 	(tmp nil)			; tmp find variable
 	(tag nil)			; tag return list
 	(tagtype nil)			; tag types return list
 	(fname nil)
 	(miniscope (when scope (clone scope)))
+	(tagclass (if (memq 'mustbeclassvariable flags)
+		      'variable nil))
 	)
     ;; First order check.  Is this wholly contained in the typecache?
     (setq tmp (semanticdb-typecache-find sequence))
-
-    (if tmp
-	(progn
+  
+    (when tmp
+      (if (or (not tagclass) (semantic-tag-of-class-p tmp tagclass))
 	  ;; We are effectively done...
-	  (setq s nil)
-	  (setq tag (list tmp)))
+	  (setq s nil
+		tag (list tmp))
+	;; tagclass doesn't match, so fail this.
+	(setq tmp nil)))
 
+    (unless tmp
       ;; For the first entry, it better be a variable, but it might
       ;; be in the local context too.
       ;; NOTE: Don't forget c++ namespace foo::bar.
@@ -271,7 +281,7 @@ Optional argument THROWSYM specifies a symbol the throw on non-recoverable error
 		 ;; shadow other things, so it goes first.
 		 (and scope (semantic-scope-find (car s) nil scope))
 		 ;; Find the tag out there... somewhere, but not in scope
-		 (semantic-analyze-find-tag (car s))
+		 (semantic-analyze-find-tag (car s) tagclass)
 		 ))
 
       (if (and (listp tmp) (semantic-tag-p (car tmp)))
@@ -382,7 +392,8 @@ searches use the same arguments."
 	    ;; Search in the typecache.  First entries in a sequence are
 	    ;; often there.
 	    (setq retlist (semanticdb-typecache-find name))
-	    (if retlist
+	    (if (and retlist (or (not tagclass)
+				 (semantic-tag-of-class-p retlist 'tagclass)))
 		retlist
 	      (semantic-analyze-select-best-tag
 	       (semanticdb-strip-find-results
@@ -647,7 +658,7 @@ Returns an object based on symbol `semantic-analyze-context'."
 	   ;; We have some sort of an assignment
 	   (condition-case err
 	       (setq asstag (semantic-analyze-find-tag-sequence
-			     assign scope))
+			     assign scope nil nil 'mustbeclassvariable))
 	     (error (semantic-analyze-push-error err)
 		    nil)))
 
