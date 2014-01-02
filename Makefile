@@ -104,7 +104,7 @@ itest-android:
 itest-arduino:
 	cd $(CURDIR)/tests;./cit-test.sh Arduino
 
-itest-batch: itest-make-batch itest-automake-batch itest-cpproot-batch itest-javaroot-batch
+itest-batch: itest-make-batch itest-automake-batch itest-cpproot-batch itest-javaroot-batch itest-globalref-batch
 
 itest-make-batch:
 	cd $(CURDIR)/tests;./cit-test.sh Make --batch
@@ -123,6 +123,9 @@ itest-android-batch:
 
 itest-arduino-batch:
 	cd $(CURDIR)/tests;./cit-test.sh Arduino --batch
+
+itest-globalref-batch:
+	cd $(CURDIR)/tests;./cit-test.sh globalref --batch
 
 itest-stl-batch:
 	$(EMACS) $(EMACSFLAGS) -l cedet-devel-load.el -l $(CURDIR)/tests/cedet/semantic/stltest.el
