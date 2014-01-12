@@ -1,6 +1,6 @@
 ;;; cedet-integ-test.el --- CEDET full integration tests.
 
-;; Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010, 2011, 2012, 2013, 2014 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -109,6 +109,7 @@
 (require 'cit-arduino)
 (require 'cit-cpproot)
 (require 'cit-javaroot)
+(require 'cit-globalref)
 (require 'cit-dist)
 
 (defvar cedet-integ-target (expand-file-name "edeproj" cedet-integ-base)
@@ -246,6 +247,19 @@ Optional argument MAKE-TYPE is the style of EDE project to test."
     (cit-ede-javaroot-test)
 
     (cit-finish-message "PASSED" "javaroot")
+    ))
+
+(defun cedet-integ-test-globalref ()
+  "Run the tests using Global to find symbols.
+This test is about optimizing for minimal file loads."
+  (interactive)
+
+  (let ((ede-auto-add-method 'never))
+    (global-ede-mode 1)
+    ;; Do an EDE cpproot project. 
+    (cit-globalref-test)
+
+    (cit-finish-message "PASSED" "globalrefs")
     ))
 
 (defun cit-finish-message (message style)
