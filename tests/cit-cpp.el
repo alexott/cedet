@@ -247,19 +247,20 @@ Argument MAKE-TYPE is the type of make project to create."
     )
 
   ;; Flip back over to main, and add our new testlib.
-  (find-file (cit-file "src/main.cpp"))
-  (let ((mt ede-object))
+
+  (let* ((buffer (find-file (cit-file "src/main.cpp")))
+	 (mt ede-object))
     (if (string= make-type "Automake")
 	(progn
 	  (oset mt :ldflags '("-L../lib"))
 	  (oset mt :ldlibs '("testlib")))
       ;; FIX THIS
       (oset mt :ldflags '("../lib/bar.o"));;HACK for libtool!
-      ))
-  (cit-compile-and-wait)
+      )
+    (cit-compile-and-wait)
 
-  ;; Use the local libs version also to make sure it works.
-  (pop-to-buffer "main.cpp")
+    ;; Use the local libs version also to make sure it works.
+    (pop-to-buffer buffer))
   (let ((mt ede-object))
     (if (string= make-type "Automake")
 	(progn
