@@ -47,6 +47,7 @@
     "tests/testfriends.cpp"
     "tests/testusing.cpp"
     "tests/testnsp.cpp"
+    "tests/testlocalvars.cpp"
     "tests/testsppcomplete.c"
     "tests/testvarnames.c"
     "tests/testjavacomp.java"
