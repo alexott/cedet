@@ -1,6 +1,6 @@
 ;;; semantic/bovine/el.el --- Semantic details for Emacs Lisp
 
-;; Copyright (C) 1999-2005, 2007-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1999-2005, 2007-2014 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
@@ -464,7 +464,7 @@ Return a bovination list to use."
 	  ;; Try an Emacs 22 fcn.  This throws errors.
 	  (find-library-name (semantic-tag-name tag))
 	(error
-	 (message "semantic: connot find source file %s"
+	 (message "semantic: cannot find source file %s"
 		  (semantic-tag-name tag))))
     ;; No handy function available.  (Older Emacsen)
     (let* ((lib (locate-library (semantic-tag-name tag)))

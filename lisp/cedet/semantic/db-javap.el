@@ -1,6 +1,6 @@
 ;;; semantic/db-javap.el --- Java include path management and symbol database via javap.
 ;;
-;; Copyright (C) 2011, 2012 Eric M. Ludlam
+;; Copyright (C) 2011, 2012, 2014 Eric M. Ludlam
 ;;
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 ;;
@@ -103,7 +103,7 @@ including the current package onto the path.  See
 ;; perform completions in package names.
 
 (define-mode-local-override semantic-analyze-find-tag-sequence
-  java-mode (sequence &optional scope typereturn throwsym)
+  java-mode (sequence &optional scope typereturn throwsym flags)
   "For Java buffers, use our javap typecache as a backup search method.
 If the default returns only strings, search for the first part of sequence
 in the typecache.  Create a return list from that, and append the last
@@ -112,7 +112,7 @@ SCOPE, TYPERETURN, and THROWSYM are all passed to the default method, but
 not used locally."
   (let* ((lastpart (car (last sequence)))
 	 (ans (semantic-analyze-find-tag-sequence-default
-	       sequence scope typereturn throwsym)))
+	       sequence scope typereturn throwsym flags)))
     ;; If the car of ans is a STRING, then lets try our hack.
     (when (and (> (length ans) 1) (stringp (car ans)))
       (setq ans (append
