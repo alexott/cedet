@@ -10,7 +10,7 @@
 top="$(CURDIR)"/
 ede_FILES=Project.ede Makefile
 
-Tests_MISC=test.c test.cpp templates.cpp test.make scopetest.cpp scopetest.java testdoublens.cpp testdoublens.hpp testsubclass.cpp testsubclass.hh testspp.c testsppreplace.c testsppreplaced.c testtypedefs.cpp testfriends.cpp testusing.hh testusing.cpp testtemplates.cpp testjavacomp.java testsppcomplete.c teststruct.cpp testvarnames.c testnsp.cpp testsppcond.cpp testf90.f90 testmodule.f90 test-fmt.cpp test-fmt.el testlocalvars.cpp
+Tests_MISC=test.c test.cpp templates.cpp test.make scopetest.cpp scopetest.java testdoublens.cpp testdoublens.hpp testsubclass.cpp testsubclass.hh testspp.c testsppreplace.c testsppreplaced.c testtypedefs.cpp testfriends.cpp testusing.hh testusing.cpp testtemplates.cpp testjavacomp.java testsppcomplete.c teststruct.cpp testvarnames.c testnsp.cpp testsppcond.cpp testf90.f90 testmodule.f90 test-fmt.cpp test-fmt.el testlocalvars.cpp testvarnames.java
 VERSION=1.0
 DISTDIR=$(top)Tests-$(VERSION)
 
