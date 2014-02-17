@@ -1,6 +1,6 @@
 ;;; semantic/analyze.el --- Analyze semantic tags against local context
 
-;; Copyright (C) 2000-2005, 2007-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2000-2005, 2007-2014 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
@@ -273,27 +273,31 @@ This function knows of flags:
 	(setq tmp nil)))
 
     (unless tmp
-      ;; For the first entry, it better be a variable, but it might
-      ;; be in the local context too.
-      ;; NOTE: Don't forget c++ namespace foo::bar.
-      (setq tmp (or
-		 ;; Is this tag within our scope.  Scopes can sometimes
-		 ;; shadow other things, so it goes first.
-		 (and scope (semantic-scope-find (car s) nil scope))
-		 ;; Find the tag out there... somewhere, but not in scope
-		 (semantic-analyze-find-tag (car s) tagclass)
-		 ))
+      ;; For tag class filtering, only apply the filter if the first entry
+      ;; is also the only entry.
+      (let ((lftagclass (if (= (length s) 1) tagclass)))
 
-      (if (and (listp tmp) (semantic-tag-p (car tmp)))
-	  (setq tmp (semantic-analyze-select-best-tag tmp)))
-      (if (not (semantic-tag-p tmp))
-	  (if throwsym
-	      (throw throwsym "Cannot find definition")
-	    (error "Cannot find definition for \"%s\"" (car s))))
-      (setq s (cdr s))
-      (setq tag (cons tmp tag)) ; tag is nil here...
-      (setq fname (semantic-tag-file-name tmp))
-      )
+	;; For the first entry, it better be a variable, but it might
+	;; be in the local context too.
+	;; NOTE: Don't forget c++ namespace foo::bar.
+	(setq tmp (or
+		   ;; Is this tag within our scope.  Scopes can sometimes
+		   ;; shadow other things, so it goes first.
+		   (and scope (semantic-scope-find (car s) lftagclass scope))
+		   ;; Find the tag out there... somewhere, but not in scope
+		   (semantic-analyze-find-tag (car s) lftagclass)
+		   ))
+
+	(if (and (listp tmp) (semantic-tag-p (car tmp)))
+	    (setq tmp (semantic-analyze-select-best-tag tmp lftagclass)))
+	(if (not (semantic-tag-p tmp))
+	    (if throwsym
+		(throw throwsym "Cannot find definition")
+	      (error "Cannot find definition for \"%s\"" (car s))))
+	(setq s (cdr s))
+	(setq tag (cons tmp tag)) ; tag is nil here...
+	(setq fname (semantic-tag-file-name tmp))
+	))
 
     ;; For the middle entries
     (while s
@@ -757,22 +761,26 @@ Some useful functions are found in `semantic-format-tag-functions'."
   "Send the tag SEQUENCE to standard out.
 Use PREFIX as a label.
 Use BUFF as a source of override methods."
+  ;; If there is no sequence, at least show the field as being empty.
+  (unless sequence (princ prefix) (princ "<none>\n"))
+
+  ;; Display the sequence column aligned.
   (while sequence
-      (princ prefix)
-      (cond
-       ((semantic-tag-p (car sequence))
-	(princ (funcall semantic-analyze-summary-function
-			(car sequence))))
-       ((stringp (car sequence))
-	(princ "\"")
-	(princ (semantic--format-colorize-text (car sequence) 'variable))
-	(princ "\""))
-       (t
-	(princ (format "'%S" (car sequence)))))
-      (princ "\n")
-      (setq sequence (cdr sequence))
-      (setq prefix (make-string (length prefix) ? ))
-      ))
+    (princ prefix)
+    (cond
+     ((semantic-tag-p (car sequence))
+      (princ (funcall semantic-analyze-summary-function
+		      (car sequence))))
+     ((stringp (car sequence))
+      (princ "\"")
+      (princ (semantic--format-colorize-text (car sequence) 'variable))
+      (princ "\""))
+     (t
+      (princ (format "'%S" (car sequence)))))
+    (princ "\n")
+    (setq sequence (cdr sequence))
+    (setq prefix (make-string (length prefix) ? ))
+    ))
 
 (defmethod semantic-analyze-show ((context semantic-analyze-context))
   "Insert CONTEXT into the current buffer in a nice way."
