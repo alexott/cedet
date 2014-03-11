@@ -197,7 +197,8 @@ return nil."
 		   (error nil))
 	       (semantic-ectags-test-version))))
     (when (and res (called-interactively-p 'interactive))
-      (message "Exuberent CTags %s  - Good enough for CEDET." (car (semantic-ectags-version))))))
+      (message "Exuberent CTags %s  - Good enough for CEDET." (car (semantic-ectags-version))))
+    res))
 
 (provide 'semantic/ectags/util)
 
