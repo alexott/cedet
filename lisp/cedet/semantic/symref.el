@@ -341,7 +341,14 @@ Use the  `semantic-symref-hit-tags' method to get this list.")
 Buffers collected during symref can result in some files being
 opened multiple times for one operation.  This will keep buffers open
 until the next command is executed."
-  (mapc 'kill-buffer semantic-symref-recently-opened-buffers)
+  ;;(message "To Clean Up: %S" semantic-symref-recently-opened-buffers)
+  (mapc (lambda (buff)
+	  ;; Don't delete any buffers which are being used
+	  ;; upon completion of some command.
+	  (when (not (get-buffer-window buff))
+	    (kill-buffer buff)))
+	semantic-symref-recently-opened-buffers)
+  (setq semantic-symref-recently-opened-buffers nil)
   (remove-hook 'post-command-hook 'semantic-symref-cleanup-recent-buffers-fcn)
   )
   
