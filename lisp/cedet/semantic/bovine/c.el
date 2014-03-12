@@ -1,6 +1,6 @@
 ;;; semantic/bovine/c.el --- Semantic details for C
 
-;; Copyright (C) 1999-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
@@ -272,7 +272,7 @@ Return the defined symbol as a special spp lex token."
 						 (if (looking-back "/\\*.*" beginning-of-define)
 						     (progn
 						       (goto-char (match-beginning 0))
-						       (1- (point)))
+						       (point))
 						   (point)))))
 	   )
 
