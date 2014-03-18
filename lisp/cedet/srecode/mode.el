@@ -277,7 +277,7 @@ MENU-DEF is the menu to bind this into."
       (setq allgeneratorapps
 	    (cons (vector (cdr gen) (car gen))
 		  allgeneratorapps))
-      (message "Adding %S to srecode menu" (car gen))
+;;      (message "Adding %S to srecode menu" (car gen))
       )
 
     (easy-menu-filter-return
