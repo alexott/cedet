@@ -1,6 +1,6 @@
 ;;; semantic.el --- Semantic buffer evaluator.
 
-;; Copyright (C) 1999-2013 Free Software Foundation, Inc.
+;; Copyright (C) 1999-2014 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: syntax tools
@@ -403,7 +403,8 @@ the output buffer."
 	 (end (current-time)))
     (message "Retrieving tags took %.2f seconds."
 	     (semantic-elapsed-time start end))
-    (when (or (null clear) (not (listp clear)))
+    (when (or (null clear) (not (listp clear))
+	      (and (numberp clear) (< 0 clear)))
       (pop-to-buffer "*Parser Output*")
       (require 'pp)
       (erase-buffer)
