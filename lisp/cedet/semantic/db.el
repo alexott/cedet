@@ -1,6 +1,6 @@
 ;;; semantic/db.el --- Semantic tag database manager
 
-;; Copyright (C) 2000-2013 Free Software Foundation, Inc.
+;; Copyright (C) 2000-2014 Free Software Foundation, Inc.
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;; Keywords: tags
@@ -123,6 +123,18 @@ for a new table not associated with a buffer."
   "Return a buffer associated with OBJ.
 If the buffer is not in memory, load it with `find-file-noselect'."
   nil)
+
+;; This generic method allows for sloppier coding.  Many
+;; functions treat "table" as something that could be a buffer,
+;; file name, or other.  This makes use of table more robust.
+(defmethod semanticdb-full-filename (buffer-or-string)
+  "Fetch the full filename that BUFFER-OR-STRING referrs to.
+This uses semanticdb to get a better file name."
+  (cond ((bufferp buffer-or-string)
+	 (with-current-buffer buffer-or-string
+	   (semanticdb-full-filename semanticdb-current-table)))
+	((and (stringp buffer-or-string) (file-exists-p buffer-or-string))
+	 (expand-file-name buffer-or-string))))
 
 (defmethod semanticdb-full-filename ((obj semanticdb-abstract-table))
   "Fetch the full filename that OBJ refers to.
