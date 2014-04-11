@@ -1,6 +1,6 @@
 ;;; semantic/utest.el --- Tests for semantic's parsing system.
 
-;;; Copyright (C) 2003, 2004, 2007, 2008, 2009, 2010, 2011, 2012 Eric M. Ludlam
+;;; Copyright (C) 2003, 2004, 2007, 2008, 2009, 2010, 2011, 2012, 2014 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 
@@ -569,16 +569,16 @@ t2:t1 #1
   "
  (define fun1 2)
 
- (define fun2 3  ;1
-              )
+ (define (fun2 n) 3 ) ;1
+
 ")
 
 (defvar semantic-utest-Scheme-name-contents
   '(("fun1" variable
      (:default-value ("2"))
      nil (overlay 3 18 "tst.scm"))
-    ("fun2" variable
-     (:default-value ("3"))
+    ("fun2" function
+     (:arguments ("n"))
      nil (overlay 21 55 "tst.scm")))
   )
 
@@ -844,7 +844,7 @@ INSERTME is the text to be inserted after the deletion."
 
 (defun semantic-utest-Makefile()
   (interactive)
-  (semantic-utest-generic "Makefile" (semantic-utest-fname "Makefile") semantic-utest-Makefile-buffer-contents  semantic-utest-Makefile-name-contents   '("fun2") "#1" "#deleted line")
+  (semantic-utest-generic "Makefile" (semantic-utest-fname "Makefile") semantic-utest-Makefile-buffer-contents  semantic-utest-Makefile-name-contents   '("t2") "#1" "#deleted line")
   )
 
 (defun semantic-utest-Scheme()
@@ -967,21 +967,25 @@ SKIPNAMES includes lists of possible child nodes that should be missing."
 (defun semantic-utest-taglists-equivalent-p (table names skipnames)
   "Compare TABLE and NAMES, where skipnames allow list1 to be different.
 SKIPNAMES is a list of names that should be skipped in the NAMES list."
-  (let ((SN skipnames))
-    (while SN
-      (setq names (remove (car SN) names))
-      (setq SN (cdr SN))))
-  (while (and names table)
-    (if (not (semantic-utest-equivalent-tag-p (car names)
-					      (car table)
-					      skipnames))
-	(error "Expected %s, found %s"
-	       (semantic-format-tag-prototype (car names))
-	       (semantic-format-tag-prototype (car table))))
-    (setq names (cdr names)
-	  table (cdr table)))
-  (when names (error "Items forgotten: %S"
+  (while (or names table)
+    (if (member (semantic-tag-name (car names)) skipnames)
+	(setq names (cdr names)) ;; Skip that name from the list
+      
+      (if (not (semantic-utest-equivalent-tag-p (car names)
+						(car table)
+						skipnames))
+	  (progn
+	    (message "In Buffer: %S" (current-buffer))
+	    (message "Content:\n%S" (buffer-string))
+	    
+	    (error "Expected %s, found %s"
+		   (semantic-format-tag-summarize (car names))
+		   (semantic-format-tag-summarize (car table))))
+	(setq names (cdr names)
+	      table (cdr table)))))
+  (when names (error "Items forgotten: %S\nSkipnames: %S"
 		     (mapcar 'semantic-tag-name names)
+		     skipnames
 		     ))
   (when table (error "Items extra: %S"
 		     (mapcar 'semantic-tag-name table)))
@@ -1059,7 +1063,7 @@ SKIPNAMES is a list of names to remove from NAME-CONTENTS"
 (defun semantic-utest-last-invalid (name-contents names-removed killme insertme)
   "Make the last fcn invalid."
   (semantic-utest-kill-indicator killme insertme)
-;  (semantic-utest-verify-names name-contents names-removed); verify its gone ;new validator doesnt handle skipnames yet
+  (semantic-utest-verify-names name-contents names-removed); verify its gone ;new validator doesnt handle skipnames yet
   (semantic-utest-unkill-indicator);put back killed stuff
   )
 
