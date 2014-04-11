@@ -256,6 +256,11 @@ Argument COMMAND is the command to use for compiling the target."
 ;; Use SRecode, and the ede/srecode tool to build our Makefile.
 (require 'ede/srecode)
 
+(defun ede-arduino-regenerate ()
+  "Force recreation of makefiles for arduino project."
+  (interactive)
+  (ede-arduino-create-makefile (ede-current-project)))
+
 (defmethod ede-arduino-create-makefile ((proj ede-arduino-project))
   "Create an arduino based Makefile for project PROJ."
   (let* ((mfilename (expand-file-name ede-arduino-makefile-name
