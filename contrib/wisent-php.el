@@ -1,6 +1,9 @@
 ;;; wisent-php.el --- Php LALR parser for Emacs
 
-;; Copyright (C) 2008, 2009 Free Software Foundation
+;; Copyright (C) 2008, 2009 Anonymous
+;;
+;; NOTE: Original author wished to remian anonymous and did not assign copyright
+;;       to the FSF.
 
 ;; Author: Original code for Java by David Ponce <david@dponce.com>
 ;; Keywords: syntax
