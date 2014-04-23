@@ -1,6 +1,6 @@
 ;;; semantic/bovine/c.by -- LL grammar for C/C++ language specification
 
-;; Copyright (C) 1999-2012 Free Software Foundation, Inc.
+;; Copyright (C) 1999-2012, 2014 Free Software Foundation, Inc.
 ;;
 ;; Author: Eric M. Ludlam <zappo@gnu.org>
 ;;         David Ponce <david@dponce.com>
@@ -61,6 +61,7 @@
 %token <punctuation>   PLUS       "\\`[+]\\'"
 %token <punctuation>   MINUS      "\\`[-]\\'"
 %token <punctuation>   BANG       "\\`[!]\\'"
+%token <punctuation>   QUESTION   "\\`[?]\\'"
 %token <punctuation>   EQUAL      "\\`[=]\\'"
 %token <punctuation>   LESS       "\\`[<]\\'"
 %token <punctuation>   GREATER    "\\`[>]\\'"
@@ -1203,7 +1204,9 @@ expr-binop
 ;; Use expression for parsing only.  Don't actually return anything
 ;; for now.  Hopefully we can fix this later.
 expression
-  : unaryexpression expr-binop unaryexpression
+  : unaryexpression QUESTION unaryexpression COLON unaryexpression
+    ( (identity start) (identity end) )
+  | unaryexpression expr-binop unaryexpression
     ( (identity start) (identity end) )
   | unaryexpression
     ( (identity start) (identity end) )

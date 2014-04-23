@@ -104,6 +104,9 @@ itest-android:
 itest-arduino:
 	cd $(CURDIR)/tests;./cit-test.sh Arduino
 
+itest-globalref:
+	cd $(CURDIR)/tests;./cit-test.sh globalref
+
 itest-batch: itest-make-batch itest-automake-batch itest-cpproot-batch itest-javaroot-batch itest-globalref-batch
 
 itest-make-batch:

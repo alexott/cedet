@@ -1,6 +1,6 @@
 ;;; cedet-utests.el --- Run all unit tests in the CEDET suite.
 
-;; Copyright (C) 2008, 2009, 2010, 2012, 2013 Eric M. Ludlam
+;; Copyright (C) 2008, 2009, 2010, 2012, 2013, 2014 Eric M. Ludlam
 
 ;; Author: Eric M. Ludlam <eric@siege-engine.com>
 
@@ -31,6 +31,7 @@
 (require 'pulse-utest)
 (require 'cedet-files-utests)
 (require 'cedet-compat)
+(require 'cedet/ede/detect-utest)
 (require 'cedet/semantic/lex-utest)
 (require 'cedet/semantic/lex-spp-utest)
 (require 'cedet/semantic/utest-parse)
@@ -92,9 +93,7 @@
     ;;
     ;; EDE
     ;;
-    
-    ;; @todo - Currently handled in the integration tests.  Need
-    ;;         some simpler unit tests here.
+    ("ede: project detection tests" . ede-detect-utest)
 
     ;;
     ;; SEMANTIC
