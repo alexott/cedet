@@ -129,6 +129,12 @@
   :require  'ede/maven2
   :type 'list)
 
+(defcustom ede-maven2-deps-plugin-options '("-DincludeTypes=jar")
+  "Options for Maven's dependency plugin that is used to extract the classpath for project"
+  :group 'ede-maven2
+  :require  'ede/maven2
+  :type 'list)
+
 ;; Because there is one root project file, and no sub project files,
 ;; we need a special root-finding function.
 
@@ -210,8 +216,9 @@ Argument COMMAND is the command to use when compiling."
   "Get classpath for maven project"
   (ede-jvm-get-classpath-from-command proj ede-maven2-execute-mvn-to-get-classpath
 				      maven2-outfile-name ede-maven2-maven-command
-				      `(,nil ,nil ,nil "--batch-mode" "dependency:build-classpath"
-					     ,(concat "-Dmdep.outputFile=" maven2-outfile-name))))
+				      (append `(,nil ,nil ,nil "--batch-mode" "dependency:build-classpath"
+						     ,(concat "-Dmdep.outputFile=" maven2-outfile-name))
+					      ede-maven2-deps-plugin-options)))
 
 ;; TODO: re-implement when pom.xml parser will be available
 (defmethod project-rescan ((proj ede-maven2-project))
