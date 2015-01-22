@@ -96,8 +96,7 @@ All directories need at least one target.")
 (defmethod ede-find-target ((proj ede-single-root-project) buffer)
   "Find an EDE target in PROJ for BUFFER.
 If one doesn't exist, create a new one for this directory."
-  (let* ((ext (file-name-extension (buffer-file-name buffer)))
-         (cls 'ede-single-root-target)
+  (let* ((cls 'ede-single-root-target)
          (targets (oref proj targets))
          (dir default-directory)
          (ans (ede-single-root-find-matching-target cls dir targets))
